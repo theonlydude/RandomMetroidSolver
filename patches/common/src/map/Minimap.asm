@@ -167,46 +167,16 @@ org $82E7C9
 org $82E21B
         jsl preserve_etank_color : nop : nop
 
-
-;; change "end HUD drawing" IRQ handlers to skip registers update so we
-;; can do it ourselves
-org $80961c     ; main gameplay
-        dw $96c1
-org $809620     ; start of door transition
-        dw $9708
-org $809624     ; draygon's room
-        dw $9746
-org $809628     ; vertical transition
-        dw end_hud_irq_vertical_transition
-org $80962e     ; horizontal transition
-        dw end_hud_irq_horizontal_transition
+;;; add some new IRQ commands to handle colors, so create a new table
+org $80987C
+        dw new_irq_table
 
 ;; Hook into begin/end HUD drawing IRQs to switch colors
-!vcounter_target = $1e          ; since we raise the HUD, trigger IRQ 1 line early
-!hcounter_target = 210          ; change IRQ fire in scanline to restore display at the proper time
-!hud_draw_offset = 1
-
-org $8096A2
-        ldy.w #!vcounter_target
-        jmp begin_hud
-org $8096CF
-        jmp end_hud_main_gameplay
-org $8096EA
-        ldy.w #!vcounter_target
-        jmp begin_hud
-org $809716
-        jmp end_hud_transition_start
-org $80972C
-        ldy.w #!vcounter_target
-        jmp begin_hud
-org $809754
-        jmp end_hud_draygon
-org $80976A
-        ldy.w #!vcounter_target
-        jmp begin_hud
-org $8097D3
-        ldy.w #!vcounter_target
-        jmp begin_hud
+!vcounter_target_begin = $02
+!vcounter_target_colors = $1d
+!vcounter_target_end = $1f
+!hcounter_target = $98
+!hud_draw_offset = 2
 
 ;; raise HUD one pixel to have an extra scanline to change colors
 org $888338
@@ -268,7 +238,6 @@ org $809BDC
 !OPHCT = $213C
 !STAT78 = $213F
 !WRIO = $4201
-!hcounter_begin_hud = $0368
 
 macro setNextColor(addr)
         lda <addr> : sta.w !CGDATA
@@ -290,12 +259,64 @@ endmacro
 
 macro endFBlank()
         lda.b !NMI_INIDISP : sta.w !INIDISP
+print "end fblank ", pc
 endmacro
 
+;; change next IRQ commands and vtarget in "begin HUD" original handlers:
+;; main gameplay
+org $8096A0
+        db $1e
+org $8096A3
+        db !vcounter_target_colors
+;; door transition start
+org $8096E8
+        db $22
+org $8096EB
+        db !vcounter_target_colors
+;; draygon room
+org $80972A
+        db $26
+org $80972D
+        db !vcounter_target_colors
+;; vertical transition
+org $809768
+        db $2a
+org $80976B
+        db !vcounter_target_colors
+;; horizontal transition
+org $8097D1
+        db $2e
+org $8097D4
+        db !vcounter_target_colors
 
 org $80d600
+new_irq_table:
+        dw $966E, $9680
+        dw irq_colors_begin_hud_main_gameplay    ; IRQ cmd $04: main gameplay begin hud drawing
+        dw irq_colors_end_hud_main_gameplay_end  ; IRQ cmd $06: main gameplay end hud drawing
+        dw irq_colors_begin_hud_start_transition ; IRQ cmd $08: start of door transition begin hud drawing
+        dw irq_colors_end_hud_start_transition_end  ; IRQ cmd $0A: start of door transition end hud drawing
+        dw irq_colors_begin_hud_draygon          ; IRQ cmd $0C: draygon room begin hud drawing
+        dw irq_colors_end_hud_draygon_end        ; IRQ cmd $0E: draygon room end hud drawing
+        dw irq_colors_begin_hud_vertical_transition  ; IRQ cmd $10: vertical transition begin hud drawing
+        dw irq_colors_end_hud_vertical_transition_end ; IRQ cmd $12: vertical transition end hud drawing
+        dw $97A9
+        dw irq_colors_begin_hud_horizontal_transition ; IRQ cmd $16: horizontal transition begin hud drawing
+        dw irq_colors_end_hud_horizontal_transition_end  ; IRQ cmd $18: horizontal transition end hud drawing
+        dw $980A
+        ;; new entries:
+        dw irq_colors_begin_hud_main_gameplay_end     ; IRQ cmd $1C: original main gameplay begin hud drawing + end FBlank
+        dw irq_colors_end_hud_main_gameplay           ; IRQ cmd $1E
+        dw irq_colors_begin_hud_start_transition_end  ; IRQ cmd $20: original start of door transition begin hud drawing + end FBlank
+        dw irq_colors_end_hud_start_transition ; IRQ cmd $22
+        dw irq_colors_begin_hud_draygon_end          ; IRQ cmd $24: original draygon room begin hud drawing
+        dw irq_colors_end_hud_draygon       ; IRQ cmd $26
+        dw irq_colors_begin_hud_vertical_transition_end ; IRQ cmd $28: original vertical transition begin hud drawing
+        dw irq_colors_end_hud_vertical_transition ; IRQ cmd $2A
+        dw irq_colors_begin_hud_horizontal_transition_end ; IRQ cmd $2C: original horizontal transition begin hud drawing
+        dw irq_colors_end_hud_horizontal_transition ; IRQ cmd $2E
+
 begin_hud:
-        pha
         %a8()
         %beginFBlank()
         %setColor(!explored_0_index, !explored_0)
@@ -305,35 +326,11 @@ begin_hud:
         %addWhite()
         lda.b #!pal7_idx+1 : sta.w !CGADD
         %addWhite()
-        ;; save hcounter (beam position) to determine next IRQ hcounter target
-        ;; indeed, depending on active HDMA the time taken by the IRQ handler varies
-        ;; see https://problemkaputt.de/fullsnes.htm#snespictureprocessingunitppu
-        ;; section "SNES PPU Timers and Status" for details
-        stz.w !WRIO : lda.b #$80 : sta.w !WRIO
-        lda.w !OPHCT : sta.w !hcounter_begin_hud
-        lda.w !OPHCT : and.b #$01 : sta.w !hcounter_begin_hud+1
-        lda.w !STAT78
         %a16()
-        ;; some heuristics based on hcounter value
-        ;; whatever works, we can't afford fancy calculations in an IRQ handler
-        lda.w !hcounter_begin_hud
-        cmp.w #180 : bcc .low
-        cmp.w #195 : bcc .high
-        ldx.w #!hcounter_target
-        bra .end
-.high:
-        ldx.w #!hcounter_target-20
-        bra .end
-.low:
-        ldx.w #!hcounter_target+20
-.end:
-        %a8()
-        %endFBlank()
-        %a16()
-        pla
         rts
 
-macro endHudColors()
+end_hud:
+        %a8()
         %beginFBlank()
         lda.b #!pal7_idx+1 : sta.w !CGADD
         stz.w !CGDATA : stz.w !CGDATA
@@ -342,131 +339,175 @@ macro endHudColors()
         %setColor(!explored_1_index, !explored_1_backup)
         %setNextColor(!explored_1_backup+2)
         %setColor(!explored_0_index, !explored_0_backup)
-endmacro
+        rts
 
-macro mainGameplayStart()
-	LDA.b $70;| 8096AB | 80 | \
-	STA.w $2130                      ;| 8096AD | 80 | } Colour math control register A = [gameplay colour math control register A]
-	LDA.b $73;| 8096B0 | 80 | \
-	STA.w $2131                      ;| 8096B2 | 80 | } Colour math control register B = [gameplay colour math control register B]
-	LDA.b $5b;| 8096B5 | 80 | \
-	STA.w $2109                      ;| 8096B7 | 80 | } BG3 tilemap base address and size = [gameplay BG3 tilemap base address and size]
-endmacro
+irq_colors_begin_hud_main_gameplay:
+        jsr begin_hud
+        lda.w #$1C
+        ldy.w #!vcounter_target_begin
+        ldx.w #!hcounter_target
+        rts
 
-end_hud_main_gameplay:
-        ldx.w #$0098              ; hijacked code
+irq_colors_begin_hud_main_gameplay_end:
+        jsr $968b
         pha
         %a8()
-        %endHudColors()
-        ;; vanilla code
-        %mainGameplayStart()
-	LDA.b $6a      ;| 8096BA | 80 | \
-	STA.w $212C                      ;| 8096BC | 80 | } Main screen layers = [gameplay main screen layers]
-.end:
         %endFBlank()
         %a16()
         pla
         rts
 
-end_hud_transition_start:
-        ldx.w #$0098              ; hijacked code
+irq_colors_end_hud_main_gameplay:
+        jsr end_hud
+        %endFBlank()
+        %a16()
+        lda.w #$06
+        ldy.w #!vcounter_target_end
+        ldx.w #!hcounter_target
+        rts
+
+irq_colors_end_hud_main_gameplay_end:
+        jmp $96A9
+        ;; %a8()
+        ;; %endFBlank()
+        ;; %a16()
+        ;; LDA #$0004
+        ;; LDY #$0000
+        ;; LDX #$0098
+        ;; rts
+
+irq_colors_begin_hud_start_transition:
+        jsr begin_hud
+        lda.w #$20
+        ldy.w #!vcounter_target_begin
+        ldx.w #!hcounter_target
+        rts
+
+irq_colors_begin_hud_start_transition_end:
+        jsr $96D3
         pha
         %a8()
-        %endHudColors()
-        ;; vanilla code
-        LDA.w $07b3                         ;| 8096F3 | 80 | \
-        ORA.w $07b1                 ;| 8096F6 | 80 | |
-        BIT.b #$01                              ;| 8096F9 | 80 | } If ([CRE bitset] | [previous CRE bitset]) & 1 != 0:
-        BEQ .BRA_809701                          ;| 8096FB | 80 | /
-        LDA.b #$10                              ;| 8096FD | 80 | \
-        BRA .BRA_809703                          ;| 8096FF | 80 | } Main screen layers = sprites
-; Else (([CRE bitset] | [previous CRE bitset]) & 1 = 0):
-.BRA_809701:
-        LDA.b #$11                              ;| 809701 | 80 |  Main screen layers = BG1/sprites
-.BRA_809703:
-        STA.w $212C                      ;| 809703 | 80 | 
-.end:
         %endFBlank()
         %a16()
         pla
         rts
 
-end_hud_draygon:
-        ldx.w #$0098              ; hijacked code
+irq_colors_end_hud_start_transition:
+        jsr end_hud
+        %endFBlank()
+        %a16()
+        lda.w #$0a
+        ldy.w #!vcounter_target_end
+        ldx.w #!hcounter_target
+        rts
+
+irq_colors_end_hud_start_transition_end:
+        jmp $96F1
+        ;; pha
+        ;; %a8()
+        ;; %endFBlank()
+        ;; %a16()
+        ;; pla
+        ;; rts
+
+irq_colors_begin_hud_draygon:
+        jsr begin_hud
+        lda.w #$24
+        ldy.w #!vcounter_target_begin
+        ldx.w #!hcounter_target
+        rts
+
+irq_colors_begin_hud_draygon_end:
+        jsr $971A
         pha
         %a8()
-        %endHudColors()
-        %mainGameplayStart()
         %endFBlank()
-.end:
         %a16()
         pla
         rts
 
-end_hud_irq_vertical_transition:
-        %a8()
-        %endHudColors()
-        ;; vanilla code
-        LDA.w $07b3                         ;| 8096F3 | 80 | \
-        ORA.w $07b1                 ;| 8096F6 | 80 | |
-        BIT.b #$01                              ;| 8096F9 | 80 | } If ([CRE bitset] | [previous CRE bitset]) & 1 != 0:
-        BEQ .BRA_809781                          ;| 80977B | 80 | /
-        LDA.b #$10                              ;| 80977D | 80 | \
-        BRA .BRA_809783                          ;| 80977F | 80 | } Main screen layers = sprites
-; Else (([CRE bitset] | [previous CRE bitset]) & 1 = 0):
-.BRA_809781:
-        LDA.b #$11                              ;| 809781 | 80 |  Main screen layers = BG1/sprites
-.BRA_809783:
-        STA.w $212C                      ;| 809783 | 80 | 
-        STZ.w $2130                      ;| 809786 | 80 | \
-        STZ.w $2131                      ;| 809789 | 80 | } Disable colour math
-        REP.b #$20                              ;| 80978C | 80 | 
-        LDX.w $05bc      ;| 80978E | 80 | \
-        BPL .BRA_809796                          ;| 809791 | 80 | } If door transition VRAM update:
-        JSR.w $9632   ;| 809793 | 80 |  Execute door transition VRAM update
-.BRA_809796:
-        LDA.w $0931                       ;| 809796 | 80 | \
-        BMI .BRA_80979F                          ;| 809799 | 80 | } If door transition has not finished scrolling:
-        JSL.l $80AE4E              ;| 80979B | 80 |  Follow door transition
-.BRA_80979F:
-        LDY.w #$00D8                            ;| 8097A2 | 80 |  IRQ v-counter target = D8h
-        ldx.w #$0098
-        %a8()
+irq_colors_end_hud_draygon:
+        jsr end_hud
         %endFBlank()
         %a16()
-        LDA.w #$0014                            ;| 80979F | 80 |  Interrupt command = 14h
-.end:
+        lda.w #$0E
+        ldy.w #!vcounter_target_end
+        ldx.w #!hcounter_target
         rts
 
-end_hud_irq_horizontal_transition:
-        %a8()
-        %endHudColors()
-        ;; vanilla code
-        LDA.w $07b3                         ;| 8096F3 | 80 | \
-        ORA.w $07b1                 ;| 8096F6 | 80 | |
-        BIT.b #$01                              ;| 8096F9 | 80 | } If ([CRE bitset] | [previous CRE bitset]) & 1 != 0:
-        BEQ .BRA_8097EA                          ;| 8097E4 | 80 | /
-        LDA.b #$10                              ;| 8097E6 | 80 | \
-        BRA .BRA_8097EC                          ;| 8097E8 | 80 | } Main screen layers = sprites
-; Else (([CRE bitset] | [previous CRE bitset]) & 1 = 0):
-.BRA_8097EA:
-        LDA.b #$11                              ;| 8097EA | 80 |  Main screen layers = BG1/sprites
-.BRA_8097EC:
-        STA.w $212C                      ;| 8097EC | 80 | 
-        STZ.w $2130                      ;| 8097EF | 80 | \
-        STZ.w $2131                      ;| 8097F2 | 80 | } Disable colour math
-        REP.b #$20                              ;| 8097F5 | 80 | 
-        LDA.w $0931                       ;| 8097F7 | 80 | \
-        BMI .BRA_809800                          ;| 8097FA | 80 | } If door transition has not finished scrolling:
-        JSL.l $80AE4E              ;| 8097FC | 80 |  Follow door transition
-.BRA_809800:
-        LDY.w #$00A0                            ;| 809803 | 80 |  IRQ v-counter target = A0h (bottom of door)
-        ldx.w #$0098
+irq_colors_end_hud_draygon_end:
+        jmp $9733
+        ;; pha
+        ;; %a8()
+        ;; %endFBlank()
+        ;; %a16()
+        ;; pla
+        ;; rts
+
+irq_colors_begin_hud_vertical_transition:
+        jsr begin_hud
+        lda.w #$28
+        ldy.w #!vcounter_target_begin
+        ldx.w #!hcounter_target
+        rts
+
+irq_colors_begin_hud_vertical_transition_end:
+        jsr $9758
+        pha
         %a8()
         %endFBlank()
         %a16()
-        LDA.w #$001A                            ;| 809800 | 80 |  Interrupt command = 1Ah
-.end:
+        pla
+        rts
+
+irq_colors_end_hud_vertical_transition:
+        jsr end_hud
+        %a16()
+        lda.w #$12
+        ldy.w #!vcounter_target_end
+        ldx.w #!hcounter_target
+        rts
+
+irq_colors_end_hud_vertical_transition_end:
+        jsr $9771
+        pha
+        %a8()
+        %endFBlank()
+        %a16()
+        pla
+        rts
+
+irq_colors_begin_hud_horizontal_transition:
+        jsr begin_hud
+        lda.w #$2C
+        ldy.w #!vcounter_target_begin
+        ldx.w #!hcounter_target
+        rts
+
+irq_colors_begin_hud_horizontal_transition_end:
+        jsr $97C1
+        pha
+        %a8()
+        %endFBlank()
+        %a16()
+        pla
+        rts
+
+irq_colors_end_hud_horizontal_transition:
+        jsr end_hud
+        %a16()
+        lda.w #$18
+        ldy.w #!vcounter_target_end
+        ldx.w #!hcounter_target
+        rts
+
+irq_colors_end_hud_horizontal_transition_end:
+        jsr $97DA
+        pha
+        %a8()
+        %endFBlank()
+        %a16()
+        pla
         rts
 
 load_target_palette:

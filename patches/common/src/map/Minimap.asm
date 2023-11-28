@@ -193,6 +193,9 @@ org $828DF7
 org $82A104
         nop : nop
 
+org $82809C
+        jsl raise_hud_loading
+
 ;; replace etank tile with a custom one using palette 7,
 ;; so etanks don't change color with minimap
 org $809BDC
@@ -535,6 +538,11 @@ set_hud_map_colors:
         lda #!AreaColor_Tourian : sta !explored_2
         rts
 
+preserve_etank_color:
+        LDA $C03A : STA $C23A   ; hijacked code
+        LDA $C03C : STA $C23C
+        rtl
+
 ;; affects the BG3 scroll HDMA object, active during main gameplay
 raise_hud:
         lda.w #!hud_draw_offset : sta $7ECADA
@@ -555,10 +563,12 @@ raise_hud_pause:
         lda.b #!hud_draw_offset : sta.b !NMI_BG3_scroll
         rtl
 
-preserve_etank_color:
-        LDA $C03A : STA $C23A   ; hijacked code
-        LDA $C03C : STA $C23C
+raise_hud_loading:
+        JSL $888288     ; hijacked code: Enable HDMA objects
+        JSL $88D865     ; Spawn HUD BG3 scroll HDMA object
         rtl
+
+;; message boxes
 
 org $858199
 ;; replace BG3 Y scroll value at the top of the screen in HDMA RAM table
@@ -570,4 +580,33 @@ org $8581A7
         lda.w #!hud_draw_offset
 org $8582D7
         lda.w #!hud_draw_offset
+
+;; prevent the game from manipulating palette 6 (useless because overwritten by IRQ handler)
+org $858152
+skip_msgbox_colors:
+        bra .skip
+org $858169
+.skip:
+
+;; change button letters palettes, face buttons in pink, shoulders in gray
+org $858426
+        dw BGtile($e0, 2, 1, 0, 0) ; pink A
+        dw BGtile($e1, 2, 1, 0, 0) ; pink B
+        dw BGtile($f7, 2, 1, 0, 0) ; pink X
+        dw BGtile($f8, 2, 1, 0, 0) ; pink Y
+        dw BGtile($d0, 2, 1, 0, 0) ; white select
+        dw BGtile($eb, 3, 1, 0, 0) ; gray L
+        dw BGtile($f1, 3, 1, 0, 0) ; gray R
+
+;; change save dialog arrow color to pink
+org $85948F
+        dw BGtile($cc, 2, 1, 0, 0)
+        dw BGtile($cd, 2, 1, 0, 0)
+org $8595D1
+        dw BGtile($cc, 2, 1, 0, 0)
+        dw BGtile($cd, 2, 1, 0, 0)
+org $859623
+        dw BGtile($cc, 2, 1, 0, 0)
+        dw BGtile($cd, 2, 1, 0, 0)
+
 }

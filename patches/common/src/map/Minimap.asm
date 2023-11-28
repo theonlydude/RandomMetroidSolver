@@ -171,14 +171,15 @@ org $82E21B
 org $80987C
         dw new_irq_table
 
-;; Hook into begin/end HUD drawing IRQs to switch colors
+;; IRQ parameters
 !vcounter_target_begin = $02
 !vcounter_target_colors = $1d
 !vcounter_target_end = $1f
 !hcounter_target = $98
+
+;; raise HUD 2 pixels to have extra scanlines to restore colors
 !hud_draw_offset = 2
 
-;; raise HUD one pixel to have an extra scanline to change colors
 org $888338
         jsl raise_hud
 
@@ -191,9 +192,6 @@ org $828DF7
         jsl raise_hud_pause : nop
 org $82A104
         nop : nop
-
-org $808764
-        jsr enable_hcounter
 
 ;; replace etank tile with a custom one using palette 7,
 ;; so etanks don't change color with minimap
@@ -235,9 +233,6 @@ org $809BDC
 ;; F-Blank management
 !NMI_INIDISP = $51
 !INIDISP = $2100
-!OPHCT = $213C
-!STAT78 = $213F
-!WRIO = $4201
 
 macro setNextColor(addr)
         lda <addr> : sta.w !CGDATA
@@ -263,31 +258,58 @@ print "end fblank ", pc
 endmacro
 
 ;; change next IRQ commands and vtarget in "begin HUD" original handlers:
-;; main gameplay
-org $8096A0
-        db $1e
-org $8096A3
-        db !vcounter_target_colors
+
+;; main gameplay : we rewrite the routine, see irq_colors_begin_hud_main_gameplay_end
+
 ;; door transition start
 org $8096E8
         db $22
 org $8096EB
         db !vcounter_target_colors
+
 ;; draygon room
 org $80972A
         db $26
 org $80972D
         db !vcounter_target_colors
+
 ;; vertical transition
 org $809768
         db $2a
 org $80976B
         db !vcounter_target_colors
+
 ;; horizontal transition
 org $8097D1
         db $2e
 org $8097D4
         db !vcounter_target_colors
+
+;; IRQ handlers logic: vanilla "begin HUD" IRQ now points to a new one that will, on scanline 0
+;; - enable F-Blank (needed to access CGRAM)
+;; - swap colors
+;; - setup the next IRQ (new) on scanline 2
+;; This new "end begin HUD" IRQ will :
+;; - waste a few cycles and disable F-blank
+;; - run vanilla begin HUD IRQ handler
+;; - setup "end HUD" IRQ (new) on scanline 29
+;; This new "end HUD" IRQ will :
+;; - enable F-blank
+;; - restore colors
+;; - disable F-blank (except in door transitions)
+;; - setup "end HUD end" IRQ on scanline 31 (vanilla end HUD IRQ)
+;; "end HUD end" IRQ will :
+;; - waste a few cycles and disable F-blank (in door transitions only)
+;; - run vanilla IRQ handler
+;;
+;; What is run and when is the result of various experiments, notably regarding door transitions. IRQ trigger time and
+;; exec duration vary, and are dependant on stuff like the amount of running HDMA, which makes adjusting timings
+;; for them to work in all cases very difficult.
+;;
+;; Mesen seems to be the emulator where the most display glitches appear, followed by real SNES and bsnes-accuracy,
+;; so these are good experiment platforms.
+;; Other tested emulators (snes9x, normal bsnes, SNES Classic canoe) are way less finnicky and probably don't require
+;; half of the shenanigans below.
 
 org $80d600
 new_irq_table:
@@ -489,7 +511,6 @@ load_target_palette:
 target_pal:
         lda 2*!pal3_idx+!palettes_ram : sta 2*!pal3_idx+!palettes_ram+$200
         lda 2*!pal7_idx+!palettes_ram : sta 2*!pal7_idx+!palettes_ram+$200
-        ;; lda 2*(!pal7_idx+1)+!palettes_ram : sta 2*(!pal7_idx+1)+!palettes_ram+$200
         rts
 
 door_transition:
@@ -508,7 +529,6 @@ load_tileset_palette:
 set_hud_map_colors:
         lda #!unexplored_gray : sta 2*!pal3_idx+!palettes_ram
         lda #!vanilla_etank_color : sta 2*!pal7_idx+!palettes_ram
-        ;; lda #$7FFF : sta 2*(!pal7_idx+1)+!palettes_ram
         ;; FIXME hardcode for now
         lda #!AreaColor_Crateria : sta !explored_0
         lda #!AreaColor_WreckedShip : sta !explored_1
@@ -534,10 +554,6 @@ raise_hud_pause:
         lda.b !NMI_BG3_scroll : sta.w $0770 ; hijacked code
         lda.b #!hud_draw_offset : sta.b !NMI_BG3_scroll
         rtl
-
-enable_hcounter:
-        lda.b #$80 : sta.w !WRIO
-        rts
 
 preserve_etank_color:
         LDA $C03A : STA $C23A   ; hijacked code

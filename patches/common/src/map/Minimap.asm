@@ -349,12 +349,17 @@ irq_colors_begin_hud_main_gameplay:
         rts
 
 irq_colors_begin_hud_main_gameplay_end:
-        jsr $968b
-        pha
         %a8()
+        ;; don't call the whole vanilla routine here, extract what we need
+        ;; because timing is tight
+        LDA.b #$5A : STA.w $2109
+        STZ.w $2130 : STZ.w $2131
+        LDA.b #$04 : STA.w $212C
         %endFBlank()
         %a16()
-        pla
+        LDA.w #$001E
+        LDY.w #!vcounter_target_colors
+        LDX.w #!hcounter_target
         rts
 
 irq_colors_end_hud_main_gameplay:
@@ -368,13 +373,6 @@ irq_colors_end_hud_main_gameplay:
 
 irq_colors_end_hud_main_gameplay_end:
         jmp $96A9
-        ;; %a8()
-        ;; %endFBlank()
-        ;; %a16()
-        ;; LDA #$0004
-        ;; LDY #$0000
-        ;; LDX #$0098
-        ;; rts
 
 irq_colors_begin_hud_start_transition:
         jsr begin_hud
@@ -384,13 +382,10 @@ irq_colors_begin_hud_start_transition:
         rts
 
 irq_colors_begin_hud_start_transition_end:
-        jsr $96D3
-        pha
+        nop : nop
         %a8()
         %endFBlank()
-        %a16()
-        pla
-        rts
+        jmp $96D3
 
 irq_colors_end_hud_start_transition:
         jsr end_hud
@@ -403,12 +398,6 @@ irq_colors_end_hud_start_transition:
 
 irq_colors_end_hud_start_transition_end:
         jmp $96F1
-        ;; pha
-        ;; %a8()
-        ;; %endFBlank()
-        ;; %a16()
-        ;; pla
-        ;; rts
 
 irq_colors_begin_hud_draygon:
         jsr begin_hud
@@ -418,13 +407,10 @@ irq_colors_begin_hud_draygon:
         rts
 
 irq_colors_begin_hud_draygon_end:
-        jsr $971A
-        pha
+        nop : nop
         %a8()
         %endFBlank()
-        %a16()
-        pla
-        rts
+        jmp $971A
 
 irq_colors_end_hud_draygon:
         jsr end_hud
@@ -437,12 +423,6 @@ irq_colors_end_hud_draygon:
 
 irq_colors_end_hud_draygon_end:
         jmp $9733
-        ;; pha
-        ;; %a8()
-        ;; %endFBlank()
-        ;; %a16()
-        ;; pla
-        ;; rts
 
 irq_colors_begin_hud_vertical_transition:
         jsr begin_hud
@@ -452,13 +432,10 @@ irq_colors_begin_hud_vertical_transition:
         rts
 
 irq_colors_begin_hud_vertical_transition_end:
-        jsr $9758
-        pha
+        nop : nop
         %a8()
         %endFBlank()
-        %a16()
-        pla
-        rts
+        jmp $9758
 
 irq_colors_end_hud_vertical_transition:
         jsr end_hud
@@ -482,13 +459,10 @@ irq_colors_begin_hud_horizontal_transition:
         rts
 
 irq_colors_begin_hud_horizontal_transition_end:
-        jsr $97C1
-        pha
+        nop : nop
         %a8()
         %endFBlank()
-        %a16()
-        pla
-        rts
+        jmp $97C1
 
 irq_colors_end_hud_horizontal_transition:
         jsr end_hud

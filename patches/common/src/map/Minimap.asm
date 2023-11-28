@@ -469,13 +469,10 @@ irq_colors_end_hud_vertical_transition:
         rts
 
 irq_colors_end_hud_vertical_transition_end:
-        jsr $9771
-        pha
+        xba : xba
         %a8()
         %endFBlank()
-        %a16()
-        pla
-        rts
+        jmp $9771
 
 irq_colors_begin_hud_horizontal_transition:
         jsr begin_hud
@@ -502,13 +499,10 @@ irq_colors_end_hud_horizontal_transition:
         rts
 
 irq_colors_end_hud_horizontal_transition_end:
-        jsr $97DA
-        pha
+        xba : xba
         %a8()
         %endFBlank()
-        %a16()
-        pla
-        rts
+        jmp $97DA
 
 load_target_palette:
         ;; Prevent HUD map colors from gradually changing (e.g. to blue/pink) during door transition

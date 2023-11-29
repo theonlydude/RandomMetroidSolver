@@ -609,4 +609,9 @@ org $859623
         dw BGtile($cc, 2, 1, 0, 0)
         dw BGtile($cd, 2, 1, 0, 0)
 
+;; replace unexplored+map selection/etank colors in Phantoon WS power on palettes
+org $A7CA61+(2*!pal3_idx)
+        dw !unexplored_gray
+org $A7CA61+(2*!pal7_idx)
+        dw !vanilla_etank_color
 }

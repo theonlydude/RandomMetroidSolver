@@ -175,7 +175,7 @@ org $80987C
 !vcounter_target_begin = $02
 !vcounter_target_colors = $1d
 !vcounter_target_end = $1f
-!hcounter_target = $98
+!hcounter_target = $a5
 
 ;; raise HUD 2 pixels to have extra scanlines to restore colors
 !hud_draw_offset = 2
@@ -291,19 +291,19 @@ org $8097D4
 ;; IRQ handlers logic: vanilla "begin HUD" IRQ now points to a new one that will, on scanline 0
 ;; - enable F-Blank (needed to access CGRAM)
 ;; - swap colors
-;; - setup the next IRQ (new) on scanline 2
+;; - run vanilla IRQ handler
+;; - setup the next IRQ (new) late on scanline 2
 ;; This new "end begin HUD" IRQ will :
-;; - waste a few cycles and disable F-blank
-;; - run vanilla begin HUD IRQ handler
+;; - disable F-blank
 ;; - setup "end HUD" IRQ (new) on scanline 29
 ;; This new "end HUD" IRQ will :
 ;; - enable F-blank
 ;; - restore colors
-;; - disable F-blank (except in door transitions)
-;; - setup "end HUD end" IRQ on scanline 31 (vanilla end HUD IRQ)
+;; - run most of vanilla IRQ handler
+;; - setup "end HUD end" IRQ late on scanline 31 (vanilla end HUD IRQ)
 ;; "end HUD end" IRQ will :
-;; - waste a few cycles and disable F-blank (in door transitions only)
-;; - run vanilla IRQ handler
+;; - disable F-blank
+;; - run extended vanilla IRQ handler
 ;;
 ;; What is run and when is the result of various experiments, notably regarding door transitions. IRQ trigger time and
 ;; exec duration vary, and are dependant on stuff like the amount of running HDMA, which makes adjusting timings
@@ -342,7 +342,6 @@ new_irq_table:
         dw irq_colors_end_hud_horizontal_transition ; IRQ cmd $2E
 
 begin_hud:
-        %a8()
         %beginFBlank()
         %setColor(!explored_0_index, !explored_0)
         %setColor(!explored_1_index, !explored_1)
@@ -351,7 +350,6 @@ begin_hud:
         %addWhite()
         lda.b #!pal7_idx+1 : sta.w !CGADD
         %addWhite()
-        %a16()
         rts
 
 end_hud:
@@ -367,7 +365,12 @@ end_hud:
         rts
 
 irq_colors_begin_hud_main_gameplay:
+        %a8()
         jsr begin_hud
+        LDA.b #$5A : STA.w $2109
+        STZ.w $2130 : STZ.w $2131
+        LDA.b #$04 : STA.w $212C
+        %a16()
         lda.w #$1C
         ldy.w #!vcounter_target_begin
         ldx.w #!hcounter_target
@@ -375,11 +378,6 @@ irq_colors_begin_hud_main_gameplay:
 
 irq_colors_begin_hud_main_gameplay_end:
         %a8()
-        ;; don't call the whole vanilla routine here, extract what we need
-        ;; because timing is tight
-        LDA.b #$5A : STA.w $2109
-        STZ.w $2130 : STZ.w $2131
-        LDA.b #$04 : STA.w $212C
         %endFBlank()
         %a16()
         LDA.w #$001E
@@ -389,7 +387,14 @@ irq_colors_begin_hud_main_gameplay_end:
 
 irq_colors_end_hud_main_gameplay:
         jsr end_hud
-        %endFBlank()
+        LDA.b $70;| 8096AB | 80 | \
+        STA.w $2130                      ;| 8096AD | 80 | } Colour math control register A = [gameplay colour math control register A]
+        LDA.b $73;| 8096B0 | 80 | \
+        STA.w $2131                      ;| 8096B2 | 80 | } Colour math control register B = [gameplay colour math control register B]
+        LDA.b $5b;| 8096B5 | 80 | \
+        STA.w $2109                      ;| 8096B7 | 80 | } BG3 tilemap base address and size = [gameplay BG3 tilemap base address and size]
+        LDA.b $6a      ;| 8096BA | 80 | \
+        STA.w $212C                      ;| 8096BC | 80 | } Main screen layers = [gameplay main screen layers]
         %a16()
         lda.w #$06
         ldy.w #!vcounter_target_end
@@ -397,24 +402,43 @@ irq_colors_end_hud_main_gameplay:
         rts
 
 irq_colors_end_hud_main_gameplay_end:
-        jmp $96A9
+        %a8()        
+        %endFBlank()
+        jmp $96BF
 
 irq_colors_begin_hud_start_transition:
+        %a8()
         jsr begin_hud
+        LDA.b #$5A                              ;| 8096D5 | 80 | \
+        STA.w $2109                      ;| 8096D7 | 80 | } BG3 tilemap base address = $5800, size = 32x64
+        LDA.b #$04                              ;| 8096DA | 80 | \
+        STA.w $212C                      ;| 8096DC | 80 | } Main screen layers = BG3
+        STZ.w $2130                      ;| 8096DF | 80 | \
+        STZ.w $2131                      ;| 8096E2 | 80 | } Disable colour math
+        %a16()
         lda.w #$20
         ldy.w #!vcounter_target_begin
         ldx.w #!hcounter_target
         rts
 
 irq_colors_begin_hud_start_transition_end:
-        nop : nop
         %a8()
         %endFBlank()
-        jmp $96D3
+        jmp $96e5
 
 irq_colors_end_hud_start_transition:
         jsr end_hud
-        %endFBlank()
+        LDA.w $07b3                         ;| 8096F3 | 80 | \
+        ORA.w $07b1                 ;| 8096F6 | 80 | |
+        BIT.b #$01                              ;| 8096F9 | 80 | } If ([CRE bitset] | [previous CRE bitset]) & 1 != 0:
+        BEQ .BRA_809701                          ;| 8096FB | 80 | /
+        LDA.b #$10                              ;| 8096FD | 80 | \
+        BRA .BRA_809703                          ;| 8096FF | 80 | } Main screen layers = sprites
+; Else (([CRE bitset] | [previous CRE bitset]) & 1 = 0):
+.BRA_809701:
+        LDA.b #$11                              ;| 809701 | 80 |  Main screen layers = BG1/sprites
+.BRA_809703:
+        STA.w $212C                      ;| 809703 | 80 | 
         %a16()
         lda.w #$0a
         ldy.w #!vcounter_target_end
@@ -422,24 +446,36 @@ irq_colors_end_hud_start_transition:
         rts
 
 irq_colors_end_hud_start_transition_end:
-        jmp $96F1
+        %a8()
+        %endFBlank()
+        jmp $9706
 
 irq_colors_begin_hud_draygon:
+        %a8()
         jsr begin_hud
+        LDA.b #$04                              ;| 80971C | 80 | \
+        STA.w $212C                      ;| 80971E | 80 | } Main screen layers = BG3
+        STZ.w $2130                      ;| 809721 | 80 | \
+        STZ.w $2131                      ;| 809724 | 80 | } Disable colour math
+        %a16()
         lda.w #$24
         ldy.w #!vcounter_target_begin
         ldx.w #!hcounter_target
         rts
 
 irq_colors_begin_hud_draygon_end:
-        nop : nop
         %a8()
         %endFBlank()
-        jmp $971A
+        jmp $9727
 
 irq_colors_end_hud_draygon:
         jsr end_hud
-        %endFBlank()
+        LDA.b $5b;| 809735 | 80 | \
+        STA.w $2109                      ;| 809737 | 80 | } BG3 tilemap base address and size = [gameplay BG3 tilemap base address and size]
+        LDA.b $70;| 80973A | 80 | \
+        STA.w $2130                      ;| 80973C | 80 | } Colour math control register A = [gameplay colour math control register A]
+        LDA.b $73;| 80973F | 80 | \
+        STA.w $2131                      ;| 809741 | 80 | } Colour math control register B = [gameplay colour math control register B]
         %a16()
         lda.w #$0E
         ldy.w #!vcounter_target_end
@@ -447,23 +483,43 @@ irq_colors_end_hud_draygon:
         rts
 
 irq_colors_end_hud_draygon_end:
-        jmp $9733
+        %a8()
+        %endFBlank()
+        jmp $9744
 
 irq_colors_begin_hud_vertical_transition:
+        %a8()
         jsr begin_hud
+        LDA.b #$04                              ;| 80975A | 80 | \
+        STA.w $212C                      ;| 80975C | 80 | } Main screen layers = BG3
+        STZ.w $2130                      ;| 80975F | 80 | \
+        STZ.w $2131                      ;| 809762 | 80 | } Disable colour math
+        %a16()
         lda.w #$28
         ldy.w #!vcounter_target_begin
         ldx.w #!hcounter_target
         rts
 
 irq_colors_begin_hud_vertical_transition_end:
-        nop : nop
         %a8()
         %endFBlank()
-        jmp $9758
+        jmp $9765
 
 irq_colors_end_hud_vertical_transition:
         jsr end_hud
+        LDA.w $07b3                         ;| 809773 | 80 | \
+        ORA.w $07b1                 ;| 809776 | 80 | |
+        BIT.b #$01                              ;| 809779 | 80 | } If ([CRE bitset] | [previous CRE bitset]) & 1 != 0:
+        BEQ .BRA_809781                          ;| 80977B | 80 | /
+        LDA.b #$10                              ;| 80977D | 80 | \
+        BRA .BRA_809783                          ;| 80977F | 80 | } Main screen layers = sprites
+; Else (([CRE bitset] | [previous CRE bitset]) & 1 = 0):
+.BRA_809781:
+        LDA.b #$11                              ;| 809781 | 80 |  Main screen layers = BG1/sprites
+.BRA_809783:
+        STA.w $212C                      ;| 809783 | 80 | 
+        STZ.w $2130                      ;| 809786 | 80 | \
+        STZ.w $2131                      ;| 809789 | 80 | } Disable colour math
         %a16()
         lda.w #$12
         ldy.w #!vcounter_target_end
@@ -471,26 +527,43 @@ irq_colors_end_hud_vertical_transition:
         rts
 
 irq_colors_end_hud_vertical_transition_end:
-        xba : xba
         %a8()
         %endFBlank()
-        jmp $9771
+        jmp $978c
 
 irq_colors_begin_hud_horizontal_transition:
+        %a8()
         jsr begin_hud
+        LDA.b #$04                              ;| 8097C3 | 80 | \
+        STA.w $212C                      ;| 8097C5 | 80 | } Main screen layers = BG3
+        STZ.w $2130                      ;| 8097C8 | 80 | \
+        STZ.w $2131                      ;| 8097CB | 80 | } Disable colour math
+        %a16()
         lda.w #$2C
         ldy.w #!vcounter_target_begin
         ldx.w #!hcounter_target
         rts
 
 irq_colors_begin_hud_horizontal_transition_end:
-        nop : nop
         %a8()
         %endFBlank()
-        jmp $97C1
+        jmp $97CE
 
 irq_colors_end_hud_horizontal_transition:
         jsr end_hud
+        LDA.w $07b3                         ;| 8097DC | 80 | \
+        ORA.w $07b1                 ;| 8097DF | 80 | |
+        BIT.b #$01                              ;| 8097E2 | 80 | } If ([CRE bitset] | [previous CRE bitset]) & 1 != 0:
+        BEQ .BRA_8097EA                          ;| 8097E4 | 80 | /
+        LDA.b #$10                              ;| 8097E6 | 80 | \
+        BRA .BRA_8097EC                          ;| 8097E8 | 80 | } Main screen layers = sprites
+; Else (([CRE bitset] | [previous CRE bitset]) & 1 = 0):
+.BRA_8097EA:
+        LDA.b #$11                              ;| 8097EA | 80 |  Main screen layers = BG1/sprites
+.BRA_8097EC:
+        STA.w $212C                      ;| 8097EC | 80 | 
+        STZ.w $2130                      ;| 8097EF | 80 | \
+        STZ.w $2131                      ;| 8097F2 | 80 | } Disable colour math
         %a16()
         lda.w #$18
         ldy.w #!vcounter_target_end
@@ -498,10 +571,9 @@ irq_colors_end_hud_horizontal_transition:
         rts
 
 irq_colors_end_hud_horizontal_transition_end:
-        xba : xba
         %a8()
         %endFBlank()
-        jmp $97DA
+        jmp $97F5
 
 load_target_palette:
         ;; Prevent HUD map colors from gradually changing (e.g. to blue/pink) during door transition

@@ -199,7 +199,7 @@ org $82809C
 ;; replace etank tile with a custom one using palette 7,
 ;; so etanks don't change color with minimap
 org $809BDC
-        ldx.w #BGtile($30, 7, 1, 0, 0)
+        ldx.w #BGtile($4f, 7, 1, 0, 0)
 
 ;; normal explored color
 !pal2_idx = 9

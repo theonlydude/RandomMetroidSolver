@@ -263,10 +263,33 @@ macro endFBlank()
 print "end fblank ", pc
 endmacro
 
+
+;; IRQ handlers logic: vanilla "begin HUD" IRQ now points to a new one that will, on scanline 0
+;; - enable F-Blank (needed to access CGRAM)
+;; - swap colors
+;; - run vanilla IRQ handler
+;; - setup the next IRQ (new) late on scanline 2
+;; This new "end begin HUD" IRQ will :
+;; - disable F-blank
+;; - setup "end HUD" IRQ (new) on scanline 29
+;; This new "end HUD" IRQ will :
+;; - enable F-blank
+;; - restore colors
+;; - run most of vanilla IRQ handler
+;; - setup "end HUD end" IRQ late on scanline 31 (vanilla end HUD IRQ)
+;; "end HUD end" IRQ will :
+;; - disable F-blank
+;; - run extended vanilla IRQ handler
+;;
+;; What is run and when is the result of various experiments, notably regarding door transitions. IRQ trigger time and
+;; exec duration vary, and are dependant on stuff like the amount of running HDMA, which makes adjusting timings
+;; for them to work in all cases very difficult.
+;;
+;; Actual SNES hardware is where most glitches appear, Mesen being the emulator that shows the most, followed by bsnes-accuracy.
+;; Other tested emulators (snes9x, normal bsnes, SNES Classic canoe) are way less finnicky and probably don't require
+;; half of the shenanigans below.
+
 ;; change next IRQ commands and vtarget in "begin HUD" original handlers:
-
-;; main gameplay : we rewrite the routine, see irq_colors_begin_hud_main_gameplay_end
-
 ;; door transition start
 org $8096E8
         db $22
@@ -296,31 +319,6 @@ org $8097D4
         db !vcounter_target_colors
 org $8097D7
         db !hcounter_target_door_transitions
-
-;; IRQ handlers logic: vanilla "begin HUD" IRQ now points to a new one that will, on scanline 0
-;; - enable F-Blank (needed to access CGRAM)
-;; - swap colors
-;; - run vanilla IRQ handler
-;; - setup the next IRQ (new) late on scanline 2
-;; This new "end begin HUD" IRQ will :
-;; - disable F-blank
-;; - setup "end HUD" IRQ (new) on scanline 29
-;; This new "end HUD" IRQ will :
-;; - enable F-blank
-;; - restore colors
-;; - run most of vanilla IRQ handler
-;; - setup "end HUD end" IRQ late on scanline 31 (vanilla end HUD IRQ)
-;; "end HUD end" IRQ will :
-;; - disable F-blank
-;; - run extended vanilla IRQ handler
-;;
-;; What is run and when is the result of various experiments, notably regarding door transitions. IRQ trigger time and
-;; exec duration vary, and are dependant on stuff like the amount of running HDMA, which makes adjusting timings
-;; for them to work in all cases very difficult.
-;;
-;; Actual SNES hardware is where most glitches appear, Mesen being the emulator that shows the most, followed by bsnes-accuracy.
-;; Other tested emulators (snes9x, normal bsnes, SNES Classic canoe) are way less finnicky and probably don't require
-;; half of the shenanigans below.
 
 org $80d600
 new_irq_table:

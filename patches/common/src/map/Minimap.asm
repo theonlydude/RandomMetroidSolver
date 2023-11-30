@@ -176,6 +176,8 @@ org $80987C
 !vcounter_target_colors = $1d
 !vcounter_target_end = $1f
 !hcounter_target = $a5
+!hcounter_target_gameplay = !hcounter_target
+!hcounter_target_door_transitions = !hcounter_target
 
 ;; raise HUD 2 pixels to have extra scanlines to restore colors
 !hud_draw_offset = 2
@@ -253,6 +255,7 @@ endmacro
 
 macro beginFBlank()
         lda.b !NMI_INIDISP : ora.b #$80 : sta.w !INIDISP
+print "begin fblank ", pc
 endmacro
 
 macro endFBlank()
@@ -269,6 +272,8 @@ org $8096E8
         db $22
 org $8096EB
         db !vcounter_target_colors
+org $8096EE
+        db !hcounter_target_door_transitions
 
 ;; draygon room
 org $80972A
@@ -281,12 +286,16 @@ org $809768
         db $2a
 org $80976B
         db !vcounter_target_colors
+org $80976E
+        db !hcounter_target_door_transitions
 
 ;; horizontal transition
 org $8097D1
         db $2e
 org $8097D4
         db !vcounter_target_colors
+org $8097D7
+        db !hcounter_target_door_transitions
 
 ;; IRQ handlers logic: vanilla "begin HUD" IRQ now points to a new one that will, on scanline 0
 ;; - enable F-Blank (needed to access CGRAM)
@@ -309,8 +318,7 @@ org $8097D4
 ;; exec duration vary, and are dependant on stuff like the amount of running HDMA, which makes adjusting timings
 ;; for them to work in all cases very difficult.
 ;;
-;; Mesen seems to be the emulator where the most display glitches appear, followed by real SNES and bsnes-accuracy,
-;; so these are good experiment platforms.
+;; Actual SNES hardware is where most glitches appear, Mesen being the emulator that shows the most, followed by bsnes-accuracy.
 ;; Other tested emulators (snes9x, normal bsnes, SNES Classic canoe) are way less finnicky and probably don't require
 ;; half of the shenanigans below.
 
@@ -353,8 +361,6 @@ begin_hud:
         rts
 
 end_hud:
-        %a8()
-        %beginFBlank()
         lda.b #!pal7_idx+1 : sta.w !CGADD
         stz.w !CGDATA : stz.w !CGDATA
         %setColor(!explored_2_index, !explored_2_backup)
@@ -382,11 +388,12 @@ irq_colors_begin_hud_main_gameplay_end:
         %a16()
         LDA.w #$001E
         LDY.w #!vcounter_target_colors
-        LDX.w #!hcounter_target
+        LDX.w #!hcounter_target_gameplay
         rts
 
 irq_colors_end_hud_main_gameplay:
-        jsr end_hud
+        %a8()
+        %beginFBlank()
         LDA.b $70;| 8096AB | 80 | \
         STA.w $2130                      ;| 8096AD | 80 | } Colour math control register A = [gameplay colour math control register A]
         LDA.b $73;| 8096B0 | 80 | \
@@ -395,6 +402,7 @@ irq_colors_end_hud_main_gameplay:
         STA.w $2109                      ;| 8096B7 | 80 | } BG3 tilemap base address and size = [gameplay BG3 tilemap base address and size]
         LDA.b $6a      ;| 8096BA | 80 | \
         STA.w $212C                      ;| 8096BC | 80 | } Main screen layers = [gameplay main screen layers]
+        jsr end_hud
         %a16()
         lda.w #$06
         ldy.w #!vcounter_target_end
@@ -427,7 +435,8 @@ irq_colors_begin_hud_start_transition_end:
         jmp $96e5
 
 irq_colors_end_hud_start_transition:
-        jsr end_hud
+        %a8()
+        %beginFBlank()
         LDA.w $07b3                         ;| 8096F3 | 80 | \
         ORA.w $07b1                 ;| 8096F6 | 80 | |
         BIT.b #$01                              ;| 8096F9 | 80 | } If ([CRE bitset] | [previous CRE bitset]) & 1 != 0:
@@ -439,6 +448,7 @@ irq_colors_end_hud_start_transition:
         LDA.b #$11                              ;| 809701 | 80 |  Main screen layers = BG1/sprites
 .BRA_809703:
         STA.w $212C                      ;| 809703 | 80 | 
+        jsr end_hud
         %a16()
         lda.w #$0a
         ldy.w #!vcounter_target_end
@@ -469,13 +479,15 @@ irq_colors_begin_hud_draygon_end:
         jmp $9727
 
 irq_colors_end_hud_draygon:
-        jsr end_hud
+        %a8()
+        %beginFBlank()
         LDA.b $5b;| 809735 | 80 | \
         STA.w $2109                      ;| 809737 | 80 | } BG3 tilemap base address and size = [gameplay BG3 tilemap base address and size]
         LDA.b $70;| 80973A | 80 | \
         STA.w $2130                      ;| 80973C | 80 | } Colour math control register A = [gameplay colour math control register A]
         LDA.b $73;| 80973F | 80 | \
         STA.w $2131                      ;| 809741 | 80 | } Colour math control register B = [gameplay colour math control register B]
+        jsr end_hud
         %a16()
         lda.w #$0E
         ldy.w #!vcounter_target_end
@@ -506,7 +518,8 @@ irq_colors_begin_hud_vertical_transition_end:
         jmp $9765
 
 irq_colors_end_hud_vertical_transition:
-        jsr end_hud
+        %a8()
+        %beginFBlank()
         LDA.w $07b3                         ;| 809773 | 80 | \
         ORA.w $07b1                 ;| 809776 | 80 | |
         BIT.b #$01                              ;| 809779 | 80 | } If ([CRE bitset] | [previous CRE bitset]) & 1 != 0:
@@ -520,6 +533,7 @@ irq_colors_end_hud_vertical_transition:
         STA.w $212C                      ;| 809783 | 80 | 
         STZ.w $2130                      ;| 809786 | 80 | \
         STZ.w $2131                      ;| 809789 | 80 | } Disable colour math
+        jsr end_hud
         %a16()
         lda.w #$12
         ldy.w #!vcounter_target_end
@@ -550,7 +564,8 @@ irq_colors_begin_hud_horizontal_transition_end:
         jmp $97CE
 
 irq_colors_end_hud_horizontal_transition:
-        jsr end_hud
+        %a8()
+        %beginFBlank()
         LDA.w $07b3                         ;| 8097DC | 80 | \
         ORA.w $07b1                 ;| 8097DF | 80 | |
         BIT.b #$01                              ;| 8097E2 | 80 | } If ([CRE bitset] | [previous CRE bitset]) & 1 != 0:
@@ -564,6 +579,7 @@ irq_colors_end_hud_horizontal_transition:
         STA.w $212C                      ;| 8097EC | 80 | 
         STZ.w $2130                      ;| 8097EF | 80 | \
         STZ.w $2131                      ;| 8097F2 | 80 | } Disable colour math
+        jsr end_hud
         %a16()
         lda.w #$18
         ldy.w #!vcounter_target_end

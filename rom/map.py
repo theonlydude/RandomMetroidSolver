@@ -69,6 +69,12 @@ def getTileIndex(kind, tileClass):
     else:
         raise ValueError(f"No '{tileClass}' entry for tile kind {kind}")
 
+def getGraphArea(area, palette):
+    for graphArea, pal in palettesByArea[area].items():
+        if pal == palette:
+            return graphArea
+    return None
+
 nPages = 2
 pageSize = 32
 

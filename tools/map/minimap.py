@@ -1,9 +1,7 @@
-import json, os
+import json, sys, os
 
-from rom.map import AreaMap, palettesByArea
+from rom.map import AreaMap, palettesByArea, getGraphArea
 from rom.rom import RealROM
-from rooms import rooms as rooms_area
-from rooms import rooms_alt
 
 areas = {
     "Brinstar": "brinstar",
@@ -39,24 +37,49 @@ class RoomPalettes(object):
     def palettes(self):
         return sorted(list(self._palettes))
 
+    @property
+    def graphAreas(self):
+        return [getGraphArea(self.area, palette) for palette in self.palettes]
+
     def __eq__(self, other):
         return other.palettes == self.palettes
 
     def addGraphArea(self, graphArea):
         self._palettes.add(palettesByArea[self.area][graphArea])
 
+class RoomType(object):
+    _id = 0
+
+    def __init__(self, paletteTriplet, graphAreas):
+        self.id = None
+        self.paletteTriplet = paletteTriplet
+        self.graphAreas = graphAreas
+
+    def enable(self):
+        self.id = RoomType._id
+        RoomType._id += 1
+
+    def __eq__(self, other):
+        return self.graphAreas == other.graphAreas and self.paletteTriplet == other.paletteTriplet
+
+    def __repr__(self):
+        return f"{self.id} | {self.graphAreas} | {self.paletteTriplet}"
+
 class PalettesConfigGenerator(object):
     def __init__(self, dataDir="tools/map/graph_area", binMapDir="patches/vanilla/src/map", alt=False):
-        self.rooms = rooms_area if not alt else rooms_alt
         self.dataDir = dataDir
         self.binMapDir = binMapDir
         self.alt = alt
         self.paletteConfigs = {}
         self.maps = {}
         self.roomPalettes = {}
+        self.paletteTriplets = {}
+        self.roomTypes = {}
         self.loadMaps()
         self.loadRoomTiles()
         self.findRoomPalettes()
+        self.createPaletteTriplets()
+        self.createRoomTypes()
 
     def loadMaps(self):
         for area, baseName in areas.items():
@@ -88,7 +111,6 @@ class PalettesConfigGenerator(object):
                         areaMap.setTile(x, y, RoomTile(room, graphArea))
 
     def findRoomPalettes(self):
-        # very dumb algorithm but we can afford it
         for area, areaMap in self.maps.items():
             for x in range(areaMap.width):
                 for y in range(areaMap.height):
@@ -110,3 +132,32 @@ class PalettesConfigGenerator(object):
                             if not isinstance(t, RoomTile):
                                 continue
                             roomPal.addGraphArea(t.graphArea)
+
+    def createPaletteTriplets(self):
+        for room, roomPalettes in self.roomPalettes.items():
+            pals = set(roomPalettes.palettes)
+            n = sys.maxsize
+            selected, selectedColors = None, None
+            for triplet in self.paletteTriplets.values():
+                newColors = [c for c in pals if c not in triplet]
+                if len(newColors) < n and len(newColors) + len(triplet) <= 3:
+                    n = len(newColors)
+                    selected = triplet
+                    selectedColors = newColors
+            if selected is not None:
+                for c in selectedColors:
+                    selected.add(c)
+            else:
+                selected = pals
+            self.paletteTriplets[room] = selected
+
+    def createRoomTypes(self):
+        for room, roomPalette in self.roomPalettes.items():
+            triplet = self.paletteTriplets[room]
+            roomType = RoomType(triplet, roomPalette.graphAreas)
+            existent = next((rt for rt in self.roomTypes.values() if rt == roomType), None)
+            if existent is not None:
+                roomType = existent
+            else:
+                roomType.enable()
+            self.roomTypes[room] = roomType

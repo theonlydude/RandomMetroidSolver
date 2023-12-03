@@ -303,6 +303,8 @@ org $80972A
         db $26
 org $80972D
         db !vcounter_target_colors
+org $809730
+        db !hcounter_target_gameplay
 
 ;; vertical transition
 org $809768

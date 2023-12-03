@@ -325,6 +325,8 @@ VARIA_init:
         %gfxDMA(extra_gfx, $2CB0, !extra_gfx_size) 	; DMA transfer from extra_gfx to VRAM:2CB0
         ;; mirror map explored for area portals inside the same map to work
         jsl $8085c6
+        ;; Clear force blank and wait for NMI because F-blank was set before VRAM transfers
+        jsl $808382
 	rtl
 
 ;;; Y: pointer to spritemap entry
@@ -581,7 +583,11 @@ PrepareAreaIndex:
 + : SEP #$30 : LDA $01,s : TAX
 	LDA !ExploredAreaBits : ORA.w $B7C9,x : STA !ExploredAreaBits : REP #$30
 ++ : PLA : INC : CMP.w #!AccessableAreaNumber : BCC .arealoop	;check as many areas as set
-	PLP : RTS
+	PLP
+        ;; Set force blank and wait for NMI because VRAM transfers may not finish in time,
+        ;; due to more complex Minimap IRQs
+        jsl $80836f
+        RTS
 
 
 ;Construct next explored map during switch routine

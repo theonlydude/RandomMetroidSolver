@@ -2,11 +2,9 @@
 
 import sys, os
 
-# now that we're in directory 'tools/' we have to update sys.path
 sys.path.append(os.path.dirname(sys.path[0]))
 
-# generate asm files putting graph area ID in "Unused Pointer" field's first byte in
-# all room states
+# generate asm files putting graph area ID, and minimap room type ID in "Unused Pointer" field in all room states
 
 vanilla=sys.argv[1]
 asm=sys.argv[2]

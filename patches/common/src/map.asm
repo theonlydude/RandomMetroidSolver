@@ -222,12 +222,9 @@ math pri off
 ;Config files
 INCSRC "map/config/CoverTileList.asm"
 INCSRC "map/config/ItembitTilechangeList.asm"
-incsrc "map/config/area_colors.asm"
+incsrc "area_colors.asm"
 INCSRC "map/config/MaptileGlow.asm"
 INCSRC "map/config/MapDecoration.asm"
-
-!unexplored_gray = $318c
-!vanilla_etank_color = $48fb
 
 ;Clean up
 ;;; commented out for VARIA to reduce IPS size

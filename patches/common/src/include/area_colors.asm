@@ -1,4 +1,7 @@
 include
+!unexplored_gray = $318c
+!vanilla_etank_color = $48fb
+!AreaColor_Ceres = !vanilla_etank_color
 
 ;; Crateria : RGB (74, 123, 107) / Hex RGB $4a7b6b
 !AreaColor_Crateria = $35e9

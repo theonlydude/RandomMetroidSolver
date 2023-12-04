@@ -52,24 +52,26 @@ UpdateMinimapTileset:
 	LDA.w #!RAM_ActiveMap+$40 : STA $03
 	LDA.w #!RAM_ActiveMap+$80 : STA $06
 	LDA #$0005 : STA $12 : STZ $14
+        ;; $18 = minimap tile palette table addr
+        jsl get_room_minimap_table : sta $18
 
 ;Row 0
 - : LDA [$00],y : CMP.w #!EmptyTile : BNE +						;check if current tile is empty tile
 	ORA.w #!MinimapPaletteEmptyTile<<10|$2000 : BRA ++			;set palette and priority bit
-+ : AND #$1C00 : LSR : XBA : TAX								;gather palette from maptile and create index of palette for minimap
-	LDA [$00],y : AND #$E3FF : ORA.w MinimapTilePaletteTable,x	;set minimap palette
++ : PHY : AND #$1C00 : LSR : XBA : PHA								;gather palette from maptile and create index of palette for minimap
+	LDA [$00],y : AND #$E3FF : PLY : ORA ($18), y : PLY	;set minimap palette
 ++ : LDX $14 : STA $7EC63C,x
 ;Row 1
 	LDA [$03],y : CMP.w #!EmptyTile : BNE +
 	ORA.w #!MinimapPaletteEmptyTile<<10|$2000 : BRA ++
-+ : AND #$1C00 : LSR : XBA : TAX
-	LDA [$03],y : AND #$E3FF : ORA.w MinimapTilePaletteTable,x
++ : PHY : AND #$1C00 : LSR : XBA : PHA
+	LDA [$03],y : AND #$E3FF : PLY : ORA ($18), y : PLY
 ++ : LDX $14 : STA $7EC67C,x
 ;Row 2
 	LDA [$06],y : CMP.w #!EmptyTile : BNE +
 	ORA.w #!MinimapPaletteEmptyTile<<10|$2000 : BRA ++
-+ : AND #$1C00 : LSR : XBA : TAX
-	LDA [$06],y : AND #$E3FF : ORA.w MinimapTilePaletteTable,x
++ : PHY : AND #$1C00 : LSR : XBA : PHA
+	LDA [$06],y : AND #$E3FF : PLY : ORA ($18), y : PLY
 ++ : LDX $14 : STA $7EC6BC,x
 
 	INC $14 : INC $14 : INY #2
@@ -134,13 +136,17 @@ update_area_tilecount:
 %export(total_tiles)
         dw 0
 
-print "main minimap end: ", pc
-warnpc $90AC04
+;; actual data depends on flavor and is provided in separate patch
+MinimapTilePaletteTables:
 
-ORG $90AC0C
-MinimapTilePaletteTable:
-	DW !MinimapPalette0<<10|$2000, !MinimapPalette1<<10|$2000, !MinimapPalette2<<10|$2000, !MinimapPalette3<<10|$2000
-	DW !MinimapPalette4<<10|$2000, !MinimapPalette5<<10|$2000, !MinimapPalette6<<10|$2000, !MinimapPalette7<<10|$2000
+print "main minimap end: ", pc
+org $90AC04
+.limit:
+
+;; ORG $90AC0C
+;; MinimapTilePaletteTable:
+;; 	DW !MinimapPalette0<<10|$2000, !MinimapPalette1<<10|$2000, !MinimapPalette2<<10|$2000, !MinimapPalette3<<10|$2000
+;; 	DW !MinimapPalette4<<10|$2000, !MinimapPalette5<<10|$2000, !MinimapPalette6<<10|$2000, !MinimapPalette7<<10|$2000
 
 
 ORG $90E734 : JSL MinimapASM
@@ -621,17 +627,26 @@ load_tileset_palette:
         rtl
 
 set_hud_map_colors:
+        phx
         lda #!unexplored_gray : sta 2*!pal3_idx+!palettes_ram
         lda #!vanilla_etank_color : sta 2*!pal7_idx+!palettes_ram
-        ;; FIXME hardcode for now
-        lda #!AreaColor_Crateria : sta !explored_0
-        lda #!AreaColor_WreckedShip : sta !explored_1
-        lda #!AreaColor_Tourian : sta !explored_2
+        ;; get explored colors from table
+        lda !VARIA_minimap_room_type : and #$00ff : asl : asl : asl : tax
+        lda.l minimap_color_data+2, x  : sta !explored_0
+        lda.l minimap_color_data+4, x  : sta !explored_1
+        lda.l minimap_color_data+6, x  : sta !explored_2
+        plx
         rts
 
 preserve_etank_color:
         LDA $C03A : STA $C23A   ; hijacked code
         LDA $C03C : STA $C23C
+        rtl
+
+;;; returns in A the ptr to minimap palette table in bank 90
+get_room_minimap_table:
+        lda !VARIA_minimap_room_type : and #$00ff : asl : asl : asl : tax
+        lda.l minimap_color_data, x
         rtl
 
 ;; affects the BG3 scroll HDMA object, active during main gameplay
@@ -658,6 +673,14 @@ raise_hud_loading:
         JSL $888288     ; hijacked code: Enable HDMA objects
         JSL $88D865     ; Spawn HUD BG3 scroll HDMA object
         rtl
+
+print "b80 end: ", pc
+;; table indexed by room type containing 8 byte entries of the form:
+;; minimap_palettes_ptr_bank90, explored_0, explored_1, explored_2
+;; actual data depends on flavor etc so it will be applied in separate patch
+minimap_color_data:
+org $80f000
+.limit:
 
 ;; message boxes
 

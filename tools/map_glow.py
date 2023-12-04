@@ -38,7 +38,9 @@ def shiftColor(c, i):
     return RGB_24_to_15(color2bytes(hsv2rgb(*bytes2color(applyOffset(i, *color2bytes(rgb2hsv(*bytes2color(c))))))))
 
 print("include")
-
+print("!unexplored_gray = $318c")
+print("!vanilla_etank_color = $48fb")
+print("!AreaColor_Ceres = !vanilla_etank_color")
 for area, color in areaColors.items():
     print("\n;; %s : RGB %s / Hex RGB $%06x" % (area, str(color), color[0] << 16 | color[1] << 8 | color[2]))
     print("!AreaColor_%s = $%04x" % (area,  RGB_24_to_15(color)))

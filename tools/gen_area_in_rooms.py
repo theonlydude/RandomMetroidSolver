@@ -53,7 +53,7 @@ with open(asm, "w") as src:
         def processState(stateWordAddr):
             graphAreaId = areas.index(room['GraphArea'])
             minimapTypeId = minimapCfg.roomTypes[room["Name"]].id
-            src.write("org $8f%04x\n\tdb $%02x, $%02x\n" % (stateWordAddr+16, graphAreaId, minimapTypeId))
+            src.write(";;; %s\norg $8f%04x\n\tdb $%02x, $%02x\n" % (room['Name'], stateWordAddr+16, graphAreaId, minimapTypeId))
         address = room['Address']+11
         # process additionnal states
         while True:

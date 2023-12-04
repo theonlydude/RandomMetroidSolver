@@ -66,9 +66,9 @@ hijack:
 	JSR draw_info
 
 ;;; hijack load room state, to init remaining items counter
-org $82def7
+org $82df02
 .load_room_state:
-	jml load_state
+	jsl load_state : nop : nop
 
 ;;; yet another item pickup hijack, different from the ones in endingtotals and bomb_torizo
 ;;; this one is used to count remaining items in current area, and handle scavenger hunt
@@ -349,14 +349,13 @@ draw_info:
 	;; Draw current area name and remaining items in it
 .draw_area:
 	;; determine current graph area
-	ldx $07bb
-	sep #$20
-	lda $8f0010,x
+        %a8()
+	lda !VARIA_area_id
 	;; check if we must draw it
 	cmp !previous
 	beq .items
 	sta !previous
-	rep #$20
+        %a16()
 	;; get text address
 	and #$00ff
 	asl : asl : asl : asl
@@ -534,9 +533,9 @@ load_state:
 	sta !scav_tmp
 	jsr compute_n_items
 	;; hijacked code
-	LDX $07BB
-	LDA $0003,x
-	jml $82DEFD		; resume routine
+        LDX $E7A7,y
+        LDA $0001,x
+        rtl
 
 ;;; return
 ;;; - carry set if in scav mode, clear if not
@@ -681,14 +680,14 @@ compute_n_items:
 	phy
 	;; go through loc id list for current area, counting collected items
 	;; determine current graph area
-	ldx $07bb : lda $8f0010,x : and #$00ff
+	lda !VARIA_room_data : and #$00ff
         jsl objectives_count_items_in_area
 	;; here, $16 contain collected items, and Y number of items
         lda $16 : bne .collected_event
         tya : bra .store        ; no items collected; skip substraction
 .collected_event:
 	;; at least an item collected, trigger appropriate event : current graph area idx+area_clear_start_event_base
-	ldx $07bb : lda $8f0010,x : and #$00ff
+	lda !VARIA_room_data : and #$00ff
 	clc : adc.w #!area_clear_start_event_base
 	jsl !mark_event
 .rem:
@@ -701,7 +700,7 @@ compute_n_items:
         sta !n_items
 	bne .ret
 	;; 0 items left, trigger appropriate event : current graph area idx+area_clear_event_base
-	ldx $07bb : lda $8f0010,x : and #$00ff
+	lda !VARIA_room_data : and #$00ff
 	clc : adc.w #!area_clear_event_base
 	jsl !mark_event
 .ret:

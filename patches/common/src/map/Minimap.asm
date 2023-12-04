@@ -113,10 +113,8 @@ update_area_tilecount:
 .count:
         phx
         php
-        %a8()
-	;; determine current graph area in special byte in room state header
-	ldx $07bb
-	lda $8f0010,x : tax
+        %ai8()
+	ldx !VARIA_area_id
         ;; if total tile count for this area is 0, don't count the tiles
         lda area_tiles, x : beq .end
         ;; we can afford counting tiles on a single byte (max is 177, upper norfair in area rando)

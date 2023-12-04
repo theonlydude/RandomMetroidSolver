@@ -136,6 +136,10 @@ org $819e25
 org $81A1DB
         jsr control_lock
 
+;;; hijack load state header to put area ID/minimap room type ID in RAM
+org $82DEF7
+        jsl load_state : nop : nop
+
 ;;; -------------------------------
 ;;; CODE ;;;
 ;;; -------------------------------
@@ -929,6 +933,12 @@ update_igt:
         sta !igt_frames
 .end:
         plp
+        rtl
+
+load_state:
+        ldx $07bb               ; hijacked code
+        lda $0010, x : sta !VARIA_room_data
+        LDA $0003,x             ; hijacked code
         rtl
 
 ;;; show save area and station instead of energy

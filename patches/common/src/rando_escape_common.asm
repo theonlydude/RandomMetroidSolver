@@ -481,8 +481,7 @@ set_timer_value:
         bra .end
 .area_table:
 	;; get current area id
-	ldx $07bb
-	lda $8f0010,x : and #$00ff
+	lda !VARIA_room_data : and #$00ff
 	dec			; first area (Crateria) has ID 1 because Ceres is 0
 	asl : tax
 	lda.l timer_half_values_by_area_id, x : sta !timer_half_value

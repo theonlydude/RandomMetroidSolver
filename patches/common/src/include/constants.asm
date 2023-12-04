@@ -43,6 +43,13 @@ include
 !skip_lag_count_flag = $033c
 !timer_lag = $033a
 
+;; RAM for VARIA room data
+;; low byte: VARIA area ID, high byte: minimap room type
+!VARIA_room_data = $07d3
+;; use these when in 8-bit mode
+!VARIA_area_id = !VARIA_room_data
+!VARIA_minimap_room_type = !VARIA_room_data+1
+
 ;; stats RAM
 !_stats_ram = fc00
 !stats_ram = $7f!_stats_ram

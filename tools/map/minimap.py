@@ -25,7 +25,7 @@ class RoomPalettes(object):
     def __init__(self, name, area):
         self.name = name
         self.area = area
-        self._palettes = set()
+        self.palettes = set()
 
     def __repr__(self):
         return self.name
@@ -34,25 +34,21 @@ class RoomPalettes(object):
         return f"{self.name}: {self.palettes}"
 
     @property
-    def palettes(self):
-        return sorted(list(self._palettes))
-
-    @property
     def graphAreas(self):
-        return [getGraphArea(self.area, palette) for palette in self.palettes]
+        return {getGraphArea(self.area, palette) for palette in self.palettes}
 
     def __eq__(self, other):
         return other.palettes == self.palettes
 
     def addGraphArea(self, graphArea):
-        self._palettes.add(palettesByArea[self.area][graphArea])
+        self.palettes.add(palettesByArea[self.area][graphArea])
 
 class RoomType(object):
     _id = 0
 
     def __init__(self, paletteTriplet, graphAreas):
         self.id = None
-        self.paletteTriplet = paletteTriplet
+        self.paletteTriplet, self.paletteTripletId = paletteTriplet
         self.graphAreas = graphAreas
 
     def enable(self):
@@ -60,12 +56,15 @@ class RoomType(object):
         RoomType._id += 1
 
     def __eq__(self, other):
-        return self.graphAreas == other.graphAreas and self.paletteTriplet == other.paletteTriplet
+        return self.graphAreas == other.graphAreas and self.paletteTripletId == other.paletteTripletId
 
     def __repr__(self):
+        return f"RoomType {self.id} {self.paletteTripletId}"
+    
+    def __str__(self):
         return f"{self.id} | {self.graphAreas} | {self.paletteTriplet}"
 
-class PalettesConfigGenerator(object):
+class MinimapPalettesConfig(object):
     def __init__(self, dataDir="tools/map/graph_area", binMapDir="patches/vanilla/src/map", alt=False):
         self.dataDir = dataDir
         self.binMapDir = binMapDir
@@ -135,7 +134,7 @@ class PalettesConfigGenerator(object):
 
     def createPaletteTriplets(self):
         for room, roomPalettes in self.roomPalettes.items():
-            pals = set(roomPalettes.palettes)
+            pals = roomPalettes.palettes
             n = sys.maxsize
             selected, selectedColors = None, None
             for triplet in self.paletteTriplets.values():
@@ -148,8 +147,16 @@ class PalettesConfigGenerator(object):
                 for c in selectedColors:
                     selected.add(c)
             else:
-                selected = pals
+                selected = pals.copy()
             self.paletteTriplets[room] = selected
+        allTriplets = []
+        for s in self.paletteTriplets.values():
+            if s not in allTriplets:
+                allTriplets.append(s)
+        getId = lambda triplet: allTriplets.index(triplet)
+        for room in self.paletteTriplets:
+            triplet = self.paletteTriplets[room]
+            self.paletteTriplets[room] = (triplet, getId(triplet))
 
     def createRoomTypes(self):
         for room, roomPalette in self.roomPalettes.items():

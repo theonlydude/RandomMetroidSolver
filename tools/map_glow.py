@@ -12,14 +12,14 @@ areaColors = {
     'Crateria': (74, 123, 107),
     'GreenPinkBrinstar': (74, 173, 74),
     'RedBrinstar': (173, 66, 8),
-    'WreckedShip': (145, 145, 93),
-    'Kraid': (205, 216, 0),
+    'WreckedShip': (142, 142, 78),
+    'Kraid': (206, 214, 59),
     'Norfair': (255, 140, 0),
     'Crocomire': (99, 21, 50),
     'LowerNorfair': (255, 49, 0),
     'WestMaridia': (0, 140, 255),
     'EastMaridia': (231, 140, 222),
-    'Tourian': (189, 165, 165)
+    'Tourian': (188, 152, 152)
 }
 
 rgb2hsv = colorsys.rgb_to_hsv
@@ -31,8 +31,8 @@ v_offsets = [-off for off in s_offsets ]
 bound = lambda b: max(0, min(255, b))
 def applyOffset(i, h, s, v):
     return h, bound(s+s_offsets[i]), bound(v+v_offsets[i])
-color2bytes = lambda c: tuple(int(i*256) for i in c)
-bytes2color = lambda c: tuple(float(i)/256 for i in c)
+color2bytes = lambda c: tuple(int(i*255) for i in c)
+bytes2color = lambda c: tuple(float(i)/255 for i in c)
 
 def shiftColor(c, i):
     return RGB_24_to_15(color2bytes(hsv2rgb(*bytes2color(applyOffset(i, *color2bytes(rgb2hsv(*bytes2color(c))))))))

@@ -18,12 +18,25 @@ if len(sys.argv) > 3:
 from graph.graph_utils import graphAreas as areas
 from rooms import rooms as rooms_area
 from rooms import rooms_alt
+from map.minimap import MinimapPalettesConfig
 
 rooms = rooms_area
-if layout == "alt":
+alt = layout == "alt"
+if alt:
     rooms = rooms_alt
 
-from rom.rom import pc_to_snes,RealROM
+flavor = "vanilla"
+if "mirror" in asm:
+    flavor = "mirror"
+
+dataDirs = {
+    "vanilla": "tools/map/graph_area",
+    "mirror": "tools/map/graph_area_mirror"
+}
+
+minimapCfg = MinimapPalettesConfig(dataDir=dataDirs[flavor], binMapDir=f"patches/{flavor}/src/map", alt=alt)
+
+from rom.rom import pc_to_snes, RealROM
 
 rom = RealROM(vanilla)
 
@@ -38,7 +51,9 @@ with open(asm, "w") as src:
     for room in rooms:
 #        print(room["Name"])
         def processState(stateWordAddr):
-            src.write("org $8f%04x\n\tdb $%02x\n" % (stateWordAddr+16, areas.index(room['GraphArea'])))
+            graphAreaId = areas.index(room['GraphArea'])
+            minimapTypeId = minimapCfg.roomTypes[room["Name"]].id
+            src.write("org $8f%04x\n\tdb $%02x, $%02x\n" % (stateWordAddr+16, graphAreaId, minimapTypeId))
         address = room['Address']+11
         # process additionnal states
         while True:

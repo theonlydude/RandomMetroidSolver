@@ -10,15 +10,15 @@ include
 
 ;; RedBrinstar : RGB (173, 66, 8) / Hex RGB $ad4208
 !AreaColor_RedBrinstar = $0515
-!Glow_RedBrinstar = $04f5,$00d4,$00d3,$00d2,$00b1,$00d2,$00d3,$00d4
+!Glow_RedBrinstar = $04f5,$00f4,$00d3,$00d2,$00b1,$00d2,$00d3,$00f4
 
-;; WreckedShip : RGB (145, 145, 93) / Hex RGB $91915d
-!AreaColor_WreckedShip = $2e52
-!Glow_WreckedShip = $2e52,$2a31,$2610,$21ef,$1dce,$21ef,$2610,$2a31
+;; WreckedShip : RGB (142, 142, 78) / Hex RGB $8e8e4e
+!AreaColor_WreckedShip = $2631
+!Glow_WreckedShip = $2631,$2210,$1def,$19ce,$15ad,$19ce,$1def,$2210
 
-;; Kraid : RGB (205, 216, 0) / Hex RGB $cdd800
-!AreaColor_Kraid = $0379
-!Glow_Kraid = $037a,$0359,$0338,$0317,$02f6,$0317,$0338,$0359
+;; Kraid : RGB (206, 214, 59) / Hex RGB $ced63b
+!AreaColor_Kraid = $1f59
+!Glow_Kraid = $1f5a,$1b39,$1718,$12f7,$0ed6,$12f7,$1718,$1b39
 
 ;; Norfair : RGB (255, 140, 0) / Hex RGB $ff8c00
 !AreaColor_Norfair = $023f
@@ -34,12 +34,12 @@ include
 
 ;; WestMaridia : RGB (0, 140, 255) / Hex RGB $008cff
 !AreaColor_WestMaridia = $7e20
-!Glow_WestMaridia = $7e20,$7a20,$7600,$7200,$6de0,$7200,$7600,$7a20
+!Glow_WestMaridia = $7e40,$7a20,$7600,$7200,$6de0,$7200,$7600,$7a20
 
 ;; EastMaridia : RGB (231, 140, 222) / Hex RGB $e78cde
 !AreaColor_EastMaridia = $6e3c
-!Glow_EastMaridia = $6e3c,$6a1b,$65da,$61b9,$5d98,$61b9,$65da,$6a1b
+!Glow_EastMaridia = $6e3c,$6a1b,$65da,$61b9,$5d78,$61b9,$65da,$6a1b
 
-;; Tourian : RGB (189, 165, 165) / Hex RGB $bda5a5
-!AreaColor_Tourian = $5297
-!Glow_Tourian = $5297,$4e76,$4635,$4214,$39d3,$4214,$4635,$4e76
+;; Tourian : RGB (188, 152, 152) / Hex RGB $bc9898
+!AreaColor_Tourian = $4e77
+!Glow_Tourian = $4e77,$4636,$4215,$39d4,$35b3,$39d4,$4215,$4636

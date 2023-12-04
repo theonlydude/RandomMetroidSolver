@@ -1,6 +1,6 @@
 import json, sys, os
 
-from rom.map import AreaMap, palettesByArea, getGraphArea
+from rom.map import AreaMap, palettesByArea
 from rom.rom import RealROM
 
 areas = {
@@ -26,6 +26,7 @@ class RoomPalettes(object):
         self.name = name
         self.area = area
         self.palettes = set()
+        self.graphAreas = set()
 
     def __repr__(self):
         return self.name
@@ -33,30 +34,37 @@ class RoomPalettes(object):
     def __str__(self):
         return f"{self.name}: {self.palettes}"
 
-    @property
-    def graphAreas(self):
-        return {getGraphArea(self.area, palette) for palette in self.palettes}
-
     def __eq__(self, other):
         return other.palettes == self.palettes
 
     def addGraphArea(self, graphArea):
         self.palettes.add(palettesByArea[self.area][graphArea])
+        self.graphAreas.add(graphArea)
 
 class RoomType(object):
     _id = 0
 
-    def __init__(self, paletteTriplet, graphAreas):
+    def __init__(self, paletteTriplet, graphAreas, area):
         self.id = None
         self.paletteTriplet, self.paletteTripletId = paletteTriplet
-        self.graphAreas = graphAreas
+        self.paletteTriplet = sorted(list(self.paletteTriplet))
+        self.graphAreas = []
+        for pal in self.paletteTriplet:
+            localAreas = [graphArea for graphArea, p in palettesByArea[area].items() if pal == p]
+            if len(localAreas) > 0:
+                areaPals = [a for a in localAreas if a in graphAreas]
+                assert len(areaPals) <= 1
+                self.graphAreas.append(areaPals[0] if len(areaPals) > 0 else localAreas[0])
+            else:
+                self.graphAreas.append(None)
+        self.area = area
 
     def enable(self):
         self.id = RoomType._id
         RoomType._id += 1
 
     def __eq__(self, other):
-        return self.graphAreas == other.graphAreas and self.paletteTripletId == other.paletteTripletId
+        return self.area == other.area and self.graphAreas == other.graphAreas and self.paletteTripletId == other.paletteTripletId
 
     def __repr__(self):
         return f"RoomType {self.id} {self.paletteTripletId}"
@@ -161,7 +169,7 @@ class MinimapPalettesConfig(object):
     def createRoomTypes(self):
         for room, roomPalette in self.roomPalettes.items():
             triplet = self.paletteTriplets[room]
-            roomType = RoomType(triplet, roomPalette.graphAreas)
+            roomType = RoomType(triplet, roomPalette.graphAreas, roomPalette.area)
             existent = next((rt for rt in self.roomTypes.values() if rt == roomType), None)
             if existent is not None:
                 roomType = existent

@@ -12,6 +12,7 @@ if len(sys.argv) > 2:
 
 from rooms import rooms as rooms
 from map.minimap import MinimapPalettesConfig
+from rom.map import palettesByArea
 
 alt = layout == "alt"
 
@@ -39,14 +40,17 @@ with open(asm, "w") as src:
             src.write(f"org map_MinimapTilePaletteTables+{palette_triplet_size*tripletId}\n")
             label = f"palette_triplet_{tripletId}"
             tripletsAddresses[tripletId] = label
+            triplet = roomType.paletteTriplet
+            src.write(f";;; {triplet}\n")
             src.write(f"{label}:\n")
-            triplet = sorted(list(roomType.paletteTriplet))
             for pal in range(nPalettes):
                 if pal in triplet:
                     p = explored_pals[triplet.index(pal)]
+                elif pal == 2: # unexplored
+                    p = 3
                 else:
                     p = pal
-                src.write("\tdw $%04x\n" % ((p << 10) | 0x2000))
+                src.write("\tdw $%04x ; pal %d: %d\n" % ((p << 10) | 0x2000, pal, p))
     src.write("\nwarnpc map_MinimapTilePaletteTables_limit\n")
     # write palette data table
     src.write("\norg map_minimap_color_data\n")
@@ -54,14 +58,19 @@ with open(asm, "w") as src:
     for roomType in minimapCfg.roomTypes.values():
         if roomType not in allRoomTypes:
             allRoomTypes.append(roomType)
+    colorLists = {}
     for roomType in sorted(allRoomTypes, key=lambda rt: rt.id):
+        roomNames = [room for room, rt in minimapCfg.roomTypes.items() if rt == roomType]
+        src.write(f";;; {roomNames}\n")
         src.write(f"minimap_room_type_{roomType.id}:\n")
-        graphAreas = sorted(list(roomType.graphAreas))
+        graphAreas = roomType.graphAreas
+        triplet = roomType.paletteTriplet
         src.write(f"\tdw {tripletsAddresses[roomType.paletteTripletId]}\n")
-        for i in range(3):
-            if i < len(graphAreas):
-                area = f"!AreaColor_{graphAreas[i]}"
+        for graphArea in roomType.graphAreas:
+            if graphArea is not None:
+                src.write(f"\tdw !AreaColor_{graphArea}\n")
             else:
-                area = "!vanilla_etank_color"
-            src.write(f"\tdw {area}\n")
+                src.write("\tdw !vanilla_etank_color\n")
+        for i in range(len(graphAreas), 3):
+            src.write("\tdw !vanilla_etank_color\n")
     src.write("\nwarnpc map_minimap_color_data_limit\n")

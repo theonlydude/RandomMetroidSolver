@@ -361,6 +361,9 @@ class RomPatcher:
             if self.settings["area"] == False:
                 self.applyIPSPatch('area_ids_alt.ips')
                 self.applyIPSPatch('map_data_area_alt.ips')
+                self.applyIPSPatch('minimap_data_vanilla_layout.ips')
+            else:
+                self.applyIPSPatch('minimap_data_area_rando.ips')
             # blue doors
             doors = self.getStartDoors(plms, self.settings["area"], self.settings["minimizerN"])
             DoorsManager.getBlueDoors(doors)

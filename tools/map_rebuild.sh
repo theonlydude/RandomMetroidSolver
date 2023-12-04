@@ -14,4 +14,7 @@ tools/map_area_palettes.sh
 
 tools/map_mirror.sh
 
+tools/gen_areas_ids.sh
+tools/gen_minimap_color_data.sh
+
 make -C patches

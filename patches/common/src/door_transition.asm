@@ -8,6 +8,8 @@
 lorom
 arch 65816
 
+incsrc "sym/map.asm"
+
 incsrc "macros.asm"
 
 ;;; Constants :
@@ -119,6 +121,20 @@ org $8ff7a0
 %export(boss_exit_fix)
     stz $0e1e	; clear the flag to disable enemy BG2 tilemap routine
     rts
+
+;;; args:
+;;; X: offset in bank 7E for tile to explore
+;;; A: bitmask for tile to explore
+;;; $12: graph area for tile to explore
+%export(explore_tile)
+        phb : pea $7e7e : plb : plb ; DB = $7E
+        bit $0000, x : bne .end ; already explored: return
+        ;; explore and increase tile counts
+        ora $0000, x : sta $0000, x
+        lda $12 : jsl map_update_area_tilecount
+.end:
+        plb
+        rts
 
 warnpc $8ff7ff
 

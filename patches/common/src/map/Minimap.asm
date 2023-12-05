@@ -88,7 +88,8 @@ UpdateActiveMapWithExplored:
 	JSL LoadSourceMapData		;[$00] = long pointer to current area map data
 	TYA : ASL #3 : CLC : ADC $20 : ASL : TAX : TAY	;offset of maptile
 	LDA [$00],y : STA !RAM_ActiveMap,x				;save origin tile to RAM minimap
-        jsr update_area_tilecount
+        and #$03FF : cmp.w #!EmptyTile : beq ++ ; don't count empty tiles you could reach with X-Ray climb etc.
+        lda !VARIA_area_id : jsl update_area_tilecount
 ++ : RTS
 
 ApplyTileGFXtoRAM:
@@ -108,15 +109,12 @@ ApplyTileGFXtoRAM:
 	RTS
 
 ;;; VARIA addition: maintain a RAM table of explored map tile count 
-;;; A: exlored tile
+;;; A: VARIA area id
 update_area_tilecount:
-        and #$03FF : cmp.w #!EmptyTile : bne .count ; don't count empty tiles you could reach with X-Ray climb etc.
-        rts
-.count:
         phx
         php
         %ai8()
-	ldx !VARIA_area_id
+	tax
         ;; if total tile count for this area is 0, don't count the tiles
         lda area_tiles, x : beq .end
         ;; we can afford counting tiles on a single byte (max is 177, upper norfair in area rando)
@@ -126,7 +124,7 @@ update_area_tilecount:
 .end:
         plp
 	plx
-        rts
+        rtl
 
 ;;; quantities of tiles, per graph area. to be filled by randomizer based on flavor
 %export(area_tiles)

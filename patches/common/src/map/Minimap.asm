@@ -363,8 +363,7 @@ begin_hud:
         rts
 
 end_hud:
-        lda.b #!pal7_idx+1 : sta.w !CGADD
-        stz.w !CGDATA : stz.w !CGDATA
+        %setColor(!pal7_idx+1, 2*(!pal7_idx+1)+!palettes_ram)
         %setColor(!explored_2_index, !explored_2_backup)
         %setNextColor(!explored_2_backup+2)
         %setColor(!explored_1_index, !explored_1_backup)

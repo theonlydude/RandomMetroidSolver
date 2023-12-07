@@ -15,5 +15,7 @@ macro hasVARIAhud()
         lda.l varia_hud_hijack_health_draw  : and #$00ff : cmp #$0020 ; JSR opcode
 endmacro
 
+incsrc "macros.asm"
+
 incsrc "better_reserves/main.asm"
 incsrc "better_reserves/hud.asm"

@@ -414,7 +414,7 @@ class CommonSolver(object):
                                                         and (self.lastArea not in Bosses.areaBosses
                                                              or Bosses.areaBosses[self.lastArea] in mandatoryBosses))
                                                    and loc.comeBack is not None and loc.comeBack == True)
-                                               or (loc.Name == self.escapeLocName) )]
+                                               or (loc.Name == "Gunship") )]
         outside = [loc for loc in locations if not loc in around]
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
@@ -423,7 +423,7 @@ class CommonSolver(object):
 
         around.sort(key=lambda loc: (
             # end game loc
-            0 if loc.Name == self.escapeLocName else 1,
+            0 if loc.Name == "Gunship" else 1,
             # locs in the same area
             0 if loc.SolveArea == self.lastArea else 1,
             # nearest locs
@@ -512,9 +512,9 @@ class CommonSolver(object):
         return locs
 
     def nextDecision(self, majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold):
-        # first take end game location to end the run
+        # first go back to gunship if available to end the run
         if (len(majorsAvailable) > 0
-            and majorsAvailable[0].Name == self.escapeLocName):
+            and majorsAvailable[0].Name == "Gunship"):
             return self.collectMajor(majorsAvailable.pop(0))
         # next take major items of acceptable difficulty in the current area
         elif (len(majorsAvailable) > 0
@@ -710,14 +710,12 @@ class CommonSolver(object):
             mbLoc.AccessFrom['Golden Four'] = self.getMotherBrainAccess()
             mbLoc.Available = self.getMotherBrainAvailable()
             self.endGameLoc = mbLoc
-            self.escapeLocName = 'Mother Brain'
         else:
             # remove mother brain location and replace it with gunship loc
             self.locations.remove(mbLoc)
             gunship = self.getGunship()
             self.locations.append(gunship)
             self.endGameLoc = gunship
-            self.escapeLocName = 'Gunship'
 
         if self.majorsSplit == 'Major':
             self.majorLocations = [loc for loc in self.locations if loc.isMajor() or loc.isBoss()]

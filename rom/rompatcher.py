@@ -361,6 +361,9 @@ class RomPatcher:
             if self.settings["area"] == False:
                 self.applyIPSPatch('area_ids_alt.ips')
                 self.applyIPSPatch('map_data_area_alt.ips')
+                self.applyIPSPatch('minimap_data_vanilla_layout.ips')
+            else:
+                self.applyIPSPatch('minimap_data_area_rando.ips')
             # blue doors
             doors = self.getStartDoors(plms, self.settings["area"], self.settings["minimizerN"])
             DoorsManager.getBlueDoors(doors)
@@ -932,6 +935,7 @@ class RomPatcher:
         incompatible_doors = loadDoorTransitionShortPtrBytes("incompatible_doors")
         giveiframes = loadDoorTransitionShortPtrBytes("giveiframes")
         reveal_objectives = loadDoorTransitionShortPtrBytes("reveal_objectives", patch="objectives")
+        explore_tile = loadDoorTransitionShortPtrBytes("explore_tile")
         for conn in doorConnections:
             # write door ASM for transition doors (code and pointers)
             if 'DoorPtrSym' not in conn:
@@ -1008,13 +1012,28 @@ class RomPatcher:
                 if apInfo is not None:
                     areaMap = self.areaMaps[apInfo['area']]
                     byteIndex, bitMask = areaMap.getByteIndexMask(*apInfo['coords'])
-                    ramAddr = getWordBytes(self._getExploredMapRam(apInfo['area'], byteIndex)) + [ 0x7E ]
-                    # LDA.l $7E[map tile byte index]
-                    asmPatch += [ 0xAF ] + ramAddr
-                    # ORA.w #[map tile mask]
-                    asmPatch += [ 0x09 ] + getWordBytes(bitMask)
-                    # STA.l $7E[map tile byte index]
-                    asmPatch += [ 0x8F ] + ramAddr
+                    ramAddr = self._getExploredMapRam(apInfo['area'], byteIndex)
+                    if apInfo.get("coversTile", False):
+                        # in that case, the tile we want to explore could be explored by the player,
+                        # call a dedicated function
+                        # LDX #[map tile byte index]
+                        asmPatch += [ 0xA2 ] + getWordBytes(ramAddr)
+                        # LDA #[graph area]
+                        asmPatch += [ 0xA9 ] + getWordBytes(graphAreas.index(ap.GraphArea))
+                        # STA $12
+                        asmPatch += [ 0x85, 0x12 ]
+                        # LDA #[map tile mask]
+                        asmPatch += [ 0xA9 ] + getWordBytes(bitMask)
+                        # JSR explore_tile
+                        asmPatch += [ 0x20 ] + explore_tile
+                    else:
+                        ramAddrBytes = getWordBytes(ramAddr) + [ 0x7E ]
+                        # LDA.l $7E[map tile byte index]
+                        asmPatch += [ 0xAF ] + ramAddrBytes
+                        # ORA.w #[map tile mask]
+                        asmPatch += [ 0x09 ] + getWordBytes(bitMask)
+                        # STA.l $7E[map tile byte index]
+                        asmPatch += [ 0x8F ] + ramAddrBytes
                     # for index
                     if apInfo['area'] == gameAreas[matching.RoomInfo['area']]:
                         # JSL $80858C ; Load mirror of current area's map explored

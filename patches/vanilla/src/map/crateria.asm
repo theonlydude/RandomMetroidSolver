@@ -677,6 +677,19 @@ org map_data_Crateria+$aac  ; (54, 10)
 org map_data_Crateria+$aaa  ; (53, 10)
      dw $9829  ; BGtile[i=$29 p=$6 VX]
 
+;;; tiles for room "Bowling Alley Path"
+
+org map_data_Crateria+$8d2  ; (41, 3)
+     dw $181d  ; BGtile[i=$1d p=$6 X]
+
+org map_data_Crateria+$8d4  ; (42, 3)
+     dw $581d  ; BGtile[i=$1d p=$6 HX]
+
+;;; tiles for room "[West Ocean Geemer Corridor]"
+
+org map_data_Crateria+$8d6  ; (43, 3)
+     dw $1818  ; BGtile[i=$18 p=$6 X]
+
 ;;; tiles for graph area Tourian
 
 ;;; tiles for room "Statues Hallway"

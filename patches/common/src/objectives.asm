@@ -396,10 +396,7 @@ endmacro
 	lda.l objectives_options_escape_flag : and #$00ff : beq .ok
 	lda.l objectives_options_settings_flags : and.w #!option_nothing_trigger_escape_crateria_mask : beq .ok
 	;; determine current graph area in special byte in room state header
-	phx
-	ldx $07bb
-	lda $8f0010,x : and #$00ff
-	plx
+        lda !VARIA_room_data : and #$00ff
 	;; crateria ID is 1
 	cmp #$0001 : beq .ok
 	clc

@@ -677,7 +677,7 @@ print "b80 end: ", pc
 ;; minimap_palettes_ptr_bank90, explored_0, explored_1, explored_2
 ;; actual data depends on flavor etc so it will be applied in separate patch
 minimap_color_data:
-org $80f000
+org $80e000
 .limit:
 
 ;; message boxes
@@ -709,6 +709,12 @@ org $858426
         dw BGtile($d0, 2, 1, 0, 0) ; white select
         dw BGtile($eb, 3, 1, 0, 0) ; gray L
         dw BGtile($f1, 3, 1, 0, 0) ; gray R
+
+;;; adjust Bomb Message
+org $8590c9
+        dw BGtile($dc, 7, 1, 0, 0)
+org $85914d
+        dw BGtile($cd, 7, 1, 0, 0)
 
 ;; change save dialog arrow color to pink
 org $85948F

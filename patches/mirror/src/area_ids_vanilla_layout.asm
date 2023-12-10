@@ -3,7 +3,7 @@ arch 65816
 
 incsrc "sym/bank_8f.asm"
 
-incsrc "area_ids_base.asm"
+incsrc "area_ids_vanilla_layout_base.asm"
 
 ;;; MB room
 org bank_8f_Room_DD58_state_DD6E_Header+16

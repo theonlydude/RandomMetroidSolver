@@ -107,6 +107,10 @@ class MinimapPalettesConfig(object):
                     with open(altPath, "r") as fp:
                         altMapData = json.load(fp)
                     for graphArea, rooms in altMapData.items():
+                        for origArea in mapData:
+                            for room in rooms:
+                                if room in mapData[origArea]:
+                                    del mapData[origArea][room]
                         if graphArea in mapData:
                             mapData[graphArea].update(altMapData[graphArea])
                         else:

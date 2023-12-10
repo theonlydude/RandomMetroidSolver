@@ -16,7 +16,7 @@ palette_triplet_0:
 	dw $2000 ; pal 6: 0
 	dw $3800 ; pal 7: 6
 org map_MinimapTilePaletteTables+16
-;;; [3, 4, 7]
+;;; [3, 4, 6]
 palette_triplet_1:
 	dw $2000 ; pal 0: 0
 	dw $2400 ; pal 1: 1
@@ -25,28 +25,6 @@ palette_triplet_1:
 	dw $2000 ; pal 4: 0
 	dw $3400 ; pal 5: 5
 	dw $3800 ; pal 6: 6
-	dw $3800 ; pal 7: 6
-org map_MinimapTilePaletteTables+32
-;;; [3, 5, 7]
-palette_triplet_2:
-	dw $2000 ; pal 0: 0
-	dw $2400 ; pal 1: 1
-	dw $2c00 ; pal 2: 3
-	dw $2800 ; pal 3: 2
-	dw $3000 ; pal 4: 4
-	dw $2000 ; pal 5: 0
-	dw $3800 ; pal 6: 6
-	dw $3800 ; pal 7: 6
-org map_MinimapTilePaletteTables+48
-;;; [4, 6]
-palette_triplet_3:
-	dw $2000 ; pal 0: 0
-	dw $2400 ; pal 1: 1
-	dw $2c00 ; pal 2: 3
-	dw $2c00 ; pal 3: 3
-	dw $2800 ; pal 4: 2
-	dw $3400 ; pal 5: 5
-	dw $2000 ; pal 6: 0
 	dw $3c00 ; pal 7: 7
 
 warnpc map_MinimapTilePaletteTables_limit
@@ -63,7 +41,7 @@ minimap_room_type_1:
 	dw palette_triplet_1
 	dw !AreaColor_Norfair
 	dw !AreaColor_Kraid
-	dw !AreaColor_GreenPinkBrinstar
+	dw !AreaColor_RedBrinstar
 ;;; ['Crumble Shaft', 'Ice Beam Snake Room', 'Ice Beam Gate Room', 'Crocomire Speedway', 'Grapple Beam Room', 'Ice Beam Tutorial Room', 'Ice Beam Acid Room', 'Grapple Tutorial Room 1', 'Post Crocomire Jump Room', 'Ice Beam Room', 'Grapple Tutorial Room 2', 'Hi Jump Boots Room', 'Grapple Tutorial Room 3', 'Hi Jump Energy Tank Room', 'Norfair Map Room', 'Post Crocomire Power Bomb Room', 'Business Center', 'Post Crocomire Farming Room', 'Post Crocomire Shaft', 'Cathedral Entrance', '[Business Center Save Room]', 'Crocomire Escape', 'Post Crocomire Missile Room', 'Frog Speedway', "Crocomire's Room", '[Post Crocomire Save Room]', 'Cathedral', 'Acid Statue Room', '[Crocomire Save Room]', 'Acid Snakes Tunnel', 'Rising Tide', 'Main Hall', 'Norfair Reserve Tank Room', "Golden Torizo's Room", 'Red Pirate Shaft', 'Green Bubbles Missile Room', 'Upper Norfair Farming Room', '[Crocomire Recharge Room]', '[Elevator Save Room]', 'Screw Attack Room', '[Bubble Mountain Save Room]', 'Spiky Acid Snakes Tunnel', '[Elevator to Lower Norfair]', 'Fast Ripper Room', '[Screw Attack Energy Charge Room]', 'Bubble Mountain', 'Purple Shaft', 'Lava Dive Room', 'Ridley Tank Room', 'Purple Farming Room', 'Magdollite Tunnel', "Ridley's Room", 'Bat Cave', 'Single Chamber', 'Lower Norfair Farming Room', 'Speed Booster Hall', 'Double Chamber', 'Spiky Platforms Tunnel', 'Fast Pillars Setup Room', 'Kronic Boost Room', 'Mickey Mouse Room', 'Pillar Room', 'Volcano Room', 'Plowerhouse Room', 'Wave Beam Room', "Three Muskateers' Room", 'The Worst Room In The Game', 'Metal Pirates Room', 'Amphitheatre', 'Wasteland', 'Lower Norfair Spring Ball Maze Room', 'Lower Norfair Fireflea Room', 'Red Keyhunter Shaft', '[Red Keyhunter Shaft Save Room]', 'Speed Booster Room', 'Lower Norfair Escape Power Bomb Room']
 minimap_room_type_2:
 	dw palette_triplet_0
@@ -76,50 +54,26 @@ minimap_room_type_3:
 	dw !AreaColor_EastMaridia
 	dw !AreaColor_WestMaridia
 	dw !AreaColor_RedBrinstar
-;;; ['[Elevator to Green Brinstar]']
+;;; ['[Elevator to Green Brinstar]', 'Lower Mushrooms', 'Green Pirates Shaft', 'Gauntlet Energy Tank Room', 'Terminator Room', 'Statues Hallway', 'The Final Missile', 'Final Missile Bombway', 'Statues Room', 'Gauntlet Entrance', 'Parlor and Alcatraz', '[Parlor Save Room]', 'Climb', 'Pre-Map Flyway', 'Pit Room [Old Mother Brain Room]', 'Crateria Super Room', 'Flyway', 'Landing Site', 'Crateria Map Room', '[Elevator to Blue Brinstar]', 'Bomb Torizo Room', 'Crateria Power Bomb Room', 'Crateria Tube', 'Crateria Keyhunter Room', '[Elevator to Red Brinstar]', 'The Moat', 'West Ocean', 'Bowling Alley Path', '[West Ocean Geemer Corridor]', 'East Ocean', '[Crab Maze to Elevator]', '[Elevator to Maridia]', 'Crab Maze', 'Forgotten Highway Kago Room']
 minimap_room_type_4:
-	dw palette_triplet_1
-	dw !AreaColor_GreenPinkBrinstar
-	dw !AreaColor_EastMaridia
-	dw !AreaColor_Crateria
-;;; ['Lower Mushrooms']
-minimap_room_type_5:
-	dw palette_triplet_2
-	dw !AreaColor_GreenPinkBrinstar
-	dw !AreaColor_Tourian
-	dw !AreaColor_Crateria
-;;; ['Green Pirates Shaft', 'Gauntlet Energy Tank Room', 'Terminator Room', 'Statues Hallway', 'The Final Missile', 'Final Missile Bombway', 'Statues Room', 'Gauntlet Entrance', 'Parlor and Alcatraz', '[Parlor Save Room]', 'Climb', 'Pre-Map Flyway', 'Pit Room [Old Mother Brain Room]', 'Crateria Super Room', 'Flyway', 'Landing Site', 'Crateria Map Room', '[Elevator to Blue Brinstar]', 'Bomb Torizo Room', 'Crateria Power Bomb Room', 'Crateria Tube', 'The Moat', 'West Ocean', 'Bowling Alley Path', '[West Ocean Geemer Corridor]', 'East Ocean', 'Forgotten Highway Kago Room']
-minimap_room_type_6:
 	dw palette_triplet_0
 	dw !AreaColor_Tourian
 	dw !AreaColor_WreckedShip
 	dw !AreaColor_Crateria
-;;; ['Crateria Keyhunter Room', '[Elevator to Red Brinstar]']
-minimap_room_type_7:
-	dw palette_triplet_1
-	dw !AreaColor_RedBrinstar
-	dw !AreaColor_EastMaridia
-	dw !AreaColor_Crateria
-;;; ['[Crab Maze to Elevator]', '[Elevator to Maridia]', 'Crab Maze']
-minimap_room_type_8:
-	dw palette_triplet_3
-	dw !AreaColor_EastMaridia
-	dw !AreaColor_WreckedShip
-	dw !vanilla_etank_color
 ;;; ['Bowling Alley', 'Gravity Suit Room', 'Attic', 'Wrecked Ship Entrance', 'Wrecked Ship Main Shaft', 'Wrecked Ship Map Room', 'Basement', 'Wrecked Ship West Super Room', '[Wrecked Ship Save Room]', 'Sponge Bath', 'Wrecked Ship Energy Tank Room', 'Wrecked Ship East Super Room', 'Wrecked Ship East Missile Room', 'Spiky Death Room', "Phantoon's Room", 'Electric Death Room']
-minimap_room_type_9:
+minimap_room_type_5:
 	dw palette_triplet_0
 	dw !vanilla_etank_color
 	dw !vanilla_etank_color
 	dw !AreaColor_WreckedShip
 ;;; ['Tourian Recharge Room', 'Tourian Escape Room 1', 'Tourian Escape Room 2', 'Seaweed Room', 'Tourian Escape Room 3', 'Metroid Room 2', 'Big Boy Room', 'Tourian Eye Door Room', 'Mother Brain Room', 'Metroid Room 1', 'Metroid Room 3', '[Mother Brain Save Room]', 'Dust Torizo Room', 'Rinka Shaft', 'Tourian Escape Room 4', 'Blue Hopper Room', 'Tourian First Room', 'Metroid Room 4', '[Tourian First Save Room]']
-minimap_room_type_10:
+minimap_room_type_6:
 	dw palette_triplet_0
 	dw !vanilla_etank_color
 	dw !vanilla_etank_color
 	dw !AreaColor_Tourian
 ;;; ['[Ceres Elevator Room]', '[Ceres Jump Tutorial Room]', '[Ceres Staircase Room]', '[Ceres Dead Scientists Room]', '[Ceres Last Corridor]', '[Ceres Ridley Room]']
-minimap_room_type_11:
+minimap_room_type_7:
 	dw palette_triplet_1
 	dw !AreaColor_Ceres
 	dw !vanilla_etank_color

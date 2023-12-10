@@ -357,12 +357,13 @@ class RomPatcher:
             if self.settings["escapeAttr"] is not None:
                 # animals and timer
                 self.applyEscapeAttributes(self.settings["escapeAttr"], plms)
-            # VARIA area modifications for vanilla layout
+            # VARIA area IDs/minimap room types/area map palettes
             if self.settings["area"] == False:
-                self.applyIPSPatch('area_ids_alt.ips')
-                self.applyIPSPatch('map_data_area_alt.ips')
+                self.applyIPSPatch('area_ids_vanilla_layout.ips')
                 self.applyIPSPatch('minimap_data_vanilla_layout.ips')
+                self.applyIPSPatch('map_data_area_alt.ips')
             else:
+                self.applyIPSPatch('area_ids_area_rando.ips')
                 self.applyIPSPatch('minimap_data_area_rando.ips')
             # blue doors
             doors = self.getStartDoors(plms, self.settings["area"], self.settings["minimizerN"])

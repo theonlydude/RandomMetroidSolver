@@ -147,7 +147,7 @@ _baseIPS = [
     'map.ips',
     # game map
     'map_data.ips',
-    # game map palettes for graph areas
+    # game map palettes for graph areas (area rando)
     'map_data_area.ips',
     # boot, save files and backup management, stats infrastructure
     'base.ips',
@@ -159,8 +159,6 @@ _baseIPS = [
     'plm_spawn.ips',
     # needed fixes for VARIA
     'vanilla_bugfixes.ips',
-    # use a byte in a unused room state header field to store area ID in the VARIA sense
-    'area_ids.ips',
     # custom credits
     'credits.ips',
     # actual game hijacks to update tracking stats

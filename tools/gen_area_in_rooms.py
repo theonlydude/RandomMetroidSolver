@@ -18,10 +18,13 @@ from rooms import rooms as rooms_area
 from rooms import rooms_alt
 from map.minimap import MinimapPalettesConfig
 
-rooms = rooms_area
+rooms = {}
+for room in rooms_area:
+    rooms[room['Name']] = room
 alt = layout == "alt"
 if alt:
-    rooms = rooms_alt
+    for room in rooms_alt:
+        rooms[room['Name']] = room
 
 flavor = "vanilla"
 if "mirror" in asm:
@@ -46,7 +49,7 @@ statesChecksArgSize = {
 
 with open(asm, "w") as src:
     src.write("lorom\narch 65816\n\n")
-    for room in rooms:
+    for room in rooms.values():
 #        print(room["Name"])
         def processState(stateWordAddr):
             graphAreaId = areas.index(room['GraphArea'])

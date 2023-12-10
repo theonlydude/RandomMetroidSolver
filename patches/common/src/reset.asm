@@ -19,6 +19,9 @@ incsrc "macros.asm"
 org $828BB3
 	jsl hook_main
 
+org $90e8a1
+        jsl give_control_back_to_samus : nop : nop
+
 org $81fa80
 hook_main:
 	jsl $A09169  ; run hi-jacked instruction
@@ -40,6 +43,9 @@ check_reload:
 	;; actually reset :
 	;; increment reset count
 	lda !stat_resets : jsl base_inc_stat
+        ;; if you hold the combo on SNES classic, actual reset occurs,
+        ;; use this as special value to not count reset twice in the stats in that case
+        lda #!dec_reset_flag : sta !softreset
 	;; update region time
 	jsl stats_update_and_store_region_time
 	;; save stats
@@ -54,4 +60,12 @@ check_reload:
 	plp
 	rtl
 
-warnpc $81facf
+give_control_back_to_samus:
+        ;; hijacked code
+        LDA #$E725
+        STA $0A44
+        ;; set soft reset flag back to normal (samus fanfare is long enough that SNES classic reset didn't trigger here)
+        lda #!reset_flag : sta !softreset
+        rtl
+
+warnpc $81fadf

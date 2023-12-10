@@ -43,6 +43,11 @@ include
 !skip_lag_count_flag = $033c
 !timer_lag = $033a
 
+;; special value here to check on boot if console was just reset
+!softreset = $7fffe6
+!reset_flag = $babe             ; if !softreset is set to this, reuse RAM stats
+!dec_reset_flag = $decc         ; if !softreset is set to this, decrement reset count, then reuse RAM stats
+
 ;; RAM for VARIA room data
 ;; low byte: VARIA area ID, high byte: minimap room type
 !VARIA_room_data = $07d3

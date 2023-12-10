@@ -54,9 +54,6 @@ incsrc "constants.asm"
 !was_started_flag32 #= !last_saveslot+4
 ;; bitmask of which saves are locked (to know when to play the lock/unlock sound)
 !locked_slots_mask #= !last_saveslot+8
-;; special value here to check on boot if console was just reset
-!softreset = $7fffe6
-!reset_flag = $babe
 ;; magic value used as marker in some places
 !magic_flag = $caca
 ;; backup RAM for timer to avoid it to get cleared at boot
@@ -239,9 +236,13 @@ print "first boot check: ", pc
     ;; skip soft reset check, since it's the 1st boot
     bra .cont
 .check_reset:
-print "soft reset check: ", pc
-    ;; check if soft reset, if so, restore RAM timer
+    ;; check if special soft reset: dec reset count if set
     lda !softreset
+    cmp #!dec_reset_flag : bne +
+    lda !stat_resets : jsl dec_stat
+    ;; set it back to normal soft reset
+    lda #!reset_flag : sta !softreset
++
     cmp #!reset_flag
     bne .cont
     lda !timer1

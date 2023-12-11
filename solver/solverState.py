@@ -269,6 +269,12 @@ class SolverState(object):
             if loc.difficulty is not None and loc.difficulty.bool == True:
                 diff = loc.difficulty
                 locName = self.name4isolver(loc.Name)
+                # we have loc.comeBack which tells if you can comeback from loc access point to current player accesspoint.
+                # we also have loc.mayNotComeback which tells if you may not be able to comeback from a loc to its access point.
+                # we merge these two comebacks into one to display a '?' on a loc icon if you may not be able to come back from the loc to the current player access point.
+
+                finalMayNotComeback = loc.mayNotComeback or (not loc.comeBack) if loc.comeBack is not None else loc.mayNotComeback
+                print(f"getAvailableLocationsWeb {locName} {diff} mayNotComeback {loc.mayNotComeback} comeback {loc.comeBack} finalMayNotComeback {finalMayNotComeback}")
                 ret[locName] = {"difficulty": diff4solver(diff.difficulty),
                                 "knows": self.knows2isolver(diff.knows),
                                 "items": fixEnergy(list(set(diff.items))),
@@ -277,7 +283,7 @@ class SolverState(object):
                                 "canHidden": loc.CanHidden,
                                 "visibility": loc.Visibility,
                                 "major": loc.isClass(majorsSplit),
-                                "maybe": loc.maybe}
+                                "mayNotComeback": finalMayNotComeback}
 
                 if loc.comeBack is not None:
                     ret[locName]["comeBack"] = loc.comeBack
@@ -310,7 +316,7 @@ class SolverState(object):
                                 "canHidden": loc.CanHidden,
                                 "visibility": loc.Visibility,
                                 "major": loc.isClass(majorsSplit),
-                                "maybe": False}
+                                "mayNotComeback": False}
                 if self.debug == True:
                     if loc.difficulty is not None:
                         ret[locName]["difficulty"] = str(loc.difficulty)

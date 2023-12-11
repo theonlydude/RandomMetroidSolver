@@ -11,7 +11,7 @@ class Location:
         'restricted', )
 
     solver_slots = (
-        'itemName', 'comeBack', 'areaWeight', 'maybe' )
+        'itemName', 'comeBack', 'areaWeight', 'mayNotComeback' )
 
     __slots__ = graph_slots + rando_slots + solver_slots
 
@@ -31,7 +31,7 @@ class Location:
         self.itemType = itemType
         self.comeBack = comeBack
         self.areaWeight = areaWeight
-        self.maybe = False
+        self.mayNotComeback = False
 
     def isMajor(self):
         return self._isMajor
@@ -75,14 +75,14 @@ class Location:
                 # if post available is true then display the loc as available in the tracker,
                 # if post available if false then display the loc as maybe available in the tracker
                 postAvailable = self.PostAvailable(smbm)
-                self.maybe = not postAvailable.bool
+                self.mayNotComeback = not postAvailable.bool
                 if postAvailable:
                     self.difficulty = self.difficulty & postAvailable
                     self.locDifficulty = self.locDifficulty & postAvailable
 
     def evalComeBack(self, smbm, areaGraph, ap):
         if self.difficulty.bool == True:
-            # check if we can come back to given ap from the location,
+            # check if we can come back to given ap from the location access point,
             # don't add the item at the location as we're not supposed to know it beforehand
             self.comeBack = areaGraph.canAccess(smbm, self.accessPoint, ap, infinity)
 

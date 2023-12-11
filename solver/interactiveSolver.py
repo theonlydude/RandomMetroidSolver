@@ -486,7 +486,7 @@ class InteractiveSolver(CommonSolver):
                                               self.bossRando, self.escapeRando, False)
 
         from utils.version import displayedVersion
-        from rom_patches import groups
+        from rom.rom_patches import groups
 
         # individual layout/tweak patch handling
         layoutCustom = []

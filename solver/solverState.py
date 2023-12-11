@@ -276,7 +276,8 @@ class SolverState(object):
                                 "name": loc.Name,
                                 "canHidden": loc.CanHidden,
                                 "visibility": loc.Visibility,
-                                "major": loc.isClass(majorsSplit)}
+                                "major": loc.isClass(majorsSplit),
+                                "maybe": loc.maybe}
 
                 if loc.comeBack is not None:
                     ret[locName]["comeBack"] = loc.comeBack
@@ -308,7 +309,8 @@ class SolverState(object):
                                 "items": [],
                                 "canHidden": loc.CanHidden,
                                 "visibility": loc.Visibility,
-                                "major": loc.isClass(majorsSplit)}
+                                "major": loc.isClass(majorsSplit),
+                                "maybe": False}
                 if self.debug == True:
                     if loc.difficulty is not None:
                         ret[locName]["difficulty"] = str(loc.difficulty)

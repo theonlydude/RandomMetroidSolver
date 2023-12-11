@@ -11,7 +11,7 @@ class Location:
         'restricted', )
 
     solver_slots = (
-        'itemName', 'comeBack', 'areaWeight' )
+        'itemName', 'comeBack', 'areaWeight', 'maybe' )
 
     __slots__ = graph_slots + rando_slots + solver_slots
 
@@ -31,6 +31,7 @@ class Location:
         self.itemType = itemType
         self.comeBack = comeBack
         self.areaWeight = areaWeight
+        self.maybe = False
 
     def isMajor(self):
         return self._isMajor
@@ -58,15 +59,26 @@ class Location:
         self._isBoss = 'Boss' in _class
         self._isScavenger = 'Scavenger' in _class
 
-    def evalPostAvailable(self, smbm):
+    def evalPostAvailable(self, smbm, mode):
         if self.difficulty.bool == True and self.PostAvailable is not None:
-            smbm.addItem(self.itemName)
-            postAvailable = self.PostAvailable(smbm)
-            smbm.removeItem(self.itemName)
+            if mode == 'standard':
+                smbm.addItem(self.itemName)
+                postAvailable = self.PostAvailable(smbm)
+                smbm.removeItem(self.itemName)
 
-            self.difficulty = self.difficulty & postAvailable
-            if self.locDifficulty is not None:
-                self.locDifficulty = self.locDifficulty & postAvailable
+                self.difficulty = self.difficulty & postAvailable
+                # rando solver doesn't have locDifficulty, only regular solver/tracker has it
+                if self.locDifficulty is not None:
+                    self.locDifficulty = self.locDifficulty & postAvailable
+            else:
+                # in tracker mode we don't add the item of the location to compute post available,
+                # if post available is true then display the loc as available in the tracker,
+                # if post available if false then display the loc as maybe available in the tracker
+                postAvailable = self.PostAvailable(smbm)
+                self.maybe = not postAvailable.bool
+                if postAvailable:
+                    self.difficulty = self.difficulty & postAvailable
+                    self.locDifficulty = self.locDifficulty & postAvailable
 
     def evalComeBack(self, smbm, areaGraph, ap):
         if self.difficulty.bool == True:

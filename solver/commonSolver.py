@@ -191,7 +191,7 @@ class CommonSolver(object):
             self.areaGraph.getAvailableLocations(nextLocations, self.smbm, difficultyTarget, self.lastAP)
             # check post available functions too
             for loc in nextLocations:
-                loc.evalPostAvailable(self.smbm)
+                loc.evalPostAvailable(self.smbm, self.mode)
 
             self.areaGraph.useCache(True)
             # also check if we can come back to current AP from the location

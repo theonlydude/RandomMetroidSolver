@@ -13,7 +13,9 @@ LoadMapFromPause:
         jsl load_area_palettes
 	!MapDecorationAppearence		;config: draw map deco depending on mapstation setting
 + : LDA #$4000 : JSR MainMapConstruction		;construct map in this RAM location
-	INC !Update_Minimap_VRAM_Flag	;set bit for transfer to VRAM
+        lda $05F7 : bne .end    	;set bit for transfer to VRAM if minimap is enabled
+	INC !Update_Minimap_VRAM_Flag
+.end:
 	PLP : RTL
 
 

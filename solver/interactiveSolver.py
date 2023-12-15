@@ -486,7 +486,7 @@ class InteractiveSolver(CommonSolver):
                                               self.bossRando, self.escapeRando, False)
 
         from utils.version import displayedVersion
-        from rom.rom_patches import groups
+        from rom.rom_patches import groups, getPatchSet
 
         # individual layout/tweak patch handling
         layoutCustom = []
@@ -496,7 +496,7 @@ class InteractiveSolver(CommonSolver):
             # FIXME would be better if we actually read patches from ROM? or access read patches?
             # because here we could miss individual layout patches with no logic impact
             for patchSet in groups[grp]:
-                if all(rp in RomPatches.ActivePatches for rp in patchSet.get('logic', [])):
+                if all(rp in RomPatches.ActivePatches for rp in getPatchSet(patchSet, RomFlavor.flavor).get('logic', [])):
                     custom.append(patchSet)
         fillCustom('layout', layoutCustom)
         fillCustom('areaLayout', areaLayoutCustom)
@@ -516,7 +516,7 @@ class InteractiveSolver(CommonSolver):
             "escapeAttr": escapeAttr,
             "variaTweaks": len(variaTweaksCustom) > 0,
             "variaTweaksCustom": variaTweaksCustom,
-            "nerfedCharge": RomPatches.Nerfedcharge in RomPatches.ActivePatches,
+            "nerfedCharge": RomPatches.NerfedCharge in RomPatches.ActivePatches,
             "nerfedRainbowBeam": RomPatches.NerfedRainbowBeam in RomPatches.ActivePatches,
             # these settings are kept to False or None to keep what's in base ROM
             "ctrlDict": None,

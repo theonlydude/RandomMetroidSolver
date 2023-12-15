@@ -284,8 +284,6 @@ class SolverState(object):
                                 "major": loc.isClass(majorsSplit),
                                 "mayNotComeback": finalMayNotComeback}
 
-                if loc.comeBack is not None:
-                    ret[locName]["comeBack"] = loc.comeBack
                 if loc.accessPoint is not None:
                     ret[locName]["accessPoint"] = self.transition2isolver(loc.accessPoint)
                     if loc.path is not None:

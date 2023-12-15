@@ -274,7 +274,6 @@ class SolverState(object):
                 # we merge these two comebacks into one to display a '?' on a loc icon if you may not be able to come back from the loc to the current player access point.
 
                 finalMayNotComeback = loc.mayNotComeback or (not loc.comeBack) if loc.comeBack is not None else loc.mayNotComeback
-                print(f"getAvailableLocationsWeb {locName} {diff} mayNotComeback {loc.mayNotComeback} comeback {loc.comeBack} finalMayNotComeback {finalMayNotComeback}")
                 ret[locName] = {"difficulty": diff4solver(diff.difficulty),
                                 "knows": self.knows2isolver(diff.knows),
                                 "items": fixEnergy(list(set(diff.items))),

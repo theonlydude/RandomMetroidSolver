@@ -291,7 +291,8 @@ mkdir -p ~/web2py/applications/solver/static/images/rooms
 [ -L ~/web2py/applications/solver/static/images/rooms/NorfairGrappleEscape.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/NorfairGrappleEscape.png ~/web2py/applications/solver/static/images/rooms/NorfairGrappleEscape.png
 [ -L ~/web2py/applications/solver/static/images/rooms/NorfairIce.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/NorfairIce.png ~/web2py/applications/solver/static/images/rooms/NorfairIce.png
 [ -L ~/web2py/applications/solver/static/images/rooms/PinkBrinstar.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/PinkBrinstar.png ~/web2py/applications/solver/static/images/rooms/PinkBrinstar.png
-[ -L ~/web2py/applications/solver/static/images/rooms/RedBrinstar.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/RedBrinstar.png ~/web2py/applications/solver/static/images/rooms/RedBrinstar.png
+[ -L ~/web2py/applications/solver/static/images/rooms/RedBrinstarBottom.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/RedBrinstarBottom.png ~/web2py/applications/solver/static/images/rooms/RedBrinstarBottom.png
+[ -L ~/web2py/applications/solver/static/images/rooms/RedBrinstarMiddle.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/RedBrinstarMiddle.png ~/web2py/applications/solver/static/images/rooms/RedBrinstarMiddle.png
 [ -L ~/web2py/applications/solver/static/images/rooms/RedBrinstarTop.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/RedBrinstarTop.png ~/web2py/applications/solver/static/images/rooms/RedBrinstarTop.png
 [ -L ~/web2py/applications/solver/static/images/rooms/TourianSubArea.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/TourianSubArea.png ~/web2py/applications/solver/static/images/rooms/TourianSubArea.png
 [ -L ~/web2py/applications/solver/static/images/rooms/WreckedShip.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/WreckedShip.png ~/web2py/applications/solver/static/images/rooms/WreckedShip.png

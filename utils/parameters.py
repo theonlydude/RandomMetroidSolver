@@ -440,6 +440,12 @@ class Knows:
                          'href': 'https://www.youtube.com/watch?v=lFJPqu8qk54',
                          'rooms': ['Ice Beam Acid Room']}
 
+    IceEscapeWithoutIce = SMBool(False, 0, ['IceEscapeWithoutIce'])
+    desc['IceEscapeWithoutIce'] = {'display': 'Ice Escape without Ice',
+                                   'title': 'Ice escape without freezing the platforms (kill the left one with a Super)',
+                                   'href': '', # TODO
+                                   'rooms': ['Ice Beam Acid Room']}
+
     WallJumpCathedralExit = SMBool(True, easy, ['WallJumpCathedralExit'])
     desc['WallJumpCathedralExit'] = {'display': 'Wall Jump to exit Cathedral',
                                      'title': 'Use a delayed wall jump to exit Cathedral',
@@ -798,7 +804,7 @@ class Knows:
              'title': 'Obscure suitless stuff'}
         ],
         'Upper Norfair': [
-            {'knows': ['WallJumpCathedralExit', 'IceEscape', 'FrogSpeedwayWithoutSpeed', 'NovaBoost'],
+            {'knows': ['WallJumpCathedralExit', 'FrogSpeedwayWithoutSpeed', 'IceEscape', 'IceEscapeWithoutIce', 'NovaBoost'],
               'title': 'Main Upper Norfair'},
             {'knows': ['BubbleMountainWallJump', 'NorfairReserveDBoost', 'DoubleChamberWallJump'],
              'title': 'Bubble Mountain'},

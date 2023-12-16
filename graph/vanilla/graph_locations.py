@@ -180,13 +180,16 @@ loc.AccessFrom = {
 }
 loc.Available = (
     lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['Ice']['Norfair Entrance -> Ice Beam']),
-                       sm.wor(sm.canPassBombPassages(), # to exit, or if you fail entrance
-                              sm.wand(sm.haveItem('Ice'), # harder strat
-                                      sm.haveItem('Morph'),
-                                      sm.knowsIceEscape())),
-                       sm.wor(sm.wand(sm.haveItem('Morph'),
-                                      sm.knowsMockball()),
+                       sm.haveItem('Morph'),
+                       sm.wor(sm.knowsMockball(),
                               sm.haveItem('SpeedBooster')))
+)
+loc.PostAvailable = (
+    lambda sm: sm.wor(sm.canPassBombPassages(),
+                      sm.wand(sm.haveItem('Ice'),
+                              sm.knowsIceEscape()),
+                      sm.wand(sm.haveItem('Super'),
+                              sm.knowsIceEscapeWithoutIce()))
 )
 
 

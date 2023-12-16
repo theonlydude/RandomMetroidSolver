@@ -407,6 +407,10 @@
       "WestSandHoleMorphOnlyItemAccess": [
           true,
           1
+      ],
+      "IceEscapeWithoutIce": [
+          true,
+          1
       ]
   },
   "Settings": {

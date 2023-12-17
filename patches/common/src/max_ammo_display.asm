@@ -151,6 +151,24 @@ org $809C00
         ;; $80:9C03 F0 11       BEQ $11    [$9C16]     ;} If [Samus' max missiles] != 0:
         jmp hud_ammo_drawing
 
+;;; when super missiles/power bombs are displayed with three digits make the first digit highlight too with auto-cancel
+org $809D41
+        ;; $80:9D41 C0 00 00    CPY #$0000             ;\
+        ;; $80:9D44 F0 01       BEQ $01    [$9D47]     ;} If not missiles: return
+        ;; $80:9D46 60          RTS                    ;/
+        nop : nop : nop
+        nop : nop
+        nop
+
+;;; handle supers/pbs as three tiles wide items by moving them one tile to the left
+org $809D6E
+        ;; ; HUD item tilemap offsets
+        ;; $80:9D6E             dw 0014, ; Missiles
+        ;;                         001C, ; Super missiles
+        ;;                         0022, ; Power bombs
+        ;;                         0028, ; Grapple beam
+        ;;                         002E  ; X-ray
+	dw $0014, $001A, $0020
 
 ;;; parameters set by vanilla before all hijacks:
 ;;; LDA !HUD_digits_tilemap_row3

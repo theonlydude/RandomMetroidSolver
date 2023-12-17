@@ -314,7 +314,7 @@ define_location(
 define_location(
     Area="Brinstar",
     GraphArea="RedBrinstar",
-    SolveArea="Red Brinstar",
+    SolveArea="Red Brinstar Middle",
     Name="X-Ray Scope",
     Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
@@ -329,7 +329,7 @@ define_location(
 define_location(
     Area="Brinstar",
     GraphArea="RedBrinstar",
-    SolveArea="Red Brinstar",
+    SolveArea="Red Brinstar Bottom",
     Name="Spazer",
     Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,

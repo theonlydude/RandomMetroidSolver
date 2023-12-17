@@ -442,8 +442,8 @@ class Knows:
 
     IceEscapeWithoutIce = SMBool(False, 0, ['IceEscapeWithoutIce'])
     desc['IceEscapeWithoutIce'] = {'display': 'Ice Escape without Ice',
-                                   'title': 'Ice escape without freezing the platforms (kill the left one with a Super)',
-                                   'href': '', # TODO
+                                   'title': 'Ice escape without freezing the platforms',
+                                   'href': 'https://vimeo.com/548250376',
                                    'rooms': ['Ice Beam Acid Room']}
 
     WallJumpCathedralExit = SMBool(True, easy, ['WallJumpCathedralExit'])

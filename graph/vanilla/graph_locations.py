@@ -188,8 +188,7 @@ loc.PostAvailable = (
     lambda sm: sm.wor(sm.canPassBombPassages(),
                       sm.wand(sm.haveItem('Ice'),
                               sm.knowsIceEscape()),
-                      sm.wand(sm.haveItem('Super'),
-                              sm.knowsIceEscapeWithoutIce()))
+                      sm.knowsIceEscapeWithoutIce())
 )
 
 

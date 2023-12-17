@@ -868,6 +868,10 @@ class Objectives(object):
     def setGraph(graph, startAP, maxDiff):
         Objectives.accessibleAPs = graph.getAccessibleAccessPoints(startAP)
         Objectives.graph = graph
+        # crateria-less minimizer (solver/tracker)
+        escape = graph.accessPoints["Climb Bottom Left"]
+        Objectives.isCrateriaLess = not any(ap for ap in graph.accessPoints.values() if ap.GraphArea == "Crateria" and ap != escape and ap.ConnectedTo is not None)
+        LOG.debug(f"Objectives.isCrateriaLess = {Objectives.isCrateriaLess}")
         Objectives.maxDiff = maxDiff
         for goal in Objectives.goals.values():
             if goal.area is not None:
@@ -925,10 +929,8 @@ class Objectives(object):
 
     @staticmethod
     def _getSkipExploreAreas():
-        g4 = Objectives.graph.accessPoints["Golden Four"]
-        isCrateriaLess = g4.ConnectedTo is None or g4.isLoop() # crateria-less minimizer (solver/tracker)
         skipAreas = ["Tourian", "Ceres"]
-        if isCrateriaLess:
+        if Objectives.isCrateriaLess:
             skipAreas.append("Crateria")
         return skipAreas
 

@@ -924,9 +924,19 @@ class Objectives(object):
         return SMBool(True)
 
     @staticmethod
+    def _getSkipExploreAreas():
+        g4 = Objectives.graph.accessPoints["Golden Four"]
+        isCrateriaLess = g4.ConnectedTo is None or g4.isLoop() # crateria-less minimizer (solver/tracker)
+        skipAreas = ["Tourian", "Ceres"]
+        if isCrateriaLess:
+            skipAreas.append("Crateria")
+        return skipAreas
+
+    @staticmethod
     def canExploreMap(sm, rootApName):
         graph, maxDiff = Objectives.graph, Objectives.maxDiff
-        allAPs = [ap for ap in Objectives.accessibleAPs if ap.GraphArea != "Tourian" and ap.GraphArea != "Ceres"]
+        skipAreas = Objectives._getSkipExploreAreas()
+        allAPs = [ap for ap in Objectives.accessibleAPs if ap.GraphArea not in skipAreas]
         availAPs = graph.getAvailableAccessPoints(graph.accessPoints[rootApName], sm, maxDiff)
         for ap in allAPs:
             if ap not in availAPs:
@@ -934,7 +944,7 @@ class Objectives(object):
                 return SMBool(False)
 
         accessibleLocs = graph.getAccessibleLocations(Logic.locationsDict().values(), rootApName)
-        allLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea != "Tourian"]
+        allLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea not in skipAreas]
         availLocs = graph.getAvailableLocations(allLocs, sm, maxDiff, rootApName)
         if len(availLocs) != len(allLocs):
             if LOG.getEffectiveLevel() == logging.DEBUG:
@@ -949,7 +959,8 @@ class Objectives(object):
         graph, maxDiff = Objectives.graph, Objectives.maxDiff
         # questionable heuristic: consider "access x% items" equivalent to "can reach x% locations"
         accessibleLocs = graph.getAccessibleLocations(Logic.locationsDict().values(), rootApName)
-        allLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea != "Tourian"]
+        skipAreas = Objectives._getSkipExploreAreas()
+        allLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea not in skipAreas]
         availLocs = graph.getAvailableLocations(allLocs, sm, maxDiff, rootApName)
         pct = 100*float(len(availLocs)) / float(len(allLocs))
         return SMBool(pct >= percent)

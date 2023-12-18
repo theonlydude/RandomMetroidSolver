@@ -872,6 +872,8 @@ class Objectives(object):
         escape = graph.accessPoints["Climb Bottom Left"]
         Objectives.isCrateriaLess = not any(ap for ap in graph.accessPoints.values() if ap.GraphArea == "Crateria" and ap != escape and ap.ConnectedTo is not None)
         LOG.debug(f"Objectives.isCrateriaLess = {Objectives.isCrateriaLess}")
+        if Objectives.isCrateriaLess:
+            Objectives.accessibleAPs = [ap for ap in Objectives.accessibleAPs if ap.GraphArea != "Crateria"]
         Objectives.maxDiff = maxDiff
         for goal in Objectives.goals.values():
             if goal.area is not None:

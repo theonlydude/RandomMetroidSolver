@@ -305,17 +305,20 @@ if __name__ == "__main__":
             forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", webValue='on')
             forced = forcedLayout['layout']
             custom, actuallyForced = mergeCustomLayout(args.layoutCustom, forced)
-            forceArg("layoutCustom", ','.join(custom), f"Forced layout patches: {getForcedText(forced)}", webValue=custom)
+            if len(actuallyForced) > 0:
+                forceArg("layoutCustom", ','.join(custom), f"Forced layout patches: {getForcedText(actuallyForced)}", webValue=custom)
         if args.areaRandomization != 'off' and forcedLayout['areaLayout'] and (args.areaLayoutBase or args.areaLayoutCustom is not None):
             forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", webValue='on')
             forced = forcedLayout['areaLayout']
             custom, actuallyForced = mergeCustomLayout(args.areaLayoutCustom, forced)
-            forceArg("areaLayoutCustom", ','.join(custom), f"Forced area layout patches: {getForcedText(forced)}", webValue=custom)
+            if len(actuallyForced) > 0:
+                forceArg("areaLayoutCustom", ','.join(custom), f"Forced area layout patches: {getForcedText(actuallyForced)}", webValue=custom)
         if forcedLayout['variaTweaks'] and (args.noVariaTweaks or args.variaTweaksCustom is not None):
             forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", webValue='on')
             forced = forcedLayout['variaTweaks']
             custom, actuallyForced = mergeCustomLayout(args.variaTweaksCustom, forced)
-            forceArg('variaTweaksCustom', ','.join(custom), f"Forced VARIA tweaks: {getForcedText(forced)}", webValue=custom)
+            if len(actuallyForced) > 0:
+                forceArg('variaTweaksCustom', ','.join(custom), f"Forced VARIA tweaks: {getForcedText(actuallyForced)}", webValue=custom)
 
     # if rando preset given, load it first
     if args.randoPreset is not None:

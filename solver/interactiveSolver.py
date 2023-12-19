@@ -196,7 +196,7 @@ class InteractiveSolver(CommonSolver):
                 doorName = params['doorName']
                 DoorsManager.switchVisibility(doorName)
             elif action == 'clear':
-                DoorsManager.initTracker()
+                DoorsManager.initTracker(self.doorsRando and self.mode in ['standard', 'race'])
         elif scope == 'dump':
             if action == 'import':
                 self.importDump(params["dump"])

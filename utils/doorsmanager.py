@@ -363,6 +363,8 @@ class DoorsManager():
             DoorsManager.doors['FishTankRight'].forceBlue()
         if RomPatches.has(RomPatches.HellwayBlueDoor):
             DoorsManager.doors['RedTowerElevatorLeft'].forceBlue()
+        if RomPatches.has(RomPatches.AlphaPowerBombBlueDoor):
+            DoorsManager.doors['RedTowerElevatorBottomLeft'].forceBlue()
         if RomPatches.has(RomPatches.RedTowerBlueDoors):
             DoorsManager.doors['RedBrinstarElevatorTop'].forceBlue()
         if RomPatches.has(RomPatches.AreaRandoBlueDoors):

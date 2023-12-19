@@ -833,7 +833,7 @@ define_location(
 define_location(
     Area="Crateria",
     GraphArea="Crateria",
-    SolveArea="Crateria Landing Site",
+    SolveArea="Crateria Moat",
     Name="Missile (Crateria moat)",
     Class=["Minor"],
     CanHidden=False,

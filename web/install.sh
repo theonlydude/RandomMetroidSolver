@@ -266,6 +266,7 @@ mkdir -p ~/web2py/applications/solver/static/images/rooms
 [ -L ~/web2py/applications/solver/static/images/rooms/BlueBrinstar.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/BlueBrinstar.png ~/web2py/applications/solver/static/images/rooms/BlueBrinstar.png
 [ -L ~/web2py/applications/solver/static/images/rooms/CrateriaBombs.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/CrateriaBombs.png ~/web2py/applications/solver/static/images/rooms/CrateriaBombs.png
 [ -L ~/web2py/applications/solver/static/images/rooms/CrateriaLandingSite.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/CrateriaLandingSite.png ~/web2py/applications/solver/static/images/rooms/CrateriaLandingSite.png
+[ -L ~/web2py/applications/solver/static/images/rooms/CrateriaMoat.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/CrateriaMoat.png ~/web2py/applications/solver/static/images/rooms/CrateriaMoat.png
 [ -L ~/web2py/applications/solver/static/images/rooms/CrateriaTerminator.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/CrateriaTerminator.png ~/web2py/applications/solver/static/images/rooms/CrateriaTerminator.png
 [ -L ~/web2py/applications/solver/static/images/rooms/BrinstarHills.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/BrinstarHills.png ~/web2py/applications/solver/static/images/rooms/BrinstarHills.png
 [ -L ~/web2py/applications/solver/static/images/rooms/BubbleNorfairBottom.png ] || ln -s ~/RandomMetroidSolver/web/static/rooms/BubbleNorfairBottom.png ~/web2py/applications/solver/static/images/rooms/BubbleNorfairBottom.png

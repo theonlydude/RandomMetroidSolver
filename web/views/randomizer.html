@@ -350,7 +350,7 @@ function randomizeTarget(evt, elemId) {
     }
 
     // recreate select with updated multiple
-    $('#'+elemId).data('picker').destroy();
+    $('#'+elemId).data('picker')?.destroy();
     var params = {show_label: true};
     $('#'+elemId).imagepicker(params);
 }
@@ -532,7 +532,7 @@ function randomizeObjective(evt) {
 
         // restore previous value
         var backup_values = objectiveBackup.false
-        if (backup_values.length === 0) {
+        if (backup_values.length === 0 || backup_values[0] === 'random') {
             backup_values = ['kill all G4']
         }
         setObjectives(backup_values);
@@ -546,7 +546,7 @@ function randomizeObjective(evt) {
 
         var all_objectives = defaultMultiValues.objective.slice();
         all_objectives = removeHundreds(all_objectives)
-        if (backup_values.length === 0) {
+        if (backup_values.length === 0 || backup_values[0] === 'random') {
             backup_values = all_objectives
         }
         if (backup_values.length >= all_objectives.length) {
@@ -1574,7 +1574,7 @@ function loadRandoPresetLocalCallbak(e) {
 function loadRandoPresetOK(data) {
     // instead of reloading the page which remove the sm ROM, update all fields manually
     for(var key in data) {
-        if(key == "objective" || key == "objectiveMultiSelect" || key == "randoPreset") {
+        if(key == "objective" || key == "objectiveMultiSelect" || key == "randoPreset" || key == "logicMultiSelect") {
             continue;
         }
         value = data[key];

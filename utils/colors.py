@@ -1,5 +1,22 @@
-
 from rom.rom import RealROM, snes_to_pc
+
+# minimap colors in R, G, B bytes (0-255 range)
+areaColors = {
+    'Crateria': (74, 123, 107),
+    'GreenPinkBrinstar': (74, 173, 74),
+    'RedBrinstar': (173, 66, 8),
+    'WreckedShip': (142, 142, 78),
+    'Kraid': (206, 214, 59),
+    'Norfair': (255, 140, 0),
+    'Crocomire': (99, 21, 50),
+    'LowerNorfair': (255, 49, 0),
+    'WestMaridia': (0, 140, 255),
+    'EastMaridia': (231, 140, 222),
+    'Tourian': (188, 152, 152)
+}
+
+def RGB_24_to_html(color_tuple, opacity):
+    return '#%02X%02X%02X%02X' % (color_tuple[0], color_tuple[1], color_tuple[2], opacity)
 
 def RGB_24_to_15(color_tuple):
     R_adj = int(color_tuple[0])//8

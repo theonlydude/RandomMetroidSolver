@@ -294,10 +294,7 @@ class RandoSetup(object):
         for loc in locs:
             ap = loc.accessPoint
             if ap not in comeBack:
-                # we chose Golden Four because it is always there.
-                # Start APs might not have comeback transitions
-                # possible start AP issues are handled in checkStart
-                comeBack[ap] = self.areaGraph.canAccess(self.sm, ap, 'Golden Four', self.settings.maxDiff)
+                comeBack[ap] = self.areaGraph.canAccess(self.sm, ap, self.startAP, self.settings.maxDiff)
             if comeBack[ap]:
                 totalAvailLocs.append(loc)
         self.areaGraph.useCache(False)
@@ -320,7 +317,7 @@ class RandoSetup(object):
                 self.errorMsgs.append(msg)
                 continue
             for ap in escAPs:
-                if not self.areaGraph.canAccess(self.sm, ap, "Golden Four", self.settings.maxDiff):
+                if not self.areaGraph.canAccess(self.sm, ap, self.startAP, self.settings.maxDiff):
                     ret = False
                     msg = "Objective '{}' impossible to complete".format(goal.name)
                     self.log.debug("checkPool. {}".format(msg))
@@ -329,7 +326,7 @@ class RandoSetup(object):
         if ret:
             checkedGoals = [goal for goal in Objectives.activeGoals if goal.category != "Bosses" and goal.category != "Minibosses"]
             for goal in checkedGoals:
-                if not goal.canClearGoal(self.sm, 'Golden Four'):
+                if not goal.canClearGoal(self.sm, self.startAP):
                     ret = False
                     msg = f"Objective {goal} is not completable"
                     self.log.debug('checkPool. {}'.format(msg))

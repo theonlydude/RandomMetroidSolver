@@ -317,7 +317,7 @@ accessPoints = [
                                                     sm.canPassWastelandDessgeegas()))
     }, internal=True),
     AccessPoint('Wasteland', 'LowerNorfair', {
-        # no transition to firefleas to exlude pb of shame location when starting at firefleas top
+        # no transition to firefleas to exclude pb of shame location when starting at firefleas top
         'Ridley Zone': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                       sm.traverse('WastelandLeft'),
                                                       sm.canGetBackFromRidleyZone(),
@@ -537,7 +537,8 @@ accessPoints = [
                                                        sm.wor(RomPatches.has(RomPatches.CrabTunnelGreenGateRemoved),
                                                               sm.haveItem('Super')),
                                                        sm.canTraverseWestSandHallLeftToRight())),
-        'Crab Shaft Left': lambda sm: sm.canPassMtEverest()
+        'Crab Shaft Left': lambda sm: sm.canPassMtEverest(),
+        "Mama Turtle": lambda sm: sm.canAccessMamaTurtleFromMainStreet()
     }, roomInfo = {'RoomPtr':0xcfc9, "area": 0x4},
        exitInfo = {'DoorPtr':0xa39c, 'direction': 0x6, "cap": (0x6, 0x2), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x170, "doorAsmPtr": 0x0000},

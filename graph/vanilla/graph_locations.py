@@ -379,22 +379,6 @@ loc.Available = (
 
 loc = locationsDict["Energy Tank, Mama turtle"]
 loc.AccessFrom = {
-    'Main Street Bottom': lambda sm: sm.wand(sm.canDoOuterMaridia(),
-                                             sm.wor(sm.traverse('FishTankRight'),
-                                                    RomPatches.has(RomPatches.MamaTurtleBlueDoor)),
-                                             sm.wor(sm.wand(sm.haveItem('Gravity'),
-                                                            sm.haveItem('SpeedBooster')),
-                                                    sm.haveItem('Grapple'),
-                                                    sm.canFly(),
-                                                    sm.wand(sm.haveItem('HiJump'),
-                                                            sm.haveItem('SpeedBooster'),
-                                                            sm.knowsHiJumpMamaTurtle()),
-                                                    sm.wand(sm.canUseSpringBall(),
-                                                            sm.wor(sm.wand(sm.haveItem('HiJump'),
-                                                                           sm.knowsSpringBallJump()),
-                                                                   sm.knowsSpringBallJumpFromWall())),
-                                                    sm.wand(sm.canPassBombPassages(),
-                                                            sm.knowsMamaTurtleWallJumpBombBoost()))),
     'Mama Turtle': lambda sm: SMBool(True)
 }
 loc.Available = (

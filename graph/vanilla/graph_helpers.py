@@ -990,3 +990,22 @@ class HelpersGraph(Helpers):
                               sm.canShortCharge(),
                               sm.wand(sm.canSpringBallJump(),
                                       sm.knowsSpringBallJumpFromWall())))
+    @Cache.decorator
+    def canAccessMamaTurtleFromMainStreet(self):
+        sm = self.smbm
+        return sm.wand(sm.canDoOuterMaridia(),
+                       sm.wor(sm.traverse('FishTankRight'),
+                              RomPatches.has(RomPatches.MamaTurtleBlueDoor)),
+                       sm.wor(sm.wand(sm.haveItem('Gravity'),
+                                      sm.haveItem('SpeedBooster')),
+                              sm.haveItem('Grapple'),
+                              sm.canFly(),
+                              sm.wand(sm.haveItem('HiJump'),
+                                      sm.haveItem('SpeedBooster'),
+                                      sm.knowsHiJumpMamaTurtle()),
+                              sm.wand(sm.canUseSpringBall(),
+                                      sm.wor(sm.wand(sm.haveItem('HiJump'),
+                                                     sm.knowsSpringBallJump()),
+                                             sm.knowsSpringBallJumpFromWall())),
+                              sm.wand(sm.canPassBombPassages(),
+                                      sm.knowsMamaTurtleWallJumpBombBoost())))

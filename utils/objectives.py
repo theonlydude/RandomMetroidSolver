@@ -280,6 +280,9 @@ def getEnemiesAccessPoints(nmyType):
 def getEnemiesEscapeAccessPoints(nmyType):
     return (1, getEnemiesAccessPoints(nmyType))
 
+def getAreaAccessPoints(area):
+    return [ap for ap in Objectives.accessibleAPs if ap.GraphArea == area]
+
 GTsettingsConflict = lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))
 
 exploreSettingsConflict = lambda settings: settings.qty['energy'] == 'ultra sparse'
@@ -539,42 +542,49 @@ _goalsList = [
          text="Explore 100% map",
          introText="explore the entire map",
          conflictFunc=exploreSettingsConflict,
+         objCompletedFuncAPs=lambda ap: Objectives.accessibleAPs,
          category="Map"),
     Goal("explore crateria", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "Crateria"),
          "crateria_explored", romInProgressFunc="crateria_explored_percent",
          conflictFunc=exploreSettingsConflict,
          text="Explore Crateria",
          category="Map",
+         objCompletedFuncAPs=lambda ap: getAreaAccessPoints("Crateria"),
          area="Crateria"),
     Goal("explore green brinstar", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "GreenPinkBrinstar"),
          "green_brin_explored", romInProgressFunc="green_brin_explored_percent",
          text="Explore Green Brin",
          introText="explore green brinstar",
          category="Map",
+         objCompletedFuncAPs=lambda ap: getAreaAccessPoints("GreenPinkBrinstar"),
          area="GreenPinkBrinstar"),
     Goal("explore red brinstar", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "RedBrinstar"),
          "red_brin_explored", romInProgressFunc="red_brin_explored_percent",
          text="Explore Red Brin",
          introText="explore red brinstar",
          category="Map",
+         objCompletedFuncAPs=lambda ap: getAreaAccessPoints("RedBrinstar"),
          area="RedBrinstar"),
     Goal("explore wrecked ship", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "WreckedShip"),
          "ws_explored", romInProgressFunc="ws_explored_percent",
          text="Explore Wreck Ship",
          introText="explore wrecked ship",
          category="Map",
+         objCompletedFuncAPs=lambda ap: getAreaAccessPoints("WreckedShip"),
          area="WreckedShip"),
     Goal("explore kraid's lair", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "Kraid"),
          "kraid_explored", romInProgressFunc="kraid_explored_percent",
          text="Explore Kraid Lair",
          introText="explore kraid's lair",
          category="Map",
+         objCompletedFuncAPs=lambda ap: getAreaAccessPoints("Kraid"),
          area="Kraid"),
     Goal("explore upper norfair", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "Norfair"),
          "upper_norfair_explored", romInProgressFunc="upper_norfair_explored_percent",
          text="Explore Up Norfair",
          introText="explore upper norfair",
          category="Map",
+         objCompletedFuncAPs=lambda ap: getAreaAccessPoints("Norfair"),
          area="Norfair"),
     Goal("explore croc's lair", "map", lambda sm, ap: sm.wand(Objectives.canExploreArea(sm, ap, "Crocomire"),
                                                               sm.wor(sm.haveItem("SpeedBooster"), sm.haveItem("SpaceJump"))), # don't explore Post-Croc Jump Room w/ Bombs...
@@ -582,6 +592,7 @@ _goalsList = [
          text="Explore Croc Lair",
          introText="explore croc's lair",
          category="Map",
+         objCompletedFuncAPs=lambda ap: getAreaAccessPoints("Crocomire"),
          area="Crocomire"),
     Goal("explore lower norfair", "map", lambda sm, ap: sm.wand(Objectives.canExploreArea(sm, ap, "LowerNorfair"),
                                                                 sm.canExploreAmphitheater()),
@@ -590,6 +601,7 @@ _goalsList = [
          introText="explore lower norfair",
          conflictFunc=exploreSettingsConflict,
          category="Map",
+         objCompletedFuncAPs=lambda ap: getAreaAccessPoints("LowerNorfair"),
          area="LowerNorfair"),
     Goal("explore west maridia", "map", lambda sm, ap: sm.wand(Objectives.canExploreArea(sm, ap, "WestMaridia"),
                                                                sm.canGoUpMtEverest()),
@@ -597,6 +609,7 @@ _goalsList = [
          text="Explore West Marid",
          introText="explore west maridia",
          category="Map",
+         objCompletedFuncAPs=lambda ap: getAreaAccessPoints("WestMaridia"),
          area="WestMaridia"),
     Goal("explore east maridia", "map", lambda sm, ap: sm.wand(Objectives.canExploreArea(sm, ap, "EastMaridia"),
                                                                sm.canPassCacatacAlleyEastToWest()),
@@ -604,6 +617,7 @@ _goalsList = [
          text="Explore East Marid",
          introText="explore east maridia",
          category="Map",
+         objCompletedFuncAPs=lambda ap: getAreaAccessPoints("EastMaridia"),
          area="EastMaridia"),
     # memes
     Goal("tickle the red fish", "other",
@@ -902,7 +916,7 @@ class Objectives(object):
         graph, maxDiff = Objectives.graph, Objectives.maxDiff
 
         availAPs = graph.getAvailableAccessPoints(graph.accessPoints[rootApName], sm, maxDiff)
-        areaAPs = [ap for ap in Objectives.accessibleAPs if ap.GraphArea == area]
+        areaAPs = getAreaAccessPoints(area)
 
         if not areaAPs:
             LOG.debug(f"canExploreArea {area} no ap available")

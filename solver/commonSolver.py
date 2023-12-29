@@ -260,6 +260,15 @@ class CommonSolver(object):
             if not loc.isBoss():
                 loc.difficulty = smboolFalse
 
+        # add location path APs in visited APs (used by explore objectives)
+        if loc.path is not None:
+            self.log.debug("add visited path APs: {} for loc {}".format([ap.Name for ap in loc.path], loc.Name))
+            self.visitedAPs.update([ap.Name for ap in loc.path])
+        if loc.accessPoint is not None:
+            self.log.debug("add visited access APs: ['{}'] for loc {}".format(loc.accessPoint, loc.Name))
+            self.visitedAPs.add(loc.accessPoint)
+        self.log.debug("visited aps: {}".format(self.visitedAPs))
+
         if self.log.getEffectiveLevel() == logging.DEBUG:
             print("---------------------------------------------------------------")
             print("collectItem: {:<16} at {:<48} diff {}".format(item, loc.Name, loc.difficulty))
@@ -733,6 +742,7 @@ class CommonSolver(object):
 
         self.visitedLocations = []
         self.collectedItems = []
+        self.visitedAPs = set()
 
         self.log.debug("{}: available major: {}, available minor: {}, visited: {}".format(Conf.itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
 
@@ -754,13 +764,23 @@ class CommonSolver(object):
             # check if a new objective can be completed
             goals = self.objectives.checkGoals(self.smbm, self.lastAP)
             if any([possible for possible in goals.values()]):
+                completed = False
                 for goalName, possible in goals.items():
                     if possible:
-                        self.log.debug("complete objective {}".format(goalName))
-                        self.objectives.setGoalCompleted(goalName, True)
-                        self.completedObjectives.append((len(self.collectedItems), goalName))
-                        break
-                continue
+                        self.log.debug("objective possible: {}".format(goalName))
+                        goalObj = self.objectives.goals[goalName]
+                        requiredAPs = set(goalObj.objCompletedFuncAPs(self.lastAP))
+                        self.log.debug("objective required aps: {}".format(requiredAPs))
+                        requiredAPs = requiredAPs.intersection(set([ap.Name for ap in Objectives.accessibleAPs]))
+                        self.log.debug("objective filtered required aps: {}".format(requiredAPs))
+                        if requiredAPs.issubset(self.visitedAPs):
+                            self.log.debug("complete objective {}".format(goalName))
+                            self.objectives.setGoalCompleted(goalName, True)
+                            self.completedObjectives.append((len(self.collectedItems), goalName))
+                            completed = True
+                            break
+                if completed:
+                    continue
 
             # compute the difficulty of all the locations
             self.computeLocationsDifficulty(self.majorLocations)

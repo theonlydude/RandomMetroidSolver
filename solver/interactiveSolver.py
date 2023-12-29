@@ -278,8 +278,16 @@ class InteractiveSolver(CommonSolver):
         goals = self.objectives.checkGoals(self.smbm, self.lastAP)
         for goalName, canClear in goals.items():
             if canClear:
-                self.objectives.setGoalCompleted(goalName, True)
-                self.newlyCompletedObjectives.append("Completed objective: {}".format(goalName))
+                self.log.debug("objective possible: {}".format(goalName))
+                goalObj = self.objectives.goals[goalName]
+                requiredAPs = set(goalObj.objCompletedFuncAPs(self.lastAP))
+                self.log.debug("objective required aps: {}".format(requiredAPs))
+                requiredAPs = requiredAPs.intersection(set([ap.Name for ap in Objectives.accessibleAPs]))
+                self.log.debug("objective filtered required aps: {}".format(requiredAPs))
+                if requiredAPs.issubset(self.visitedAPs):
+                    self.log.debug("complete objective {}".format(goalName))
+                    self.objectives.setGoalCompleted(goalName, True)
+                    self.newlyCompletedObjectives.append("Completed objective: {}".format(goalName))
 
     def getLocNameFromAddress(self, address):
         return self.locsAddressName[address]
@@ -676,6 +684,7 @@ class InteractiveSolver(CommonSolver):
     def clearItems(self, reload=False):
         self.collectedItems = []
         self.visitedLocations = []
+        self.visitedAPs = set()
         self.lastAP = self.startLocation
         self.lastArea = self.startArea
         self.majorLocations = self.locations

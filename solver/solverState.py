@@ -6,6 +6,7 @@ from utils.utils import removeChars, fixEnergy
 from utils.parameters import diff4solver, Knows
 from utils.doorsmanager import DoorsManager
 from rom.rom_patches import RomPatches
+from graph.graph_utils import getAccessPoint
 
 class SolverState(object):
     def __init__(self, debug=False):
@@ -56,6 +57,8 @@ class SolverState(object):
         self.state["availableLocations"] = self.getAvailableLocations(solver.majorLocations)
         # string of last access point
         self.state["lastAP"] = solver.lastAP
+        # set of access point name
+        self.state["visitedAPs"] = solver.visitedAPs
         # dict {locNameWeb: {infos}, ...}
         self.state["availableLocationsWeb"] = self.getAvailableLocationsWeb(solver.majorLocations, solver.masterMajorsSplit)
         # dict {locNameWeb: {infos}, ...}
@@ -135,6 +138,7 @@ class SolverState(object):
                                                                              self.state["availableLocations"],
                                                                              solver.locations, self.state["tourian"])
         solver.lastAP = self.state["lastAP"]
+        solver.visitedAPs = self.state["visitedAPs"]
         solver.mode = self.state["mode"]
         solver.seed = self.state["seed"]
         solver.hasNothing = self.state["hasNothing"]
@@ -239,8 +243,9 @@ class SolverState(object):
                 retVis.append((visitedLocations[loc.Name]["index"], loc))
             else:
                 if loc.Name in availableLocations:
-                    diff = availableLocations[loc.Name]
+                    diff = availableLocations[loc.Name]['diff']
                     loc.difficulty = SMBool(diff[0], diff[1], diff[2], diff[3])
+                    loc.path = [getAccessPoint(apName) for apName in availableLocations[loc.Name]['path']]
                 retMaj.append(loc)
         retVis.sort(key=lambda x: x[0])
         return ([loc for (i, loc) in retVis], retMaj)
@@ -337,7 +342,10 @@ class SolverState(object):
         for loc in locations:
             if loc.difficulty is not None and loc.difficulty.bool == True:
                 diff = loc.difficulty
-                ret[loc.Name] = (diff.bool, diff.difficulty, diff.knows, diff.items)
+                ret[loc.Name] = {
+                    'diff': (diff.bool, diff.difficulty, diff.knows, diff.items),
+                    'path': [ap.Name for ap in loc.path]
+                }
         return ret
 
     def getScavengerOrder(self, solver):

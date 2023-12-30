@@ -42,14 +42,14 @@ class Synonyms(object):
 
 class Goal(object):
     def __init__(self, name, gtype, logicClearFunc, romClearFunc, romInProgressFunc=None,
-                 escapeAccessPoints=None, objCompletedFuncAPs=lambda ap: [ap],
+                 escapeAccessPoints=None, objCompletedFuncVisit=lambda ap: ([ap], []),
                  exclusion=None, items=None, text=None, introText=None, mapIcons=None,
                  available=True, expandableList=None, category=None, area=None,
                  conflictFunc=None):
         self.name = name
         self.available = available
         self.clearFunc = logicClearFunc
-        self.objCompletedFuncAPs = objCompletedFuncAPs
+        self.objCompletedFuncVisit = objCompletedFuncVisit
         self.symbol = "objectives_%s" % romClearFunc
         self.inProgressSymbol = None
         if romInProgressFunc is not None:
@@ -284,6 +284,8 @@ def getAreaAccessPoints(area):
     return [ap for ap in Objectives.accessibleAPs if ap.GraphArea == area]
 def getAreaAccessPointsNames(area):
     return [ap.Name for ap in getAreaAccessPoints(area)]
+def getAreaLocations(area):
+    return [loc.Name for loc in Objectives.accessibleLocations if loc.GraphArea == area]
 
 GTsettingsConflict = lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))
 
@@ -544,49 +546,49 @@ _goalsList = [
          text="Explore 100% map",
          introText="explore the entire map",
          conflictFunc=exploreSettingsConflict,
-         objCompletedFuncAPs=lambda ap: [_ap.Name for _ap in Objectives.accessibleAPs],
+         objCompletedFuncVisit=lambda ap: ([_ap.Name for _ap in Objectives.accessibleAPs], [loc.Name for loc in Objectives.accessibleLocations]),
          category="Map"),
     Goal("explore crateria", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "Crateria"),
          "crateria_explored", romInProgressFunc="crateria_explored_percent",
          conflictFunc=exploreSettingsConflict,
          text="Explore Crateria",
          category="Map",
-         objCompletedFuncAPs=lambda ap: getAreaAccessPointsNames("Crateria"),
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("Crateria"), getAreaLocations("Crateria")),
          area="Crateria"),
     Goal("explore green brinstar", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "GreenPinkBrinstar"),
          "green_brin_explored", romInProgressFunc="green_brin_explored_percent",
          text="Explore Green Brin",
          introText="explore green brinstar",
          category="Map",
-         objCompletedFuncAPs=lambda ap: getAreaAccessPointsNames("GreenPinkBrinstar"),
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("GreenPinkBrinstar"), getAreaLocations("GreenPinkBrinstar")),
          area="GreenPinkBrinstar"),
     Goal("explore red brinstar", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "RedBrinstar"),
          "red_brin_explored", romInProgressFunc="red_brin_explored_percent",
          text="Explore Red Brin",
          introText="explore red brinstar",
          category="Map",
-         objCompletedFuncAPs=lambda ap: getAreaAccessPointsNames("RedBrinstar"),
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("RedBrinstar"), getAreaLocations("RedBrinstar")),
          area="RedBrinstar"),
     Goal("explore wrecked ship", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "WreckedShip"),
          "ws_explored", romInProgressFunc="ws_explored_percent",
          text="Explore Wreck Ship",
          introText="explore wrecked ship",
          category="Map",
-         objCompletedFuncAPs=lambda ap: getAreaAccessPointsNames("WreckedShip"),
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("WreckedShip"), getAreaLocations("WreckedShip")),
          area="WreckedShip"),
     Goal("explore kraid's lair", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "Kraid"),
          "kraid_explored", romInProgressFunc="kraid_explored_percent",
          text="Explore Kraid Lair",
          introText="explore kraid's lair",
          category="Map",
-         objCompletedFuncAPs=lambda ap: getAreaAccessPointsNames("Kraid"),
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("Kraid"), getAreaLocations("Kraid")),
          area="Kraid"),
     Goal("explore upper norfair", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "Norfair"),
          "upper_norfair_explored", romInProgressFunc="upper_norfair_explored_percent",
          text="Explore Up Norfair",
          introText="explore upper norfair",
          category="Map",
-         objCompletedFuncAPs=lambda ap: getAreaAccessPointsNames("Norfair"),
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("Norfair"), getAreaLocations("Norfair")),
          area="Norfair"),
     Goal("explore croc's lair", "map", lambda sm, ap: sm.wand(Objectives.canExploreArea(sm, ap, "Crocomire"),
                                                               sm.wor(sm.haveItem("SpeedBooster"), sm.haveItem("SpaceJump"))), # don't explore Post-Croc Jump Room w/ Bombs...
@@ -594,7 +596,7 @@ _goalsList = [
          text="Explore Croc Lair",
          introText="explore croc's lair",
          category="Map",
-         objCompletedFuncAPs=lambda ap: getAreaAccessPointsNames("Crocomire"),
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("Crocomire"), getAreaLocations("Crocomire")),
          area="Crocomire"),
     Goal("explore lower norfair", "map", lambda sm, ap: sm.wand(Objectives.canExploreArea(sm, ap, "LowerNorfair"),
                                                                 sm.canExploreAmphitheater()),
@@ -603,7 +605,7 @@ _goalsList = [
          introText="explore lower norfair",
          conflictFunc=exploreSettingsConflict,
          category="Map",
-         objCompletedFuncAPs=lambda ap: getAreaAccessPointsNames("LowerNorfair"),
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("LowerNorfair"), getAreaLocations("LowerNorfair")),
          area="LowerNorfair"),
     Goal("explore west maridia", "map", lambda sm, ap: sm.wand(Objectives.canExploreArea(sm, ap, "WestMaridia"),
                                                                sm.canGoUpMtEverest()),
@@ -611,7 +613,7 @@ _goalsList = [
          text="Explore West Marid",
          introText="explore west maridia",
          category="Map",
-         objCompletedFuncAPs=lambda ap: getAreaAccessPointsNames("WestMaridia"),
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("WestMaridia"), getAreaLocations("WestMaridia")),
          area="WestMaridia"),
     Goal("explore east maridia", "map", lambda sm, ap: sm.wand(Objectives.canExploreArea(sm, ap, "EastMaridia"),
                                                                sm.canPassCacatacAlleyEastToWest()),
@@ -619,7 +621,7 @@ _goalsList = [
          text="Explore East Marid",
          introText="explore east maridia",
          category="Map",
-         objCompletedFuncAPs=lambda ap: getAreaAccessPointsNames("EastMaridia"),
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("EastMaridia"), getAreaLocations("EastMaridia")),
          area="EastMaridia"),
     # memes
     Goal("tickle the red fish", "other",
@@ -627,7 +629,7 @@ _goalsList = [
          "fish_tickled",
          text="Tickle the Red Fish",
          escapeAccessPoints=(1, ["Red Fish Room Bottom"]),
-         objCompletedFuncAPs=lambda ap: ["Red Fish Room Bottom"],
+         objCompletedFuncVisit=lambda ap: (["Red Fish Room Bottom"], []),
          mapIcons=["RedFish"],
          category="Memes"),
     Goal("kill the orange geemer", "other",
@@ -635,7 +637,7 @@ _goalsList = [
                                 sm.wor(sm.haveItem('Wave'), sm.canUsePowerBombs())),
          "orange_geemer",
          escapeAccessPoints=(1, ["Bowling"]),
-         objCompletedFuncAPs=lambda ap: ["Bowling"],
+         objCompletedFuncVisit=lambda ap: (["Bowling"], []),
          text="{} Orange Geemer",
          mapIcons=["OrangeGeemer"],
          category="Memes"),
@@ -645,7 +647,7 @@ _goalsList = [
                                 sm.canAccessShaktoolFromPantsRoom()),
          "shak_dead",
          escapeAccessPoints=(1, ["Oasis Bottom"]),
-         objCompletedFuncAPs=lambda ap: ["Oasis Bottom"],
+         objCompletedFuncVisit=lambda ap: (["Oasis Bottom"], []),
          text="{} Shaktool",
          mapIcons=["Shaktool"],
          category="Memes"),
@@ -658,7 +660,7 @@ _goalsList = [
          text="Trigger Chozo bots      ",
          mapIcons=["BombTorizo", "GoldenTorizo", "WreckedShipChozo", "LowerNorfairChozo"],
          escapeAccessPoints=(3, ["Landing Site", "Screw Attack Bottom", "Bowling"]),
-         objCompletedFuncAPs=lambda ap: ["Landing Site", "Screw Attack Bottom", "Bowling"],
+         objCompletedFuncVisit=lambda ap: (["Landing Site", "Screw Attack Bottom", "Bowling"], []),
          conflictFunc=GTsettingsConflict),
     Goal("visit the animals", "other", lambda sm, ap: sm.wand(Objectives.canAccess(sm, ap, "Big Pink"), sm.haveItem("SpeedBooster"), # dachora
                                                               Objectives.canAccess(sm, ap, "Etecoons Bottom")), # Etecoons
@@ -667,7 +669,7 @@ _goalsList = [
          mapIcons=["Etecoons", "Dachora"],
          category="Memes",
          escapeAccessPoints=(2, ["Big Pink", "Etecoons Bottom"]),
-         objCompletedFuncAPs=lambda ap: ["Big Pink", "Etecoons Bottom"]),
+         objCompletedFuncVisit=lambda ap: (["Big Pink", "Etecoons Bottom"], [])),
     Goal("kill king cacatac", "other",
          lambda sm, ap: Objectives.canAccess(sm, ap, 'Bubble Mountain Top'),
          "king_cac_dead",
@@ -675,7 +677,7 @@ _goalsList = [
          mapIcons=["KingCacatac"],
          category="Memes",
          escapeAccessPoints=(1, ['Bubble Mountain Top']),
-         objCompletedFuncAPs=lambda ap: ['Bubble Mountain Top']),
+         objCompletedFuncVisit=lambda ap: (['Bubble Mountain Top'], [])),
     # "kill all <enemy>" objectives
     Goal("kill all space pirates", "enemies",
          getEnemiesLogicFunc("Space Pirates"),
@@ -685,7 +687,7 @@ _goalsList = [
          mapIcons=getEnemiesMapIcons("SpacePirates"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Space Pirates"),
-         objCompletedFuncAPs=lambda ap: getEnemiesAccessPoints("Space Pirates")),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessPoints("Space Pirates"), [])),
     Goal("kill all ki hunters", "enemies",
          getEnemiesLogicFunc("Ki Hunters"),
          "kill_all_ki_hunters", romInProgressFunc="kill_all_ki_hunters_progress",
@@ -694,7 +696,7 @@ _goalsList = [
          mapIcons=getEnemiesMapIcons("KiHunters"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Ki Hunters"),
-         objCompletedFuncAPs=lambda ap: getEnemiesAccessPoints("Ki Hunters")),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessPoints("Ki Hunters"),[])),
     Goal("kill all beetoms", "enemies",
          getEnemiesLogicFunc("Beetoms"),
          "kill_all_beetoms", romInProgressFunc="kill_all_beetoms_progress",
@@ -702,7 +704,7 @@ _goalsList = [
          mapIcons=getEnemiesMapIcons("Beetoms"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Beetoms"),
-         objCompletedFuncAPs=lambda ap: getEnemiesAccessPoints("Beetoms")),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessPoints("Beetoms"), [])),
     Goal("kill all cacatacs", "enemies",
          getEnemiesLogicFunc("Cacatacs"),
          "kill_all_cacatacs", romInProgressFunc="kill_all_cacatacs_progress",
@@ -710,7 +712,7 @@ _goalsList = [
          mapIcons=getEnemiesMapIcons("Cacatacs"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Cacatacs"),
-         objCompletedFuncAPs=lambda ap: getEnemiesAccessPoints("Cacatacs")),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessPoints("Cacatacs"), [])),
     Goal("kill all kagos", "enemies",
          getEnemiesLogicFunc("Kagos"),
          "kill_all_kagos", romInProgressFunc="kill_all_kagos_progress",
@@ -718,7 +720,7 @@ _goalsList = [
          mapIcons=getEnemiesMapIcons("Kagos"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Kagos"),
-         objCompletedFuncAPs=lambda ap: getEnemiesAccessPoints("Kagos")),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessPoints("Kagos"), [])),
     Goal("kill all yapping maws", "enemies",
          getEnemiesLogicFunc("Yapping Maws"),
          "kill_all_yapping_maws", romInProgressFunc="kill_all_yapping_maws_progress",
@@ -727,7 +729,7 @@ _goalsList = [
          mapIcons=getEnemiesMapIcons("YappingMaws"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Yapping Maws"),
-         objCompletedFuncAPs=lambda ap: getEnemiesAccessPoints("Yapping Maws"))
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessPoints("Yapping Maws"), []))
 ]
 
 _goals = {goal.name:goal for goal in _goalsList}
@@ -882,7 +884,8 @@ class Objectives(object):
     # goals must access it, and it doesn't change often
     @staticmethod
     def setGraph(graph, startAP, maxDiff):
-        Objectives.accessibleAPs = graph.getAccessibleAccessPoints(startAP)
+        Objectives.accessibleAPs = [ap for ap in graph.getAccessibleAccessPoints(startAP) if ap.GraphArea != "Tourian"]
+        Objectives.accessibleLocations = [loc for loc in graph.getAccessibleLocations(Logic.locationsDict().values(), startAP) if loc.GraphArea != "Tourian"]
         Objectives.graph = graph
         # crateria-less minimizer (solver/tracker)
         escape = graph.accessPoints["Climb Bottom Left"]
@@ -890,6 +893,8 @@ class Objectives(object):
         LOG.debug(f"Objectives.isCrateriaLess = {Objectives.isCrateriaLess}")
         if Objectives.isCrateriaLess:
             Objectives.accessibleAPs = [ap for ap in Objectives.accessibleAPs if ap.GraphArea != "Crateria"]
+            Objectives.accessibleLocations = [loc for loc in Objectives.accessibleLocations if loc.GraphArea != "Crateria"]
+        LOG.debug(f"Objectives.accessibleLocations = {len(Objectives.accessibleLocations)}, {Objectives.accessibleLocations}")
         Objectives.maxDiff = maxDiff
         for goal in Objectives.goals.values():
             if goal.area is not None:

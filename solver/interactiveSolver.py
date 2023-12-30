@@ -280,11 +280,11 @@ class InteractiveSolver(CommonSolver):
             if canClear:
                 self.log.debug("objective possible: {}".format(goalName))
                 goalObj = self.objectives.goals[goalName]
-                requiredAPs = set(goalObj.objCompletedFuncAPs(self.lastAP))
-                self.log.debug("objective required aps: {}".format(requiredAPs))
-                requiredAPs = requiredAPs.intersection(set([ap.Name for ap in Objectives.accessibleAPs]))
-                self.log.debug("objective filtered required aps: {}".format(requiredAPs))
-                if requiredAPs.issubset(self.visitedAPs):
+                requiredAPs, requiredLocs = goalObj.objCompletedFuncVisit(self.lastAP)
+                visitedLocNames = set([loc.Name for loc in self.visitedLocations])
+                self.log.debug(f"remaining required APs: {[ap for ap in requiredAPs if ap not in self.visitedAPs]}")
+                self.log.debug(f"remaining required locs: {[loc for loc in requiredLocs if loc not in visitedLocNames]}")
+                if set(requiredAPs).issubset(self.visitedAPs) and set(requiredLocs).issubset(visitedLocNames):
                     self.log.debug("complete objective {}".format(goalName))
                     self.objectives.setGoalCompleted(goalName, True)
                     self.newlyCompletedObjectives.append("Completed objective: {}".format(goalName))

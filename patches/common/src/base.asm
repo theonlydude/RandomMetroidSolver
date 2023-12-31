@@ -133,6 +133,10 @@ org $819e25
 org $81A1DB
         jsr control_lock
 
+;;; draw help for lock control
+org $819FEA
+        jsr draw_lock_help
+
 ;;; hijack load state header to put area ID/minimap room type ID in RAM
 org $82DEF7
         jsl load_state : nop : nop
@@ -1148,7 +1152,7 @@ draw_lock:
         ;; check if the save is actually used
         asl : tax
         lda !used_slots_mask : and.l slots_bitmasks, x
-        beq .draw_helmet
+        beq .end
         ;; check for locked status in SRAM
         lda !temp
         %backupIndex()
@@ -1168,17 +1172,24 @@ draw_lock:
         ;; check if previous status was unlocked
         lda !temp : asl : tax
         lda !locked_slots_mask : and.l slots_bitmasks, x
-        beq .draw_helmet               ; already unlocked
+        beq .end               ; already unlocked
         ;; clear locked status
         lda.l slots_bitmasks, x : eor #$ffff : and.l !locked_slots_mask : sta !locked_slots_mask
         ;; play "moved cursor" sound
         lda #$0037 : JSL $809049
-        bra .draw_helmet
+        bra .end
 .draw_lock:
         ply : plx : phx : phy
         lda #$0a00 : sta $03    ; set palette to 5
         lda #$0068 : jsl $81891F
-.draw_helmet:
+.end:
+        ;; draw lock for help if needed
+        ;; (doing this here is not really efficient, but good enough)
+        lda.l !used_slots_mask : beq .helmet
+        ldx.w #(32*8-1) : ldy.w #(27*8+2)
+        lda #$0a00 : sta $03    ; set palette to 5
+        lda #$0068 : jsl $81891F
+.helmet:
         ply : plx
         lda #$0e00 : sta $03    ; set palette to 7
         pla : jsl $81891F
@@ -1199,9 +1210,35 @@ control_lock:
 .end:
         rts
 
-print "b81 end: ", pc
+print "b81 end 1: ", pc
 
 warnpc $81fa7f
+
+!arrow_tile_idx #= $c0
+!menu_bg1_tilemap #= $7e3600
+!lock_help_tilemap_size #= 8*2
+
+org $81fc00
+draw_lock_help:
+        lda.l !used_slots_mask : beq .end
+        ldx.w #!lock_help_tilemap_size
+.loop:
+        dex : dex
+        bmi .end
+        lda.l lock_help_tilemap, x : sta.l !menu_bg1_tilemap+tileOffset(21, 26), x
+        bra .loop
+.end:
+        JSR $969F               ; hijacked code
+        rts
+
+lock_help_tilemap:
+        dw BGtile(!arrow_tile_idx, 0, 1, 0, 0), BGtile(!arrow_tile_idx, 0, 1, 1, 0) ; <>
+        dw "TOGGLE"
+
+print "b81 end 2: ", pc
+
+org $8e8000+(32*!arrow_tile_idx)
+incbin "base/arrow_tile.gfx"
 
 ;;; Spritemap pointers table end. It can be expanded, since we spill over unused data
 org $82c639

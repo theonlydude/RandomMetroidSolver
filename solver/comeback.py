@@ -127,6 +127,7 @@ class ComeBack(object):
             return False
         self.solver.cancelLastItems(count)
         self.solver.cancelObjectives(lastStep.cur)
+        self.solver.cancelVisitedAPs(count)
         self.log.debug("Rewind {} items to {}".format(count, lastStep.cur))
         return True
 

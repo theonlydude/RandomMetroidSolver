@@ -260,15 +260,6 @@ class CommonSolver(object):
             if not loc.isBoss():
                 loc.difficulty = smboolFalse
 
-        # add location path APs in visited APs (used by explore objectives)
-        if loc.path is not None:
-            self.log.debug("add visited path APs: {} for loc {}".format([ap.Name for ap in loc.path], loc.Name))
-            self.visitedAPs.update([ap.Name for ap in loc.path])
-        if loc.accessPoint is not None:
-            self.log.debug("add visited access APs: ['{}'] for loc {}".format(loc.accessPoint, loc.Name))
-            self.visitedAPs.add(loc.accessPoint)
-        self.log.debug("visited aps: {}".format(self.visitedAPs))
-
         if self.log.getEffectiveLevel() == logging.DEBUG:
             print("---------------------------------------------------------------")
             print("collectItem: {:<16} at {:<48} diff {}".format(item, loc.Name, loc.difficulty))
@@ -279,6 +270,26 @@ class CommonSolver(object):
         if loc.accessPoint is not None:
             self.lastAP = loc.accessPoint
             self.lastArea = loc.SolveArea
+
+        # add location path APs in visited APs (used by explore objectives)
+        self.visitedAPsHistory.append(set())
+        if loc.path is not None:
+            pathAPs = [ap.Name for ap in loc.path]
+            self.log.debug("add visited path APs: {} for loc {}".format(pathAPs, loc.Name))
+            self.visitedAPs.update(pathAPs)
+            self.visitedAPsHistory[-1].update(pathAPs)
+        if loc.accessPoint is not None:
+            self.log.debug("add visited access AP: ['{}'] for loc {}".format(loc.accessPoint, loc.Name))
+            self.visitedAPs.add(loc.accessPoint)
+            self.visitedAPsHistory[-1].add(loc.accessPoint)
+        # some APs required by some objectives are not in locations 'access from',
+        # so as an heuristic also add available APs adjacent to lastAP
+        adjacentAPs = self.areaGraph.getAdjacentAPs(self.lastAP, self.smbm)
+        self.log.debug("add adjacent APs: ['{}'] for AP {}".format(adjacentAPs, self.lastAP))
+        self.visitedAPs.update(adjacentAPs)
+        self.visitedAPsHistory[-1].update(adjacentAPs)
+
+        self.log.debug("visited aps: {}".format(sorted(self.visitedAPs)))
 
     def getLocIndex(self, locName):
         for (i, loc) in enumerate(self.visitedLocations):
@@ -396,6 +407,10 @@ class CommonSolver(object):
             goalCur, goalName = self.completedObjectives.pop()
             self.log.debug("rollback objective {}".format(goalName))
             self.objectives.setGoalCompleted(goalName, False)
+
+    def cancelVisitedAPs(self, count):
+        self.visitedAPsHistory = self.visitedAPsHistory[:-count]
+        self.visitedAPs = {ap for stepAps in self.visitedAPsHistory for ap in stepAps}
 
     def printLocs(self, locs, phase):
         if len(locs) > 0:
@@ -743,6 +758,7 @@ class CommonSolver(object):
         self.visitedLocations = []
         self.collectedItems = []
         self.visitedAPs = set()
+        self.visitedAPsHistory = []
 
         self.log.debug("{}: available major: {}, available minor: {}, visited: {}".format(Conf.itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
 
@@ -779,8 +795,12 @@ class CommonSolver(object):
                             self.completedObjectives.append((len(self.collectedItems), goalName))
                             completed = True
                             break
+                        else:
+                            self.log.debug("objective missing aps: {}".format(sorted(requiredAPs-self.visitedAPs)))
                 if completed:
                     continue
+            else:
+                self.log.debug("no possible objectives")
 
             # compute the difficulty of all the locations
             self.computeLocationsDifficulty(self.majorLocations)

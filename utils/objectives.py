@@ -937,7 +937,9 @@ class Objectives(object):
         accessibleLocs = graph.getAccessibleLocations(Logic.locationsDict().values(), rootApName)
         # in solver we don't want to recompute already visited locations difficulty, so copy them first
         areaLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea == area]
+        LOG.debug("canExploreArea {} all   locs: {}".format(area, sorted([loc.Name for loc in areaLocs])))
         availLocs = graph.getAvailableLocations(areaLocs, sm, maxDiff, rootApName)
+        LOG.debug("canExploreArea {} avail locs: {}".format(area, sorted([loc.Name for loc in availLocs])))
         if not areaLocs:
             LOG.debug(f"canExploreArea {area} no loc available")
             return SMBool(False)
@@ -947,6 +949,8 @@ class Objectives(object):
                 missingLocs = [loc for loc in areaLocs if loc not in availLocs]
                 LOG.debug(f"canExploreArea {area}, cannot access locs: {str(missingLocs)}")
             return SMBool(False)
+
+        # TODO::check that all area locs have been visited ?
 
         return SMBool(True)
 

@@ -61,6 +61,9 @@ class StandardSolver(CommonSolver):
 
         self.comeBack = ComeBack(self)
 
+        self.visitedAPs = set()
+        self.visitedAPsHistory = []
+
         self.runtimeLimit_s = runtimeLimit_s
         self.startTime = time.process_time()
 

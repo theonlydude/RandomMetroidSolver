@@ -244,6 +244,12 @@ class AccessGraph(object):
             availNodes.update(newAvailNodes)
         return availNodes
 
+    def getAdjacentAPs(self, rootNodeName, smbm):
+        rootNode = self.accessPoints[rootNodeName]
+        # recompute graph from rootNode
+        availableAPs = self.getAvailableAccessPoints(rootNode, smbm, infinity)
+        return [ap.Name for ap, data in availableAPs.items() if data['from'] == rootNode]
+
     # gets path from the root AP used to compute availAps
     def getPath(self, dstAp, availAps):
         path = []

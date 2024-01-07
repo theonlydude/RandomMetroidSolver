@@ -41,6 +41,9 @@ class InteractiveSolver(CommonSolver):
 
         self.objectives = Objectives(reset=True)
 
+        self.visitedAPs = set()
+        self.visitedAPsHistory = []
+
         # no time limitation
         self.runtimeLimit_s = 0
 
@@ -144,6 +147,11 @@ class InteractiveSolver(CommonSolver):
             if action == 'clear':
                 self.clearItems(True)
             else:
+                # to be able to update visitedAPs we need the graph to exist
+                self.buildGraph()
+                # we also need the availAccessPoints to be computed in the graph
+                self.areaGraph.getAvailableLocations([], self.smbm, infinity, self.lastAP)
+
                 if action == 'add':
                     if self.mode in ['plando', 'seedless', 'race', 'debug']:
                         if 'loc' in params:
@@ -276,6 +284,7 @@ class InteractiveSolver(CommonSolver):
         # check if objectives can be completed
         self.newlyCompletedObjectives = []
         goals = self.objectives.checkGoals(self.smbm, self.lastAP)
+        self.log.debug("objectives: {}".format(goals))
         for goalName, canClear in goals.items():
             if canClear:
                 self.log.debug("objective possible: {}".format(goalName))
@@ -288,6 +297,8 @@ class InteractiveSolver(CommonSolver):
                     self.log.debug("complete objective {}".format(goalName))
                     self.objectives.setGoalCompleted(goalName, True)
                     self.newlyCompletedObjectives.append("Completed objective: {}".format(goalName))
+            else:
+                self.log.debug("objective not possible: {}".format(goalName))
 
     def getLocNameFromAddress(self, address):
         return self.locsAddressName[address]
@@ -685,6 +696,7 @@ class InteractiveSolver(CommonSolver):
         self.collectedItems = []
         self.visitedLocations = []
         self.visitedAPs = set()
+        self.visitedAPsHistory = []
         self.lastAP = self.startLocation
         self.lastArea = self.startArea
         self.majorLocations = self.locations

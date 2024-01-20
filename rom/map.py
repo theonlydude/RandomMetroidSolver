@@ -270,8 +270,8 @@ class DoorMapIcon(MapIcon):
         super().__init__(index, palette=5, hFlip=hFlip, vFlip=vFlip, x=x, y=y)
 
 class PortalMapIcon(MapIcon):
-    def __init__(self, index):
-        super().__init__(index, palette=4, y=-1)
+    def __init__(self, index, palette=4):
+        super().__init__(index, palette, y=-1)
 
 class ObjectiveMapIcon(MapIcon):
     def __init__(self, objIdx):
@@ -293,7 +293,8 @@ portal_mapicons = {
     "KraidBoss": PortalMapIcon(0xF8),
     "PhantoonBoss": PortalMapIcon(0xF9),
     "DraygonBoss": PortalMapIcon(0xFA),
-    "RidleyBoss": PortalMapIcon(0xFB)
+    "RidleyBoss": PortalMapIcon(0xFB),
+    "Unexplored": PortalMapIcon(0xDB, palette=5)
 }
 
 def assignMapIconSpriteTableIndices():

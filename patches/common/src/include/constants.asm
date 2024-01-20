@@ -96,6 +96,7 @@ include
 
 ;; vanilla area check
 !area_index = $079f
+!map_station_ram = $7ED908      ; area byte indexed array
 !brinstar = $0001
 !norfair = $0002
 

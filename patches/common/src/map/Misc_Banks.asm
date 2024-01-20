@@ -238,9 +238,9 @@ ORG $8EE4E2 : DW $4631, $7FF4, $001F, $7FE0, $7EA0, $7D40, $7C00, $6417, $4C12, 
 ORG $8F0000+!SetCollectedAreaCodePosition
 set_collected_map:
 	REP #$30
-	LDX $079F : LDA $7ED908,x
+	LDX !area_index : LDA !map_station_ram,x
 	BIT #$0001 : BNE +							;check if map station bit has been set for this area
-	ORA #$0001 : STA $7ED908,x : STA $0789		;set map station bit for this area
+	ORA #$0001 : STA !map_station_ram,x : STA $0789		;set map station bit for this area
 	JSL ConstructMap							;reload active map
 + : RTS
 print "bank 8F end ", pc

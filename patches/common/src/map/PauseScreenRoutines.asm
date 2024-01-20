@@ -397,9 +397,12 @@ draw_portal_icons:
 	lda $0002, x : jsr load_icon
         sta $18
 	stx $04			; backup X in $04
-	;; skip entry if tile unexplored
+	;; if tile unexplored: draw unexplored portal if map station active
 	ldx $14 : ldy $18
-	jsl is_explored : beq .next
+	jsl is_explored : bne .explored
+        ldx !area_index : lda.l !map_station_ram,x : and #$00ff : beq .next
+        ldy #portal_Unexplored : bra .draw
+.explored:
         ;; check if the other end of the portal is explored
         ldy $04 : lda $0006, y : jsr load_icon
         tax
@@ -410,6 +413,7 @@ draw_portal_icons:
         lda $0004, x : jsr load_icon
         asl : tax
         ldy portals_mapicons_sprite_table, x
+.draw:
         %drawMapIcon()
 .next:
 	lda $04 : clc : adc.w #10 : tax : bra .loop	; continue loop

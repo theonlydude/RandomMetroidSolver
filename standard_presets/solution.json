@@ -403,6 +403,14 @@
       "IceEscapeWithoutIce": [
           true,
           100
+      ],
+      "RJumpSuitlessSpringAccess": [
+          true,
+          100
+      ],
+      "SpaceJumpSuitlessSpringEscape": [
+          true,
+          100
       ]
   },
   "Settings": {

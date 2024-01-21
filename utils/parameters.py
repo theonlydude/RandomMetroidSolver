@@ -687,6 +687,18 @@ class Knows:
                                 'href': 'https://snipaclip.com/watch/HomelyImpartialVampireFloof',
                                 'rooms': ['Pants Room']}
 
+    RJumpSuitlessSpringAccess = SMBool(False, 0, ['RJumpSuitlessSpringAccess'])
+    desc['RJumpSuitlessSpringAccess'] = {'display': 'Suitless Spring Ball item access with R-Jump',
+                                         'title': 'Use X-Ray to force a stand, clip into the ground slightly, hold Angle Up or Down before jumping, jump, release Angle Up/Down (can be done the frame before jump is pressed), and then Morph. Inputs can be buffered with a pause.',
+                                         'href': 'https://wiki.supermetroid.run/Spring_Ball_Room#Suitless_Collection',
+                                         'rooms': ['Spring Ball Room']}
+
+    SpaceJumpSuitlessSpringEscape = SMBool(False, 0, ['SpaceJumpSuitlessSpringEscape'])
+    desc['SpaceJumpSuitlessSpringEscape'] = {'display': 'Escape Spring Ball item suitless with Space Jump',
+                                             'title': 'Mid-air morph after escaping water line with Space Jump. Look for the water being between the metal and green tiles.',
+                                             'href': 'https://www.youtube.com/watch?v=ONTQlyJbB2g',
+                                             'rooms': ['Spring Ball Room']}
+
     CrystalFlashClip = SMBool(False, 0, ['CrystalFlashClip'])
     desc['CrystalFlashClip'] = {'display': 'Crystal Flash Clip',
                                'title': 'Use a Crystal Flash to clip through crumble blocks to get to Botwoon or Shaktool, using Gravity and Bombs',
@@ -800,7 +812,7 @@ class Knows:
             {'knows': ['WestSandHoleSuitlessWallJumps', 'DoubleSpringBallJump', 'TediousMountEverest',
                        'BotwoonToDraygonWithIce', 'SuitlessCrystalFlashClip',
                        'CacAlleyUWJ', 'EastSandHallSpringBallJump', 'WestSandHallInsaneBombJump',
-                       'SuitlessPuyoClip'],
+                       'SuitlessPuyoClip', 'RJumpSuitlessSpringAccess', 'SpaceJumpSuitlessSpringEscape'],
              'title': 'Obscure suitless stuff'}
         ],
         'Upper Norfair': [

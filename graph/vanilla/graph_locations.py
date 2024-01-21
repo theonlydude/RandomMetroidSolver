@@ -414,14 +414,22 @@ loc.AccessFrom = {
 loc.Available = (
     lambda sm: sm.wand(sm.canAccessShaktoolFromPantsRoom(),
                        sm.canUsePowerBombs(), # in Shaktool room to let Shaktool access the sand blocks
-                       sm.wor(sm.haveItem('Gravity'), sm.canUseSpringBall())) # acess the item in spring ball room
+                       # acess the item in spring ball room
+                       sm.wor(sm.haveItem('Gravity'),
+                              sm.canUseSpringBall(),
+                              sm.wand(sm.haveItem("XRayScope"),
+                                      sm.itemCountOk("Reserve", 1),
+                                      sm.knowsRJumpSuitlessSpringAccess())))
 )
 loc.PostAvailable = (
     lambda sm: sm.wor(sm.wand(sm.haveItem('Gravity'),
                               sm.wor(sm.haveItem('HiJump'),
                                      sm.canFly(),
                                      sm.knowsMaridiaWallJumps())),
-                      sm.canSpringBallJump())
+                      # suitless escape
+                      sm.wor(sm.canSpringBallJump(),
+                             sm.wand(sm.haveItem("SpaceJump"),
+                                     sm.knowsSpaceJumpSuitlessSpringEscape())))
 )
 
 

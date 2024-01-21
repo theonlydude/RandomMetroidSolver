@@ -418,7 +418,6 @@ loc.Available = (
                        sm.wor(sm.haveItem('Gravity'),
                               sm.canUseSpringBall(),
                               sm.wand(sm.haveItem("XRayScope"),
-                                      sm.itemCountOk("Reserve", 1),
                                       sm.knowsRJumpSuitlessSpringAccess())))
 )
 loc.PostAvailable = (

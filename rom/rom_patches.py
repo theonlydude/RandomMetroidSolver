@@ -314,6 +314,7 @@ definitions = {
             'address': snes_to_pc(0x848c91), 'value': 0x4C,
             'desc': "Area escape randomization",
             'ips': ['rando_escape_common.ips', 'rando_escape.ips',
+                    'map_data_escape_rando.ips',
                     'rando_escape_ws_fix.ips', 'door_transition.ips']
         },
         'base': {

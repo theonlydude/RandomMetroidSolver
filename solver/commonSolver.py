@@ -143,8 +143,9 @@ class CommonSolver(object):
         return getPatchDescriptionsByGroup(sorted(self.romLoader.getPatchIds()), RomFlavor.flavor)
 
     def buildGraph(self):
+        Objectives.startAP = self.startLocation
         self.areaGraph = AccessGraph(Logic.accessPoints(), self.curGraphTransitions)
-        Objectives.setGraph(self.areaGraph, self.startLocation, infinity)
+        Objectives.setGraph(self.areaGraph, infinity)
 
     def loadPreset(self, presetFileName):
         presetLoader = PresetLoader.factory(presetFileName)

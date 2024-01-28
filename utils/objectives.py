@@ -7,7 +7,7 @@ from logic.helpers import Bosses
 from logic.smbool import SMBool
 from logic.logic import Logic
 from utils.parameters import Knows, Settings
-from graph.graph_utils import graphAreas
+from graph.graph_utils import graphAreas, GraphUtils
 from graph.vanilla.map_tiles import objectives as map_icons
 from utils.utils import randGaussBounds
 import utils.log, logging
@@ -748,7 +748,7 @@ def completeGoalData():
     # remove clear area goals if disabled tourian, as escape can trigger as soon as an area is cleared,
     # even if ship is not currently reachable
     for goal in itemAreaGoals:
-        _goals[goal].exclusion['tourian'] = "Disabled"
+        _goals[goal].exclusion["canAutoClear"] = True
     # if we need 100% map, don't require "explore area", as it covers those
     mapAreaGoals = [goal.name for goal in areaGoals if goal.gtype == "map"]
     _goals["explore 100% map"].exclusion["list"] += mapAreaGoals[:]
@@ -764,6 +764,7 @@ class Objectives(object):
     totalItemsCount = 100
     goals = _goals
     graph = None
+    startAP = None
     tourianRequired = None
     hidden = False
     accessibleAPs = []
@@ -794,8 +795,8 @@ class Objectives(object):
             goal.completed = False
 
     def conflict(self, newGoal):
-        if newGoal.exclusion.get('tourian') == "Disabled" and self.tourianRequired == False:
-            LOG.debug("new goal %s conflicts with disabled Tourian" % newGoal.name)
+        if newGoal.exclusion.get('canAutoClear') == True and self.tourianRequired == False and not GraphUtils.isStandardStart(Objectives.startAP):
+            LOG.debug("rejecting new goal %s as it can auto clear with no access to ship" % newGoal.name)
             return True
         LOG.debug("check if new goal {} conflicts with existing active goals".format(newGoal.name))
         count = 0
@@ -883,7 +884,9 @@ class Objectives(object):
     # having graph as a global sucks but Objectives instances are all over the place,
     # goals must access it, and it doesn't change often
     @staticmethod
-    def setGraph(graph, startAP, maxDiff):
+    def setGraph(graph, maxDiff):
+        assert Objectives.startAP is not None
+        startAP = Objectives.startAP
         Objectives.accessibleAPs = [ap for ap in graph.getAccessibleAccessPoints(startAP) if ap.GraphArea != "Tourian"]
         Objectives.accessibleLocations = [loc for loc in graph.getAccessibleLocations(Logic.locationsDict().values(), startAP) if loc.GraphArea != "Tourian"]
         Objectives.graph = graph

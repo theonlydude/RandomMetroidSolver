@@ -634,6 +634,7 @@ if __name__ == "__main__":
     # objectives
     if plandoSettings is None:
         objectivesManager = Objectives(args.tourian != 'Disabled', randoSettings)
+        Objectives.startAP = args.startLocation
         addedObjectives = 0
         if args.majorsSplit == "Scavenger":
             objectivesManager.setScavengerHunt()

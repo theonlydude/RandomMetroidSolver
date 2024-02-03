@@ -143,7 +143,7 @@ class Randomizer(object):
         defaultMultiValues = getDefaultMultiValues()
 
         # objectives self exclusions
-        objectivesExclusions = Objectives.getExclusions()
+        objectivesExclusions = json.dumps(Objectives.getExclusions())
         objectivesTypes = Objectives.getObjectivesTypes()
         objectivesSort = Objectives.getObjectivesSort()
         objectivesCategories = Objectives.getObjectivesCategories()

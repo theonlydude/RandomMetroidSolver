@@ -2,69 +2,52 @@ import time, copy
 
 from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
 from logic.helpers import Pickup
-from solver.conf import Conf
 from graph.graph_utils import getAccessPoint
+from solver.conf import RandoSolverConf
 from solver.comeback import ComeBack
 from solver.standardSolver import StandardSolver
-from utils.parameters import easy
 from solver.out import Out
+from solver.runtimeLimiter import runtimeLimiter
+from utils.parameters import easy
 from utils.objectives import Objectives
 import utils.log
 
 class RandoSolver(StandardSolver):
     def __init__(self, majorsSplit, startLocation, areaGraph, locations, vcr=None):
-        self.interactive = False
-        self.checkDuplicateMajor = False
-        self.vcr = vcr
-        # for compatibility with some common methods of the interactive solver
-        self.mode = 'standard'
-
         self.log = utils.log.get('Solver')
 
-        # default conf
-        self.setConf(easy, 'all_strict', [], False)
+        self.conf = RandoSolverConf()
 
-        self.firstLogFile = None
+        # optional modules
+        self.modules = []
+        if vcr is not None:
+            from solver.modules import ModuleVCR
+            self.modules.append(ModuleVCR(vcr=vcr))
 
-        self.extStatsFilename = None
-        self.extStatsStep = None
+        self.output = Out.factory('rando', self)
 
-        self.type = 'rando'
-        self.output = Out.factory(self.type, self)
-        self.outputFileName = None
-
-        # create a copy as solver can add gunship or update mother brain functions
+        # create a copy of locations as solver can add gunship or update mother brain functions
         self.locations = copy.deepcopy(locations)
-
         self.smbm = SMBoolManager()
-
-        # preset already loaded by rando
-        self.presetFileName = None
-
-        self.pickup = Pickup(Conf.itemsPickup)
-
+        self.pickup = Pickup(self.conf.pickupStrategy)
         self.comeBack = ComeBack(self)
 
         # load ROM info, patches are already loaded by the rando. get the graph from the rando too
-        self.majorsSplit = majorsSplit
-        self.startLocation = startLocation
-        self.startArea = getAccessPoint(startLocation).Start['solveArea']
+        self.conf.majorsSplit = majorsSplit
+        self.conf.startLocation = startLocation
+        self.conf.startArea = getAccessPoint(startLocation).Start['solveArea']
         self.areaGraph = areaGraph
         self.escapeTransition = []
 
         self.objectives = Objectives()
 
-        # store at each step how many locations are available
-        self.nbAvailLocs = []
-
         # limit to a few seconds to avoid cases with a lot of rewinds which could last for minutes
-        self.runtimeLimit_s = 5
-        self.startTime = time.process_time()
+        self.runtimeLimiter = RuntimeLimiter(5)
 
     def propagateDifficulties(self, container):
         # as the rando solver works on a copy of the rando locations we have to propagate
         # locations difficulties computed by the solver back to the rando
-        for loc in self.visitedLocations:
+        for loc in self.container.visitedLocations():
             if loc.itemName == "Gunship":
                 continue
             itemLoc = container.getItemLoc(loc)

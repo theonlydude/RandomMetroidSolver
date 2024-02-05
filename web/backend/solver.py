@@ -7,7 +7,7 @@ from utils.parameters import easy, medium, hard, harder, hardcore, mania
 from utils.utils import getPresetDir, getPythonExec
 from utils.db import DB
 from utils.colors import areaColors, RGB_24_to_html
-from solver.conf import Conf
+from solver.conf import SolverConf
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.http import redirect
@@ -98,8 +98,8 @@ class Solver(object):
         if self.session.solver is None:
             self.session.solver = {
                 'preset': 'regular',
-                'difficultyTarget': Conf.difficultyTarget,
-                'pickupStrategy': Conf.itemsPickup,
+                'difficultyTarget': SolverConf.defaultDifficultyTarget
+                'pickupStrategy': SolverConf.defaultPickupStrategy
                 'itemsForbidden': [],
                 'romFiles': [],
                 'romFile': None,

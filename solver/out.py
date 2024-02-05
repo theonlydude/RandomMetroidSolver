@@ -1,24 +1,23 @@
 import sys, json, os
-from solver.conf import Conf
 from solver.difficultyDisplayer import DifficultyDisplayer
 from utils.objectives import Objectives
 from utils.utils import fixEnergy
 
-class Out(object):
+class Out:
     @staticmethod
-    def factory(output, solver):
-        if output == 'web':
-            return OutWeb(solver)
-        elif output == 'console':
+    def factory(outputType, solver, outputFileName=None):
+        if outputType == 'web':
+            return OutWeb(solver, outputFileName)
+        if outputType == 'console':
             return OutConsole(solver)
-        elif output == 'rando':
+        if outputType == 'rando':
             return OutRando(solver)
-        else:
-            raise Exception("Wrong output type for the Solver: {}".format(output))
+        raise Exception("Wrong output type for the Solver: {}".format(outputType))
 
 class OutWeb(Out):
-    def __init__(self, solver):
+    def __init__(self, solver, outputFileName):
         self.solver = solver
+        self.outputFileName = outputFileName
 
     def out(self):
         s = self.solver
@@ -65,7 +64,7 @@ class OutWeb(Out):
                       nbActiveGoals=Objectives.nbActiveGoals, nbRequiredGoals=Objectives.nbRequiredGoals,
                       tourian=tourian)
 
-        with open(s.outputFileName, 'w') as jsonFile:
+        with open(self.outputFileName, 'w') as jsonFile:
             json.dump(result, jsonFile)
 
     def getPath(self, locations, objectives=None):
@@ -181,8 +180,8 @@ class OutConsole(Out):
         s = self.solver
         self.displayOutput()
 
-        print("({}, {}): diff : {}".format(round(float(s.difficulty), 3), s.itemsOk, s.romFileName))
-        print("{}/{}: knows Used : {}".format(s.knowsUsed, s.knowsKnown, s.romFileName))
+        print("({}, {}): diff : {}".format(round(float(s.difficulty), 3), s.itemsOk, s.conf.romFileName))
+        print("{}/{}: knows Used : {}".format(s.knowsUsed, s.knowsKnown, s.conf.romFileName))
 
         if s.difficulty >= 0:
             sys.exit(0)
@@ -251,10 +250,10 @@ class OutConsole(Out):
         print("all patches: {}".format(s.romLoader.getAllPatches()))
         print("objectives: {}".format(Objectives.getGoalsList()))
         print("objectives required: {}/{}".format(Objectives.nbRequiredGoals, Objectives.nbActiveGoals))
-        print("tourian: {}".format(s.tourian))
+        print("tourian: {}".format(s.romConf.tourian))
 
         # print generated path
-        if Conf.displayGeneratedPath == True:
+        if s.conf.displayGeneratedPath == True:
             self.printPath("Generated path ({}/101):".format(len(s.visitedLocations)), s.visitedLocations, displayAPs=True, objectives=s.completedObjectives)
 
             # if we've aborted, display missing techniques and remaining locations

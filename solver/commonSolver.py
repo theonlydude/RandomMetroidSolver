@@ -7,7 +7,8 @@ from rom.romloader import RomLoader
 from rom.rom_patches import RomPatches, getPatchDescriptionsByGroup
 from graph.graph import AccessGraphSolver as AccessGraph
 from utils.utils import PresetLoader
-from solver.conf import Conf
+from solver.conf import RomConf
+from solver.container import SolverContainer
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils, getAccessPoint
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity
 from utils.doorsmanager import DoorsManager
@@ -17,76 +18,61 @@ from rom.flavor import RomFlavor
 from graph.location import define_location
 
 class CommonSolver(object):
-    def loadRom(self, rom, romName, interactive=False, magic=None, extraSettings=None):
-        self.scavengerOrder = []
-        self.plandoScavengerOrder = []
-        self.additionalETanks = 0
-        self.escapeRandoRemoveEnemies = True
-        self.revealMap = False
-        self.objectivesHidden = False
-        self.objectivesHiddenOption = False
-        self.romFileName = romName
-        # startLocation param is only use for seedless
+    def loadRom(self, rom, extraSettings=None):
+        # rom can be:
+        #  None: for tracker seedless
+        #  dict: for tracker and web solver
+        #  file name: for console solver
+        romConf = RomConf()
+
         if rom is None:
-            self.majorsSplit = 'Full'
-            self.masterMajorsSplit = 'Full'
-            self.areaRando = True
-            self.bossRando = True
-            self.escapeRando = False
-            self.escapeTimer = "03:00"
-            self.startLocation = extraSettings.get('startLocation')
-            RomPatches.setDefaultPatches(self.startLocation)
-            self.startArea = getAccessPoint(self.startLocation).Start['solveArea']
+            # seedless
+            romConf.initSeedless(extraSettings)
+
+            RomPatches.setDefaultPatches(romConf.startLocation)
+
             # in seedless load all the vanilla transitions
-            self.areaTransitions = vanillaTransitions[:]
-            self.bossTransitions = vanillaBossesTransitions[:]
-            self.escapeTransition = [vanillaEscapeTransitions[0]]
-            # in seedless we allow mixing of area and boss transitions
-            self.hasMixedTransitions = True
-            self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
+            self.curGraphTransitions = romConf.bossTransitions + romConf.areaTransitions + romConf.escapeTransition
+
             self.locations = Logic.locations()
             for loc in self.locations:
                 loc.itemName = 'Nothing'
+
             # set doors related to default patches
-            self.doorsRando = extraSettings.get('doorsRando')
-            DoorsManager.setDoorsColor(seedless=self.doorsRando)
-            self.hasNothing = False
+            DoorsManager.setDoorsColor(seedless=self.conf.doorsRando)
+
             self.objectives.setVanilla()
-            self.tourian = 'Vanilla'
-            self.majorUpgrades = []
-            self.splitLocsByArea = {}
         else:
-            self.romLoader = RomLoader.factory(rom, magic)
+            self.romLoader = RomLoader.factory(rom, self.conf.magic)
             Logic.factory(self.romLoader.readLogic())
-            if not interactive:
+            if not self.conf.interactive:
                 RomFlavor.factory()
             self.romLoader.loadSymbols()
             self.locations = Logic.locations()
-            (self.majorsSplit, self.masterMajorsSplit) = self.romLoader.assignItems(self.locations)
-            (self.startLocation, self.startArea, startPatches) = self.romLoader.getStartAP()
-            if not GraphUtils.isStandardStart(self.startLocation) and self.majorsSplit != 'Full':
+            (romConf.majorsSplit, romConf.masterMajorsSplit) = self.romLoader.assignItems(self.locations)
+            (romConf.startLocation, romConf.startArea, startPatches) = self.romLoader.getStartAP()
+            if not GraphUtils.isStandardStart(romConf.startLocation) and romConf.majorsSplit != 'Full':
                 # update major/chozo locs in non standard start
-                self.romLoader.updateSplitLocs(self.majorsSplit, self.locations)
-            (self.areaRando, self.bossRando, self.escapeRando, hasObjectives, self.tourian) = self.romLoader.loadPatches()
+                self.romLoader.updateSplitLocs(romConf.majorsSplit, self.locations)
+            (romConf.areaRando, romConf.bossRando, romConf.escapeRando,
+             hasObjectives, romConf.tourian) = self.romLoader.loadPatches()
             RomPatches.ActivePatches += startPatches
-            self.escapeTimer = self.romLoader.getEscapeTimer()
-            self.doorsRando = self.romLoader.loadDoorsColor()
-            self.hasNothing = self.checkLocsForNothing()
-            if self.majorsSplit == 'Scavenger':
-                self.scavengerOrder = self.romLoader.loadScavengerOrder(self.locations)
+            romConf.escapeTimer = self.romLoader.getEscapeTimer()
+            romConf.doorsRando = self.romLoader.loadDoorsColor()
+            romConf.hasNothing = self.checkLocsForNothing()
+            if romConf.majorsSplit == 'Scavenger':
+                romConf.scavengerOrder = self.romLoader.loadScavengerOrder(self.locations)
             if hasObjectives:
                 self.romLoader.loadObjectives(self.objectives)
-                if interactive:
+                if self.conf.interactive:
                     # this option wasn't available in previous release
                     if not Objectives.previousReleaseFallback:
-                        self.objectivesHiddenOption = bool(self.romLoader.readOption("objectivesHidden"))
-                        self.objectivesHidden = self.objectivesHiddenOption
+                        romConf.objectivesHiddenOption = bool(self.romLoader.readOption("objectivesHidden"))
+                        romConf.objectivesHidden = romConf.objectivesHiddenOption
                         # load event bit masks for auto tracker
-                        self.eventsBitMasks = self.romLoader.loadEventBitMasks()
-                    else:
-                        self.eventsBitMasks = {}
+                        romConf.eventsBitMasks = self.romLoader.loadEventBitMasks()
             else:
-                if self.majorsSplit == "Scavenger":
+                if romConf.majorsSplit == "Scavenger":
                     # add scav hunt
                     self.objectives.setScavengerHunt()
                     self.objectives.tourianRequired = not self.romLoader.isEscapeTrigger()
@@ -96,55 +82,61 @@ class CommonSolver(object):
                 else:
                     # only G4
                     self.objectives.setVanilla()
-            self.majorUpgrades = self.romLoader.loadMajorUpgrades()
-            self.splitLocsByArea = self.romLoader.getSplitLocsByArea(self.locations)
-            self.objectives.setSolverMode(self)
-            if self.mode == 'plando':
-                self.additionalETanks = self.romLoader.getAdditionalEtanks()
-                self.escapeRandoRemoveEnemies = bool(self.romLoader.readOption("escapeRandoRemoveEnemies"))
-                self.revealMap = self.romLoader.hasPatch('revealMap')
-            if interactive == False:
-                print("ROM {}\nmajors: {} area: {} boss: {} escape: {}\npatches: {}".format(rom, self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando, self.getPatchDescriptionsByGroup()))
+            romConf.majorUpgrades = self.romLoader.loadMajorUpgrades()
+            romConf.splitLocsByArea = self.romLoader.getSplitLocsByArea(self.locations)
+            self.objectives.setSolverMode(self, romConf)
+            if self.conf.mode == 'plando':
+                romConf.additionalETanks = self.romLoader.getAdditionalEtanks()
+                romConf.escapeRandoRemoveEnemies = bool(self.romLoader.readOption("escapeRandoRemoveEnemies"))
+                romConf.revealMap = self.romLoader.hasPatch('revealMap')
+            if self.conf.interactive:
+                print("majors: {} area: {} boss: {} escape: {}".format(
+                    romConf.majorsSplit, romConf.areaRando,
+                    romConf.bossRando, romConf.escapeRando)
+                )
             else:
-                print("majors: {} area: {} boss: {} escape: {}".format(self.majorsSplit, self.areaRando, self.bossRando, self.escapeRando))
+                print("ROM {}\nmajors: {} area: {} boss: {} escape: {}\npatches: {}".format(
+                    self.conf.romFileName, romConf.majorsSplit, romConf.areaRando,
+                    romConf.bossRando, romConf.escapeRando, self.getPatchDescriptionsByGroup())
+                )
 
-            (self.areaTransitions, self.bossTransitions, self.escapeTransition, self.hasMixedTransitions) = self.romLoader.getTransitions(self.tourian)
-            self.log.debug("area transitions: {}".format(self.areaTransitions))
-            self.log.debug("boss transitions: {}".format(self.bossTransitions))
-            self.log.debug("escape transitions: {}".format(self.escapeTransition))
+            (romConf.areaTransitions, romConf.bossTransitions,
+             romConf.escapeTransition, romConf.hasMixedTransitions) = self.romLoader.getTransitions(romConf.tourian)
+            self.log.debug("area transitions: {}".format(romConf.areaTransitions))
+            self.log.debug("boss transitions: {}".format(romConf.bossTransitions))
+            self.log.debug("escape transitions: {}".format(romConf.escapeTransition))
 
-            if interactive == True and self.debug == False:
+            if self.conf.interactive and not self.conf.debug:
                 # in interactive area mode we build the graph as we play along
-                if self.areaRando == True and self.bossRando == True:
+                if romConf.areaRando and romConf.bossRando:
                     self.curGraphTransitions = []
-                elif self.areaRando == True:
-                    self.curGraphTransitions = self.bossTransitions[:]
-                elif self.bossRando == True:
-                    self.curGraphTransitions = self.areaTransitions[:]
+                elif romConf.areaRando:
+                    self.curGraphTransitions = romConf.bossTransitions[:]
+                elif romConf.bossRando:
+                    self.curGraphTransitions = romConf.areaTransitions[:]
                 else:
-                    self.curGraphTransitions = self.bossTransitions + self.areaTransitions
-                if self.escapeRando == False:
-                    self.curGraphTransitions += self.escapeTransition
+                    self.curGraphTransitions = romConf.bossTransitions + romConf.areaTransitions
+                if not romConf.escapeRando:
+                    self.curGraphTransitions += romConf.escapeTransition
             else:
-                self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
+                self.curGraphTransitions = romConf.bossTransitions + romConf.areaTransitions + romConf.escapeTransition
 
         self.smbm = SMBoolManager()
-        self.buildGraph()
-
-        # store at each step how many locations are available
-        self.nbAvailLocs = []
+        self.buildGraph(romConf)
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("Display items at locations:")
             for loc in self.locations:
                 self.log.debug('{:>50}: {:>16}'.format(loc.Name, loc.itemName))
 
+        return romConf
+
     def getPatchDescriptionsByGroup(self):
         return getPatchDescriptionsByGroup(sorted(self.romLoader.getPatchIds()), RomFlavor.flavor)
 
-    def buildGraph(self):
+    def buildGraph(self, romConf):
         self.areaGraph = AccessGraph(Logic.accessPoints(), self.curGraphTransitions)
-        Objectives.setGraph(self.areaGraph, self.startLocation, infinity)
+        Objectives.setGraph(self.areaGraph, romConf.startLocation, infinity)
 
     def loadPreset(self, presetFileName):
         presetLoader = PresetLoader.factory(presetFileName)
@@ -153,11 +145,6 @@ class CommonSolver(object):
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             presetLoader.printToScreen()
-
-    def getLoc(self, locName):
-        for loc in self.locations:
-            if loc.Name == locName:
-                return loc
 
     def getNextDifficulty(self, difficulty):
         nextDiffs = {
@@ -176,10 +163,7 @@ class CommonSolver(object):
         return any(loc.itemName == "Nothing" for loc in self.locations)
 
     def computeLocationsDifficulty(self, locations, phase="major", startDiff=None):
-        if startDiff is None:
-            difficultyTarget = Conf.difficultyTarget
-        else:
-            difficultyTarget = startDiff
+        difficultyTarget = startDiff if startDiff is not None else self.conf.difficultyTarget
         nextLocations = locations
 
         # before looping on all diff targets, get only the available locations with diff target infinity
@@ -191,7 +175,7 @@ class CommonSolver(object):
             self.areaGraph.getAvailableLocations(nextLocations, self.smbm, difficultyTarget, self.lastAP)
             # check post available functions too
             for loc in nextLocations:
-                loc.evalPostAvailable(self.smbm, self.mode)
+                loc.evalPostAvailable(self.smbm, self.conf.mode)
 
             self.areaGraph.useCache(True)
             # also check if we can come back to current AP from the location
@@ -219,46 +203,39 @@ class CommonSolver(object):
                     print("                                            path: {}".format([ap.Name for ap in loc.path]))
 
     def collectMajor(self, loc, itemName=None, autotracker=False):
-        self.majorLocations.remove(loc)
-        self.visitedLocations.append(loc)
+        self.log.debug("collect major at {}".format(loc.Name))
+        self.container.collectMajor(loc)
+
         # in autotracker items are read from memory
-        if not autotracker:
-            self.collectItem(loc, itemName)
+        if autotracker:
+            self.collectItem(loc, 'major', 'Nothing')
+        else:
+            self.collectItem(loc, 'major', itemName)
         return loc
 
     def collectMinor(self, loc):
-        self.minorLocations.remove(loc)
-        self.visitedLocations.append(loc)
-        self.collectItem(loc)
+        self.log.debug("collect minor at {}".format(loc.Name))
+        self.container.collectMinor(loc)
+        self.collectItem(loc, 'minor')
         return loc
 
-    def collectItem(self, loc, item=None):
-        if item == None:
+    def collectItem(self, loc, _class, item=None):
+        if item is None:
             item = loc.itemName
 
-        if self.vcr != None:
-            self.vcr.addLocation(loc.Name, item)
+        for module in self.modules:
+            module.addLocation(loc.Name, item)
 
-        if self.firstLogFile is not None:
-            if item not in self.collectedItems:
-                self.firstLogFile.write("{};{};{};{}\n".format(item, loc.Name, loc.Area, loc.GraphArea))
-
-        if item not in Conf.itemsForbidden:
-            self.collectedItems.append(item)
-            if self.checkDuplicateMajor == True:
-                if item not in ['Nothing', 'NoEnergy', 'Missile', 'Super', 'PowerBomb', 'ETank', 'Reserve']:
-                    if self.smbm.haveItem(item):
-                        print("WARNING: {} has already been picked up".format(item))
-
+        if item not in self.conf.itemsForbidden:
             self.smbm.addItem(item)
         else:
             # update the name of the item
             item = "-{}-".format(item)
             loc.itemName = item
-            self.collectedItems.append(item)
             # we still need the boss difficulty
             if not loc.isBoss():
                 loc.difficulty = smboolFalse
+        self.container.collectItem(loc, item, _class)
 
         if self.log.getEffectiveLevel() == logging.DEBUG:
             print("---------------------------------------------------------------")
@@ -266,30 +243,16 @@ class CommonSolver(object):
             print("---------------------------------------------------------------")
 
         # last loc is used as root node for the graph.
-        # when loading a plando we can load locations from non connected areas, so they don't have an access point.
-        if loc.accessPoint is not None:
-            self.lastAP = loc.accessPoint
-            self.lastArea = loc.SolveArea
+        self.lastAP = self.container.lastAP()
+        self.lastArea = self.container.lastArea()
 
-        # add location path APs in visited APs (used by explore objectives)
-        self.visitedAPsHistory.append(set())
-        if loc.path is not None:
-            pathAPs = [ap.Name for ap in loc.path]
-            self.log.debug("add visited path APs: {} for loc {}".format(pathAPs, loc.Name))
-            self.visitedAPs.update(pathAPs)
-            self.visitedAPsHistory[-1].update(pathAPs)
-        if loc.accessPoint is not None:
-            self.log.debug("add visited access AP: ['{}'] for loc {}".format(loc.accessPoint, loc.Name))
-            self.visitedAPs.add(loc.accessPoint)
-            self.visitedAPsHistory[-1].add(loc.accessPoint)
+        # TODO::keep that ? => no, we'll add a path to objectives to visite objective APs
         # some APs required by some objectives are not in locations 'access from',
         # so as an heuristic also add available APs adjacent to lastAP
-        adjacentAPs = self.areaGraph.getAdjacentAPs(self.lastAP, self.smbm)
-        self.log.debug("add adjacent APs: ['{}'] for AP {}".format(adjacentAPs, self.lastAP))
-        self.visitedAPs.update(adjacentAPs)
-        self.visitedAPsHistory[-1].update(adjacentAPs)
-
-        self.log.debug("visited aps: {}".format(sorted(self.visitedAPs)))
+        #adjacentAPs = self.areaGraph.getAdjacentAPs(self.lastAP, self.smbm)
+        #self.log.debug("add adjacent APs: ['{}'] for AP {}".format(adjacentAPs, self.lastAP))
+        #self.visitedAPs.update(adjacentAPs)
+        #self.log.debug("visited aps: {}".format(sorted(self.visitedAPs)))
 
     def getLocIndex(self, locName):
         for (i, loc) in enumerate(self.visitedLocations):
@@ -308,12 +271,8 @@ class CommonSolver(object):
         self.majorLocations.append(loc)
 
         # access point
-        if len(self.visitedLocations) == 0:
-            self.lastAP = self.startLocation
-            self.lastArea = self.startArea
-        else:
-            self.lastAP = self.visitedLocations[-1].accessPoint
-            self.lastArea = self.visitedLocations[-1].SolveArea
+        self.lastAP = self.container.lastAP()
+        self.lastArea = self.container.lastArea()
 
         # delete location params which are set when the location is available
         if loc.difficulty is not None:
@@ -345,72 +304,13 @@ class CommonSolver(object):
             if item not in self.collectedItems:
                 self.smbm.removeItem(item)
 
-    def cancelLastItems(self, count):
-        if self.vcr != None:
-            self.vcr.addRollback(count)
+    def rollback(self, count):
+        for module in self.modules:
+            module.addRollback(count)
 
-        if self.interactive == False:
-            self.nbAvailLocs = self.nbAvailLocs[:-count]
-
-        for _ in range(count):
-            if len(self.visitedLocations) == 0:
-                return
-
-            loc = self.visitedLocations.pop()
-            if self.majorsSplit == 'Full' or loc.isClass(self.majorsSplit) or loc.isBoss():
-                self.majorLocations.append(loc)
-            else:
-                self.minorLocations.append(loc)
-
-            # access point
-            if len(self.visitedLocations) == 0:
-                self.lastAP = self.startLocation
-                self.lastArea = self.startArea
-            else:
-                self.lastAP = self.visitedLocations[-1].accessPoint
-                if self.lastAP is None:
-                    # default to location first access from access point
-                    self.lastAP = list(self.visitedLocations[-1].AccessFrom.keys())[0]
-                self.lastArea = self.visitedLocations[-1].SolveArea
-
-            # delete location params which are set when the location is available
-            if loc.difficulty is not None:
-                loc.difficulty = None
-            if loc.distance is not None:
-                loc.distance = None
-            if loc.accessPoint is not None:
-                loc.accessPoint = None
-            if loc.path is not None:
-                loc.path = None
-
-            # item
-            item = loc.itemName
-            if item == self.collectedItems[-1]:
-                self.collectedItems.pop()
-            else:
-                raise Exception("Item of last collected loc {}: {} is different from last collected item: {}".format(loc.Name, item, self.collectedItems[-1]))
-
-            # in plando we have to remove the last added item,
-            # else it could be used in computing the postAvailable of a location
-            if self.mode in ['plando', 'seedless', 'race', 'debug']:
-                loc.itemName = 'Nothing'
-
-            # if multiple majors in plando mode, remove it from smbm only when it's the last occurence of it
-            if self.smbm.isCountItem(item):
-                self.smbm.removeItem(item)
-            else:
-                if item not in self.collectedItems:
-                    self.smbm.removeItem(item)
-
-    def cancelObjectives(self, cur):
-        while self.completedObjectives and self.completedObjectives[-1][0] > cur:
-            goalCur, goalName = self.completedObjectives.pop()
-            self.log.debug("rollback objective {}".format(goalName))
-            self.objectives.setGoalCompleted(goalName, False)
-
-    def cancelVisitedAPs(self, count):
-        self.visitedAPsHistory = self.visitedAPsHistory[:-count]
-        self.visitedAPs = {ap for stepAps in self.visitedAPsHistory for ap in stepAps}
+        self.container.rollback(count, self.smbm)
+        self.lastAP = self.container.lastAP()
+        self.lastArea = self.container.lastArea()
 
     def printLocs(self, locs, phase):
         if len(locs) > 0:
@@ -650,7 +550,7 @@ class CommonSolver(object):
 
     def canRelaxEnd(self):
         # sometimes you can't get all locations because of restricted locs, so allow to go to mother brain
-        if self.endGameLoc.Name == 'Mother Brain' and Conf.itemsPickup == 'all':
+        if self.endGameLoc.Name == 'Mother Brain' and self.conf.pickupStrategy == 'all':
             self.relaxedEndCheck = True
             self.computeLocationsDifficulty(self.majorLocations)
             self.relaxedEndCheck = False
@@ -716,8 +616,8 @@ class CommonSolver(object):
             if solver.relaxedEndCheck:
                 return tourian
             else:
-                hasEnoughMinors = solver.pickup.enoughMinors(sm, solver.minorLocations)
-                hasEnoughMajors = solver.pickup.enoughMajors(sm, solver.majorLocations)
+                hasEnoughMinors = solver.pickup.enoughMinors(sm, solver.container.minorLocations)
+                hasEnoughMajors = solver.pickup.enoughMajors(sm, solver.container.majorLocations)
                 hasEnoughItems = hasEnoughMajors and hasEnoughMinors
                 return sm.wand(tourian, SMBool(hasEnoughItems))
         return MotherBrainAvailable
@@ -728,7 +628,8 @@ class CommonSolver(object):
         # the next collected item is the one with the smallest difficulty,
         # if equality between major and minor, take major first.
 
-        mbLoc = self.getLoc('Mother Brain')
+        self.container = SolverContainer(self.locations, self.conf, self.romConf)
+        mbLoc = self.container.getLoc('Mother Brain')
         if self.objectives.tourianRequired:
             # update mother brain to handle all end game conditions, allow MB loc to access solver data
             mbLoc.AccessFrom['Golden Four'] = self.getMotherBrainAccess()
@@ -736,44 +637,23 @@ class CommonSolver(object):
             self.endGameLoc = mbLoc
         else:
             # remove mother brain location and replace it with gunship loc
-            self.locations.remove(mbLoc)
             gunship = self.getGunship()
-            self.locations.append(gunship)
+            self.container.updateEndGameLocation(gunship)
             self.endGameLoc = gunship
 
-        if self.majorsSplit == 'Major':
-            self.majorLocations = [loc for loc in self.locations if loc.isMajor() or loc.isBoss()]
-            self.minorLocations = [loc for loc in self.locations if loc.isMinor()]
-        elif self.majorsSplit == 'Chozo':
-            self.majorLocations = [loc for loc in self.locations if loc.isChozo() or loc.isBoss()]
-            self.minorLocations = [loc for loc in self.locations if not loc.isChozo() and not loc.isBoss()]
-        elif self.majorsSplit == 'Scavenger':
-            self.majorLocations = [loc for loc in self.locations if loc.isScavenger() or loc.isBoss()]
-            self.minorLocations = [loc for loc in self.locations if not loc.isScavenger() and not loc.isBoss()]
-        else:
-            # Full
-            self.majorLocations = self.locations[:] # copy
-            self.minorLocations = self.majorLocations
-
-        self.visitedLocations = []
-        self.collectedItems = []
-        self.visitedAPs = set()
-        self.visitedAPsHistory = []
-
-        self.log.debug("{}: available major: {}, available minor: {}, visited: {}".format(Conf.itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
+        self.log.debug("{}: available major: {}, available minor: {}".format(
+            self.conf.pickupStrategy, len(self.container.majorLocations), len(self.container.minorLocations))
+        )
 
         endDifficulty = mania
         diffThreshold = self.getDiffThreshold()
         self.relaxedEndCheck = False
         self.aborted = False
-        self.completedObjectives = []
 
-        while self.endGameLoc not in self.visitedLocations:
+        while not self.container.isLocVisited(self.endGameLoc):
             # check time limit
-            if self.runtimeLimit_s > 0:
-                if time.process_time() - self.startTime > self.runtimeLimit_s:
-                    self.log.debug("time limit exceeded ({})".format(self.runtimeLimit_s))
-                    return (-1, False)
+            if self.runtimeLimiter.expired():
+                return (-1, False)
 
             self.log.debug("Current AP/Area: {}/{}".format(self.lastAP, self.lastArea))
 
@@ -786,35 +666,48 @@ class CommonSolver(object):
                         self.log.debug("objective possible: {}".format(goalName))
                         goalObj = self.objectives.goals[goalName]
                         requiredAPs, requiredLocs = goalObj.objCompletedFuncVisit(self.lastAP)
-                        visitedLocNames = set([loc.Name for loc in self.visitedLocations])
-                        self.log.debug(f"remaining required APs: {[ap for ap in requiredAPs if ap not in self.visitedAPs]}")
-                        self.log.debug(f"remaining required locs: {[loc for loc in requiredLocs if loc not in visitedLocNames]}")
-                        if set(requiredAPs).issubset(self.visitedAPs) and set(requiredLocs).issubset(visitedLocNames):
+                        visitedLocNames = set([loc.Name for loc in self.container.visitedLocations()])
+                        self.log.debug("remaining required APs: {}".format([ap for ap in requiredAPs if ap not in self.container.visitedAPs()]))
+                        self.log.debug("remaining required locs: {}".format([loc for loc in requiredLocs if loc not in visitedLocNames]))
+                        # TODO::first check required locs, then if ok:
+                        #  extract missing APs and visit them to get objective path
+                        if (set(requiredAPs).issubset(self.container.visitedAPs())
+                            and set(requiredLocs).issubset(visitedLocNames)):
                             self.log.debug("complete objective {}".format(goalName))
-                            self.objectives.setGoalCompleted(goalName, True)
-                            self.completedObjectives.append((len(self.collectedItems), goalName))
+
+                            # TODO::if some aps have been visited to complete the objectives,
+                            #  use them to update last AP/Area
+                            self.container.completeObjective(goalName, self.lastAP, self.lastArea)
+
+                            for module in self.modules:
+                                module.addObjective(goalName)
+
                             completed = True
                             break
                         else:
-                            self.log.debug("objective missing aps: {}".format(sorted(requiredAPs-self.visitedAPs)))
+                            self.log.debug("objective missing aps: {}".format(
+                                sorted(set(requiredAPs) - self.container.visitedAPs()))
+                            )
                 if completed:
                     continue
             else:
                 self.log.debug("no possible objectives")
 
             # compute the difficulty of all the locations
-            self.computeLocationsDifficulty(self.majorLocations)
-            if self.majorsSplit != 'Full':
-                self.computeLocationsDifficulty(self.minorLocations, phase="minor")
+            self.computeLocationsDifficulty(self.container.majorLocations)
+            if self.romConf.majorsSplit != 'Full':
+                self.computeLocationsDifficulty(self.container.minorLocations, phase="minor")
 
             # keep only the available locations
-            majorsAvailable = [loc for loc in self.majorLocations if loc.difficulty is not None and loc.difficulty.bool == True]
-            minorsAvailable = [loc for loc in self.minorLocations if loc.difficulty is not None and loc.difficulty.bool == True]
+            majorsAvailable = self.container.getMajorsAvailable()
+            minorsAvailable = self.container.getMinorsAvailable()
 
-            self.nbAvailLocs.append(len(self.getAllLocs(majorsAvailable, minorsAvailable)))
+            allLocs = self.getAllLocs(majorsAvailable, minorsAvailable)
+            for module in self.modules:
+                module.addStep(allLocs)
 
             # remove next scavenger locs before checking if we're stuck
-            if self.majorsSplit == 'Scavenger':
+            if self.romConf.majorsSplit == 'Scavenger':
                 majorsAvailable = self.filterScavengerLocs(majorsAvailable)
 
             # check if we're stuck
@@ -824,7 +717,7 @@ class CommonSolver(object):
                 if not self.endGameLoc.difficulty and self.canRelaxEnd():
                     self.log.debug("Can't collect 100% but Mother Brain is available in relax end")
                     majorsAvailable.append(self.endGameLoc)
-                elif self.comeBack.rewind(len(self.collectedItems)) == True:
+                elif self.comeBack.rewind(self.container.currentStep()) == True:
                     self.log.debug("Rewind as we're stuck")
                     continue
                 else:
@@ -835,9 +728,9 @@ class CommonSolver(object):
 
             # handle no comeback locations
             rewindRequired = self.comeBack.handleNoComeBack(majorsAvailable, minorsAvailable,
-                                                            len(self.collectedItems))
+                                                            self.container.currentStep())
             if rewindRequired == True:
-                if self.comeBack.rewind(len(self.collectedItems)) == True:
+                if self.comeBack.rewind(self.container.currentStep()) == True:
                     continue
                 else:
                     # we're really stucked
@@ -848,28 +741,29 @@ class CommonSolver(object):
             # sort them on difficulty and proximity
             self.log.debug("getAvailableItemsList majors")
             majorsAvailable = self.getAvailableItemsList(majorsAvailable, diffThreshold)
-            if self.majorsSplit == 'Full':
+            if self.romConf.majorsSplit == 'Full':
                 minorsAvailable = majorsAvailable
             else:
                 self.log.debug("getAvailableItemsList minors")
                 minorsAvailable = self.getAvailableItemsList(minorsAvailable, diffThreshold)
 
             # choose one to pick up
-            hasEnoughMinors = self.pickup.enoughMinors(self.smbm, self.minorLocations)
+            hasEnoughMinors = self.pickup.enoughMinors(self.smbm, self.container.minorLocations)
             self.nextDecision(majorsAvailable, minorsAvailable, hasEnoughMinors, diffThreshold)
 
-            self.comeBack.cleanNoComeBack(self.getAllLocs(self.majorLocations, self.minorLocations))
+            self.comeBack.cleanNoComeBack(self.getAllLocs(self.container.majorLocations,
+                                                          self.container.minorLocations))
 
-        if self.objectives.tourianRequired and not self.aborted and self.escapeTransition:
+        if self.objectives.tourianRequired and not self.aborted and self.romConf.escapeTransition:
             # add gunship location to display escape in the spoiler log
             gunship = self.getGunship()
-            self.majorLocations.append(gunship)
+            self.container.majorLocations.append(gunship)
             # ignore items requirements now that mother brain is dead
             self.relaxedEndCheck = True
             # change current AP to escape AP
-            self.lastAP = self.escapeTransition[0][1]
-            self.computeLocationsDifficulty(self.majorLocations)
-            majorsAvailable = [loc for loc in self.majorLocations if loc.difficulty is not None and loc.difficulty.bool == True]
+            self.lastAP = self.romConf.escapeTransition[0][1]
+            self.computeLocationsDifficulty(self.container.majorLocations)
+            majorsAvailable = self.container.getMajorsAvailable()
             if gunship in majorsAvailable:
                 self.collectMajor(gunship)
 
@@ -879,10 +773,13 @@ class CommonSolver(object):
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("difficulty={}".format(difficulty))
             self.log.debug("itemsOk={}".format(itemsOk))
-            self.log.debug("{}: remaining major: {}, remaining minor: {}, visited: {}".format(Conf.itemsPickup, len(self.majorLocations), len(self.minorLocations), len(self.visitedLocations)))
+            self.log.debug("{}: remaining major: {}, remaining minor: {}, visited: {}".format(
+                self.conf.pickupStrategy, len(self.container.majorLocations),
+                len(self.container.minorLocations), len(self.container.visitedLocations())
+            ))
 
             self.log.debug("remaining majors:")
-            for loc in self.majorLocations:
+            for loc in self.container.majorLocations:
                 self.log.debug("{} ({})".format(loc.Name, loc.itemName))
 
             self.log.debug("bosses: {}".format([(boss, Bosses.bossDead(self.smbm, boss)) for boss in Bosses.Golden4()]))
@@ -891,13 +788,14 @@ class CommonSolver(object):
 
     def haveAllMinorTypes(self):
         # the first minor of each type can be seen as a major, so check for them first before going to far in zebes
-        hasPB = 'PowerBomb' in self.collectedItems
-        hasSuper = 'Super' in self.collectedItems
-        hasMissile = 'Missile' in self.collectedItems
+        collectedItems = self.container.collectedItems()
+        hasPB = 'PowerBomb' in collectedItems
+        hasSuper = 'Super' in collectedItems
+        hasMissile = 'Missile' in collectedItems
         return (hasPB and hasSuper and hasMissile)
 
     def getAllLocs(self, majorsAvailable, minorsAvailable):
-        if self.majorsSplit == 'Full':
+        if self.romConf.majorsSplit == 'Full':
             return majorsAvailable
         else:
             return majorsAvailable+minorsAvailable
@@ -909,13 +807,13 @@ class CommonSolver(object):
         else:
             # return the maximum difficulty
             difficultyMax = 0
-            for loc in self.visitedLocations:
+            for loc in self.container.visitedLocations():
                 difficultyMax = max(difficultyMax, loc.difficulty.difficulty)
             difficulty = difficultyMax
 
             # check if we have taken all the requested items
-            if (self.pickup.enoughMinors(self.smbm, self.minorLocations)
-                and self.pickup.enoughMajors(self.smbm, self.majorLocations)):
+            if (self.pickup.enoughMinors(self.smbm, self.container.minorLocations)
+                and self.pickup.enoughMajors(self.smbm, self.container.majorLocations)):
                 return (difficulty, True)
             else:
                 # can finish but can't take all the requested items
@@ -924,8 +822,8 @@ class CommonSolver(object):
     def getScavengerHuntState(self):
         # check where we are in the scavenger hunt
         huntInProgress = False
-        for index, loc in enumerate(self.scavengerOrder):
-            if loc not in self.visitedLocations:
+        for index, loc in enumerate(self.romConf.scavengerOrder):
+            if not self.container.isLocVisited(loc):
                 huntInProgress = True
                 break
         return (huntInProgress, index)
@@ -933,9 +831,9 @@ class CommonSolver(object):
     def filterScavengerLocs(self, majorsAvailable):
         huntInProgress, index = self.getScavengerHuntState()
         if huntInProgress and index < len(self.scavengerOrder)-1:
-            self.log.debug("Scavenger hunt in progress, {}/{}".format(index, len(self.scavengerOrder)-1))
+            self.log.debug("Scavenger hunt in progress, {}/{}".format(index, len(self.romConf.scavengerOrder)-1))
             # remove all next locs in the hunt
-            nextHuntLocs = self.scavengerOrder[index+1:]
+            nextHuntLocs = self.romConf.scavengerOrder[index+1:]
             for loc in nextHuntLocs:
                 self.log.debug("Scavenger hunt, try to remove loc {}".format(loc.Name))
                 try:
@@ -946,20 +844,18 @@ class CommonSolver(object):
         return majorsAvailable
 
     def scavengerHuntComplete(self, smbm=None, ap=None):
-        if self.masterMajorsSplit != 'Scavenger':
+        if self.romConf.masterMajorsSplit != 'Scavenger':
             return SMBool(True)
         else:
             # check that last loc from the scavenger hunt list has been visited
-            lastLoc = self.scavengerOrder[-1]
-            return SMBool(lastLoc in self.visitedLocations)
+            lastLoc = self.romConf.scavengerOrder[-1]
+            return SMBool(self.container.isLocVisited(lastLoc))
 
     def getPriorityArea(self):
         # if scav returns solve area of next loc in the hunt
-        if self.majorsSplit != 'Scavenger':
+        if self.romConf.majorsSplit != 'Scavenger':
             return None
-        else:
-            huntInProgress, index = self.getScavengerHuntState()
-            if huntInProgress and index < len(self.scavengerOrder)-1:
-                return self.scavengerOrder[index].SolveArea
-            else:
-                return None
+        huntInProgress, index = self.getScavengerHuntState()
+        if huntInProgress and index < len(self.romConf.scavengerOrder)-1:
+            return self.romConf.scavengerOrder[index].SolveArea
+        return None

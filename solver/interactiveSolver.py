@@ -1,36 +1,34 @@
 import sys, json, os, tempfile
 
 from solver.commonSolver import CommonSolver
+from solver.solverState import SolverState
+from solver.comeback import ComeBack
+from solver.conf import InteractiveSolverConf
+from solver.runtimeLimiter import runtimeLimiter
+from logic.logic import Logic
 from logic.smbool import SMBool
 from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
 from logic.helpers import Pickup
 from rom.rompatcher import RomPatcher
 from rom.rom_patches import RomPatches
 from rom.flavor import RomFlavor
+from rando.ItemLocContainer import ItemLocation
 from graph.graph import AccessGraphSolver as AccessGraph
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
 from graph.location import define_location
-from utils.utils import removeChars
-from utils.parameters import easy, hard, infinity
-from solver.solverState import SolverState
-from solver.comeback import ComeBack
-from rando.ItemLocContainer import ItemLocation
-from utils.doorsmanager import DoorsManager
-from logic.logic import Logic
-from utils.objectives import Objectives
 from graph.vanilla.map_tiles import areaAccessPoints as vanilla_areaAccessPoints, bossAccessPoints as vanilla_bossAccessPoints, escapeAccessPoints as vanilla_escapeAccessPoints, itemLocations as vanilla_itemLocations, doors as vanilla_doors
 from graph.mirror.map_tiles import areaAccessPoints as mirror_areaAccessPoints, bossAccessPoints as mirror_bossAccessPoints, escapeAccessPoints as mirror_escapeAccessPoints, itemLocations as mirror_itemLocations, doors as mirror_doors
+from utils.utils import removeChars
+from utils.parameters import easy, hard, infinity
+from utils.doorsmanager import DoorsManager
+from utils.objectives import Objectives
 import utils.log
 
 class InteractiveSolver(CommonSolver):
     def __init__(self, logic):
         self.interactive = True
         self.errorMsg = ""
-        self.checkDuplicateMajor = False
-        self.vcr = None
         self.log = utils.log.get('Solver')
-
-        self.firstLogFile = None
 
         self.logic = logic
         Logic.factory(self.logic, new=True)
@@ -40,12 +38,6 @@ class InteractiveSolver(CommonSolver):
         self.transWeb2Internal = self.initTransitionsName()
 
         self.objectives = Objectives(reset=True)
-
-        self.visitedAPs = set()
-        self.visitedAPsHistory = []
-
-        # no time limitation
-        self.runtimeLimit_s = 0
 
         # used by auto tracker to know how many locs have changed
         self.locDelta = 0
@@ -73,33 +65,30 @@ class InteractiveSolver(CommonSolver):
 
     def initialize(self, mode, romData, romFileName, presetFileName, fill, extraSettings):
         # load rom and preset, return first state
-        self.debug = mode == "debug"
-        self.mode = mode
-        self.seed = romFileName
+        self.conf = InteractiveSolverConf(mode, romFileName, presetFileName)
 
         self.smbm = SMBoolManager()
 
-        self.presetFileName = presetFileName
-        self.loadPreset(self.presetFileName)
+        self.loadPreset(self.conf.presetFileName)
 
-        self.loadRom(romData, romFileName, interactive=True, extraSettings=extraSettings)
+        self.romConf = self.loadRom(romData, extraSettings=extraSettings)
         # in plando/tracker always consider that we're doing full
-        self.majorsSplit = 'Full'
+        self.romConf.majorsSplit = 'Full'
 
         # hide doors
-        DoorsManager.initTracker(self.doorsRando and mode in ['standard', 'race'])
+        DoorsManager.initTracker(self.romConf.doorsRando and self.conf.mode in ['standard', 'race'])
 
         self.clearItems()
 
         # in debug mode don't load plando locs/transitions
-        if self.mode == 'plando' and self.debug == False:
+        if self.conf.mode == 'plando' and self.conf.debug == False:
             if fill == True:
                 # load the source seed transitions and items/locations
                 self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
                 self.buildGraph()
                 self.fillPlandoLocs()
             else:
-                if self.areaRando == True or self.bossRando == True:
+                if self.romConf.areaRando == True or self.romConf.bossRando == True:
                     plandoTrans = self.loadPlandoTransitions()
                     if len(plandoTrans) > 0:
                         self.curGraphTransitions = plandoTrans
@@ -108,7 +97,7 @@ class InteractiveSolver(CommonSolver):
                 self.loadPlandoLocs()
 
         # if tourian is disabled remove mother brain location
-        if self.tourian == 'Disabled':
+        if self.romConf.tourian == 'Disabled':
             mbLoc = self.getLoc('Mother Brain')
             assert mbLoc is not None, "Mother Brain loc is None !"
             self.locations.remove(mbLoc)
@@ -325,6 +314,9 @@ class InteractiveSolver(CommonSolver):
     def fillPlandoLocs(self):
         self.pickup = Pickup("all")
         self.comeBack = ComeBack(self)
+
+        # no time limitation
+        self.runtimeLimiter = RuntimeLimiter(-1)
 
         # backup
         locationsBck = self.locations[:]

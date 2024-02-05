@@ -1064,16 +1064,16 @@ class Objectives(object):
             if area in goalsByArea:
                 goalsByArea[area].setClearFunc(func)
 
-    def setSolverMode(self, solver):
+    def setSolverMode(self, solver, romConf):
         self.setScavengerHuntFunc(solver.scavengerHuntComplete)
         # in rando we know the number of items after randomizing, so set the functions only for the solver
-        self.setItemPercentFuncs(allUpgradeTypes=solver.majorUpgrades)
+        self.setItemPercentFuncs(allUpgradeTypes=romConf.majorUpgrades)
 
         def getObjAreaFunc(area):
             def f(sm, ap):
                 nonlocal solver, area
-                visitedLocs = set([loc.Name for loc in solver.visitedLocations])
-                allVisited = SMBool(all(locName in visitedLocs for locName in solver.splitLocsByArea[area]))
+                visitedLocs = set([loc.Name for loc in solver.container.visitedLocations()])
+                allVisited = SMBool(all(locName in visitedLocs for locName in solver.romConf.splitLocsByArea[area]))
                 return sm.wand(Objectives.canReachArea(sm, ap, area), allVisited)
             return f
         self.setAreaFuncs({area:getObjAreaFunc(area) for area in graphAreas})
@@ -1124,7 +1124,8 @@ class Objectives(object):
 
         return ret
 
-    def setGoalCompleted(self, goalName, completed):
+    @staticmethod
+    def setGoalCompleted(goalName, completed):
         for goal in Objectives.activeGoals:
             if goal.name == goalName:
                 goal.completed = completed

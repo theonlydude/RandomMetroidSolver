@@ -11,6 +11,15 @@ incsrc "sym/map_data.asm"
 org map_data_Brinstar+$134  ; (26, 4)
     dw $001f   ; empty tile
 
+org map_data_Brinstar+$4f2  ; (25, 19)
+    dw $001f   ; empty tile
+
+org map_data_Brinstar+$4f0  ; (24, 19)
+    dw $001f   ; empty tile
+
+org map_data_Brinstar+$4ee  ; (23, 19)
+    dw $001f   ; empty tile
+
 ;;; tiles for room "Red Tower"
 
 org map_data_Brinstar+$2bc  ; (30, 10)

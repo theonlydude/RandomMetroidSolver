@@ -13,6 +13,7 @@ tools/map_glow.py > patches/common/src/include/area_colors.asm
 tools/map_area_palettes.sh
 
 tools/map_escape_rando.py vanilla
+tools/map_minimizer.py vanilla
 
 tools/map_mirror.sh
 

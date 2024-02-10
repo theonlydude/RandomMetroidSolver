@@ -30,3 +30,4 @@ json_dir=${mirror_area_json_dir} map_dir=${mirror_dir} tools/map_area_palettes.s
 tools/map_mirror_icons.py
 
 tools/map_escape_rando.py mirror
+tools/map_minimizer.py mirror

@@ -115,8 +115,10 @@ class MinimapPalettesConfig(object):
                             mapData[graphArea].update(altMapData[graphArea])
                         else:
                             mapData[graphArea] = altMapData[graphArea]
-            for graphArea, rooms in mapData.items():
+            for graphArea, rooms in mapData.items():                
                 for room, coords in rooms.items():
+                    if room == "__unexplorable__":
+                        continue
                     for c in coords:
                         x, y = c[0], c[1]
                         areaMap.setTile(x, y, RoomTile(room, graphArea))

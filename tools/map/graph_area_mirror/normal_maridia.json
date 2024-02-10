@@ -788,6 +788,16 @@
         ]
     },
     "RedBrinstar": {
+        "__unexplorable__": [
+            [
+                57,
+                19
+            ],
+            [
+                53,
+                19
+            ]
+        ],
         "[Glass Tunnel Save Room]": [
             [
                 54,

@@ -934,6 +934,20 @@
         ]
     },
     "EastMaridia": {
+        "__unexplorable__": [
+            [
+                52,
+                12
+            ],
+            [
+                52,
+                13
+            ],
+            [
+                52,
+                14
+            ]
+        ],
         "[Crab Maze to Elevator]": [
             [
                 52,
@@ -948,6 +962,20 @@
         ]
     },
     "RedBrinstar": {
+        "__unexplorable__": [
+            [
+                34,
+                9
+            ],
+            [
+                34,
+                10
+            ],
+            [
+                34,
+                11
+            ]
+        ],
         "[Elevator to Red Brinstar]": [
             [
                 34,
@@ -956,6 +984,20 @@
         ]
     },
     "GreenPinkBrinstar": {
+        "__unexplorable__": [
+            [
+                6,
+                10
+            ],
+            [
+                6,
+                11
+            ],
+            [
+                6,
+                12
+            ]
+        ],
         "[Elevator to Green Brinstar]": [
             [
                 6,

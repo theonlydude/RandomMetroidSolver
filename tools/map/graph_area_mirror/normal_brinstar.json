@@ -1,5 +1,11 @@
 {
     "Crateria": {
+        "__unexplorable__": [
+            [
+                37,
+                8
+            ]
+        ],
         "Morph Ball Room": [
             [
                 42,
@@ -98,6 +104,12 @@
         ]
     },
     "RedBrinstar": {
+        "__unexplorable__": [
+            [
+                26,
+                4
+            ]
+        ],
         "Red Tower": [
             [
                 30,
@@ -1086,6 +1098,16 @@
         ]
     },
     "Norfair": {
+        "__unexplorable__": [
+            [
+                22,
+                21
+            ],
+            [
+                22,
+                22
+            ]
+        ],
         "Warehouse Entrance": [
             [
                 22,

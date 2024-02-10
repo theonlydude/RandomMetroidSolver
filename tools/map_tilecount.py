@@ -29,6 +29,8 @@ def loadDataPath(area, prefix="normal"):
     print("Loaded "+mapDataPath)
     for graphArea, rooms in mapData.items():
         for room, coords in rooms.items():
+            if room == "__unexplorable__":
+                continue
             for c in coords:
                 x, y = c[0], c[1]
                 regionMap.setTile(x, y, graphArea)

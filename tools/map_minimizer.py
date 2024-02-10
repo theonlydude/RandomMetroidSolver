@@ -39,8 +39,11 @@ lorom
 arch 65816
 
 incsrc "sym/map_data.asm"
-    ''')
+''')
         for areaName, area in area_maps.items():
+            if graphArea == "Crateria" and area == "Crateria":
+                # never remove Crateria graph area in Crateria map as it is in the escape
+                continue
             with open(mapDataPath + areaName + ".json", "r") as fp:
                 mapData = json.load(fp)
             graphAreaMapData = mapData.get(graphArea)
@@ -48,17 +51,17 @@ incsrc "sym/map_data.asm"
                 continue
             asm.write(f'''
 ;;; tiles for {area}
-    ''')
+''')
             for room, coords in graphAreaMapData.items():
                 if room in roomsToKeep:
                     continue
                 asm.write(f'''
 ;;; tiles for room "{room}"
-    ''')
+''')
                 for c in coords:
                     x, y = c[0], c[1]
                     offset = dummyMap.getOffset(x, y, mapOffset=0)
                     asm.write(f'''
 org map_data_{area}+${offset:x}  ; ({x}, {y})
     dw $001f   ; empty tile
-    ''')
+''')

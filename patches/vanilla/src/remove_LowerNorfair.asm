@@ -133,14 +133,6 @@ org map_data_Norfair+$3f0  ; (24, 15)
 org map_data_Norfair+$42a  ; (21, 16)
     dw $001f   ; empty tile
     
-;;; tiles for room "Ridley's Room"
-    
-org map_data_Norfair+$46e  ; (23, 17)
-    dw $001f   ; empty tile
-    
-org map_data_Norfair+$4ae  ; (23, 18)
-    dw $001f   ; empty tile
-    
 ;;; tiles for room "Lower Norfair Farming Room"
     
 org map_data_Norfair+$470  ; (24, 17)
@@ -399,11 +391,6 @@ org map_data_Norfair+$1be  ; (31, 6)
     dw $001f   ; empty tile
     
 org map_data_Norfair+$980  ; (32, 6)
-    dw $001f   ; empty tile
-    
-;;; tiles for room "Ridley Tank Room"
-    
-org map_data_Norfair+$4ac  ; (22, 18)
     dw $001f   ; empty tile
     
 ;;; tiles for room "Screw Attack Room"

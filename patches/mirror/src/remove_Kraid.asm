@@ -70,28 +70,9 @@ org map_data_Brinstar+$514  ; (10, 20)
 org map_data_Brinstar+$512  ; (9, 20)
     dw $001f   ; empty tile
     
-;;; tiles for room "Kraid Room"
-    
-org map_data_Brinstar+$4d0  ; (8, 19)
-    dw $001f   ; empty tile
-    
-org map_data_Brinstar+$4ce  ; (7, 19)
-    dw $001f   ; empty tile
-    
-org map_data_Brinstar+$50e  ; (7, 20)
-    dw $001f   ; empty tile
-    
-org map_data_Brinstar+$510  ; (8, 20)
-    dw $001f   ; empty tile
-    
 ;;; tiles for room "[Kraid Recharge Station]"
     
 org map_data_Brinstar+$4d2  ; (9, 19)
-    dw $001f   ; empty tile
-    
-;;; tiles for room "Varia Suit Room"
-    
-org map_data_Brinstar+$50c  ; (6, 20)
     dw $001f   ; empty tile
     
 ;;; tiles for room "[Kraid Save Room]"

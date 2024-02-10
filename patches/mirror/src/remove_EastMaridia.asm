@@ -526,11 +526,6 @@ org map_data_Maridia+$a54  ; (42, 9)
 org map_data_Maridia+$a52  ; (41, 9)
     dw $001f   ; empty tile
     
-;;; tiles for room "Space Jump Room"
-    
-org map_data_Maridia+$2f8  ; (28, 11)
-    dw $001f   ; empty tile
-    
 ;;; tiles for room "[Colosseum Energy Charge Room]"
     
 org map_data_Maridia+$1f0  ; (24, 7)
@@ -574,20 +569,6 @@ org map_data_Maridia+$a0c  ; (38, 8)
     dw $001f   ; empty tile
     
 org map_data_Maridia+$9c4  ; (34, 7)
-    dw $001f   ; empty tile
-    
-;;; tiles for room "Draygon's Room"
-    
-org map_data_Maridia+$2b6  ; (27, 10)
-    dw $001f   ; empty tile
-    
-org map_data_Maridia+$2b4  ; (26, 10)
-    dw $001f   ; empty tile
-    
-org map_data_Maridia+$2f4  ; (26, 11)
-    dw $001f   ; empty tile
-    
-org map_data_Maridia+$2f6  ; (27, 11)
     dw $001f   ; empty tile
     
 ;;; tiles for room "Shaktool Room"

@@ -436,11 +436,6 @@ org map_data_WreckedShip+$524  ; (18, 20)
 org map_data_WreckedShip+$51a  ; (13, 20)
     dw $001f   ; empty tile
     
-;;; tiles for room "Phantoon's Room"
-    
-org map_data_WreckedShip+$526  ; (19, 20)
-    dw $001f   ; empty tile
-    
 ;;; tiles for room "Sponge Bath"
     
 org map_data_WreckedShip+$422  ; (17, 16)

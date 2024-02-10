@@ -22,6 +22,13 @@ area_maps = {
     "wrecked_ship": "WreckedShip"
 }
 
+roomsToKeep = [
+    "Kraid Room", "Varia Suit Room",
+    "Draygon's Room", "Space Jump Room",
+    "Ridley's Room", "Ridley Tank Room",
+    "Phantoon's Room"
+]
+
 for graphArea in graphAreas:
     if graphArea in ["Ceres", "Tourian"]:
         continue
@@ -43,6 +50,8 @@ incsrc "sym/map_data.asm"
 ;;; tiles for {area}
     ''')
             for room, coords in graphAreaMapData.items():
+                if room in roomsToKeep:
+                    continue
                 asm.write(f'''
 ;;; tiles for room "{room}"
     ''')

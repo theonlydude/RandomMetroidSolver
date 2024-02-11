@@ -62,6 +62,8 @@ class RomPatcher:
 
     def patchRom(self):
         self._mapIconTableAddr = Addresses.getOne("map_mapicons_tables")
+        self._accessibleAreasNoBoss = self._getAccessibleAreasNoBoss(self.settings["itemLocs"])
+        self._updateMapIconsGraphAreas(self.settings["itemLocs"])
         # apply patches first
         self.applyIPSPatches()
         self.commitIPS()
@@ -86,16 +88,15 @@ class RomPatcher:
         self.writeItemsNumber()
         # objectives
         self.writeObjectives(self.settings["itemLocs"], self.settings["tourian"])
-        self.writeObjectivesMapIcons()
+        self.writeObjectivesMapIcons(self.settings["tourian"])
         # area connections
         self.writeDoorConnections(self.settings["doors"])
-        self.writeDoorConnectionsMapIcons(self.settings["doors"])
+        self.writeDoorConnectionsMapIcons(self.settings["doors"], self.settings["tourian"])
         # door caps
         self.writeDoorsColor()
         self.writeDoorsMapIcons()
         # map tile count
-        self.writeMapTileCount(self.settings["itemLocs"], self.settings["area"],
-                               self.settings["escapeAttr"] is not None, self.settings["tourian"])
+        self.writeMapTileCount(self.settings["area"], self.settings["escapeAttr"] is not None, self.settings["tourian"])
         # credits stuff
         self.writeSpoiler(self.settings["itemLocs"], self.settings["progItemLocs"])
         self.writeRandoSettings(self.settings["randoSettings"], self.settings["itemLocs"])
@@ -205,6 +206,8 @@ class RomPatcher:
     def writeItemMapTiles(self, split, itemLocs):
         for il in itemLocs:
             if il.Location.isBoss():
+                continue
+            if not il.Location.SolveArea.endswith("Boss") and il.Location.GraphArea not in self._accessibleAreasNoBoss:
                 continue
 #            print("loc %s, area %s" % (il.Location.Name, il.Location.Area))
             self.areaMaps[il.Location.Area].setItemLoc(il, split)
@@ -334,6 +337,11 @@ class RomPatcher:
         plmList = patchSet.get('plms', [])
         plms += [plm for plm in plmList if plm not in plms]
 
+    def _getRemoveAreaPatches(self):
+        allAreas = list(self._accessibleAreasNoBoss) + ['Ceres', 'Tourian']
+        missingAreas = [area for area in graphAreas if area not in allAreas]
+        return [f"remove_{area}.ips" for area in missingAreas]
+
     def applyIPSPatches(self):
         try:
             ## apply base patches, then special patches, PLMs and other modifications, then optional patches
@@ -365,6 +373,8 @@ class RomPatcher:
             else:
                 self.applyIPSPatch('area_ids_area_rando.ips')
                 self.applyIPSPatch('minimap_data_area_rando.ips')
+            for patch in self._getRemoveAreaPatches():
+                self.applyIPSPatch(patch)
             # blue doors
             doors = self.getStartDoors(plms, self.settings["area"], self.settings["minimizerN"])
             DoorsManager.getBlueDoors(doors)
@@ -1074,7 +1084,23 @@ class RomPatcher:
         exploredAreaSize = 0x100
         return exploredBaseRam + area*exploredAreaSize + index
 
-    def _writePortalIcons(self, doorConnections, area, areaMap):
+    def _updateMapIconsGraphAreas(self, itemLocs):
+        mapIcons = Logic.map_tiles
+        def updateAccessPoints(apIcons):
+            for apName, icon in apIcons.items():
+                ap = getAccessPoint(apName)
+                icon['graphArea'] = ap.GraphArea
+        updateAccessPoints(mapIcons.areaAccessPoints)
+        updateAccessPoints(mapIcons.areaAccessPointsInGameDisplay)
+        updateAccessPoints(mapIcons.bossAccessPoints)
+        updateAccessPoints(mapIcons.escapeAccessPoints)
+        for il in itemLocs:
+            if il.Location.isBoss():
+                continue
+            icon = mapIcons.itemLocations[il.Location.Name]
+            icon["graphArea"] = il.Location.GraphArea
+
+    def _writePortalIcons(self, doorConnections, area, areaMap, tourian):
         def getMapInfo(apName, isSrc):
             if isSrc and apName in Logic.map_tiles.areaAccessPointsInGameDisplay:
                 return Logic.map_tiles.areaAccessPointsInGameDisplay[apName]
@@ -1089,10 +1115,15 @@ class RomPatcher:
             "DraygonRoomIn": "DraygonBoss",
             "RidleyRoomIn": "RidleyBoss"
         }
+        allAreas = list(self._accessibleAreasNoBoss)
+        if tourian != "Disabled":
+            allAreas.append("Tourian")
         for conn in doorConnections:
             src, dst = conn['transition']
             srcMapInfo, dstMapInfo = getMapInfo(src.Name, True), getMapInfo(dst.Name, False)
             if srcMapInfo is None or dstMapInfo is None or srcMapInfo['area'] != area:
+                continue
+            if src.Name not in graphAreaOverride and src.GraphArea not in allAreas:
                 continue
             if "coords" in srcMapInfo:
                 x, y = srcMapInfo['coords']
@@ -1106,14 +1137,14 @@ class RomPatcher:
             self.romFile.writeWord(dstMapInfo['bitMask'])
         self.writeWordMagic(0xffff) # terminator
 
-    def writeDoorConnectionsMapIcons(self, doorConnections):
+    def writeDoorConnectionsMapIcons(self, doorConnections, tourian):
         assert len(self.areaMaps) > 0, "call writeDoorConnectionsMapIcons when areaMaps are built"
         # write area portal tables
         self.romFile.seek(self._mapIconTableAddr)
         mapicon_ptrs = {}
         for area, areaMap in self.areaMaps.items():
             mapicon_ptrs[area] = self.romFile.tell()
-            self._writePortalIcons(doorConnections, area, areaMap)
+            self._writePortalIcons(doorConnections, area, areaMap, tourian)
         self._mapIconTableAddr = self.romFile.tell()
         self._writeMapIconTable(mapicon_ptrs, Addresses.getOne("map_portals_mapicons_by_area"))
 
@@ -1304,8 +1335,8 @@ class RomPatcher:
         bossChk = lambda loc: loc.isBoss() or loc.SolveArea in bossSolveAreeas
         return {il.Location.GraphArea for il in itemLocs if not bossChk(il.Location) and not il.Location.restricted}
 
-    def writeMapTileCount(self, itemLocs, isArea, isEscape, tourian):
-        accessibleAreasNoBoss = self._getAccessibleAreasNoBoss(itemLocs)
+    def writeMapTileCount(self, isArea, isEscape, tourian):
+        accessibleAreasNoBoss = self._accessibleAreasNoBoss
         self.log.debug(f"writeMapTileCount. accessibleareas: {accessibleAreasNoBoss}")
         # G4 are always there, even when their area is not in minimizer layout
         bossTiles = {
@@ -1349,7 +1380,7 @@ class RomPatcher:
             self.romFile.writeWord(ceil((total * percent)/100), addr)
 
     def writeEnemiesTotals(self, itemLocs):
-        accessibleAreasNoBoss = self._getAccessibleAreasNoBoss(itemLocs)
+        accessibleAreasNoBoss = self._accessibleAreasNoBoss
         for nmyType, nmyEntry in enemies_objectives_data.items():
             areaCounts = nmyEntry["area_count"]
             total = sum(areaCounts[area] for area in areaCounts if area in accessibleAreasNoBoss)
@@ -1396,7 +1427,7 @@ class RomPatcher:
         self.romFile.writeWord(itemsMask, Addresses.getOne('itemsMask'))
         self.romFile.writeWord(beamsMask, Addresses.getOne('beamsMask'))
 
-    def writeObjectivesMapIcons(self):
+    def writeObjectivesMapIcons(self, tourian):
         assert len(self.areaMaps) > 0, "call writeObjectivesMapIcons when areaMaps are built"
         # create a dict area => {(x, y) => (obj, mapIcon)}
         objByArea = defaultdict(dict)
@@ -1405,6 +1436,9 @@ class RomPatcher:
             for mapIcon in goal.mapIcons:
                 coords = objTiles[mapIcon]["map_coords_px"]
                 area = objTiles[mapIcon]["area"]
+                graphArea = objTiles[mapIcon].get("graphArea")
+                if graphArea is not None and graphArea not in self._accessibleAreasNoBoss:
+                    continue
                 addIcon = coords not in objByArea[area]
                 if not addIcon:
                     # icon coords conflict, choose one

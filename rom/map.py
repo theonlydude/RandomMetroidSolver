@@ -304,3 +304,80 @@ def assignMapIconSpriteTableIndices():
         i += 1
 
 assignMapIconSpriteTableIndices()
+
+# spritemaps indicating areas above elevators. useful to be able to remove them when removing areas in minimizer
+# content generated with tools/map_read_area_icons.py
+areaSpriteMaps = {
+    "vanilla": {
+        "Crateria": {
+            "addr": 0x82c759,
+            "icons": {
+                "Brinstar Left": {"x": 48, "y": 112, "type": 0x5a},
+                "Brinstar Middle": {"x": 184, "y": 184, "type": 0x5a},
+                "Brinstar Right": {"x": 272, "y": 104, "type": 0x5a},
+                "Wrecked Ship": {"x": 376, "y": 32, "type": 0x5c},
+                "Maridia": {"x": 416, "y": 128, "type": 0x5d},
+            },
+        },
+        "Brinstar": {
+            "addr": 0x82c779,
+            "icons": {
+                "Crateria Left": {"x": 72, "y": 8, "type": 0x59},
+                "Crateria Middle": {"x": 208, "y": 64, "type": 0x59},
+                "Crateria Right": {"x": 296, "y": 32, "type": 0x59},
+                "Maridia": {"x": 320, "y": 144, "type": 0x5d},
+                "Norfair": {"x": 328, "y": 192, "type": 0x5b},
+            },
+        },
+        "Norfair": {
+            "addr": 0x82c799,
+            "icons": {
+                "Brinstar": {"x": 80, "y": 8, "type": 0x5a},
+            },
+        },
+        "Maridia": {
+            "addr": 0x82c7af,
+            "icons": {
+                "Crateria": {"x": 264, "y": 8, "type": 0x59},
+                "Brinstar Left": {"x": 48, "y": 160, "type": 0x5a},
+                "Brinstar Right": {"x": 120, "y": 160, "type": 0x5a},
+            },
+        },
+    },
+    "mirror": {
+        "Crateria": {
+            "addr": 0x82c759,
+            "icons": {
+                "Brinstar Left": {"x": 438, "y": 111, "type": 0x5a},
+                "Brinstar Middle": {"x": 306, "y": 183, "type": 0x5a},
+                "Brinstar Right": {"x": 222, "y": 104, "type": 0x5a},
+                "Wrecked Ship": {"x": 111, "y": 32, "type": 0x5c},
+                "Maridia": {"x": 70, "y": 126, "type": 0x5d},
+            },
+        },
+        "Brinstar": {
+            "addr": 0x82c779,
+            "icons": {
+                "Crateria Left": {"x": 428, "y": 7, "type": 0x59},
+                "Crateria Middle": {"x": 286, "y": 64, "type": 0x59},
+                "Crateria Right": {"x": 202, "y": 32, "type": 0x59},
+                "Maridia": {"x": 170, "y": 145, "type": 0x5d},
+                "Norfair": {"x": 169, "y": 192, "type": 0x5b},
+            },
+        },
+        "Norfair": {
+            "addr": 0x82c799,
+            "icons": {
+                "Brinstar": {"x": 409, "y": 7, "type": 0x5a},
+            },
+        },
+        "Maridia": {
+            "addr": 0x82c7af,
+            "icons": {
+                "Crateria": {"x": 250, "y": 8, "type": 0x59},
+                "Brinstar Left": {"x": 397, "y": 160, "type": 0x5a},
+                "Brinstar Right": {"x": 474, "y": 159, "type": 0x5a},
+            },
+        },
+    }
+}

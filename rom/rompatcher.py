@@ -15,7 +15,7 @@ from rom.addresses import Addresses
 from rom.rom_patches import RomPatches, getPatchSet, getPatchSetsFromPatcherSettings
 from rom.rom_options import RomOptions
 from rom.flavor import RomFlavor
-from rom.map import AreaMap, getTileIndex, portal_mapicons
+from rom.map import AreaMap, getTileIndex, portal_mapicons, areaSpriteMaps
 from rom.enemies_objectives_data import enemies_objectives_data
 from patches.patchaccess import PatchAccess
 from utils.parameters import appDir, Settings
@@ -337,10 +337,49 @@ class RomPatcher:
         plmList = patchSet.get('plms', [])
         plms += [plm for plm in plmList if plm not in plms]
 
-    def _getRemoveAreaPatches(self):
+    def removeMinimizerUnusedAreas(self):
+        # remove map tiles
         allAreas = list(self._accessibleAreasNoBoss) + ['Ceres', 'Tourian']
         missingAreas = [area for area in graphAreas if area not in allAreas]
-        return [f"remove_{area}.ips" for area in missingAreas]
+        removeAreaPatches = [f"remove_{area}.ips" for area in missingAreas]
+        for patch in removeAreaPatches:
+            self.applyIPSPatch(patch)
+        # remove spritemaps above elevators
+        spritemapsRemoved = {
+            "Crateria": {
+                "Brinstar Left": "GreenPinkBrinstar",
+                "Brinstar Middle": "Crateria",
+                "Brinstar Right": "RedBrinstar",
+                "Wrecked Ship": "WreckedShip",
+                "Maridia": "EastMaridia"
+            },
+            "Brinstar": {
+                "Crateria Left": "GreenPinkBrinstar",
+                "Crateria Middle": "Crateria",
+                "Crateria Right": "RedBrinstar",
+                "Maridia": "RedBrinstar",
+                "Norfair": "Norfair"
+            },
+            "Norfair": {
+                "Brinstar": "Norfair"
+            },
+            "Maridia": {
+                "Crateria": "EastMaridia",
+                "Brinstar Left": "RedBrinstar",
+                "Brinstar Right": "RedBrinstar"
+            }
+        }
+        spritemaps = areaSpriteMaps[RomFlavor.flavor]
+        for area, areaData in spritemaps.items():
+            self.romFile.seek(snes_to_pc(areaData["addr"]))
+            for iconName, icon in areaData["icons"].items():
+                graphArea = spritemapsRemoved[area][iconName]
+                if graphArea in missingAreas:
+                    continue
+                self.romFile.writeWord(icon["x"])
+                self.romFile.writeWord(icon["y"])
+                self.romFile.writeWord(icon["type"])
+            self.romFile.writeWord(0xffff)
 
     def applyIPSPatches(self):
         try:
@@ -373,8 +412,8 @@ class RomPatcher:
             else:
                 self.applyIPSPatch('area_ids_area_rando.ips')
                 self.applyIPSPatch('minimap_data_area_rando.ips')
-            for patch in self._getRemoveAreaPatches():
-                self.applyIPSPatch(patch)
+            if self.settings["minimizerN"] is not None:
+                self.removeMinimizerUnusedAreas()
             # blue doors
             doors = self.getStartDoors(plms, self.settings["area"], self.settings["minimizerN"])
             DoorsManager.getBlueDoors(doors)

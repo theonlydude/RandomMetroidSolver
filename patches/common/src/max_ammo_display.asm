@@ -173,7 +173,7 @@ org $809D6E
 ;;; parameters set by vanilla before all hijacks:
 ;;; LDA !HUD_digits_tilemap_row3
 ;;; STA $00    [$7E:0000]
-org $80CE30
+org $80CE40
 
 ;;; parameters set before hijack:
 ;;; LDX !row3_super_index_vanilla

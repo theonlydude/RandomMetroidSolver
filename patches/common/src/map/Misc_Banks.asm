@@ -15,41 +15,39 @@ HUD_MapTileOffset:
 ORG $809AF3 : STZ !SamusMapPositionMirror : NOP		;remove broken minimap update during start game
 ORG $80A153 : JSL RevertAreaNumber
 
-
 ORG !FreespaceBank80_VRAM
 NMI_MinimapHijack:
-	LDA !Update_Minimap_VRAM_Flag : BEQ +++	;check if update minimap flag is set
+	LDA !Update_Minimap_VRAM_Flag : BEQ .end	;check if update minimap flag is set
+        ;; if BG1/BG2 column or line update (increases NMI runtime), skip minimap to trigger it next frame
+        lda $0962 : bne .end ; BG1 column
+        lda $0970 : bne .end ; BG1 row
+        lda $097e : bne .end ; BG2 column
+        lda $098c : bne .end ; BG2 row
+        ;; actually update gfx
 	PHP : SEP #$30
 ;row 0 tiles to VRAM
 	LDA #$80 : STA $2115		;set video port control (only need to do once)
 	LDA #$D8 : STA $2116		;set low byte of target in VRAM
-	JSR FindTileAddressForBG_3	;determine high byte of target
-	ADC #$02 : STA $2117		;set high byte of target in VRAM
+        LDA $5E : ASL #4 : CLC : ADC #$02 : PHA		;determine high byte of target and save it to stack
+	STA $2117		;set high byte of target in VRAM
 	JSL $8091A9					;set up DMA transfer (channel, transfer mode, destination address : source : size)
 	DB $01, $01, $18 : DL !RAM_Minimap_GFX : DW $0050
 	LDA #$02 : STA $420B		;activate DMA transfer
 ;row 1 tiles to VRAM
 	LDA #$58 : STA $2116
-	JSR FindTileAddressForBG_3
-	ADC #$03 : STA $2117
+	PLA : INC : PHA : STA $2117
 	JSL $8091A9
 	DB $01, $01, $18 : DL !RAM_Minimap_GFX+$50 : DW $0050
 	LDA #$02 : STA $420B
 ;row 2 tiles to VRAM
 	LDA #$D8 : STA $2116
-	JSR FindTileAddressForBG_3
-	ADC #$03 : STA $2117
+        PLA : STA $2117
 	JSL $8091A9
 	DB $01, $01, $18 : DL !RAM_Minimap_GFX+$A0 : DW $0050
 	LDA #$02 : STA $420B
 	
 	PLP : STZ !Update_Minimap_VRAM_Flag	;zero flag to not update minimap every frame
-+++ : JMP $91EE							;jump to "update IO registers"
-
-
-;Load tilemap base address and adjust for target highbyte ($5E = 4 for normal / 2 for kraid room)
-FindTileAddressForBG_3:
-	LDA $5E : ASL #4 : CLC : RTS
+.end : JMP $91EE							;jump to "update IO registers"
 
 
 ;Force update minimap to prevent showing garbage when unpausing or during room transition
@@ -66,7 +64,7 @@ RevertAreaNumber:
 	JMP $835D		;return
 print "bank 80 end: ", pc
 
-warnpc $80CE2F
+warnpc $80CE3F
 }
 ;---------------------------------------------------------------------------------------------------
 ;|x|                                    BANK $81        Planet Zebes Map                         |x|

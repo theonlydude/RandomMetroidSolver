@@ -187,6 +187,7 @@ org $808FA3 ;; overwrite unused routine
     pla
     pld
     plb
+.rti:
     rti
 
 warnpc $808FC1 ;; next used routine start

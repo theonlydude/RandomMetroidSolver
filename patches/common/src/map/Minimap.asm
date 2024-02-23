@@ -177,9 +177,10 @@ org $80987C
 !vcounter_target_begin = $02
 !vcounter_target_colors = $1d
 !vcounter_target_end = $1f
-!hcounter_target = $a5
+!hcounter_target = $b0
 !hcounter_target_gameplay = !hcounter_target
 !hcounter_target_door_transitions = !hcounter_target
+!hcounter_end_hud_offset #= 32
 
 ;; raise HUD 2 pixels to have extra scanlines to restore colors
 !hud_draw_offset = 2
@@ -306,7 +307,7 @@ org $8096E8
 org $8096EB
         db !vcounter_target_colors
 org $8096EE
-        db !hcounter_target_door_transitions
+        db !hcounter_target_door_transitions+!hcounter_end_hud_offset
 
 ;; draygon room
 org $80972A
@@ -314,7 +315,7 @@ org $80972A
 org $80972D
         db !vcounter_target_colors
 org $809730
-        db !hcounter_target_gameplay
+        db !hcounter_target_gameplay+!hcounter_end_hud_offset
 
 ;; vertical transition
 org $809768
@@ -322,7 +323,7 @@ org $809768
 org $80976B
         db !vcounter_target_colors
 org $80976E
-        db !hcounter_target_door_transitions
+        db !hcounter_target_door_transitions+!hcounter_end_hud_offset
 
 ;; horizontal transition
 org $8097D1
@@ -330,7 +331,7 @@ org $8097D1
 org $8097D4
         db !vcounter_target_colors
 org $8097D7
-        db !hcounter_target_door_transitions
+        db !hcounter_target_door_transitions+!hcounter_end_hud_offset
 
 org $80d600
 new_irq_table:
@@ -397,7 +398,7 @@ irq_colors_begin_hud_main_gameplay_end:
         %a16()
         LDA.w #$001E
         LDY.w #!vcounter_target_colors
-        LDX.w #!hcounter_target_gameplay
+        LDX.w #!hcounter_target_gameplay+!hcounter_end_hud_offset
         rts
 
 irq_colors_end_hud_main_gameplay:

@@ -240,6 +240,9 @@ org $809BDC
 ;; F-Blank management
 !NMI_INIDISP = $51
 !INIDISP = $2100
+;; long writes to INIDISP mitigates early read glitch (https://undisbeliever.net/snesdev/registers/inidisp.html#early-read-glitch)
+!INIDISP_begin_fblank #= $800000+!INIDISP
+!INIDISP_end_fblank #= $0f0000+!INIDISP
 
 macro setNextColor(addr)
         lda <addr> : sta.w !CGDATA
@@ -256,12 +259,17 @@ macro addWhite()
 endmacro
 
 macro beginFBlank()
-        lda.b #$80 : sta.w !INIDISP
+        lda.b #$80 : sta.l !INIDISP_begin_fblank
 print "begin fblank ", pc
 endmacro
 
+macro clearFBlank()
+        ;; disables F-blank, but turn beam black to avoid glitches
+        lda.b #0 : sta.l !INIDISP_end_fblank
+endmacro
+
 macro endFBlank()
-        lda.b !NMI_INIDISP : sta.w !INIDISP
+        lda.b !NMI_INIDISP : sta.l !INIDISP_end_fblank
 print "end fblank ", pc
 endmacro
 
@@ -380,7 +388,7 @@ irq_colors_begin_hud_main_gameplay:
         %a16()
         lda.w #$1C
         ldy.w #!vcounter_target_begin
-        ldx.w #!hcounter_target
+        ldx.w #!hcounter_target_gameplay
         rts
 
 irq_colors_begin_hud_main_gameplay_end:
@@ -404,11 +412,11 @@ irq_colors_end_hud_main_gameplay:
         LDA.b $6a      ;| 8096BA | 80 | \
         STA.w $212C                      ;| 8096BC | 80 | } Main screen layers = [gameplay main screen layers]
         jsr end_hud
-        stz.w !INIDISP          ; disables F-blank, but turn beam black to avoid glitches
+        %clearFBlank()
         %a16()
         lda.w #$06
         ldy.w #!vcounter_target_end
-        ldx.w #!hcounter_target
+        ldx.w #!hcounter_target_gameplay
         rts
 
 irq_colors_end_hud_main_gameplay_end:
@@ -428,7 +436,7 @@ irq_colors_begin_hud_start_transition:
         %a16()
         lda.w #$20
         ldy.w #!vcounter_target_begin
-        ldx.w #!hcounter_target
+        ldx.w #!hcounter_target_door_transitions
         rts
 
 irq_colors_begin_hud_start_transition_end:
@@ -451,11 +459,11 @@ irq_colors_end_hud_start_transition:
 .BRA_809703:
         STA.w $212C                      ;| 809703 | 80 | 
         jsr end_hud
-        stz.w !INIDISP          ; disables F-blank, but turn beam black to avoid glitches
+        %clearFBlank()
         %a16()
         lda.w #$0a
         ldy.w #!vcounter_target_end
-        ldx.w #!hcounter_target
+        ldx.w #!hcounter_target_door_transitions
         rts
 
 irq_colors_end_hud_start_transition_end:
@@ -473,7 +481,7 @@ irq_colors_begin_hud_draygon:
         %a16()
         lda.w #$24
         ldy.w #!vcounter_target_begin
-        ldx.w #!hcounter_target
+        ldx.w #!hcounter_target_gameplay
         rts
 
 irq_colors_begin_hud_draygon_end:
@@ -491,11 +499,11 @@ irq_colors_end_hud_draygon:
         LDA.b $73;| 80973F | 80 | \
         STA.w $2131                      ;| 809741 | 80 | } Colour math control register B = [gameplay colour math control register B]
         jsr end_hud
-        stz.w !INIDISP          ; disables F-blank, but turn beam black to avoid glitches
+        %clearFBlank()
         %a16()
         lda.w #$0E
         ldy.w #!vcounter_target_end
-        ldx.w #!hcounter_target
+        ldx.w #!hcounter_target_gameplay
         rts
 
 irq_colors_end_hud_draygon_end:
@@ -513,7 +521,7 @@ irq_colors_begin_hud_vertical_transition:
         %a16()
         lda.w #$28
         ldy.w #!vcounter_target_begin
-        ldx.w #!hcounter_target
+        ldx.w #!hcounter_target_door_transitions
         rts
 
 irq_colors_begin_hud_vertical_transition_end:
@@ -538,11 +546,11 @@ irq_colors_end_hud_vertical_transition:
         STZ.w $2130                      ;| 809786 | 80 | \
         STZ.w $2131                      ;| 809789 | 80 | } Disable colour math
         jsr end_hud
-        stz.w !INIDISP          ; disables F-blank, but turn beam black to avoid glitches
+        %clearFBlank()
         %a16()
         lda.w #$12
         ldy.w #!vcounter_target_end
-        ldx.w #!hcounter_target
+        ldx.w #!hcounter_target_door_transitions
         rts
 
 irq_colors_end_hud_vertical_transition_end:
@@ -560,7 +568,7 @@ irq_colors_begin_hud_horizontal_transition:
         %a16()
         lda.w #$2C
         ldy.w #!vcounter_target_begin
-        ldx.w #!hcounter_target
+        ldx.w #!hcounter_target_door_transitions
         rts
 
 irq_colors_begin_hud_horizontal_transition_end:
@@ -585,11 +593,11 @@ irq_colors_end_hud_horizontal_transition:
         STZ.w $2130                      ;| 8097EF | 80 | \
         STZ.w $2131                      ;| 8097F2 | 80 | } Disable colour math
         jsr end_hud
-        stz.w !INIDISP          ; disables F-blank, but turn beam black to avoid glitches
+
         %a16()
         lda.w #$18
         ldy.w #!vcounter_target_end
-        ldx.w #!hcounter_target
+        ldx.w #!hcounter_target_door_transitions
         rts
 
 irq_colors_end_hud_horizontal_transition_end:

@@ -594,7 +594,7 @@ irq_colors_end_hud_horizontal_transition:
         STZ.w $2130                      ;| 8097EF | 80 | \
         STZ.w $2131                      ;| 8097F2 | 80 | } Disable colour math
         jsr end_hud
-
+        %clearFBlank()
         %a16()
         lda.w #$18
         ldy.w #!vcounter_target_end

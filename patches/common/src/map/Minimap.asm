@@ -177,7 +177,7 @@ org $80987C
 !vcounter_target_begin = 2
 !vcounter_target_colors = 28
 !vcounter_target_end = 31
-!hcounter_target = 184
+!hcounter_target = 176
 !hcounter_target_gameplay = !hcounter_target
 !hcounter_target_door_transitions = !hcounter_target
 !hcounter_end_hud_offset #= 0

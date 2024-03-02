@@ -120,10 +120,10 @@ math pri off
 	!MinimapPalette0 = $00
 	!MinimapPalette1 = $04
 	!MinimapPalette2 = $03
-	!MinimapPalette3 = $06
+	!MinimapPalette3 = $02
 	!MinimapPalette4 = $02
-	!MinimapPalette5 = $00
-	!MinimapPalette6 = $06
+	!MinimapPalette5 = $02
+	!MinimapPalette6 = $02
 	!MinimapPalette7 = $02
 
 ;Which minimap palette should empty tiles have? (vanilla: $03) (range: $00 - $07)

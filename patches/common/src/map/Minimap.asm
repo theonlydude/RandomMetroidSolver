@@ -141,10 +141,10 @@ print "main minimap end: ", pc
 org $90AC04
 .limit:
 
-;; ORG $90AC0C
-;; MinimapTilePaletteTable:
-;; 	DW !MinimapPalette0<<10|$2000, !MinimapPalette1<<10|$2000, !MinimapPalette2<<10|$2000, !MinimapPalette3<<10|$2000
-;; 	DW !MinimapPalette4<<10|$2000, !MinimapPalette5<<10|$2000, !MinimapPalette6<<10|$2000, !MinimapPalette7<<10|$2000
+ORG $90AC0C
+MinimapTilePaletteTable:
+	DW !MinimapPalette0<<10|$2000, !MinimapPalette1<<10|$2000, !MinimapPalette2<<10|$2000, !MinimapPalette3<<10|$2000
+	DW !MinimapPalette4<<10|$2000, !MinimapPalette5<<10|$2000, !MinimapPalette6<<10|$2000, !MinimapPalette7<<10|$2000
 
 
 ORG $90E734 : JSL MinimapASM
@@ -174,16 +174,16 @@ org $80987C
         dw new_irq_table
 
 ;; IRQ parameters
-!vcounter_target_begin = $02
-!vcounter_target_colors = $1d
-!vcounter_target_end = $1f
-!hcounter_target = $b0
+!vcounter_target_begin = 2
+!vcounter_target_colors = 28
+!vcounter_target_end = 31
+!hcounter_target = 184
 !hcounter_target_gameplay = !hcounter_target
 !hcounter_target_door_transitions = !hcounter_target
-!hcounter_end_hud_offset #= 32
+!hcounter_end_hud_offset #= 0
 
 ;; raise HUD 2 pixels to have extra scanlines to restore colors
-!hud_draw_offset = 2
+!hud_draw_offset = 3
 
 org $888338
         jsl raise_hud
@@ -282,7 +282,7 @@ endmacro
 ;; - setup the next IRQ (new) late on scanline 2
 ;; This new "end begin HUD" IRQ will :
 ;; - disable F-blank
-;; - setup "end HUD" IRQ (new) on scanline 29
+;; - setup "end HUD" IRQ (new) on scanline 28
 ;; This new "end HUD" IRQ will :
 ;; - enable F-blank
 ;; - restore colors

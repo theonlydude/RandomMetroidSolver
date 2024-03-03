@@ -41,6 +41,10 @@ org $8097D4
         db !vcounter_target
 org $8097D7
         db !hcounter_target
+org $809634
+.door_fblank:
+        ;; restore vanilla fblank for door transition VRAM update
+        LDA #$80 : STA $2100
 
 
 org map_get_room_minimap_table

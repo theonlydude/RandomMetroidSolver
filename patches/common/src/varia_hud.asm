@@ -28,6 +28,7 @@ incsrc "event_list.asm"
 
 incsrc "sym/objectives.asm"
 incsrc "sym/seed_display.asm"
+incsrc "sym/map.asm"
 
 !hudposition = $0006
 !digit_0 = $0C10               ; new font in modified HUD gfx included in map patch
@@ -182,7 +183,7 @@ org $809B99
 	BRA ++
 	+
 	CMP $14 : BCC +
-	LDA #BGtile($4f, 7, 1, 0, 0)
+	LDA.w map_etank_tile
 	BRA ++
 	+
 	LDA #$3430

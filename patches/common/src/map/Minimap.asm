@@ -201,11 +201,6 @@ org $82A104
 org $82809C
         jsl raise_hud_loading
 
-;; replace etank tile with a custom one using palette 7,
-;; so etanks don't change color with minimap
-org $809BDC
-        ldx.w #BGtile($4f, 7, 1, 0, 0)
-
 ;; normal explored color
 !pal2_idx = 9
 ;; normal unexplored color
@@ -337,7 +332,15 @@ org $8097D7
 org $809634
         jsr door_transition_fblank : nop : nop
 
+;; replace etank tile with a custom one using palette 7,
+;; so etanks don't change color with minimap
+org $809BDC
+        ldx.w etank_tile
+
 org $80d600
+etank_tile:                     ; put this in ROM to be able to disable the minimap HUD colors
+        dw BGtile($4f, 7, 1, 0, 0)
+
 new_irq_table:
         dw $966E, $9680
         dw irq_colors_begin_hud_main_gameplay    ; IRQ cmd $04: main gameplay begin hud drawing

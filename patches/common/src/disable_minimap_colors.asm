@@ -51,3 +51,7 @@ org map_get_room_minimap_table
 get_room_minimap_table:
         lda #map_MinimapTilePaletteTable
         rtl
+
+;; vanilla etank tile
+org map_etank_tile
+        dw $2831

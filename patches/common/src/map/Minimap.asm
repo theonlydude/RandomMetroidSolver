@@ -177,12 +177,12 @@ org $80987C
 !vcounter_target_begin = 2
 !vcounter_target_colors = 28
 !vcounter_target_end = 31
-!hcounter_target = 176
+!hcounter_target = 172
 !hcounter_target_gameplay = !hcounter_target
 !hcounter_target_door_transitions = !hcounter_target
 !hcounter_end_hud_offset #= 0
 
-;; raise HUD 2 pixels to have extra scanlines to restore colors
+;; raise HUD 3 pixels to have extra scanlines to restore colors
 !hud_draw_offset = 3
 
 org $888338
@@ -259,14 +259,15 @@ macro addWhite()
         lda.b #$ff : sta.w !CGDATA : sta.w !CGDATA
 endmacro
 
-macro beginFBlank()
-        lda.b #$80 : sta.l !INIDISP_begin_fblank
-print "begin fblank ", pc
-endmacro
-
 macro clearFBlank()
         ;; disables F-blank, but turn beam black to avoid glitches
         lda.b #0 : sta.l !INIDISP_end_fblank
+endmacro
+
+macro beginFBlank()
+        %clearFBlank()
+        lda.b #$80 : sta.l !INIDISP_begin_fblank
+print "begin fblank ", pc
 endmacro
 
 macro endFBlank()
@@ -332,6 +333,9 @@ org $8097D4
         db !vcounter_target_colors
 org $8097D7
         db !hcounter_target_door_transitions+!hcounter_end_hud_offset
+
+org $809634
+        jsr door_transition_fblank : nop : nop
 
 org $80d600
 new_irq_table:
@@ -605,6 +609,10 @@ irq_colors_end_hud_horizontal_transition_end:
         %a8()
         %endFBlank()
         jmp $97F5
+
+door_transition_fblank:
+        %beginFBlank()
+        rts
 
 load_target_palette:
         ;; Prevent HUD map colors from gradually changing (e.g. to blue/pink) during door transition

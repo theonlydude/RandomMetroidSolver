@@ -247,14 +247,6 @@ class CommonSolver(object):
         self.lastAP = self.container.lastAP()
         self.lastArea = self.container.lastArea()
 
-        # TODO::keep that ? => no, we'll add a path to objectives to visite objective APs
-        # some APs required by some objectives are not in locations 'access from',
-        # so as an heuristic also add available APs adjacent to lastAP
-        #adjacentAPs = self.areaGraph.getAdjacentAPs(self.lastAP, self.smbm)
-        #self.log.debug("add adjacent APs: ['{}'] for AP {}".format(adjacentAPs, self.lastAP))
-        #self.visitedAPs.update(adjacentAPs)
-        #self.log.debug("visited aps: {}".format(sorted(self.visitedAPs)))
-
     def getLocIndex(self, locName):
         for (i, loc) in enumerate(self.visitedLocations):
             if loc.Name == locName:
@@ -698,14 +690,13 @@ class CommonSolver(object):
                                 self.lastAP = lastAP.Name
                                 self.lastArea = lastAP.SolveArea
 
-                            # TODO::add path in objective completion for solver spoiler log
                             self.container.completeObjective(goalName, self.lastAP, self.lastArea, paths)
 
                             for module in self.modules:
                                 module.addObjective(goalName)
 
                             # TODO::always create a rollback point when completing an objective ?
-                            # TODO::it means that we have to priorize objective or location after a rollback (to
+                            #       it means that we have to priorize objective or location after a rollback (to
                             #       not complete the rollbacked objective right away),
                             #       so it's a big change... try with jm first to see if it happens
 

@@ -54,9 +54,6 @@ class StandardSolver(CommonSolver):
         self.runtimeLimiter = RuntimeLimiter(args.runtimeLimit_s)
 
     def solveRom(self):
-        self.lastAP = self.romConf.startLocation
-        self.lastArea = self.romConf.startArea
-
         (self.difficulty, self.itemsOk) = self.computeDifficulty()
         (self.knowsUsed, self.knowsKnown, self.knowsUsedList) = self.getKnowsUsed()
 

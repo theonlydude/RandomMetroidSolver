@@ -572,8 +572,8 @@ class CommonSolver(object):
             if solver.relaxedEndCheck:
                 return SMBool(True)
             else:
-                hasEnoughMinors = solver.pickup.enoughMinors(sm, solver.minorLocations)
-                hasEnoughMajors = solver.pickup.enoughMajors(sm, solver.majorLocations)
+                hasEnoughMinors = solver.pickup.enoughMinors(sm, solver.container.minorLocations)
+                hasEnoughMajors = solver.pickup.enoughMajors(sm, solver.container.majorLocations)
                 hasEnoughItems = hasEnoughMajors and hasEnoughMinors
                 return SMBool(hasEnoughItems)
 
@@ -628,6 +628,9 @@ class CommonSolver(object):
         # the next collected item is the one with the smallest difficulty,
         # if equality between major and minor, take major first.
 
+        self.lastAP = self.romConf.startLocation
+        self.lastArea = self.romConf.startArea
+
         self.container = SolverContainer(self.locations, self.conf, self.romConf)
         mbLoc = self.container.getLoc('Mother Brain')
         if self.objectives.tourianRequired:
@@ -635,11 +638,13 @@ class CommonSolver(object):
             mbLoc.AccessFrom['Golden Four'] = self.getMotherBrainAccess()
             mbLoc.Available = self.getMotherBrainAvailable()
             self.endGameLoc = mbLoc
+            self.log.debug("tourian is required, end game location is mother brain")
         else:
             # remove mother brain location and replace it with gunship loc
             gunship = self.getGunship()
             self.container.updateEndGameLocation(gunship)
             self.endGameLoc = gunship
+            self.log.debug("tourian is disabled, end game location is gunship")
 
         self.log.debug("{}: available major: {}, available minor: {}".format(
             self.conf.pickupStrategy, len(self.container.majorLocations), len(self.container.minorLocations))
@@ -655,7 +660,9 @@ class CommonSolver(object):
             if self.runtimeLimiter.expired():
                 return (-1, False)
 
+            self.log.debug("################################ new solver step ################################")
             self.log.debug("Current AP/Area: {}/{}".format(self.lastAP, self.lastArea))
+            self.log.debug("Objectives: {}".format(self.objectives.getState()))
 
             # check if a new objective can be completed
             goals = self.objectives.checkGoals(self.smbm, self.lastAP)
@@ -669,18 +676,37 @@ class CommonSolver(object):
                         visitedLocNames = set([loc.Name for loc in self.container.visitedLocations()])
                         self.log.debug("remaining required APs: {}".format([ap for ap in requiredAPs if ap not in self.container.visitedAPs()]))
                         self.log.debug("remaining required locs: {}".format([loc for loc in requiredLocs if loc not in visitedLocNames]))
-                        # TODO::first check required locs, then if ok:
-                        #  extract missing APs and visit them to get objective path
-                        if (set(requiredAPs).issubset(self.container.visitedAPs())
-                            and set(requiredLocs).issubset(visitedLocNames)):
+                        # first check required locs
+                        if set(requiredLocs).issubset(visitedLocNames):
+                            # extract missing APs and visit them to get objective path
+                            missingAPs = set(requiredAPs) - self.container.visitedAPs()
+                            paths = None
+                            if missingAPs:
+                                paths = self.areaGraph.exploreAPs(self.smbm, self.lastAP, missingAPs,
+                                                                  self.conf.difficultyTarget)
+                                if not paths:
+                                    self.log.debug("can't access missings APs for objective {}".format(goalName))
+                                    continue
+
                             self.log.debug("complete objective {}".format(goalName))
 
-                            # TODO::if some aps have been visited to complete the objectives,
+                            # if some aps have been visited to complete the objectives,
                             #  use them to update last AP/Area
-                            self.container.completeObjective(goalName, self.lastAP, self.lastArea)
+                            if paths is not None:
+                                lastAP = paths[-1].path[-1]
+                                self.lastAP = lastAP.Name
+                                self.lastArea = lastAP.SolveArea
+
+                            # TODO::add path in objective completion for solver spoiler log
+                            self.container.completeObjective(goalName, self.lastAP, self.lastArea, paths)
 
                             for module in self.modules:
                                 module.addObjective(goalName)
+
+                            # TODO::always create a rollback point when completing an objective ?
+                            # TODO::it means that we have to priorize objective or location after a rollback (to
+                            #       not complete the rollbacked objective right away),
+                            #       so it's a big change... try with jm first to see if it happens
 
                             completed = True
                             break
@@ -691,7 +717,7 @@ class CommonSolver(object):
                 if completed:
                     continue
             else:
-                self.log.debug("no possible objectives")
+                self.log.debug("no possible objectives, remaining: {}".format(goals.keys()))
 
             # compute the difficulty of all the locations
             self.computeLocationsDifficulty(self.container.majorLocations)

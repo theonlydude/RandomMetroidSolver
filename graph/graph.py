@@ -55,7 +55,7 @@ class AccessPoint(object):
         roomInfo = copy.deepcopy(self.RoomInfo) if self.RoomInfo is not None else None
         start = copy.deepcopy(self.Start) if self.Start is not None else None
         # in any case, do not copy connections
-        return AccessPoint(self.Name, self.GraphArea, self.intraTransitions, self.traverse,
+        return AccessPoint(self.Name, self.GraphArea, self.SolveArea, self.intraTransitions, self.traverse,
                            exitInfo, entryInfo, roomInfo,
                            self.Internal, self.Boss, self.Escape,
                            start, self.DotOrientation)

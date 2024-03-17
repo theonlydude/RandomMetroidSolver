@@ -545,7 +545,7 @@ class CommonSolver(object):
         # sometimes you can't get all locations because of restricted locs, so allow to go to mother brain
         if self.endGameLoc.Name == 'Mother Brain' and self.conf.pickupStrategy == 'all':
             self.relaxedEndCheck = True
-            self.computeLocationsDifficulty(self.majorLocations)
+            self.computeLocationsDifficulty(self.container.majorLocations)
             self.relaxedEndCheck = False
             return self.endGameLoc.difficulty == True
         else:
@@ -848,7 +848,7 @@ class CommonSolver(object):
 
     def filterScavengerLocs(self, majorsAvailable):
         huntInProgress, index = self.getScavengerHuntState()
-        if huntInProgress and index < len(self.scavengerOrder)-1:
+        if huntInProgress and index < len(self.romConf.scavengerOrder)-1:
             self.log.debug("Scavenger hunt in progress, {}/{}".format(index, len(self.romConf.scavengerOrder)-1))
             # remove all next locs in the hunt
             nextHuntLocs = self.romConf.scavengerOrder[index+1:]

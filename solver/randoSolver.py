@@ -7,7 +7,7 @@ from solver.conf import RandoSolverConf
 from solver.comeback import ComeBack
 from solver.standardSolver import StandardSolver
 from solver.out import Out
-from solver.runtimeLimiter import runtimeLimiter
+from solver.runtimeLimiter import RuntimeLimiter
 from utils.parameters import easy
 from utils.objectives import Objectives
 import utils.log

@@ -61,10 +61,10 @@ class SolverContainer(object):
         step = SolverStepLocation(location, itemName, _class)
         self.steps.append(step)
 
-    def completeObjective(self, objectiveName, ap, area):
+    def completeObjective(self, objectiveName, ap, area, paths):
         # add one objective to steps
         Objectives.setGoalCompleted(objectiveName, True)
-        step = SolverStepObjective(objectiveName, ap, area)
+        step = SolverStepObjective(objectiveName, ap, area, paths)
         self.steps.append(step)
 
     def currentStep(self):
@@ -106,8 +106,8 @@ class SolverContainer(object):
     def updateEndGameLocation(self, gunship):
         # remove mother brain location and replace it with gunship loc
         mbLoc = self.getLoc('Mother Brain')
-        self.locations.remove(mbLoc)
-        self.locations.append(gunship)
+        self.majorLocations.remove(mbLoc)
+        self.majorLocations.append(gunship)
 
 class SolverStep(object):
     # instead of using several objects to keep visited locations, visited items, visited APs, completed objectives,
@@ -162,12 +162,17 @@ class SolverStepLocation(SolverStep):
                 smbm.removeItem(item)
 
 class SolverStepObjective(SolverStep):
-    def __init__(self, objectiveName, lastAP, lastArea):
+    def __init__(self, objectiveName, lastAP, lastArea, paths):
         self.log = utils.log.get('SolverStepObjective')
         self.objectiveName = objectiveName
         self.lastAP = lastAP
         self.lastArea = lastArea
         self.APs = set(self.lastAP)
+        self.paths = paths
+        if self.paths is not None:
+            pathAPs = [ap.Name for path in self.paths for ap in path.path]
+            self.log.debug("add visited path APs: {} for objective {}".format(pathAPs, objectiveName))
+            self.APs.update(pathAPs)
 
     def rollback(self, container, smbm):
         self.log.debug("rollback objective {}".format(self.objectiveName))

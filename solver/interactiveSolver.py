@@ -321,8 +321,6 @@ class InteractiveSolver(CommonSolver):
         # backup
         locationsBck = self.locations[:]
 
-        self.lastAP = self.startLocation
-        self.lastArea = self.startArea
         (self.difficulty, self.itemsOk) = self.computeDifficulty()
 
         if self.itemsOk == False:

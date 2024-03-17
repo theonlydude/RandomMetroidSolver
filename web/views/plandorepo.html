@@ -179,6 +179,11 @@ function hideUploadPopup() {
     document.getElementById("uploadPopup").style.display = "none";
 }
 
+var webServInProgress = false;
+function interfaceIsFrozen() {
+    return webServInProgress == true;
+}
+
 var plandoROMBytes = null;
 var plandoUpdateROMBytes = null;
 var vanillaROMBytes = null;
@@ -374,8 +379,10 @@ function checkInput(e) {
 }
 
 function downloadPlando(plando) {
+    if(interfaceIsFrozen()) {
+        return;
+    }
     console.log("downloadPlando: "+plando);
-
     if(vanillaROMBytes == null) {
         alert("Please select a vanilla ROM first");
         return;
@@ -383,6 +390,7 @@ function downloadPlando(plando) {
 
     var dataDict = {"plando": plando}
 
+    webServInProgress = true;
     var request = $.ajax({
       url: "{{=URL(f='downloadPlandoWebService')}}",
       method: "POST",
@@ -408,6 +416,8 @@ function unpack_2bytes(ips, i) {
 }
 
 function AjaxPlandoDownloadCompleted(data) {
+    webServInProgress = false;
+
     // with items/Locations patch the local rom in memory
     var bytes = vanillaROMBytes;
 
@@ -483,6 +493,10 @@ function generateRawData(vanillaBytes, plandoBytes) {
 }
 
 function uploadPlando() {
+    if(interfaceIsFrozen()) {
+        return;
+    }
+
     console.log("uploadPlando");
 
     // check that both vanilla and plando ROMs are set
@@ -504,6 +518,7 @@ function uploadPlando() {
     };
 
 
+    webServInProgress = true;
     var request = $.ajax({
       url: "{{=URL(f='uploadPlandoWebService')}}",
       method: "POST",
@@ -517,6 +532,7 @@ function uploadPlando() {
 
 function AjaxUploadPlandoCompleted(data) {
     console.log("AjaxUploadPlandoCompleted");
+    webServInProgress = false;
 
     clearSeed("vanillaROM");
     clearSeed("plandoROM");
@@ -529,6 +545,7 @@ function AjaxUploadPlandoCompleted(data) {
 }
 
 function ajaxFail(jqXHR, textStatus) {
+    webServInProgress = false;
     document.getElementById("flash").innerHTML = jqXHR.responseText;
     $('#flash').show();
 }
@@ -544,10 +561,15 @@ function displayMessage() {
 
 
 function ratePlando(plando, purePlando) {
+    if(interfaceIsFrozen()) {
+        return;
+    }
+
     var dataDict = {
         "plando": plando,
         "rate": document.getElementById("rate"+purePlando).value};
 
+    webServInProgress = true;
     var request = $.ajax({
       url: "{{=URL(f='plandoRateWebService')}}",
       method: "POST",
@@ -608,6 +630,7 @@ function updatePlandoRating(plando, rate, count) {
 
 function AjaxPlandoRateCompleted(data) {
     console.log("AjaxPlandoRateCompleted");
+    webServInProgress = false;
 
     var msg = data["msg"];
     var rate = data["rate"];
@@ -637,6 +660,10 @@ function hideDeletePopup() {
 }
 
 function deletePlando() {
+    if(interfaceIsFrozen()) {
+        return;
+    }
+
     var plandoName = document.getElementById("deletePlandoName").value;
     var plandoKey = document.getElementById("deletePlandoKey").value;
 
@@ -645,6 +672,7 @@ function deletePlando() {
         "plandoKey": plandoKey
     }
 
+    webServInProgress = true;
     var request = $.ajax({
       url: "{{=URL(f='deletePlandoWebService')}}",
       method: "POST",
@@ -657,6 +685,7 @@ function deletePlando() {
 }
 
 function AjaxPlandoDeleteCompleted(data) {
+    webServInProgress = false;
     hideDeletePopup();
     alert(data);
     // reload the page to remove the deleted plando
@@ -681,6 +710,10 @@ function hideUpdatePopup() {
 }
 
 function updatePlando() {
+    if(interfaceIsFrozen()) {
+        return;
+    }
+
     console.log("updatePlando");
 
     // check that both vanilla ROMs is set if plando ROM is set
@@ -702,6 +735,7 @@ function updatePlando() {
         dataDict["romData"] = generateRawData(vanillaROMBytes, plandoUpdateROMBytes);
     }
 
+    webServInProgress = true;
     var request = $.ajax({
       url: "{{=URL(f='updatePlandoWebService')}}",
       method: "POST",
@@ -715,6 +749,7 @@ function updatePlando() {
 
 function AjaxUpdatePlandoCompleted(data) {
     console.log("AjaxUpdatePlandoCompleted");
+    webServInProgress = false;
 
     clearSeed("vanillaROM");
     clearSeed("updatePlandoROM");

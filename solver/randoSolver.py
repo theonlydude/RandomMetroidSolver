@@ -3,7 +3,7 @@ import time, copy
 from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
 from logic.helpers import Pickup
 from graph.graph_utils import getAccessPoint
-from solver.conf import RandoSolverConf
+from solver.conf import RandoSolverConf, RomConf
 from solver.comeback import ComeBack
 from solver.standardSolver import StandardSolver
 from solver.out import Out
@@ -17,6 +17,7 @@ class RandoSolver(StandardSolver):
         self.log = utils.log.get('Solver')
 
         self.conf = RandoSolverConf()
+        self.romConf = RomConf()
 
         # optional modules
         self.modules = []
@@ -33,11 +34,11 @@ class RandoSolver(StandardSolver):
         self.comeBack = ComeBack(self)
 
         # load ROM info, patches are already loaded by the rando. get the graph from the rando too
-        self.conf.majorsSplit = majorsSplit
-        self.conf.startLocation = startLocation
-        self.conf.startArea = getAccessPoint(startLocation).Start['solveArea']
+        self.romConf.majorsSplit = majorsSplit
+        self.romConf.startLocation = startLocation
+        self.romConf.startArea = getAccessPoint(startLocation).Start['solveArea']
         self.areaGraph = areaGraph
-        self.escapeTransition = []
+        self.romConf.escapeTransition = []
 
         self.objectives = Objectives()
 

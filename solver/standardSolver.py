@@ -70,7 +70,7 @@ class StandardSolver(CommonSolver):
         return [loc for loc in self.container.majorLocations if loc.difficulty.bool == False and loc.itemName not in ['Nothing', 'NoEnergy']]
 
     def getRemainMinors(self):
-        if self.conf.majorsSplit == 'Full':
+        if self.romConf.majorsSplit == 'Full':
             return None
         return [loc for loc in self.container.minorLocations if loc.difficulty.bool == False and loc.itemName not in ['Nothing', 'NoEnergy']]
 

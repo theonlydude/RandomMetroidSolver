@@ -188,61 +188,73 @@ class OutConsole(Out):
         else:
             sys.exit(1)
 
-    def printPath(self, message, locations, displayAPs=True, objectives=None):
+    def printPathHead(self, message):
         print("")
         print(message)
         print('{} {:>48} {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'.format("Z", "Location Name", "Area", "Sub Area", "Distance", "Item", "Difficulty", "Knows used", "Items used"))
         print('-'*150)
-        lastAP = None
-        for step, loc in enumerate(locations):
-            if objectives is not None:
-                for objStep, objName in objectives:
-                    if objStep == step:
-                        print(" Objective completed: {} ".format(objName).center(160, '='))
 
-            if displayAPs == True and loc.path is not None:
-                path = [ap.Name for ap in loc.path]
-                lastAP = path[-1]
-                if not (len(path) == 1 and path[0] == lastAP):
-                    path = " -> ".join(path)
-                    pathDiff = loc.pathDifficulty
-                    print('{}: {} {} {} {}'.format('Path', path, round(float(pathDiff.difficulty), 2), sorted(pathDiff.knows), sorted(list(set(pathDiff.items)))))
-            line = '{} {:>48}: {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'
+    def printLocation(self, loc, displayAPs):
+        if displayAPs == True and loc.path is not None:
+            path = [ap.Name for ap in loc.path]
+            if len(path) > 1:
+                path = " -> ".join(path)
+                pathDiff = loc.pathDifficulty
+                print('{}: {} {} {} {}'.format('Path', path, round(float(pathDiff.difficulty), 2), sorted(pathDiff.knows), sorted(list(set(pathDiff.items)))))
+        line = '{} {:>48}: {:>12} {:>34} {:>8} {:>16} {:>14} {} {}'
 
-            if loc.locDifficulty is not None:
-                fixEnergy(loc.locDifficulty.items)
+        if loc.locDifficulty is not None:
+            fixEnergy(loc.locDifficulty.items)
 
-                print(line.format('Z' if loc.isChozo() else ' ',
-                                  loc.Name,
-                                  loc.Area,
-                                  loc.SolveArea,
-                                  loc.distance if loc.distance is not None else 'nc',
-                                  loc.itemName,
-                                  round(float(loc.locDifficulty.difficulty), 2) if loc.locDifficulty is not None else 'nc',
-                                  sorted(loc.locDifficulty.knows) if loc.locDifficulty is not None else 'nc',
-                                  sorted(list(set(loc.locDifficulty.items))) if loc.locDifficulty is not None else 'nc'))
-            elif loc.difficulty is not None:
-                fixEnergy(loc.difficulty.items)
+            print(line.format('Z' if loc.isChozo() else ' ',
+                              loc.Name,
+                              loc.Area,
+                              loc.SolveArea,
+                              loc.distance if loc.distance is not None else 'nc',
+                              loc.itemName,
+                              round(float(loc.locDifficulty.difficulty), 2) if loc.locDifficulty is not None else 'nc',
+                              sorted(loc.locDifficulty.knows) if loc.locDifficulty is not None else 'nc',
+                              sorted(list(set(loc.locDifficulty.items))) if loc.locDifficulty is not None else 'nc'))
+        elif loc.difficulty is not None:
+            fixEnergy(loc.difficulty.items)
 
-                print(line.format('Z' if loc.isChozo() else ' ',
-                                  loc.Name,
-                                  loc.Area,
-                                  loc.SolveArea,
-                                  loc.distance if loc.distance is not None else 'nc',
-                                  loc.itemName,
-                                  round(float(loc.difficulty.difficulty), 2),
-                                  sorted(loc.difficulty.knows),
-                                  sorted(list(set(loc.difficulty.items)))))
+            print(line.format('Z' if loc.isChozo() else ' ',
+                              loc.Name,
+                              loc.Area,
+                              loc.SolveArea,
+                              loc.distance if loc.distance is not None else 'nc',
+                              loc.itemName,
+                              round(float(loc.difficulty.difficulty), 2),
+                              sorted(loc.difficulty.knows),
+                              sorted(list(set(loc.difficulty.items)))))
+        else:
+            print(line.format('Z' if loc.isChozo() else ' ',
+                              loc.Name,
+                              loc.Area,
+                              loc.SolveArea,
+                              loc.distance if loc.distance is not None else 'nc',
+                              loc.itemName,
+                              'nc',
+                              'nc',
+                              'nc'))
+
+
+    def printUnifiedPath(self, message, container):
+        self.printPathHead(message)
+        for step in container.steps:
+            if container.isStepLocation(step):
+                self.printLocation(step.location, displayAPs=True)
             else:
-                print(line.format('Z' if loc.isChozo() else ' ',
-                                  loc.Name,
-                                  loc.Area,
-                                  loc.SolveArea,
-                                  loc.distance if loc.distance is not None else 'nc',
-                                  loc.itemName,
-                                  'nc',
-                                  'nc',
-                                  'nc'))
+                if step.paths is not None:
+                    for path in step.paths:
+                        display_path = " -> ".join([ap.Name for ap in path.path])
+                        print('{}: {} {} {} {}'.format('Path', display_path, round(float(path.pdiff.difficulty), 2), sorted(path.pdiff.knows), sorted(list(set(path.pdiff.items)))))
+                print(" Objective completed: {} ".format(step.objectiveName).center(160, '='))
+
+    def printPath(self, message, locations, displayAPs=True, objectives=None):
+        self.printPathHead(message)
+        for loc in locations:
+            self.printLocation(loc, displayAPs)
 
     def displayOutput(self):
         s = self.solver
@@ -254,31 +266,31 @@ class OutConsole(Out):
 
         # print generated path
         if s.conf.displayGeneratedPath == True:
-            self.printPath("Generated path ({}/101):".format(len(s.visitedLocations)), s.visitedLocations, displayAPs=True, objectives=s.completedObjectives)
+            self.printUnifiedPath("Generated path:", s.container)
 
             # if we've aborted, display missing techniques and remaining locations
             if s.difficulty == -1:
                 self.printPath("Next locs which could have been available if more techniques were known:", s.tryRemainingLocs(), displayAPs=True)
 
                 remainMajors = s.getRemainMajors()
-                if len(remainMajors) > 0:
+                if remainMajors:
                     self.printPath("Remaining major locations:", remainMajors, displayAPs=False)
 
                 remainMinors = s.getRemainMinors()
-                if remainMinors is not None and len(remainMinors) > 0:
+                if remainMinors:
                     self.printPath("Remaining minor locations:", remainMinors, displayAPs=False)
 
             else:
                 # if some locs are not picked up display those which are available
                 # and those which are not
                 skippedMajors = s.getSkippedMajors()
-                if len(skippedMajors) > 0:
+                if skippedMajors:
                     self.printPath("Skipped major locations:", skippedMajors, displayAPs=False)
                 else:
                     print("No skipped major locations")
 
                 unavailMajors = s.getUnavailMajors()
-                if len(unavailMajors) > 0:
+                if unavailMajors:
                     self.printPath("Unaccessible major locations:", unavailMajors, displayAPs=False)
                 else:
                     print("No unaccessible major locations")

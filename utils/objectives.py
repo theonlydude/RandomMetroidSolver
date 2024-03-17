@@ -277,6 +277,10 @@ def getEnemiesAccessPoints(nmyType):
         allAPs += list(apDict.keys())
     return list(set(allAPs))
 
+def getEnemiesAccessibleAccessPoints(nmyType):
+    accessibleApNames = [ap.Name for ap in Objectives.accessibleAPs]
+    return [ap for ap in getEnemiesAccessPoints(nmyType) if ap in accessibleApNames]
+
 def getEnemiesEscapeAccessPoints(nmyType):
     return (1, getEnemiesAccessPoints(nmyType))
 
@@ -687,7 +691,7 @@ _goalsList = [
          mapIcons=getEnemiesMapIcons("SpacePirates"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Space Pirates"),
-         objCompletedFuncVisit=lambda ap: (getEnemiesAccessPoints("Space Pirates"), [])),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessibleAccessPoints("Space Pirates"), [])),
     Goal("kill all ki hunters", "enemies",
          getEnemiesLogicFunc("Ki Hunters"),
          "kill_all_ki_hunters", romInProgressFunc="kill_all_ki_hunters_progress",
@@ -696,7 +700,7 @@ _goalsList = [
          mapIcons=getEnemiesMapIcons("KiHunters"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Ki Hunters"),
-         objCompletedFuncVisit=lambda ap: (getEnemiesAccessPoints("Ki Hunters"),[])),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessibleAccessPoints("Ki Hunters"),[])),
     Goal("kill all beetoms", "enemies",
          getEnemiesLogicFunc("Beetoms"),
          "kill_all_beetoms", romInProgressFunc="kill_all_beetoms_progress",
@@ -704,7 +708,7 @@ _goalsList = [
          mapIcons=getEnemiesMapIcons("Beetoms"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Beetoms"),
-         objCompletedFuncVisit=lambda ap: (getEnemiesAccessPoints("Beetoms"), [])),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessibleAccessPoints("Beetoms"), [])),
     Goal("kill all cacatacs", "enemies",
          getEnemiesLogicFunc("Cacatacs"),
          "kill_all_cacatacs", romInProgressFunc="kill_all_cacatacs_progress",
@@ -712,7 +716,7 @@ _goalsList = [
          mapIcons=getEnemiesMapIcons("Cacatacs"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Cacatacs"),
-         objCompletedFuncVisit=lambda ap: (getEnemiesAccessPoints("Cacatacs"), [])),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessibleAccessPoints("Cacatacs"), [])),
     Goal("kill all kagos", "enemies",
          getEnemiesLogicFunc("Kagos"),
          "kill_all_kagos", romInProgressFunc="kill_all_kagos_progress",
@@ -720,7 +724,7 @@ _goalsList = [
          mapIcons=getEnemiesMapIcons("Kagos"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Kagos"),
-         objCompletedFuncVisit=lambda ap: (getEnemiesAccessPoints("Kagos"), [])),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessibleAccessPoints("Kagos"), [])),
     Goal("kill all yapping maws", "enemies",
          getEnemiesLogicFunc("Yapping Maws"),
          "kill_all_yapping_maws", romInProgressFunc="kill_all_yapping_maws_progress",
@@ -729,7 +733,7 @@ _goalsList = [
          mapIcons=getEnemiesMapIcons("YappingMaws"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Yapping Maws"),
-         objCompletedFuncVisit=lambda ap: (getEnemiesAccessPoints("Yapping Maws"), []))
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessibleAccessPoints("Yapping Maws"), []))
 ]
 
 _goals = {goal.name:goal for goal in _goalsList}

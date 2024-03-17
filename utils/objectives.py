@@ -921,6 +921,12 @@ class Objectives(object):
         return SMBool(any(ap.GraphArea == area for ap in availAPs))
 
     # XXX consider "explore map" equivalent to "access all locations and APs"
+    @staticmethod
+    def locPostAvailable(sm, loc):
+        if loc.PostAvailable is None:
+            return True
+        diff = loc.PostAvailable(sm)
+        return diff.bool == True and diff.difficulty < Objectives.maxDiff
 
     @staticmethod
     def canExploreArea(sm, rootApName, area):
@@ -942,7 +948,7 @@ class Objectives(object):
         # in solver we don't want to recompute already visited locations difficulty, so copy them first
         areaLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea == area]
         LOG.debug("canExploreArea {} all   locs: {}".format(area, sorted([loc.Name for loc in areaLocs])))
-        availLocs = graph.getAvailableLocations(areaLocs, sm, maxDiff, rootApName)
+        availLocs = [loc for loc in graph.getAvailableLocations(areaLocs, sm, maxDiff, rootApName) if Objectives.locPostAvailable(sm, loc)]
         LOG.debug("canExploreArea {} avail locs: {}".format(area, sorted([loc.Name for loc in availLocs])))
         if not areaLocs:
             LOG.debug(f"canExploreArea {area} no loc available")
@@ -978,7 +984,7 @@ class Objectives(object):
 
         accessibleLocs = graph.getAccessibleLocations(Logic.locationsDict().values(), rootApName)
         allLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea not in skipAreas]
-        availLocs = graph.getAvailableLocations(allLocs, sm, maxDiff, rootApName)
+        availLocs = [loc for loc in graph.getAvailableLocations(allLocs, sm, maxDiff, rootApName) if Objectives.locPostAvailable(sm, loc)]
         if len(availLocs) != len(allLocs):
             if LOG.getEffectiveLevel() == logging.DEBUG:
                 missingLocs = [loc for loc in allLocs if loc not in availLocs]

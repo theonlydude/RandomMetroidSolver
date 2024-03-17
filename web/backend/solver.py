@@ -98,8 +98,8 @@ class Solver(object):
         if self.session.solver is None:
             self.session.solver = {
                 'preset': 'regular',
-                'difficultyTarget': SolverConf.defaultDifficultyTarget
-                'pickupStrategy': SolverConf.defaultPickupStrategy
+                'difficultyTarget': SolverConf.defaultDifficultyTarget,
+                'pickupStrategy': SolverConf.defaultPickupStrategy,
                 'itemsForbidden': [],
                 'romFiles': [],
                 'romFile': None,
@@ -211,31 +211,32 @@ class Solver(object):
                 if displayAPs == True and not (len(path) == 1 and path[0] == lastAP):
                     pathTable += """<tr class="grey"><td colspan="3">{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>\n""".format(" -&gt; ".join(path), """<img alt="samus" class="imageItem" src="/solver/static/images/solver/samus_run_{}.gif" title="samus" />""".format(currentSuit), self.getDiffImg(pathDiff), self.getTechniques(pathTechniques), self.getItems(pathItems))
 
-            (name, room) = location
+            if location is not None:
+                (name, room) = location
 
-            # not picked up items start with an '-'
-            if item[0] != '-':
-                pathTable += """
-    <tr class="{} {}">
-      <td>{}</td>
-      <td>{}</td>
-      <td>{}</td>
-      <td>{}</td>
-      <td>{}</td>
-      <td>{}</td>
-      <td>{}</td>
-    </tr>
-    """.format(item, self.getMinimapArea(subarea),
-               self.getRoomLink(name, room), self.getAreaLink(area), self.getSubArea(subarea),
-               self.getItemImg(item, location=name, scavengerOrder=scavengerOrder, boss="Boss" in _class),
-               self.getDiffImg(locDiff),
-               self.getTechniques(locTechniques),
-               self.getItems(locItems))
+                # not picked up items start with an '-'
+                if item[0] != '-':
+                    pathTable += """
+        <tr class="{} {}">
+          <td>{}</td>
+          <td>{}</td>
+          <td>{}</td>
+          <td>{}</td>
+          <td>{}</td>
+          <td>{}</td>
+          <td>{}</td>
+        </tr>
+        """.format(item, self.getMinimapArea(subarea),
+                   self.getRoomLink(name, room), self.getAreaLink(area), self.getSubArea(subarea),
+                   self.getItemImg(item, location=name, scavengerOrder=scavengerOrder, boss="Boss" in _class),
+                   self.getDiffImg(locDiff),
+                   self.getTechniques(locTechniques),
+                   self.getItems(locItems))
 
-                if item == 'Varia' and currentSuit == 'Power':
-                    currentSuit = 'Varia'
-                elif item == 'Gravity':
-                    currentSuit = 'Gravity'
+                    if item == 'Varia' and currentSuit == 'Power':
+                        currentSuit = 'Varia'
+                    elif item == 'Gravity':
+                        currentSuit = 'Gravity'
 
         pathTable += "</table>"
 

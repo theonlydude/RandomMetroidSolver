@@ -21,8 +21,9 @@ class CommonSolver(object):
     def loadRom(self, rom, extraSettings=None):
         # rom can be:
         #  None: for tracker seedless
-        #  dict: for tracker and web solver
-        #  file name: for console solver
+        #  dict: for tracker
+        #  json file name: for web solver
+        #  sfc file name: for console solver
         romConf = RomConf()
 
         if rom is None:

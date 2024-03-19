@@ -421,7 +421,7 @@ class AccessGraph(object):
         endPathAP = paths[-1].path[-1]
         startPathAP = paths[0].path[0]
         self.log.debug("check if can comeback from {} to {}".format(endPathAP.Name, startPathAP.Name))
-        if not self.canAccess(smbm, endPathAP.Name, startPathAP.Name, maxDiff):
+        if not self.canAccess(smbm, endPathAP.Name, startPathAP.Name, infinity):
             self.log.debug("Can't return to {} after visiting {}".format(srcAPName, missingAPsNames))
             return None
 

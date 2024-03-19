@@ -688,8 +688,8 @@ class CommonSolver(object):
                             missingAPs = set(requiredAPs) - self.container.visitedAPs()
                             paths = None
                             if missingAPs:
-                                paths = self.areaGraph.exploreAPs(self.smbm, self.lastAP, missingAPs,
-                                                                  self.conf.difficultyTarget)
+                                self.log.debug("try to access objective missing APs: {}".format(missingAPs))
+                                paths = self.areaGraph.exploreAPs(self.smbm, self.lastAP, missingAPs, infinity)
                                 if not paths:
                                     self.log.debug("can't access missings APs for objective {}".format(goalName))
                                     continue

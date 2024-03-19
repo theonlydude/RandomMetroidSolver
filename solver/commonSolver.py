@@ -125,11 +125,6 @@ class CommonSolver(object):
         self.smbm = SMBoolManager()
         self.buildGraph(romConf)
 
-        if Objectives.isCrateriaLess:
-            # remove escape transition to avoid visiting crateria locations before escape
-            self.log.debug("crateria less: remove escape transition: {}".format(romConf.escapeTransition))
-            self.areaGraph.removeTransitions("Climb Bottom Left")
-
         if self.log.getEffectiveLevel() == logging.DEBUG:
             self.log.debug("Display items at locations:")
             for loc in self.locations:
@@ -712,12 +707,6 @@ class CommonSolver(object):
                                 sorted(set(requiredAPs) - self.container.visitedAPs()))
                             )
                 if completed:
-                    # check if all objectives have been completed to put back escape transition
-                    if self.objectives.enoughGoalsCompleted() and Objectives.isCrateriaLess:
-                        self.log.debug("crateria less: put backup escape transition: {}".format(self.romConf.escapeTransition))
-                        self.areaGraph.addTransition(self.romConf.escapeTransition[0][0],
-                                                     self.romConf.escapeTransition[0][1])
-
                     continue
             else:
                 self.log.debug("no possible objectives, remaining: {}".format(goals.keys()))

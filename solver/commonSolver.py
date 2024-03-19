@@ -136,6 +136,19 @@ class CommonSolver(object):
         return getPatchDescriptionsByGroup(sorted(self.romLoader.getPatchIds()), RomFlavor.flavor)
 
     def buildGraph(self, romConf):
+        # in crateria less seeds update escape AP traverse function to be only available during escape
+        # to prevent crateria locations from being visited before escape
+        if not self.conf.interactive:
+            cbl = getAccessPoint("Climb Bottom Left")
+            if romConf.tourian == 'Disabled':
+                self.log.debug("update Climb Bottom Left traverse function in case of crateria less and tourian disabled")
+                cbl.transitions['Landing Site'] = lambda sm: SMBool(Objectives.enoughGoalsCompleted())
+
+            else:
+                self.log.debug("update Climb Bottom Left traverse function in case of crateria less and tourian enabled")
+                cbl.transitions['Landing Site'] = lambda sm: sm.wand(SMBool(Objectives.enoughGoalsCompleted()),
+                                                                     sm.haveItem("MotherBrain"))
+
         self.areaGraph = AccessGraph(Logic.accessPoints(), self.curGraphTransitions)
         Objectives.setGraph(self.areaGraph, romConf.startLocation, infinity)
 

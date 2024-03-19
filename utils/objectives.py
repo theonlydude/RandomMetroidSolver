@@ -1142,7 +1142,8 @@ class Objectives(object):
                 return
         assert False, "Can't set goal {} completion to {}, goal not active".format(goalName, completed)
 
-    def enoughGoalsCompleted(self):
+    @staticmethod
+    def enoughGoalsCompleted():
         nCompleted = len([goal for goal in Objectives.activeGoals if goal.completed])
         return nCompleted >= Objectives.nbRequiredGoals
 

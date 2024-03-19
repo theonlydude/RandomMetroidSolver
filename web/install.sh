@@ -407,6 +407,17 @@ mkdir -p ~/web2py/applications/solver/static/images/tracker/inventory/
 [ -L ~/web2py/applications/solver/static/images/tracker/inventory/Draygon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Draygon.png ~/web2py/applications/solver/static/images/tracker/inventory/Draygon.png
 [ -L ~/web2py/applications/solver/static/images/tracker/inventory/Phantoon.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Phantoon.png ~/web2py/applications/solver/static/images/tracker/inventory/Phantoon.png
 [ -L ~/web2py/applications/solver/static/images/tracker/inventory/Ridley.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/items/Ridley.png ~/web2py/applications/solver/static/images/tracker/inventory/Ridley.png
+[ -L ~/web2py/applications/solver/static/images/tracker/inventory/0.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/tracker/numbers/0.png ~/web2py/applications/solver/static/images/tracker/inventory/0.png
+[ -L ~/web2py/applications/solver/static/images/tracker/inventory/1.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/tracker/numbers/1.png ~/web2py/applications/solver/static/images/tracker/inventory/1.png
+[ -L ~/web2py/applications/solver/static/images/tracker/inventory/2.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/tracker/numbers/2.png ~/web2py/applications/solver/static/images/tracker/inventory/2.png
+[ -L ~/web2py/applications/solver/static/images/tracker/inventory/3.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/tracker/numbers/3.png ~/web2py/applications/solver/static/images/tracker/inventory/3.png
+[ -L ~/web2py/applications/solver/static/images/tracker/inventory/4.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/tracker/numbers/4.png ~/web2py/applications/solver/static/images/tracker/inventory/4.png
+[ -L ~/web2py/applications/solver/static/images/tracker/inventory/5.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/tracker/numbers/5.png ~/web2py/applications/solver/static/images/tracker/inventory/5.png
+[ -L ~/web2py/applications/solver/static/images/tracker/inventory/6.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/tracker/numbers/6.png ~/web2py/applications/solver/static/images/tracker/inventory/6.png
+[ -L ~/web2py/applications/solver/static/images/tracker/inventory/7.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/tracker/numbers/7.png ~/web2py/applications/solver/static/images/tracker/inventory/7.png
+[ -L ~/web2py/applications/solver/static/images/tracker/inventory/8.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/tracker/numbers/8.png ~/web2py/applications/solver/static/images/tracker/inventory/8.png
+[ -L ~/web2py/applications/solver/static/images/tracker/inventory/9.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/tracker/numbers/9.png ~/web2py/applications/solver/static/images/tracker/inventory/9.png
+[ -L ~/web2py/applications/solver/static/images/tracker/inventory/MotherBrain.png ] || ln -s ~/RandomMetroidSolver/web/static/tracker_sprites/bosses/MotherBrain.png ~/web2py/applications/solver/static/images/tracker/inventory/MotherBrain.png
 
 # tracker - auto tracker
 mkdir -p ~/web2py/applications/solver/static/images/tracker/

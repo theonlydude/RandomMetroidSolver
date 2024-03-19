@@ -34,7 +34,10 @@ class ModuleVCR(SolverModule):
         self.vcr.addLocation(locName, itemName)
 
     def addObjective(self, objectiveName):
-        self.vcr.addObjective(objectiveName)
+        # TODO::remove objectives from VCR to generate VCR compatible with master branch
+        # TODO::to be put back after tracker works again in this branch
+        if False:
+            self.vcr.addObjective(objectiveName)
 
     def addRollback(self, count):
         self.vcr.addRollback(count)

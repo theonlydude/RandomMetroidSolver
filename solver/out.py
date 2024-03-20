@@ -143,6 +143,7 @@ class OutWeb(Out):
             else:
                 if step.paths is not None:
                     for path in step.paths:
+                        fixEnergy(path.pdiff.items)
                         out.append([
                             None, None, None, None, None, None, None,
                             '{0:.2f}'.format(path.pdiff.difficulty),
@@ -266,6 +267,7 @@ class OutConsole(Out):
             else:
                 if step.paths is not None:
                     for path in step.paths:
+                        fixEnergy(path.pdiff.items)
                         display_path = " -> ".join([ap.Name for ap in path.path])
                         print('{}: {} {} {} {}'.format('Path', display_path, round(float(path.pdiff.difficulty), 2), sorted(path.pdiff.knows), sorted(list(set(path.pdiff.items)))))
                 print(" Objective completed: {} ".format(step.objectiveName).center(160, '='))

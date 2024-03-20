@@ -110,19 +110,21 @@ class ScavengerSolver(RandoSolver):
             return [loc for loc in scavAvailable if loc.Name != 'Plasma Beam']
         return scavAvailable
 
-    def cancelLastItems(self, count):
+    def rollback(self, count):
         # remove locs from scavOrder
-        a=len(self.visitedLocations)-count
-        for loc in self.visitedLocations[a:]:
-            if loc in self.scavOrder:
-                self.scavOrder.remove(loc)
-                self.remainingScavLocs.append(loc)
-                self.log.debug("cancel scav loc: {}".format(loc.Name))
-            if loc in self.visited:
-                self.visited.remove(loc)
+        a = len(self.container.steps) - count
+        for step in self.container.steps[a:]:
+            if self.container.isStepLocation(step):
+                loc = step.location
+                if loc in self.scavOrder:
+                    self.scavOrder.remove(loc)
+                    self.remainingScavLocs.append(loc)
+                    self.log.debug("cancel scav loc: {}".format(loc.Name))
+                if loc in self.visited:
+                    self.visited.remove(loc)
 
         # call base func
-        super(ScavengerSolver, self).cancelLastItems(count)
+        super(ScavengerSolver, self).rollback(count)
 
 class FillerScavenger(Filler):
     def __init__(self, startAP, graph, restrictions, fullContainer, endDate=infinity):

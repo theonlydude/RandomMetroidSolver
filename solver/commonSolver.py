@@ -669,6 +669,11 @@ class CommonSolver(object):
             self.log.debug("################################ new solver step ################################")
             self.log.debug("Current AP/Area: {}/{}".format(self.lastAP, self.lastArea))
             self.log.debug("Objectives: {}".format(self.objectives.getState()))
+            if self.log.getEffectiveLevel() == logging.DEBUG:
+                aps = self.areaGraph.getAvailableAccessPoints(getAccessPoint(self.lastAP), self.smbm, infinity)
+                aps = sorted([ap.Name for ap in aps])
+                self.log.debug("APs: {}".format(aps))
+            self.log.debug("SMBM: {}".format(self.smbm.getItems()))
 
             # check if a new objective can be completed
             goals = self.objectives.checkGoals(self.smbm, self.lastAP)

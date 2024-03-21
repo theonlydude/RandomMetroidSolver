@@ -173,17 +173,20 @@ org $82E21B
 org $80987C
         dw new_irq_table
 
+;; raise HUD to have extra scanlines to restore colors
+!hud_draw_offset #= 2
+
 ;; IRQ parameters
 !vcounter_target_begin = 2
-!vcounter_target_colors = 28
+!vcounter_target_colors #= 31-!hud_draw_offset
 !vcounter_target_end = 31
-!hcounter_target = 172
-!hcounter_target_gameplay = !hcounter_target
-!hcounter_target_door_transitions = !hcounter_target
-!hcounter_end_hud_offset #= 0
+!hcounter_target = 178
+!hcounter_end_hud_door_transitions_offset #= 24
 
-;; raise HUD 3 pixels to have extra scanlines to restore colors
-!hud_draw_offset = 3
+;; direct page flag to offset hcounter when HUD HDMA is not active and main gameplay IRQ is used (pause/message boxe)
+!no_hud_hdma_flag = $ce
+!no_hud_hdma_offset #= !hcounter_end_hud_door_transitions_offset ; value to offset when no_hud_hdma_offset is non-zero
+
 
 org $888338
         jsl raise_hud
@@ -200,6 +203,10 @@ org $82A104
 
 org $82809C
         jsl raise_hud_loading
+
+;;; in main gameplay, reset no hud hdma flag
+org $828B4B
+        jsl reset_no_hud_hdma_flag
 
 ;; normal explored color
 !pal2_idx = 9
@@ -260,7 +267,6 @@ macro clearFBlank()
 endmacro
 
 macro beginFBlank()
-        %clearFBlank()
         lda.b #$80 : sta.l !INIDISP_begin_fblank
 print "begin fblank ", pc
 endmacro
@@ -303,7 +309,7 @@ org $8096E8
 org $8096EB
         db !vcounter_target_colors
 org $8096EE
-        db !hcounter_target_door_transitions+!hcounter_end_hud_offset
+        db !hcounter_target+!hcounter_end_hud_door_transitions_offset
 
 ;; draygon room
 org $80972A
@@ -311,7 +317,7 @@ org $80972A
 org $80972D
         db !vcounter_target_colors
 org $809730
-        db !hcounter_target_gameplay+!hcounter_end_hud_offset
+        db !hcounter_target
 
 ;; vertical transition
 org $809768
@@ -319,7 +325,7 @@ org $809768
 org $80976B
         db !vcounter_target_colors
 org $80976E
-        db !hcounter_target_door_transitions+!hcounter_end_hud_offset
+        db !hcounter_target+!hcounter_end_hud_door_transitions_offset
 
 ;; horizontal transition
 org $8097D1
@@ -327,10 +333,8 @@ org $8097D1
 org $8097D4
         db !vcounter_target_colors
 org $8097D7
-        db !hcounter_target_door_transitions+!hcounter_end_hud_offset
+        db !hcounter_target+!hcounter_end_hud_door_transitions_offset
 
-org $809634
-        jsr door_transition_fblank : nop : nop
 
 ;; replace etank tile with a custom one using palette 7,
 ;; so etanks don't change color with minimap
@@ -396,16 +400,19 @@ irq_colors_begin_hud_main_gameplay:
         %a16()
         lda.w #$1C
         ldy.w #!vcounter_target_begin
-        ldx.w #!hcounter_target_gameplay
+        ldx.w #!hcounter_target
         rts
 
 irq_colors_begin_hud_main_gameplay_end:
         %a8()
         %endFBlank()
         %a16()
+        LDX.w #!hcounter_target
+        lda !no_hud_hdma_flag : beq +
+        ldx.w #!hcounter_target+!no_hud_hdma_offset
++
         LDA.w #$001E
         LDY.w #!vcounter_target_colors
-        LDX.w #!hcounter_target_gameplay+!hcounter_end_hud_offset
         rts
 
 irq_colors_end_hud_main_gameplay:
@@ -422,9 +429,12 @@ irq_colors_end_hud_main_gameplay:
         jsr end_hud
         %clearFBlank()
         %a16()
+        ldx.w #!hcounter_target
+        lda !no_hud_hdma_flag : beq +
+        ldx.w #!hcounter_target+!no_hud_hdma_offset
++
         lda.w #$06
         ldy.w #!vcounter_target_end
-        ldx.w #!hcounter_target_gameplay
         rts
 
 irq_colors_end_hud_main_gameplay_end:
@@ -444,7 +454,7 @@ irq_colors_begin_hud_start_transition:
         %a16()
         lda.w #$20
         ldy.w #!vcounter_target_begin
-        ldx.w #!hcounter_target_door_transitions
+        ldx.w #!hcounter_target
         rts
 
 irq_colors_begin_hud_start_transition_end:
@@ -471,7 +481,7 @@ irq_colors_end_hud_start_transition:
         %a16()
         lda.w #$0a
         ldy.w #!vcounter_target_end
-        ldx.w #!hcounter_target_door_transitions
+        ldx.w #!hcounter_target
         rts
 
 irq_colors_end_hud_start_transition_end:
@@ -489,7 +499,7 @@ irq_colors_begin_hud_draygon:
         %a16()
         lda.w #$24
         ldy.w #!vcounter_target_begin
-        ldx.w #!hcounter_target_gameplay
+        ldx.w #!hcounter_target
         rts
 
 irq_colors_begin_hud_draygon_end:
@@ -511,7 +521,7 @@ irq_colors_end_hud_draygon:
         %a16()
         lda.w #$0E
         ldy.w #!vcounter_target_end
-        ldx.w #!hcounter_target_gameplay
+        ldx.w #!hcounter_target
         rts
 
 irq_colors_end_hud_draygon_end:
@@ -529,7 +539,7 @@ irq_colors_begin_hud_vertical_transition:
         %a16()
         lda.w #$28
         ldy.w #!vcounter_target_begin
-        ldx.w #!hcounter_target_door_transitions
+        ldx.w #!hcounter_target+!hcounter_end_hud_door_transitions_offset
         rts
 
 irq_colors_begin_hud_vertical_transition_end:
@@ -558,7 +568,7 @@ irq_colors_end_hud_vertical_transition:
         %a16()
         lda.w #$12
         ldy.w #!vcounter_target_end
-        ldx.w #!hcounter_target_door_transitions
+        ldx.w #!hcounter_target+!hcounter_end_hud_door_transitions_offset
         rts
 
 irq_colors_end_hud_vertical_transition_end:
@@ -576,7 +586,7 @@ irq_colors_begin_hud_horizontal_transition:
         %a16()
         lda.w #$2C
         ldy.w #!vcounter_target_begin
-        ldx.w #!hcounter_target_door_transitions
+        ldx.w #!hcounter_target+!hcounter_end_hud_door_transitions_offset
         rts
 
 irq_colors_begin_hud_horizontal_transition_end:
@@ -605,17 +615,13 @@ irq_colors_end_hud_horizontal_transition:
         %a16()
         lda.w #$18
         ldy.w #!vcounter_target_end
-        ldx.w #!hcounter_target_door_transitions
+        ldx.w #!hcounter_target+!hcounter_end_hud_door_transitions_offset
         rts
 
 irq_colors_end_hud_horizontal_transition_end:
         %a8()
         %endFBlank()
         jmp $97F5
-
-door_transition_fblank:
-        %beginFBlank()
-        rts
 
 load_target_palette:
         ;; Prevent HUD map colors from gradually changing (e.g. to blue/pink) during door transition
@@ -683,12 +689,18 @@ raise_hud_door_transition:
 
 raise_hud_pause:
         lda.b !NMI_BG3_scroll : sta.w $0770 ; hijacked code
+        lda.b #1 : sta.b !no_hud_hdma_flag
         lda.b #!hud_draw_offset : sta.b !NMI_BG3_scroll
         rtl
 
 raise_hud_loading:
         JSL $888288     ; hijacked code: Enable HDMA objects
         JSL $88D865     ; Spawn HUD BG3 scroll HDMA object
+        rtl
+
+reset_no_hud_hdma_flag:
+        stz.b !no_hud_hdma_flag
+        lda.w #0
         rtl
 
 print "b80 end: ", pc
@@ -698,6 +710,7 @@ print "b80 end: ", pc
 minimap_color_data:
 org $80e000
 .limit:
+
 
 ;; message boxes
 
@@ -715,6 +728,8 @@ org $8582D7
 ;; prevent the game from manipulating palette 6 (useless because overwritten by IRQ handler)
 org $858152
 skip_msgbox_colors:
+        ;; set no hud hdma flag when setting up msg boxes
+        lda.b #$01 : sta.b !no_hud_hdma_flag
         bra .skip
 org $858169
 .skip:

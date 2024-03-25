@@ -13,8 +13,10 @@ org $8FF000
 	db $A0, $AD, $AC, $AD											; door out pointer for pre-bt
 	
 org $8FF006
+        ; reset boss flags
 	LDA #$0000
-	STA $7ED82A														; reset boss flag
+        STA $7ED829
+	STA $7ED82B
 	LDA #$F000														; load door pointer
 	STA $7E07B5														; change door out pointer
 	JML $8F91BB														; run original code

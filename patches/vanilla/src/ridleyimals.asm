@@ -7,12 +7,16 @@ org $83ADA0
 	db $79, $98, $40, $05, $2E, $06, $02, $00, $00, $80, $00, $00	; ridley exit, changed to pre-bt
 	
 org $8F98DC
-	db $06, $F0 													; setup asm pointer for pre-bt room
+	dw setup_bt 													; setup asm pointer for pre-bt room
+
+org $8FB358
+	dw setup_ridley														; setup asm pointer for ridley
 	
 org $8FF000
 	db $A0, $AD, $AC, $AD											; door out pointer for pre-bt
 	
 org $8FF006
+setup_bt:
         ; reset boss flags
 	LDA #$0000
         STA $7ED829
@@ -21,10 +25,7 @@ org $8FF006
 	STA $7E07B5														; change door out pointer
 	JML $8F91BB														; run original code
 	
-org $8FB358
-	db $18, $F0														; setup asm pointer for ridley
-	
-org $8FF018
+setup_ridley:
 	LDA $7ED820 													; loads event flags
 	BIT #$4000  													; checks for escape flag set
 	BEQ quit

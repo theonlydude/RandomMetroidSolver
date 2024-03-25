@@ -14,6 +14,9 @@ door_from_phantoon:
 	
 org $8F98DC
 	dw setup_asm_bt			; setup asm pointer for pre-bt room
+
+org $8FCD3D
+	dw setup_asm_phantoon		; setup asm pointer for ghost
 	
 org $8FF000
 door_ptr_bt:
@@ -30,10 +33,6 @@ setup_asm_bt:
 	STA $7E07B5			; change door out pointer
 	JML $8F91BB			; run original code
 
-org $8FCD3D
-	dw setup_asm_phantoon		; setup asm pointer for ghost
-
-org $8FF018
 setup_asm_phantoon:
 	LDA $7ED820 			; loads event flags
 	BIT #$4000  			; checks for escape flag set

@@ -4,6 +4,7 @@ import utils.log, random, copy
 from graph.graph_utils import GraphUtils, vanillaTransitions, vanillaBossesTransitions, escapeSource, escapeTargets
 from logic.logic import Logic
 from logic.smbool import SMBool
+from logic.helpers import Bosses
 from graph.graph import AccessGraphRando as AccessGraph
 from graph.graph_utils import graphAreas, getAccessPoint
 from utils.objectives import Objectives
@@ -38,14 +39,15 @@ class GraphBuilder(object):
                 forcedAreas = forcedAreas.union({goal.area for goal in Objectives.activeGoals if goal.area is not None})
                 # for the rest, base ourselves on escapeAccessPoints :
                 # - if only "1 of n" pick an area, preferably one already forced
-                # - filter out G4 AP (always there)
+                # - exclude Bosses AP, as the matching areas do not have to be there
+                bossesAPs = [Bosses.accessPoints[boss] for boss in Bosses.Golden4()]
                 for goal in Objectives.activeGoals:
                     if goal.area is None:
                         n, apNames = goal.escapeAccessPoints
                         aps = [getAccessPoint(apName) for apName in apNames]
                         if len(aps) >= n:
                             n -= len([ap for ap in aps if ap.Boss])
-                            escAreas = {ap.GraphArea for ap in aps if not ap.Boss}
+                            escAreas = {ap.GraphArea for ap in aps if ap.Name not in bossesAPs}
                             objForced = forcedAreas.intersection(escAreas)
                             escAreasList = sorted(list(escAreas))
                             while len(objForced) < n and len(escAreasList) > 0:

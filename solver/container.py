@@ -13,10 +13,13 @@ class SolverContainer(object):
         self.conf = conf
         self.romConf = romConf
 
-        self.steps = []
-
         self.locations = locations
         self.locationsDict = {loc.Name: loc for loc in locations}
+
+        self.reset()
+
+    def reset(self, reload=False):
+        self.steps = []
 
         if self.romConf.majorsSplit == 'Major':
             self.majorLocations = [loc for loc in self.locations if loc.isMajor() or loc.isBoss()]
@@ -32,6 +35,19 @@ class SolverContainer(object):
             self.majorLocations = self.locations[:] # copy
             self.minorLocations = self.majorLocations
 
+        # in seedless we can add items to the inventory, we need to keep track of them
+        self.inventoryItems = []
+
+        if reload:
+            self.resetLocsDifficulty()
+
+        # in auto tracker we can update samus current access point when she's travelling the map
+        self.overrideAP = None
+
+    def resetLocsDifficulty(self):
+        for loc in self.majorLocations:
+            loc.difficulty = None
+
     def rollback(self, count, smbm):
         self.log.debug("rollback {} steps".format(count))
         # cancel count steps
@@ -39,9 +55,40 @@ class SolverContainer(object):
             if self.steps:
                 step = self.steps.pop()
                 step.rollback(self, smbm)
+        self.overrideAP = None
+
+    def removeTrackerLocation(self, locName):
+        # used in isolver to remove mother brain location
+        loc = self.getLoc(locName)
+        self.locations.remove(loc)
+        self.locationsDict[locName]
+
+    def cancelTrackerLocation(self, location, cleanup=False):
+        for stepIndex, step in enumerate(self.steps):
+            if self.isStepLocation(step) and step.location == location:
+                break
+
+        # remove location step
+        self.steps = self.steps[0:stepIndex] + self.steps[stepIndex+1:]
+        # in tracker all locs are major
+        self.majorLocations.append(location)
+
+        if cleanup:
+            # delete location params which are set when the location is available
+            loc.difficulty = None
+            loc.distance = None
+            loc.accessPoint = None
+            loc.path = None
+
+    def updateOverrideAP(self, ap):
+        if ap != self.lastAP():
+            self.overrideAP = ap
 
     def lastAP(self):
-        if self.steps:
+        # autotracker current AP
+        if self.overrideAP is not None:
+            return self.overrideAP
+        elif self.steps:
             return self.steps[-1].lastAP
         else:
             return self.romConf.startLocation
@@ -65,12 +112,14 @@ class SolverContainer(object):
         self.log.debug("collect item {} at {}".format(itemName, location.Name))
         step = SolverStepLocation(location, itemName, _class)
         self.steps.append(step)
+        self.overrideAP = None
 
     def completeObjective(self, objectiveName, ap, area, paths):
         # add one objective to steps
         Objectives.setGoalCompleted(objectiveName, True)
         step = SolverStepObjective(objectiveName, ap, area, paths)
         self.steps.append(step)
+        self.overrideAP = None
 
     def currentStep(self):
         return len(self.steps)
@@ -94,7 +143,7 @@ class SolverContainer(object):
 
     def collectedItems(self):
         # return list of collected items
-        return [step.itemName for step in self.steps if self.isStepLocation(step)]
+        return self.inventoryItems + [step.location.itemName for step in self.steps if self.isStepLocation(step)]
 
     def getMajorsAvailable(self):
         return [loc for loc in self.majorLocations if loc.difficulty is not None and loc.difficulty.bool == True]
@@ -113,6 +162,19 @@ class SolverContainer(object):
         mbLoc = self.getLoc('Mother Brain')
         self.majorLocations.remove(mbLoc)
         self.majorLocations.append(gunship)
+
+    # manage seedless inventory
+    def increaseInventoryItem(self, itemName):
+        self.inventoryItems.append(itemName)
+
+    def decreaseInventoryItem(self, itemName):
+        self.inventoryItems.remove(itemName)
+
+    def hasItemInInventory(self, itemName):
+        return itemName in self.inventoryItems
+
+    def resetInventoryItems(self):
+        self.inventoryItems.clear()
 
     # serialize the solver state for the tracker
     def getState(self):
@@ -145,7 +207,7 @@ class SolverContainer(object):
                 'distance': loc.distance,
                 'accessPoint': loc.accessPoint,
                 'difficulty': (loc.difficulty.bool, loc.difficulty.difficulty, loc.difficulty.knows, loc.difficulty.items) if loc.difficulty is not None else None,
-                'path': loc.path,
+                'path': [ap.Name for ap in loc.path] if loc.path is not None else None,
                 'pathDifficulty': (loc.pathDifficulty.bool, loc.pathDifficulty.difficulty, loc.pathDifficulty.knows, loc.pathDifficulty.items) if loc.pathDifficulty is not None else None,
                 'locDifficulty': (loc.locDifficulty.bool, loc.locDifficulty.difficulty, loc.locDifficulty.knows, loc.locDifficulty.items) if loc.locDifficulty is not None else None,
                 'itemName': loc.itemName,
@@ -163,7 +225,7 @@ class SolverContainer(object):
             loc.distance = locData["distance"]
             loc.accessPoint = locData["accessPoint"]
             loc.difficulty = SMBool(locData["difficulty"][0], locData["difficulty"][1], locData["difficulty"][2], locData["difficulty"][3]) if locData["difficulty"] is not None else None
-            loc.path = locData["path"]
+            loc.path = locData["path"] if locData["path"] is None else [getAccessPoint(ap) for ap in locData["path"]]
             loc.pathDifficulty = SMBool(locData["pathDifficulty"][0], locData["pathDifficulty"][1], locData["pathDifficulty"][2], locData["pathDifficulty"][3]) if locData["pathDifficulty"] is not None else None
             loc.locDifficulty = SMBool(locData["locDifficulty"][0], locData["locDifficulty"][1], locData["locDifficulty"][2], locData["locDifficulty"][3]) if locData["locDifficulty"] is not None else None
             loc.itemName = locData["itemName"]
@@ -268,7 +330,7 @@ class SolverStepLocation(SolverStep):
     def __init__(self, location, itemName, _class):
         self.log = utils.log.get('SolverStepLocation')
         self.location = location
-        self.itemName = itemName
+        self.location.itemName = itemName
         self._class = _class
         if self.location.accessPoint is not None:
             self.lastAP = location.accessPoint
@@ -315,7 +377,7 @@ class SolverStepLocation(SolverStep):
         return {
             "type": "location",
             "locationName": self.location.Name,
-            "itemName": self.itemName,
+            "itemName": self.location.itemName,
             "_class": self._class,
         }
 

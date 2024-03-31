@@ -5,6 +5,7 @@ from solver.solverState import SolverState
 from solver.comeback import ComeBack
 from solver.conf import InteractiveSolverConf
 from solver.runtimeLimiter import RuntimeLimiter
+from solver.container import SolverContainer
 from logic.logic import Logic
 from logic.smbool import SMBool
 from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager
@@ -65,7 +66,7 @@ class InteractiveSolver(CommonSolver):
 
     def initialize(self, mode, romData, romFileName, presetFileName, fill, extraSettings):
         # load rom and preset, return first state
-        self.conf = InteractiveSolverConf(mode, romFileName, presetFileName)
+        self.conf = InteractiveSolverConf(mode=mode, romFileName=romFileName, presetFileName=presetFileName)
 
         self.smbm = SMBoolManager()
 
@@ -78,11 +79,15 @@ class InteractiveSolver(CommonSolver):
         # hide doors
         DoorsManager.initTracker(self.romConf.doorsRando and self.conf.mode in ['standard', 'race'])
 
+        self.lastAP = self.romConf.startLocation
+        self.lastArea = self.romConf.startArea
+
+        self.container = SolverContainer(Logic.locations(), self.conf, self.romConf)
         self.clearItems()
 
         # in debug mode don't load plando locs/transitions
-        if self.conf.mode == 'plando' and self.conf.debug == False:
-            if fill == True:
+        if self.conf.mode == 'plando' and not self.conf.debug:
+            if fill is True:
                 # load the source seed transitions and items/locations
                 self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
                 self.buildGraph()
@@ -98,12 +103,10 @@ class InteractiveSolver(CommonSolver):
 
         # if tourian is disabled remove mother brain location
         if self.romConf.tourian == 'Disabled':
-            mbLoc = self.getLoc('Mother Brain')
-            assert mbLoc is not None, "Mother Brain loc is None !"
-            self.locations.remove(mbLoc)
+            self.container.removeTrackerLocation('Mother Brain')
 
         # compute new available locations
-        self.computeLocationsDifficulty(self.majorLocations, startDiff=easy)
+        self.computeLocationsDifficulty(self.container.majorLocations, startDiff=easy)
         self.checkGoals()
 
         return self.dumpState()
@@ -119,18 +122,18 @@ class InteractiveSolver(CommonSolver):
         self.objectives.setSolverMode(self)
 
         # set mother brain access func for solver
-        if self.tourian != 'Disabled':
-            mbLoc = self.getLoc('Mother Brain')
+        if self.romConf.tourian != 'Disabled':
+            mbLoc = self.container.getLoc('Mother Brain')
             assert mbLoc is not None, "Mother Brain loc is None !"
             mbLoc.AccessFrom['Golden Four'] = self.getMotherBrainAccess()
 
         # save current AP
-        previousAP = self.lastAP
+        previousAP = self.container.lastAP()
 
         self.loadPreset(self.presetFileName)
 
         # add already collected items to smbm
-        self.smbm.addItems(self.collectedItems)
+        self.smbm.addItems(self.container.collectedItems())
 
         if scope == 'item':
             if action == 'clear':
@@ -139,7 +142,7 @@ class InteractiveSolver(CommonSolver):
                 # to be able to update visitedAPs we need the graph to exist
                 self.buildGraph()
                 # we also need the availAccessPoints to be computed in the graph
-                self.areaGraph.getAvailableLocations([], self.smbm, infinity, self.lastAP)
+                self.areaGraph.getAvailableLocations([], self.smbm, infinity, self.container.lastAP())
 
                 if action == 'add':
                     if self.mode in ['plando', 'seedless', 'race', 'debug']:
@@ -211,12 +214,12 @@ class InteractiveSolver(CommonSolver):
         # if last loc added was a sequence break, recompute its difficulty,
         # as it may be available with the newly placed item.
         # generalize it for auto-tracker where we can add more than one loc at once.
-        if len(self.visitedLocations) > 0:
+        if len(self.container.visitedLocations()) > 0:
             for i in range(1, rewindLimit+1):
-                if i > len(self.visitedLocations):
+                if i > len(self.container.visitedLocations()):
                     break
                 else:
-                    loc = self.visitedLocations[-i]
+                    loc = self.container.visitedLocations()[-i]
                     # check that the ap of the loc is available from the previous ap,
                     # else it may set loc diff to easy
                     if (loc.difficulty.difficulty == -1 and
@@ -225,12 +228,11 @@ class InteractiveSolver(CommonSolver):
                         lastVisitedLocs.append(loc)
 
             for loc in lastVisitedLocs:
-                self.visitedLocations.remove(loc)
-                self.majorLocations.append(loc)
+                self.container.cancelTrackerLocation(loc)
 
         # compute new available locations
-        self.clearLocs(self.majorLocations)
-        self.computeLocationsDifficulty(self.majorLocations, startDiff=easy)
+        self.container.resetLocsDifficulty()
+        self.computeLocationsDifficulty(self.container.majorLocations, startDiff=easy)
 
         while True:
             remainLocs = []
@@ -245,9 +247,9 @@ class InteractiveSolver(CommonSolver):
             if len(remainLocs) == len(lastVisitedLocs):
                 # all remaining locs are seq break
                 for loc in lastVisitedLocs:
-                    self.majorLocations.remove(loc)
-                    self.visitedLocations.append(loc)
-                    if loc.difficulty == False:
+                    self.container.collectMajor(loc)
+                    self.container.collectItem(loc, loc.itemName, 'major')
+                    if not loc.difficulty:
                         # if the loc is still sequence break, put it back as sequence break
                         loc.difficulty = SMBool(True, -1)
                 break
@@ -255,12 +257,12 @@ class InteractiveSolver(CommonSolver):
                 # add available locs
                 for loc in okLocs:
                     lastVisitedLocs.remove(loc)
-                    self.majorLocations.remove(loc)
-                    self.visitedLocations.append(loc)
+                    self.container.collectMajor(loc)
+                    self.container.collectItem(loc, loc.itemName, 'major')
 
             # compute again
-            self.clearLocs(self.majorLocations)
-            self.computeLocationsDifficulty(self.majorLocations, startDiff=easy)
+            self.container.resetLocsDifficulty()
+            self.computeLocationsDifficulty(self.container.majorLocations, startDiff=easy)
 
         # autotracker handles objectives
         if not (scope == 'dump' and action == 'import'):
@@ -270,6 +272,9 @@ class InteractiveSolver(CommonSolver):
         return self.dumpState()
 
     def checkGoals(self):
+        # TODO::check if possible to use the same code as in standard solver and to add it to a common function ?
+        #       and how to handle objectives that change the last AP ?
+
         # check if objectives can be completed
         self.newlyCompletedObjectives = []
         goals = self.objectives.checkGoals(self.smbm, self.lastAP)
@@ -306,7 +311,7 @@ class InteractiveSolver(CommonSolver):
 
         for address in addresses:
             # TODO::compute only the difficulty of the current loc
-            self.computeLocationsDifficulty(self.majorLocations)
+            self.computeLocationsDifficulty(self.container.majorLocations)
 
             locName = self.getLocNameFromAddress(address)
             self.pickItemAt(locName)
@@ -325,7 +330,7 @@ class InteractiveSolver(CommonSolver):
 
         if self.itemsOk == False:
             # add remaining locs as sequence break
-            for loc in self.majorLocations[:]:
+            for loc in self.container.majorLocations[:]:
                 loc.difficulty = SMBool(True, -1)
                 if loc.accessPoint is not None:
                     # take first ap of the loc
@@ -357,11 +362,11 @@ class InteractiveSolver(CommonSolver):
 
     def randoPlando(self, parameters):
         # if all the locations are visited, do nothing
-        if len(self.majorLocations) == 0:
+        if len(self.container.majorLocations) == 0:
             return
 
         plandoLocsItems = {}
-        for loc in self.visitedLocations:
+        for loc in self.container.visitedLocations():
             plandoLocsItems[loc.Name] = loc.itemName
 
         plandoCurrent = {
@@ -371,7 +376,7 @@ class InteractiveSolver(CommonSolver):
             "doors": DoorsManager.serialize(),
             "forbiddenItems": parameters.get("forbiddenItems", []),
             "objectives": self.objectives.getGoalsList(),
-            "tourian": self.tourian
+            "tourian": self.romConf.tourian
         }
 
         plandoCurrentJson = json.dumps(plandoCurrent)
@@ -383,14 +388,14 @@ class InteractiveSolver(CommonSolver):
         params = [
             getPythonExec(),  os.path.expanduser("~/RandomMetroidSolver/randomizer.py"),
             '--runtime', '10',
-            '--param', self.presetFileName,
+            '--param', self.conf.presetFileName,
             '--output', jsonOutFileName,
             '--plandoRando', plandoCurrentJson,
             '--progressionSpeed', 'speedrun',
             '--minorQty', parameters["minorQty"],
             '--maxDifficulty', 'hardcore',
             '--energyQty', parameters["energyQty"],
-            '--startLocation', self.startLocation
+            '--startLocation', self.romConf.startLocation
         ]
 
         import subprocess
@@ -408,16 +413,17 @@ class InteractiveSolver(CommonSolver):
             itemsLocs = data["itemLocs"]
 
             # create a copy because we need self.locations to be full, else the state will be empty
-            self.majorLocations = self.locations[:]
+            # TODO::is it still required ?
+            #self.majorLocations = self.locations[:]
 
             # if tourian is disabled remove mother brain from itemsLocs if the rando added it
-            if self.tourian == 'Disabled':
+            if self.romConf.tourian == 'Disabled':
                 if itemsLocs and itemsLocs[-1]["Location"]["Name"] == "Mother Brain":
                     itemsLocs.pop()
 
             for itemLoc in itemsLocs:
                 locName = itemLoc["Location"]["Name"]
-                loc = self.getLoc(locName)
+                loc = self.container.getLoc(locName)
                 # we can have locations from non connected areas
                 if "difficulty" in itemLoc["Location"]:
                     difficulty = itemLoc["Location"]["difficulty"]
@@ -434,9 +440,9 @@ class InteractiveSolver(CommonSolver):
         from rando.Items import ItemManager
         locsItems = {}
         itemLocs = []
-        for loc in self.visitedLocations:
+        for loc in self.container.visitedLocations():
             locsItems[loc.Name] = loc.itemName
-        for loc in self.locations:
+        for loc in self.container.locations:
             if loc.Name in locsItems:
                 itemLocs.append(ItemLocation(ItemManager.getItem(loc.itemName), loc))
             else:
@@ -444,14 +450,14 @@ class InteractiveSolver(CommonSolver):
                 itemLocs.append(ItemLocation(ItemManager.getItem("Nothing"), loc))
 
         # patch the ROM
-        if lock == True:
+        if lock is True:
             import random
             magic = random.randint(1, sys.maxsize)
         else:
             magic = None
 
         # plando is considered Full
-        majorsSplit = self.masterMajorsSplit if self.masterMajorsSplit in ["FullWithHUD", "Scavenger"] else "Full"
+        majorsSplit = self.romConf.masterMajorsSplit if self.romConf.masterMajorsSplit in ["FullWithHUD", "Scavenger"] else "Full"
         class FakeRandoSettings:
             def __init__(self):
                 self.qty = {'energy': 'plando'}
@@ -462,19 +468,15 @@ class InteractiveSolver(CommonSolver):
         randoSettings = FakeRandoSettings()
 
         escapeAttr = None
-        if self.escapeRando == True and escapeTimer != None:
+        if self.romConf.escapeRando is True and escapeTimer != None:
             # convert from '03:00' to number of seconds
             escapeTimer = int(escapeTimer[0:2]) * 60 + int(escapeTimer[3:5])
             escapeAttr = {'Timer': escapeTimer, 'Animals': None, 'patches': []}
 
         progItemLocs = []
         if majorsSplit == "Scavenger":
-            def getLoc(locName):
-                for loc in self.locations:
-                    if loc.Name == locName:
-                        return loc
-            for locName in self.plandoScavengerOrder:
-                loc = getLoc(locName)
+            for locName in self.romConf.plandoScavengerOrder:
+                loc = self.container.getLoc(locName)
                 if locName in locsItems:
                     item = ItemManager.getItem(loc.itemName)
                 else:
@@ -513,13 +515,13 @@ class InteractiveSolver(CommonSolver):
         patcherSettings = {
             "isPlando": True,
             "majorsSplit": majorsSplit,
-            "startLocation": self.startLocation,
+            "startLocation": self.romConf.startLocation,
             "optionalPatches": patches,
             "layout": len(layoutCustom) > 0,
             "layoutCustom": layoutCustom,
             "suitsMode": suitsMode,
-            "area": self.areaRando,
-            "boss": self.bossRando,
+            "area": self.romConf.areaRando,
+            "boss": self.romConf.bossRando,
             "areaLayout": len(areaLayoutCustom) > 0,
             "areaLayoutCustom": areaLayoutCustom,
             "escapeAttr": escapeAttr,
@@ -532,10 +534,10 @@ class InteractiveSolver(CommonSolver):
             "moonWalk": False,
             "debug": False,
             ##
-            "revealMap": self.revealMap,
-            "escapeRandoRemoveEnemies": self.escapeRandoRemoveEnemies,
+            "revealMap": self.romConf.revealMap,
+            "escapeRandoRemoveEnemies": self.romConf.escapeRandoRemoveEnemies,
             "minimizerN": 100 if RomPatches.NoGadoras in RomPatches.ActivePatches else None,
-            "tourian": self.tourian,
+            "tourian": self.romConf.tourian,
             "doorsColorsRando": DoorsManager.isRandom(),
             "vanillaObjectives": self.objectives.isVanilla(),
             "seed": None,
@@ -547,7 +549,7 @@ class InteractiveSolver(CommonSolver):
             "plando": {
                 "graphTrans": self.curGraphTransitions,
                 "maxTransitions": len(vanillaBossesTransitions) + len(vanillaTransitions),
-                "visitedLocations": self.visitedLocations,
+                "visitedLocations": self.container.visitedLocations(),
                 "additionalETanks": self.additionalETanks
             }
         }
@@ -583,21 +585,18 @@ class InteractiveSolver(CommonSolver):
 
     def getWebLoc(self, locNameWeb):
         locName = self.locNameWeb2Internal(locNameWeb)
-        for loc in self.locations:
-            if loc.Name == locName:
-                return loc
-        raise Exception("Location '{}' not found".format(locName))
+        return self.container.getLoc(locName)
 
     def pickItemAt(self, locName, autotracker=False):
         # collect new item at newLoc
         loc = self.getWebLoc(locName)
 
         # check that location has not already been visited
-        if loc in self.visitedLocations:
+        if loc in self.container.visitedLocations():
             self.errorMsg = "Location '{}' has already been visited".format(loc.Name)
             return
 
-        if loc.difficulty is None or loc.difficulty == False:
+        if loc.difficulty is None or not loc.difficulty:
             # sequence break
             loc.difficulty = SMBool(True, -1)
         if loc.accessPoint is None:
@@ -611,7 +610,7 @@ class InteractiveSolver(CommonSolver):
         loc = self.getWebLoc(locName)
 
         # check if location has not already been visited
-        if loc in self.visitedLocations:
+        if loc in self.container.visitedLocations():
             self.errorMsg = "Location {} has already been visited".format(loc.Name)
             return
 
@@ -625,10 +624,10 @@ class InteractiveSolver(CommonSolver):
             # take first ap of the loc
             loc.accessPoint = list(loc.AccessFrom)[0]
 
-        if hide == True:
+        if hide is True:
             loc.Visibility = 'Hidden'
 
-        if loc in self.majorLocations:
+        if loc in self.container.majorLocations:
             self.collectMajor(loc, itemName=itemName)
 
     def replaceItemAt(self, locName, itemName, hide):
@@ -636,68 +635,55 @@ class InteractiveSolver(CommonSolver):
         loc = self.getWebLoc(locName)
         oldItemName = loc.itemName
 
-        # replace item at the old item spot in collectedItems
-        try:
-            index = next(i for i, vloc in enumerate(self.visitedLocations) if vloc.Name == loc.Name)
-        except:
-            self.errorMsg = "Empty location {}".format(locName)
+        # check that location not already been visited
+        if loc not in self.container.visitedLocations():
+            self.errorMsg = "Location {} has not been visited".format(loc.Name)
             return
 
         # major item can be set multiple times in plando mode
-        count = self.collectedItems.count(oldItemName)
+        count = self.container.collectedItems().count(oldItemName)
         isCount = self.smbm.isCountItem(oldItemName)
 
-        # update item in collected items after we check the count
-        self.collectedItems[index] = itemName
+        # update item after we check the count
         loc.itemName = itemName
 
         # update smbm if count item or major was only there once
-        if isCount == True or count == 1:
+        if isCount is True or count == 1:
             self.smbm.removeItem(oldItemName)
 
-        if hide == True:
+        if hide is True:
             loc.Visibility = 'Hidden'
-        elif loc.CanHidden == True and loc.Visibility == 'Hidden':
+        elif loc.CanHidden is True and loc.Visibility == 'Hidden':
             # the loc was previously hidden, set it back to visible
             loc.Visibility = 'Visible'
 
         self.smbm.addItem(itemName)
 
     def increaseItem(self, item):
-        # add item at begining of collectedItems to not mess with item removal when cancelling a location
-        self.collectedItems.insert(0, item)
+        self.container.increaseInventoryItem(item)
         self.smbm.addItem(item)
 
     def decreaseItem(self, item):
-        if item in self.collectedItems:
-            self.collectedItems.remove(item)
+        if self.container.hasItemInInventory(item):
+            self.container.decreaseInventoryItem(item)
             self.smbm.removeItem(item)
 
     def toggleItem(self, item):
         # add or remove a major item
-        if item in self.collectedItems:
-            self.collectedItems.remove(item)
+        if self.container.hasItemInInventory(item):
+            self.container.decreaseInventoryItem(item)
             self.smbm.removeItem(item)
         else:
-            self.collectedItems.insert(0, item)
+            self.container.increaseInventoryItem(item)
             self.smbm.addItem(item)
 
     def clearItems(self, reload=False):
-        self.collectedItems = []
-        self.visitedLocations = []
-        self.visitedAPs = set()
-        self.visitedAPsHistory = []
-        self.lastAP = self.startLocation
-        self.lastArea = self.startArea
-        self.majorLocations = self.locations
-        if reload == True:
-            for loc in self.majorLocations:
-                loc.difficulty = None
+        self.container.reset(reload)
         self.smbm.resetItems()
         self.objectives.resetCompletedGoals()
 
     def updatePlandoScavengerOrder(self, plandoScavengerOrder):
-        self.plandoScavengerOrder = plandoScavengerOrder
+        self.romConf.plandoScavengerOrder = plandoScavengerOrder
 
     def addTransition(self, startPoint, endPoint):
         # already check in controller if transition is valid for seed
@@ -785,10 +771,6 @@ class InteractiveSolver(CommonSolver):
         if self.escapeRando == False:
             self.curGraphTransitions += self.escapeTransition
 
-    def clearLocs(self, locs):
-        for loc in locs:
-            loc.difficulty = None
-
     def getDiffThreshold(self):
         # in interactive solver we don't have the max difficulty parameter
         epsilon = 0.001
@@ -869,7 +851,7 @@ class InteractiveSolver(CommonSolver):
 
     def importDump(self, dumpData):
         # first update current access point
-        self.lastAP = dumpData["newAP"]
+        self.container.updateOverrideAP(dumpData["newAP"])
 
         dataEnum = {
             "state": '1',
@@ -889,7 +871,7 @@ class InteractiveSolver(CommonSolver):
         for dataType, offset in dumpData["stateDataOffsets"].items():
             if dataType == dataEnum["items"]:
                 # get item data, loop on all locations to check if they have been visited
-                for loc in self.locations:
+                for loc in self.container.locations:
                     # loc id is used to index in the items data, boss locations don't have an Id.
                     # for scav hunt ridley loc now have an id, so also check if loc is a boss loc.
                     if loc.Id is None or loc.isBoss():
@@ -904,35 +886,35 @@ class InteractiveSolver(CommonSolver):
                             self.pickItemAt(self.locNameInternal2Web(loc.Name), autotracker=True)
                             self.locDelta += 1
                     else:
-                        if loc in self.visitedLocations:
+                        if loc in self.container.visitedLocations():
                             self.removeItemAt(self.locNameInternal2Web(loc.Name), autotracker=True)
             elif dataType == dataEnum["boss"]:
                 for boss, bossData in self.bossBitMasks.items():
                     byteIndex = bossData["byteIndex"]
                     bitMask = bossData["bitMask"]
-                    loc = self.getLoc(boss)
+                    loc = self.container.getLoc(boss)
                     if currentState[offset + byteIndex] & bitMask != 0:
                         # as we clear collected items we have to add bosses back.
                         # some bosses have a space in their names, remove it.
                         bosses.append(boss.replace(' ', ''))
 
                         # in tourian disabled mother brain is not available, but it gets auto killed during escape
-                        if loc not in self.visitedLocations and loc in self.majorLocations:
+                        if loc not in self.container.visitedLocations() and loc in self.container.majorLocations:
                             self.pickItemAt(self.locNameInternal2Web(loc.Name), autotracker=True)
                             self.locDelta += 1
                     else:
-                        if loc in self.visitedLocations:
+                        if loc in self.container.visitedLocations():
                             self.removeItemAt(self.locNameInternal2Web(loc.Name), autotracker=True)
 
             # Inventory
             elif dataType == dataEnum["inventory"]:
                 # Clear collected items if loading from game state.
-                self.collectedItems.clear()
+                self.container.resetInventoryItems()
                 self.smbm.resetItems()
 
                 # put back bosses
                 for boss in bosses:
-                    self.collectedItems.append(boss)
+                    self.container.increaseInventoryItem(boss)
                     self.smbm.addItem(boss)
 
                 for item, itemData in self.inventoryBitMasks.items():
@@ -947,22 +929,22 @@ class InteractiveSolver(CommonSolver):
                     if item == "ETank":
                         tanks = int((val - 99) / 100)
                         for _ in range(tanks):
-                            self.collectedItems.append(item)
+                            self.container.increaseInventoryItem(item)
                             self.smbm.addItem(item)
                     elif item == "Reserve":
                         tanks = int(val / 100)
                         for _ in range(tanks):
-                            self.collectedItems.append(item)
+                            self.container.increaseInventoryItem(item)
                             self.smbm.addItem(item)
                     elif item in ("Missile", "Super", "PowerBomb"):
                         packs = int(val / 5)
                         for _ in range(packs):
-                            self.collectedItems.append(item)
+                            self.container.increaseInventoryItem(item)
                             self.smbm.addItem(item)
                     else:
                         bitMask = itemData["bitMask"]
                         if val & bitMask != 0:
-                            self.collectedItems.append(item)
+                            self.container.increaseInventoryItem(item)
                             self.smbm.addItem(item)
 
             elif dataType == dataEnum["map"]:
@@ -1030,13 +1012,13 @@ class InteractiveSolver(CommonSolver):
                         locData = self.nothingScreens[self.logic][loc.Name]
                         if self.isElemAvailable(currentState, offset, locData):
                             # nothing has been seen, check if loc is already visited
-                            if not loc in self.visitedLocations:
+                            if not loc in self.container.visitedLocations():
                                 # visit it
                                 self.pickItemAt(self.locNameInternal2Web(loc.Name))
                                 self.locDelta += 1
                         else:
                             # nothing not yet seed, check if loc is already visited
-                            if loc in self.visitedLocations:
+                            if loc in self.container.visitedLocations():
                                 # unvisit it
                                 self.removeItemAt(self.locNameInternal2Web(loc.Name))
                 if self.doorsRando:

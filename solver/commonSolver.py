@@ -262,40 +262,6 @@ class CommonSolver(object):
         self.lastAP = self.container.lastAP()
         self.lastArea = self.container.lastArea()
 
-    def getLocIndex(self, locName):
-        for (i, loc) in enumerate(self.visitedLocations):
-            if loc.Name == locName:
-                return i
-
-    def removeItemAt(self, locNameWeb, autotracker=False):
-        locName = self.locNameWeb2Internal(locNameWeb)
-        loc = self.container.getLoc()
-
-        if loc not in self.container.visitedLocations():
-            self.errorMsg = "Location '{}' has not been visited".format(locName)
-            return
-
-        # removeItemAt is only used from the tracker, so all the locs are in majorLocations
-        self.container.cancelTrackerLocation(loc, cleanup=True)
-
-        # access point
-        self.lastAP = self.container.lastAP()
-        self.lastArea = self.container.lastArea()
-
-        # in autotracker items are read from memory
-        if autotracker:
-            return
-
-        # item
-        item = loc.itemName
-
-        # if multiple majors in plando mode, remove it from smbm only when it's the last occurence of it
-        if self.smbm.isCountItem(item):
-            self.smbm.removeItem(item)
-        else:
-            if item not in self.collectedItems:
-                self.smbm.removeItem(item)
-
     def rollback(self, count):
         for module in self.modules:
             module.addRollback(count)

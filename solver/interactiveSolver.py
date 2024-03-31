@@ -27,6 +27,7 @@ import utils.log
 
 class InteractiveSolver(CommonSolver):
     def __init__(self, logic):
+        self.modules = []
         self.interactive = True
         self.errorMsg = ""
         self.log = utils.log.get('Solver')
@@ -90,14 +91,14 @@ class InteractiveSolver(CommonSolver):
             if fill is True:
                 # load the source seed transitions and items/locations
                 self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
-                self.buildGraph()
+                self.buildGraph(self.romConf)
                 self.fillPlandoLocs()
             else:
                 if self.romConf.areaRando == True or self.romConf.bossRando == True:
                     plandoTrans = self.loadPlandoTransitions()
                     if len(plandoTrans) > 0:
                         self.curGraphTransitions = plandoTrans
-                    self.buildGraph()
+                    self.buildGraph(self.romConf)
 
                 self.loadPlandoLocs()
 
@@ -119,7 +120,7 @@ class InteractiveSolver(CommonSolver):
         state = SolverState()
         state.set(instate)
         state.toSolver(self)
-        self.objectives.setSolverMode(self)
+        self.objectives.setSolverMode(self, self.romConf)
 
         # set mother brain access func for solver
         if self.romConf.tourian != 'Disabled':
@@ -130,7 +131,7 @@ class InteractiveSolver(CommonSolver):
         # save current AP
         previousAP = self.container.lastAP()
 
-        self.loadPreset(self.presetFileName)
+        self.loadPreset(self.conf.presetFileName)
 
         # add already collected items to smbm
         self.smbm.addItems(self.container.collectedItems())
@@ -140,14 +141,14 @@ class InteractiveSolver(CommonSolver):
                 self.clearItems(True)
             else:
                 # to be able to update visitedAPs we need the graph to exist
-                self.buildGraph()
+                self.buildGraph(self.romConf)
                 # we also need the availAccessPoints to be computed in the graph
                 self.areaGraph.getAvailableLocations([], self.smbm, infinity, self.container.lastAP())
 
                 if action == 'add':
-                    if self.mode in ['plando', 'seedless', 'race', 'debug']:
+                    if self.conf.mode in ['plando', 'seedless', 'race', 'debug']:
                         if 'loc' in params:
-                            if self.mode == 'plando':
+                            if self.conf.mode == 'plando':
                                 self.setItemAt(params['loc'], params['item'], params['hide'])
                             else:
                                 itemName = params.get('item', 'Nothing')
@@ -196,12 +197,12 @@ class InteractiveSolver(CommonSolver):
                 doorName = params['doorName']
                 DoorsManager.switchVisibility(doorName)
             elif action == 'clear':
-                DoorsManager.initTracker(self.doorsRando and self.mode in ['standard', 'race'])
+                DoorsManager.initTracker(self.doorsRando and self.conf.mode in ['standard', 'race'])
         elif scope == 'dump':
             if action == 'import':
                 self.importDump(params["dump"])
 
-        self.buildGraph()
+        self.buildGraph(self.romConf)
 
         if scope == 'common':
             if action == 'save':
@@ -558,7 +559,7 @@ class InteractiveSolver(CommonSolver):
         romPatcher.patchRom()
 
         data = romPatcher.romFile.data
-        preset = os.path.splitext(os.path.basename(self.presetFileName))[0]
+        preset = os.path.splitext(os.path.basename(self.conf.presetFileName))[0]
         seedCode = 'FX'
         if self.bossRando == True:
             seedCode = 'B'+seedCode

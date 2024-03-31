@@ -4,7 +4,7 @@ from solver.commonSolver import CommonSolver
 from solver.solverState import SolverState
 from solver.comeback import ComeBack
 from solver.conf import InteractiveSolverConf
-from solver.runtimeLimiter import runtimeLimiter
+from solver.runtimeLimiter import RuntimeLimiter
 from logic.logic import Logic
 from logic.smbool import SMBool
 from logic.smboolmanager import SMBoolManagerPlando as SMBoolManager

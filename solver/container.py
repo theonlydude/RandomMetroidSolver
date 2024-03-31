@@ -75,10 +75,10 @@ class SolverContainer(object):
 
         if cleanup:
             # delete location params which are set when the location is available
-            loc.difficulty = None
-            loc.distance = None
-            loc.accessPoint = None
-            loc.path = None
+            location.difficulty = None
+            location.distance = None
+            location.accessPoint = None
+            location.path = None
 
     def updateOverrideAP(self, ap):
         if ap != self.lastAP():

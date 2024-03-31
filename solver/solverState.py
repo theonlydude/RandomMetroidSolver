@@ -61,8 +61,8 @@ class SolverState(object):
         self.state["web"]["last"] = solver.container.lastWeb()
 
         # area tracker
-        (self.state["web"]["linesWeb"],
-         self.state["web"]["linesSeqWeb"]) = self.getLinesWeb(solver.curGraphTransitions)
+        (self.state["web"]["lines"],
+         self.state["web"]["linesSeq"]) = self.getLinesWeb(solver.curGraphTransitions)
         self.state["web"]["allTransitions"] = len(solver.curGraphTransitions) == len(solver.romConf.areaTransitions) + len(solver.romConf.bossTransitions) + len(solver.romConf.escapeTransition)
         # roomsVisibility: array of string ['landingSiteSvg', 'MissileCrateriamoatSvg']
         self.state["web"]["roomsVisibility"] = self.getRoomsVisibility(solver, solver.areaGraph, solver.smbm)
@@ -71,7 +71,7 @@ class SolverState(object):
         self.state["web"]["logic"] = solver.logic
         self.state["web"]["mode"] = solver.conf.mode
         self.state["web"]["seed"] = solver.conf.romFileName
-        self.state["web"]["preset"] = os.path.basename(os.path.splitext(solver.conf.presetFileName)[0]),
+        self.state["web"]["preset"] = os.path.basename(os.path.splitext(solver.conf.presetFileName)[0])
         self.state["web"]["majorsSplit"] = solver.romConf.masterMajorsSplit
         self.state["web"]["areaRando"] = solver.romConf.areaRando
         self.state["web"]["bossRando"] = solver.romConf.bossRando

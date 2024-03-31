@@ -269,28 +269,18 @@ class CommonSolver(object):
 
     def removeItemAt(self, locNameWeb, autotracker=False):
         locName = self.locNameWeb2Internal(locNameWeb)
-        locIndex = self.getLocIndex(locName)
-        if locIndex is None:
+        loc = self.container.getLoc()
+
+        if loc not in self.container.visitedLocations():
             self.errorMsg = "Location '{}' has not been visited".format(locName)
             return
 
-        loc = self.visitedLocations.pop(locIndex)
         # removeItemAt is only used from the tracker, so all the locs are in majorLocations
-        self.majorLocations.append(loc)
+        self.container.cancelTrackerLocation(loc, cleanup=True)
 
         # access point
         self.lastAP = self.container.lastAP()
         self.lastArea = self.container.lastArea()
-
-        # delete location params which are set when the location is available
-        if loc.difficulty is not None:
-            loc.difficulty = None
-        if loc.distance is not None:
-            loc.distance = None
-        if loc.accessPoint is not None:
-            loc.accessPoint = None
-        if loc.path is not None:
-            loc.path = None
 
         # in autotracker items are read from memory
         if autotracker:
@@ -298,12 +288,6 @@ class CommonSolver(object):
 
         # item
         item = loc.itemName
-
-        if self.mode in ['seedless', 'race', 'debug']:
-            # in seedless remove the first nothing found as collectedItems is not ordered
-            self.collectedItems.remove(item)
-        else:
-            self.collectedItems.pop(locIndex)
 
         # if multiple majors in plando mode, remove it from smbm only when it's the last occurence of it
         if self.smbm.isCountItem(item):

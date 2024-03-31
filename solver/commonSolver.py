@@ -28,6 +28,7 @@ class CommonSolver(object):
 
         if rom is None:
             # seedless
+            self.logic = Logic.implementation
             romConf.initSeedless(extraSettings)
 
             RomPatches.setDefaultPatches(romConf.startLocation)
@@ -46,6 +47,7 @@ class CommonSolver(object):
         else:
             self.romLoader = RomLoader.factory(rom, self.conf.magic)
             Logic.factory(self.romLoader.readLogic())
+            self.logic = Logic.implementation
             if not self.conf.interactive:
                 RomFlavor.factory()
             self.romLoader.loadSymbols()

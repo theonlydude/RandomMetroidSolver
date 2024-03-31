@@ -1,3 +1,4 @@
+from copy import copy
 from utils.parameters import easy, medium
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, getAccessPoint
 
@@ -7,6 +8,7 @@ class SolverConf:
     defaultPickupStrategy = 'any'
 
     def __init__(self, mode, interactive):
+        self.debug = False
         self.mode = mode
         self.interactive = interactive
         self.magic = None
@@ -23,6 +25,12 @@ class SolverConf:
 
         # the list of items to not pick up
         self.itemsForbidden = []
+
+    def getState(self):
+        return self.__dict__.copy()
+
+    def setState(self, state):
+        self.__dict__.update(state)
 
 class StandardSolverConf(SolverConf):
     def __init__(self, args):
@@ -47,11 +55,12 @@ class RandoSolverConf(SolverConf):
         self.itemsForbidden = []
 
 class InteractiveSolverConf(SolverConf):
-    def __init__(self, mode, romFileName, presetFileName):
-        super().__init__(mode=mode, interactive=True)
-        self.debug = mode == "debug"
-        self.romFileName = romFileName
-        self.presetFileName = presetFileName
+    #  params: mode, romFileName, presetFileName
+    def __init__(self, **kwargs):
+        super().__init__(mode=kwargs["mode"], interactive=True)
+        self.debug = kwargs["mode"] == "debug"
+        self.romFileName = kwargs["romFileName"]
+        self.presetFileName = kwargs["presetFileName"]
 
 class RomConf:
     def __init__(self):
@@ -64,27 +73,52 @@ class RomConf:
         self.objectivesHiddenOption = False
         self.eventsBitMasks = {}
 
-    def initSeedless(self, extraSettings):
         self.majorsSplit = 'Full'
         self.masterMajorsSplit = 'Full'
-        self.areaRando = True
-        self.bossRando = True
+        self.areaRando = False
+        self.bossRando = False
         self.escapeRando = False
         self.escapeTimer = "03:00"
+
+        self.startLocation = "Landing Site"
+        self.startArea = "Crateria Landing Site"
+
+        self.doorsRando = False
+        self.hasNothing = False
+        self.tourian = 'Vanilla'
+        self.majorUpgrades = []
+        self.splitLocsByArea = {}
+
+        # vanilla transitions
+        self.areaTransitions = vanillaTransitions[:]
+        self.bossTransitions = vanillaBossesTransitions[:]
+        self.escapeTransition = [vanillaEscapeTransitions[0]]
+        self.hasMixedTransitions = False
+
+    def initSeedless(self, extraSettings):
+        # seedless allows area/boss rando
+        self.areaRando = True
+        self.bossRando = True
 
         self.startLocation = extraSettings.get('startLocation')
         self.startArea = getAccessPoint(self.startLocation).Start['solveArea']
 
         self.doorsRando = extraSettings.get('doorsRando')
 
-        self.hasNothing = False
-        self.tourian = 'Vanilla'
-        self.majorUpgrades = []
-        self.splitLocsByArea = {}
-
-        # in seedless load all the vanilla transitions
-        self.areaTransitions = vanillaTransitions[:]
-        self.bossTransitions = vanillaBossesTransitions[:]
-        self.escapeTransition = [vanillaEscapeTransitions[0]]
         # in seedless we allow mixing of area and boss transitions
         self.hasMixedTransitions = True
+
+    # serialize the solver state for the tracker
+    def getState(self):
+        state = self.__dict__.copy()
+        # keep only locs names in scavenger order
+        state["scavengerOrder"] = [loc.Name for loc in self.scavengerOrder]
+        return state
+
+    def setState(self, state):
+        self.__dict__.update(state)
+
+    # we first unserialize the rom conf, then the container
+    def postSetState(self, container):
+        # convert scavenger order back to locations
+        self.scavengerOrder = [container.getLoc(locName) for locName in self.scavengerOrder]

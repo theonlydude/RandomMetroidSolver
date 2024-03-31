@@ -59,7 +59,7 @@ class InteractiveSolver(CommonSolver):
         return web2Internal
 
     def dumpState(self):
-        state = SolverState(self.debug)
+        state = SolverState()
         state.fromSolver(self)
         return state.get()
 

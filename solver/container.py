@@ -1,4 +1,9 @@
 from utils.objectives import Objectives
+from logic.smbool import SMBool
+from graph.graph import Path
+from graph.graph_utils import getAccessPoint
+from utils.utils import transition2isolver, removeChars, fixEnergy
+from utils.parameters import Knows, diff4solver
 import utils.log
 
 class SolverContainer(object):
@@ -109,6 +114,151 @@ class SolverContainer(object):
         self.majorLocations.remove(mbLoc)
         self.majorLocations.append(gunship)
 
+    # serialize the solver state for the tracker
+    def getState(self):
+        state = {}
+        state["locsData"] = self.getLocsData()
+        state["steps"] = [step.dump() for step in self.steps]
+        return state
+
+    def setState(self, state, smbm):
+        smbm.resetItems()
+        Objectives.resetCompletedGoals()
+
+        self.setLocsData(state["locsData"])
+        for step in state["steps"]:
+            if step["type"] == "location":
+                smbm.addItem(step["itemName"])
+                loc = self.getLoc(step["locationName"])
+                if step["_class"] == "major":
+                    self.collectMajor(loc)
+                else:
+                    self.collectMinor(loc)
+                self.steps.append(SolverStepLocation.restore(step, loc))
+            else:
+                Objectives.setGoalCompleted(step["objectiveName"], True)
+                self.steps.append(SolverStepObjective.restore(step))
+
+    def getLocsData(self):
+        return {
+            loc.Name: {
+                'distance': loc.distance,
+                'accessPoint': loc.accessPoint,
+                'difficulty': (loc.difficulty.bool, loc.difficulty.difficulty, loc.difficulty.knows, loc.difficulty.items) if loc.difficulty is not None else None,
+                'path': loc.path,
+                'pathDifficulty': (loc.pathDifficulty.bool, loc.pathDifficulty.difficulty, loc.pathDifficulty.knows, loc.pathDifficulty.items) if loc.pathDifficulty is not None else None,
+                'locDifficulty': (loc.locDifficulty.bool, loc.locDifficulty.difficulty, loc.locDifficulty.knows, loc.locDifficulty.items) if loc.locDifficulty is not None else None,
+                'itemName': loc.itemName,
+                'comeBack': loc.comeBack,
+                'areaWeight': loc.areaWeight,
+                'mayNotComeback': loc.mayNotComeback
+            } for loc in self.locations
+        }
+
+    def setLocsData(self, locsData):
+        for locName, locData in locsData.items():
+            if locName == 'Mother Brain' and self.romConf.tourian == 'Disabled':
+                continue
+            loc = self.getLoc(locName)
+            loc.distance = locData["distance"]
+            loc.accessPoint = locData["accessPoint"]
+            loc.difficulty = SMBool(locData["difficulty"][0], locData["difficulty"][1], locData["difficulty"][2], locData["difficulty"][3]) if locData["difficulty"] is not None else None
+            loc.path = locData["path"]
+            loc.pathDifficulty = SMBool(locData["pathDifficulty"][0], locData["pathDifficulty"][1], locData["pathDifficulty"][2], locData["pathDifficulty"][3]) if locData["pathDifficulty"] is not None else None
+            loc.locDifficulty = SMBool(locData["locDifficulty"][0], locData["locDifficulty"][1], locData["locDifficulty"][2], locData["locDifficulty"][3]) if locData["locDifficulty"] is not None else None
+            loc.itemName = locData["itemName"]
+            loc.comeBack = locData["comeBack"]
+            loc.areaWeight = locData["areaWeight"]
+            loc.mayNotComeback = locData["mayNotComeback"]
+
+    # serialize data for front web
+    def availableLocationsWeb(self):
+        return self.getLocationsWeb(self.majorLocations)
+
+    def visitedLocationsWeb(self):
+        return self.getLocationsWeb(self.visitedLocations())
+
+    def name4isolver(self, locName):
+        # remove space and special characters
+        return removeChars(locName, " ,()-")
+
+    def knows2isolver(self, knows):
+        result = []
+        for know in knows:
+            if know in Knows.desc:
+                result.append(Knows.desc[know]['display'])
+            else:
+                result.append(know)
+        return list(set(result))
+
+    def getLocationsWeb(self, locations):
+        ret = {}
+        for loc in locations:
+            if loc.difficulty is not None and loc.difficulty.bool:
+                diff = loc.difficulty
+                locName = self.name4isolver(loc.Name)
+                # we have loc.comeBack which tells if you can comeback from loc access point to current player accesspoint.
+                # we also have loc.mayNotComeback which tells if you may not be able to comeback from a loc to its access point.
+                # we merge these two comebacks into one to display a '?' on a loc icon if you may not be able to come back from the loc to the current player access point.
+
+                finalMayNotComeback = loc.mayNotComeback or (not loc.comeBack) if loc.comeBack is not None else loc.mayNotComeback
+                ret[locName] = {"difficulty": diff4solver(diff.difficulty),
+                                "knows": self.knows2isolver(diff.knows),
+                                "items": fixEnergy(list(set(diff.items))),
+                                "item": loc.itemName,
+                                "name": loc.Name,
+                                "canHidden": loc.CanHidden,
+                                "visibility": loc.Visibility,
+                                "major": loc.isClass(self.romConf.masterMajorsSplit),
+                                "mayNotComeback": finalMayNotComeback}
+
+                if loc.accessPoint is not None:
+                    ret[locName]["accessPoint"] = transition2isolver(loc.accessPoint)
+                    if loc.path is not None:
+                        ret[locName]["path"] = [transition2isolver(a.Name) for a in loc.path]
+                # for debug purpose
+                if self.conf.debug == True:
+                    if loc.distance is not None:
+                        ret[locName]["distance"] = loc.distance
+                    if loc.locDifficulty is not None:
+                        lDiff = loc.locDifficulty
+                        ret[locName]["locDifficulty"] = [diff4solver(lDiff.difficulty)[0], self.knows2isolver(lDiff.knows), list(set(lDiff.items))]
+                    if loc.pathDifficulty is not None:
+                        pDiff = loc.pathDifficulty
+                        ret[locName]["pathDifficulty"] = [diff4solver(pDiff.difficulty)[0], self.knows2isolver(pDiff.knows), list(set(pDiff.items))]
+
+        return ret
+
+    def remainLocationsWeb(self):
+        ret = {}
+        for loc in self.majorLocations:
+            if loc.difficulty is None or not loc.difficulty.bool:
+                locName = self.name4isolver(loc.Name)
+                ret[locName] = {"item": loc.itemName,
+                                "name": loc.Name,
+                                "knows": ["Sequence Break"],
+                                "items": [],
+                                "canHidden": loc.CanHidden,
+                                "visibility": loc.Visibility,
+                                "major": loc.isClass(self.romConf.masterMajorsSplit),
+                                "mayNotComeback": False}
+                if self.conf.debug == True:
+                    if loc.difficulty is not None:
+                        ret[locName]["difficulty"] = str(loc.difficulty)
+                    if loc.distance is not None:
+                        ret[locName]["distance"] = loc.distance
+        return ret
+
+    def lastWeb(self):
+        visitedLocations = self.visitedLocations()
+        if visitedLocations:
+            return {
+                "loc": visitedLocations[-1].Name,
+                "item": visitedLocations[-1].itemName
+            }
+        return ""
+
+
 class SolverStep(object):
     # instead of using several objects to keep visited locations, visited items, visited APs, completed objectives,
     # we put all these into a solver step object
@@ -161,6 +311,18 @@ class SolverStepLocation(SolverStep):
             if item not in container.collectedItems():
                 smbm.removeItem(item)
 
+    def dump(self):
+        return {
+            "type": "location",
+            "locationName": self.location.Name,
+            "itemName": self.itemName,
+            "_class": self._class,
+        }
+
+    @staticmethod
+    def restore(dump, location):
+        return SolverStepLocation(location, dump["itemName"], dump["_class"])
+
 class SolverStepObjective(SolverStep):
     def __init__(self, objectiveName, lastAP, lastArea, paths):
         self.log = utils.log.get('SolverStepObjective')
@@ -168,7 +330,7 @@ class SolverStepObjective(SolverStep):
         self.lastAP = lastAP
         self.lastArea = lastArea
         self.APs = set(self.lastAP)
-        self.paths = paths
+        self.paths = paths if paths is not None else []
         if self.paths is not None:
             pathAPs = [ap.Name for path in self.paths for ap in path.path]
             self.log.debug("add visited path APs: {} for objective {}".format(pathAPs, objectiveName))
@@ -177,3 +339,24 @@ class SolverStepObjective(SolverStep):
     def rollback(self, container, smbm):
         self.log.debug("rollback objective {}".format(self.objectiveName))
         Objectives.setGoalCompleted(self.objectiveName, False)
+
+    def dump(self):
+        return {
+            "type": "objective",
+            "objectiveName": self.objectiveName,
+            "lastAP": self.lastAP,
+            "lastArea": self.lastArea,
+            "paths": [{"path": [ap.Name for ap in path.path],
+                       "pdiff": (path.pdiff.bool, path.pdiff.difficulty, path.pdiff.knows, path.pdiff.items),
+                       "distance": path.distance} for path in self.paths]
+        }
+
+    @staticmethod
+    def restore(dump):
+        # rebuild paths
+        paths = [Path([getAccessPoint(APName) for APName in path["path"]],
+                      SMBool(path["pdiff"][1], path["pdiff"][1], path["pdiff"][2], path["pdiff"][3]),
+                      path["distance"]) for path in dump["paths"]]
+
+        # instanciate SolverStepObjective
+        return SolverStepObjective(dump["objectiveName"], dump["lastAP"], dump["lastArea"], paths)

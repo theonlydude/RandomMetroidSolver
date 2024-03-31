@@ -791,7 +791,8 @@ class Objectives(object):
         assert Objectives.tourianRequired is not None
         return Objectives.tourianRequired
 
-    def resetGoals(self):
+    @staticmethod
+    def resetGoals():
         Objectives.activeGoals = []
         Objectives.nbActiveGoals = 0
         for goal in Objectives.goals.values():
@@ -1230,6 +1231,7 @@ class Objectives(object):
         }
 
     def setState(self, state, tourianRequired):
+        self.resetGoals()
         rank = 1
         for goalName, completed in state["goals"].items():
             goal = Objectives.goals[goalName]
@@ -1244,7 +1246,8 @@ class Objectives(object):
     def setTotalItemsCount(self, totalItemsCount):
         Objectives.totalItemsCount = totalItemsCount
 
-    def resetCompletedGoals(self):
+    @staticmethod
+    def resetCompletedGoals():
         for goal in Objectives.activeGoals:
             goal.completed = False
 

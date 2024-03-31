@@ -89,53 +89,7 @@ class WS(object):
     def returnState(self):
         if self.session["state"]:
             state = self.session["state"]
-            return json.dumps({
-                # item tracker
-                "availableLocations": state["availableLocationsWeb"],
-                "visitedLocations": state["visitedLocationsWeb"],
-                "collectedItems": state["collectedItems"],
-                "remainLocations": state["remainLocationsWeb"],
-                "lastAP": locName4isolver(state["lastAP"]),
-
-                # area tracker
-                "lines": state["linesWeb"],
-                "linesSeq": state["linesSeqWeb"],
-                "allTransitions": state["allTransitions"],
-                "roomsVisibility": state["roomsVisibility"],
-
-                # infos on seed
-                "logic": state["logic"],
-                "mode": state["mode"],
-                "majorsSplit": state["masterMajorsSplit"],
-                "areaRando": state["areaRando"],
-                "bossRando": state["bossRando"],
-                "hasMixedTransitions": state["hasMixedTransitions"],
-                "escapeRando": state["escapeRando"],
-                "escapeTimer": state["escapeTimer"],
-                "seed": state["seed"],
-                "preset": os.path.basename(os.path.splitext(state["presetFileName"])[0]),
-                "errorMsg": state["errorMsg"],
-                "last": state["last"],
-                "innerTransitions": state["innerTransitions"],
-                "hasNothing": state["hasNothing"],
-
-                # doors
-                "doors": state["doors"],
-                "doorsRando": state["doorsRando"],
-                "allDoorsRevealed": state["allDoorsRevealed"],
-
-                # plando scav hunt
-                "plandoScavengerOrder": state["plandoScavengerOrder"],
-
-                # tourian
-                "tourian": state["tourian"],
-
-                # completed objectives
-                "newlyCompletedObjectives": state["newlyCompletedObjectives"],
-                "eventsBitMasks": state["eventsBitMasks"],
-                "objectives": state["objectives"],
-                "objectivesHidden": state["objectivesHidden"]
-            })
+            return json.dumps(state["web"])
         else:
             raiseHttp(200, "OK", True)
 

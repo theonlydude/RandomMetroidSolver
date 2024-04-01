@@ -75,22 +75,30 @@ class SolverContainer(object):
         self.locations.remove(loc)
         self.locationsDict[locName]
 
-    def cancelTrackerLocation(self, location, cleanup=False):
-        for stepIndex, step in enumerate(self.steps):
-            if self.isStepLocation(step) and step.location == location:
+    def cancelTrackerLocation(self, location, smbm):
+        # we cancel a location anywhere in the already collected locations list,
+        # doing so could invalidate some objectives but we can't revalidate all of them,
+        # so we are only checking if the location to cancel is the last location in the container,
+        # if so use the rollbackTracker method which also cancels objectives added after the location.
+        for step in self.steps[::-1]:
+            if self.isStepLocation(step):
                 break
+        if step.location == location:
+            self.rollbackTracker(1, smbm)
+        else:
+            for stepIndex, step in enumerate(self.steps):
+                if self.isStepLocation(step) and step.location == location:
+                    break
 
-        # remove location step
-        self.steps = self.steps[0:stepIndex] + self.steps[stepIndex+1:]
-        # in tracker all locs are major
-        self.majorLocations.append(location)
+            # remove location step
+            self.steps = self.steps[0:stepIndex] + self.steps[stepIndex+1:]
+            # in tracker all locs are major
+            self.majorLocations.append(location)
 
-        if cleanup:
-            # delete location params which are set when the location is available
-            location.difficulty = None
-            location.distance = None
-            location.accessPoint = None
-            location.path = None
+        location.difficulty = None
+        location.distance = None
+        location.accessPoint = None
+        location.path = None
 
     def updateOverrideAP(self, ap):
         if ap != self.lastAP():
@@ -193,11 +201,17 @@ class SolverContainer(object):
         state = {}
         state["locsData"] = self.getLocsData()
         state["steps"] = [step.dump() for step in self.steps]
+        # TODO::test with autotracker to see if it's required
+        #state["inventoryItems"] = self.inventoryItems
         return state
 
     def setState(self, state, smbm):
         smbm.resetItems()
         Objectives.resetCompletedGoals()
+
+        # TODO::test with autotracker to see if it's required
+        #       if shouldn't as we load all the inventory when importing the autotracker dump
+        #self.inventoryItems = state["inventoryItems"]
 
         self.setLocsData(state["locsData"])
         for step in state["steps"]:
@@ -378,12 +392,13 @@ class SolverStepLocation(SolverStep):
         else:
             container.minorLocations.append(self.location)
 
-        # if multiple majors in plando mode, remove it from smbm only when it's the last occurence of it
-        if smbm.isCountItem(item):
-            smbm.removeItem(item)
-        else:
-            if item not in container.collectedItems():
+        if not container.conf.autotracker:
+            # if multiple majors in plando mode, remove it from smbm only when it's the last occurence of it
+            if smbm.isCountItem(item):
                 smbm.removeItem(item)
+            else:
+                if item not in container.collectedItems():
+                    smbm.removeItem(item)
 
     def dump(self):
         return {

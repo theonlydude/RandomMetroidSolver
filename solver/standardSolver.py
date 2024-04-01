@@ -111,6 +111,6 @@ class StandardSolver(CommonSolver):
         presetLoader.load()
         self.smbm.createKnowsFunctions()
 
-        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.lastAP)
+        self.areaGraph.getAvailableLocations(locations, self.smbm, infinity, self.container.lastAP())
 
         return [loc for loc in locations if loc.difficulty.bool == True]

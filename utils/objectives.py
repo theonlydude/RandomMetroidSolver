@@ -961,8 +961,6 @@ class Objectives(object):
                 LOG.debug(f"canExploreArea {area}, cannot access locs: {str(missingLocs)}")
             return SMBool(False)
 
-        # TODO::check that all area locs have been visited ?
-
         return SMBool(True)
 
     @staticmethod

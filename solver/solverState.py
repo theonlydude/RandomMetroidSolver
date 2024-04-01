@@ -119,6 +119,8 @@ class SolverState(object):
         solver.container = SolverContainer(Logic.locations(), solver.conf, solver.romConf)
         solver.romConf.postSetState(solver.container)
         solver.container.setState(self.state["container"], solver.smbm)
+        solver.lastAP = solver.container.lastAP()
+        solver.lastArea = solver.container.lastArea()
 
         # doors
         DoorsManager.unserialize(self.state["doors"])

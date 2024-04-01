@@ -184,11 +184,11 @@ class CommonSolver(object):
 
         # before looping on all diff targets, get only the available locations with diff target infinity
         if difficultyTarget != infinity:
-            self.areaGraph.getAvailableLocations(nextLocations, self.smbm, infinity, self.lastAP)
+            self.areaGraph.getAvailableLocations(nextLocations, self.smbm, infinity, self.container.lastAP())
             nextLocations = [loc for loc in nextLocations if loc.difficulty]
 
         while True:
-            self.areaGraph.getAvailableLocations(nextLocations, self.smbm, difficultyTarget, self.lastAP)
+            self.areaGraph.getAvailableLocations(nextLocations, self.smbm, difficultyTarget, self.container.lastAP())
             # check post available functions too
             for loc in nextLocations:
                 loc.evalPostAvailable(self.smbm, self.conf.mode)
@@ -196,7 +196,7 @@ class CommonSolver(object):
             self.areaGraph.useCache(True)
             # also check if we can come back to current AP from the location
             for loc in nextLocations:
-                loc.evalComeBack(self.smbm, self.areaGraph, self.lastAP)
+                loc.evalComeBack(self.smbm, self.areaGraph, self.container.lastAP())
             self.areaGraph.useCache(False)
 
             nextLocations = [loc for loc in nextLocations if not loc.difficulty]
@@ -218,12 +218,12 @@ class CommonSolver(object):
                     print("                                          smbool: {}".format(loc.difficulty))
                     print("                                            path: {}".format([ap.Name for ap in loc.path]))
 
-    def collectMajor(self, loc, itemName=None, autotracker=False):
+    def collectMajor(self, loc, itemName=None):
         self.log.debug("collect major at {}".format(loc.Name))
         self.container.collectMajor(loc)
 
         # in autotracker items are read from memory
-        if autotracker:
+        if self.conf.autotracker:
             self.collectItem(loc, 'major', 'Nothing')
         else:
             self.collectItem(loc, 'major', itemName)
@@ -258,17 +258,11 @@ class CommonSolver(object):
             print("collectItem: {:<16} at {:<48} diff {}".format(item, loc.Name, loc.difficulty))
             print("---------------------------------------------------------------")
 
-        # last loc is used as root node for the graph.
-        self.lastAP = self.container.lastAP()
-        self.lastArea = self.container.lastArea()
-
     def rollback(self, count):
         for module in self.modules:
             module.addRollback(count)
 
         self.container.rollback(count, self.smbm)
-        self.lastAP = self.container.lastAP()
-        self.lastArea = self.container.lastArea()
 
     def printLocs(self, locs, phase):
         if len(locs) > 0:
@@ -290,11 +284,11 @@ class CommonSolver(object):
 
         # add nocomeback locations which has been selected by the comeback step (areaWeight == 1)
         around = [loc for loc in locations if( (loc.areaWeight is not None and loc.areaWeight == 1)
-                                               or ((loc.SolveArea == self.lastArea or loc.distance < 3)
+                                               or ((loc.SolveArea == self.container.lastArea() or loc.distance < 3)
                                                    and loc.difficulty.difficulty <= threshold
-                                                   and (not Bosses.areaBossDead(self.smbm, self.lastArea)
-                                                        and (self.lastArea not in Bosses.areaBosses
-                                                             or Bosses.areaBosses[self.lastArea] in mandatoryBosses))
+                                                   and (not Bosses.areaBossDead(self.smbm, self.container.lastArea())
+                                                        and (self.container.lastArea() not in Bosses.areaBosses
+                                                             or Bosses.areaBosses[self.container.lastArea()] in mandatoryBosses))
                                                    and loc.comeBack is not None and loc.comeBack == True)
                                                or (loc.Name == "Gunship") )]
         outside = [loc for loc in locations if not loc in around]
@@ -307,7 +301,7 @@ class CommonSolver(object):
             # end game loc
             0 if loc.Name == "Gunship" else 1,
             # locs in the same area
-            0 if loc.SolveArea == self.lastArea else 1,
+            0 if loc.SolveArea == self.container.lastArea() else 1,
             # nearest locs
             loc.distance,
             # beating a boss
@@ -356,7 +350,7 @@ class CommonSolver(object):
         for key in ranged:
             ranged[key].sort(key=lambda loc: (
                 # first locs in the same area
-                0 if loc.SolveArea == self.lastArea else 1,
+                0 if loc.SolveArea == self.container.lastArea() else 1,
                 # first nearest locs
                 loc.distance,
                 # beating a boss
@@ -400,7 +394,7 @@ class CommonSolver(object):
             return self.collectMajor(majorsAvailable.pop(0))
         # next take major items of acceptable difficulty in the current area
         elif (len(majorsAvailable) > 0
-            and majorsAvailable[0].SolveArea == self.lastArea
+            and majorsAvailable[0].SolveArea == self.container.lastArea()
             and majorsAvailable[0].difficulty.difficulty <= diffThreshold
             and majorsAvailable[0].comeBack == True):
             return self.collectMajor(majorsAvailable.pop(0))
@@ -475,7 +469,7 @@ class CommonSolver(object):
                 elif nextMinDifficulty <= diffThreshold and not self.haveAllMinorTypes():
                     self.log.debug("not all minors types")
                     return self.collectMinor(minorsAvailable.pop(0))
-                elif nextMinArea == self.lastArea and nextMinDifficulty <= diffThreshold:
+                elif nextMinArea == self.container.lastArea() and nextMinDifficulty <= diffThreshold:
                     self.log.debug("not enough minors")
                     return self.collectMinor(minorsAvailable.pop(0))
                 elif nextMinDifficulty > diffThreshold and nextMajDifficulty > diffThreshold:
@@ -586,9 +580,6 @@ class CommonSolver(object):
         # the next collected item is the one with the smallest difficulty,
         # if equality between major and minor, take major first.
 
-        self.lastAP = self.romConf.startLocation
-        self.lastArea = self.romConf.startArea
-
         self.container = SolverContainer(self.locations, self.conf, self.romConf)
         mbLoc = self.container.getLoc('Mother Brain')
         if self.objectives.tourianRequired:
@@ -619,23 +610,23 @@ class CommonSolver(object):
                 return (-1, False)
 
             self.log.debug("################################ new solver step ################################")
-            self.log.debug("Current AP/Area: {}/{}".format(self.lastAP, self.lastArea))
+            self.log.debug("Current AP/Area: {}/{}".format(self.container.lastAP(), self.container.lastArea()))
             self.log.debug("Objectives: {}".format(self.objectives.getState()))
             if self.log.getEffectiveLevel() == logging.DEBUG:
-                aps = self.areaGraph.getAvailableAccessPoints(getAccessPoint(self.lastAP), self.smbm, infinity)
+                aps = self.areaGraph.getAvailableAccessPoints(getAccessPoint(self.container.lastAP()), self.smbm, infinity)
                 aps = sorted([ap.Name for ap in aps])
                 self.log.debug("APs: {}".format(aps))
             self.log.debug("SMBM: {}".format(self.smbm.getItems()))
 
             # check if a new objective can be completed
-            goals = self.objectives.checkGoals(self.smbm, self.lastAP)
+            goals = self.objectives.checkGoals(self.smbm, self.container.lastAP())
             if any([possible for possible in goals.values()]):
                 completed = False
                 for goalName, possible in goals.items():
                     if possible:
                         self.log.debug("objective possible: {}".format(goalName))
                         goalObj = self.objectives.goals[goalName]
-                        requiredAPs, requiredLocs = goalObj.objCompletedFuncVisit(self.lastAP)
+                        requiredAPs, requiredLocs = goalObj.objCompletedFuncVisit(self.container.lastAP())
                         visitedLocNames = set([loc.Name for loc in self.container.visitedLocations()])
                         self.log.debug("remaining required APs: {}".format([ap for ap in requiredAPs if ap not in self.container.visitedAPs()]))
                         self.log.debug("remaining required locs: {}".format([loc for loc in requiredLocs if loc not in visitedLocNames]))
@@ -646,7 +637,7 @@ class CommonSolver(object):
                             paths = None
                             if missingAPs:
                                 self.log.debug("try to access objective missing APs: {}".format(missingAPs))
-                                paths = self.areaGraph.exploreAPs(self.smbm, self.lastAP, missingAPs, infinity)
+                                paths = self.areaGraph.exploreAPs(self.smbm, self.container.lastAP(), missingAPs, infinity)
                                 if not paths:
                                     self.log.debug("can't access missings APs for objective {}".format(goalName))
                                     continue
@@ -657,10 +648,13 @@ class CommonSolver(object):
                             #  use them to update last AP/Area
                             if paths is not None:
                                 lastAP = paths[-1].path[-1]
-                                self.lastAP = lastAP.Name
-                                self.lastArea = lastAP.SolveArea
+                                objLastAP = lastAP.Name
+                                objLastArea = lastAP.SolveArea
+                            else:
+                                objLastAP = self.container.lastAP()
+                                objLastArea = self.container.lastArea()
 
-                            self.container.completeObjective(goalName, self.lastAP, self.lastArea, paths)
+                            self.container.completeObjective(goalName, objLastAP, objLastArea, paths)
 
                             for module in self.modules:
                                 module.addObjective(goalName)
@@ -749,7 +743,7 @@ class CommonSolver(object):
             # ignore items requirements now that mother brain is dead
             self.relaxedEndCheck = True
             # change current AP to escape AP
-            self.lastAP = self.romConf.escapeTransition[0][1]
+            self.container.updateOverrideAP(self.romConf.escapeTransition[0][1])
             self.computeLocationsDifficulty(self.container.majorLocations)
             majorsAvailable = self.container.getMajorsAvailable()
             if gunship in majorsAvailable:

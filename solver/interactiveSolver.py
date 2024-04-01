@@ -41,9 +41,6 @@ class InteractiveSolver(CommonSolver):
 
         self.objectives = Objectives(reset=True)
 
-        # used by auto tracker to know how many locs have changed
-        self.locDelta = 0
-
     def initLocsAddressName(self):
         addressName = {}
         web2Internal = {}
@@ -79,9 +76,6 @@ class InteractiveSolver(CommonSolver):
 
         # hide doors
         DoorsManager.initTracker(self.romConf.doorsRando and self.conf.mode in ['standard', 'race'])
-
-        self.lastAP = self.romConf.startLocation
-        self.lastArea = self.romConf.startArea
 
         self.container = SolverContainer(Logic.locations(), self.conf, self.romConf)
         self.clearItems()
@@ -135,16 +129,13 @@ class InteractiveSolver(CommonSolver):
 
         # add already collected items to smbm
         self.smbm.addItems(self.container.collectedItems())
+        # always reset autotracker to false, then set it in importDump when importing autotracker state
+        self.conf.autotracker = False
 
         if scope == 'item':
             if action == 'clear':
                 self.clearItems(True)
             else:
-                # to be able to update visitedAPs we need the graph to exist
-                self.buildGraph(self.romConf)
-                # we also need the availAccessPoints to be computed in the graph
-                self.areaGraph.getAvailableLocations([], self.smbm, infinity, self.container.lastAP())
-
                 if action == 'add':
                     if self.conf.mode in ['plando', 'seedless', 'race', 'debug']:
                         if 'loc' in params:
@@ -210,86 +201,36 @@ class InteractiveSolver(CommonSolver):
             elif action == 'randomize':
                 self.randoPlando(params)
 
-        rewindLimit = self.locDelta if scope == 'dump' and self.locDelta > 0 else 1
-        lastVisitedLocs = []
-        # if last loc added was a sequence break, recompute its difficulty,
-        # as it may be available with the newly placed item.
-        # generalize it for auto-tracker where we can add more than one loc at once.
-        if len(self.container.visitedLocations()) > 0:
-            for i in range(1, rewindLimit+1):
-                if i > len(self.container.visitedLocations()):
-                    break
-                else:
-                    loc = self.container.visitedLocations()[-i]
-                    # check that the ap of the loc is available from the previous ap,
-                    # else it may set loc diff to easy
-                    if (loc.difficulty.difficulty == -1 and
-                        loc.accessPoint is not None and
-                        self.areaGraph.canAccess(self.smbm, previousAP, loc.accessPoint, infinity)):
-                        lastVisitedLocs.append(loc)
-
-            for loc in lastVisitedLocs:
-                self.container.cancelTrackerLocation(loc)
-
         # compute new available locations
         self.container.resetLocsDifficulty()
         self.computeLocationsDifficulty(self.container.majorLocations, startDiff=easy)
 
-        while True:
-            remainLocs = []
-            okLocs = []
-
-            for loc in lastVisitedLocs:
-                if loc.difficulty == False:
-                    remainLocs.append(loc)
-                else:
-                    okLocs.append(loc)
-
-            if len(remainLocs) == len(lastVisitedLocs):
-                # all remaining locs are seq break
-                for loc in lastVisitedLocs:
-                    self.container.collectMajor(loc)
-                    self.container.collectItem(loc, loc.itemName, 'major')
-                    if not loc.difficulty:
-                        # if the loc is still sequence break, put it back as sequence break
-                        loc.difficulty = SMBool(True, -1)
-                break
-            else:
-                # add available locs
-                for loc in okLocs:
-                    lastVisitedLocs.remove(loc)
-                    self.container.collectMajor(loc)
-                    self.container.collectItem(loc, loc.itemName, 'major')
-
-            # compute again
-            self.container.resetLocsDifficulty()
-            self.computeLocationsDifficulty(self.container.majorLocations, startDiff=easy)
-
         # autotracker handles objectives
-        if not (scope == 'dump' and action == 'import'):
+        if not self.conf.autotracker:
             self.checkGoals()
 
         # return them
         return self.dumpState()
 
     def checkGoals(self):
-        # TODO::check if possible to use the same code as in standard solver and to add it to a common function ?
-        #       and how to handle objectives that change the last AP ?
-
         # check if objectives can be completed
         self.newlyCompletedObjectives = []
-        goals = self.objectives.checkGoals(self.smbm, self.lastAP)
+        goals = self.objectives.checkGoals(self.smbm, self.container.lastAP())
         self.log.debug("objectives: {}".format(goals))
         for goalName, canClear in goals.items():
             if canClear:
                 self.log.debug("objective possible: {}".format(goalName))
                 goalObj = self.objectives.goals[goalName]
-                requiredAPs, requiredLocs = goalObj.objCompletedFuncVisit(self.lastAP)
-                visitedLocNames = set([loc.Name for loc in self.visitedLocations])
-                self.log.debug(f"remaining required APs: {[ap for ap in requiredAPs if ap not in self.visitedAPs]}")
+                requiredAPs, requiredLocs = goalObj.objCompletedFuncVisit(self.container.lastAP())
+                visitedLocNames = set([loc.Name for loc in self.container.visitedLocations()])
                 self.log.debug(f"remaining required locs: {[loc for loc in requiredLocs if loc not in visitedLocNames]}")
-                if set(requiredAPs).issubset(self.visitedAPs) and set(requiredLocs).issubset(visitedLocNames):
+                # in tracker mode only check for required visited locations as we don't want to change user
+                # current access point as it won't match with where he is in game.
+                # as a result some objectives will be validated in the tracker before they are in game by the user,
+                # it can be seen as a hint to the player that he should be able to complete the objective.
+                if set(requiredLocs).issubset(visitedLocNames):
                     self.log.debug("complete objective {}".format(goalName))
+                    self.container.completeObjective(goalName, self.container.lastAP(), self.container.lastArea(), None)
                     self.objectives.setGoalCompleted(goalName, True)
                     self.newlyCompletedObjectives.append("Completed objective: {}".format(goalName))
             else:
@@ -588,9 +529,9 @@ class InteractiveSolver(CommonSolver):
         locName = self.locNameWeb2Internal(locNameWeb)
         return self.container.getLoc(locName)
 
-    def pickItemAt(self, locName, autotracker=False):
+    def pickItemAt(self, locNameWeb):
         # collect new item at newLoc
-        loc = self.getWebLoc(locName)
+        loc = self.getWebLoc(locNameWeb)
 
         # check that location has not already been visited
         if loc in self.container.visitedLocations():
@@ -603,12 +544,12 @@ class InteractiveSolver(CommonSolver):
         if loc.accessPoint is None:
             # take first ap of the loc
             loc.accessPoint = list(loc.AccessFrom)[0]
-        self.collectMajor(loc, autotracker=autotracker)
+        self.collectMajor(loc)
 
-    def setItemAt(self, locName, itemName, hide):
+    def setItemAt(self, locNameWeb, itemName, hide):
         # set itemName at locName
 
-        loc = self.getWebLoc(locName)
+        loc = self.getWebLoc(locNameWeb)
 
         # check if location has not already been visited
         if loc in self.container.visitedLocations():
@@ -631,9 +572,9 @@ class InteractiveSolver(CommonSolver):
         if loc in self.container.majorLocations:
             self.collectMajor(loc, itemName=itemName)
 
-    def replaceItemAt(self, locName, itemName, hide):
+    def replaceItemAt(self, locNameWeb, itemName, hide):
         # replace itemName at locName
-        loc = self.getWebLoc(locName)
+        loc = self.getWebLoc(locNameWeb)
         oldItemName = loc.itemName
 
         # check that location not already been visited
@@ -660,23 +601,18 @@ class InteractiveSolver(CommonSolver):
 
         self.smbm.addItem(itemName)
 
-    def removeItemAt(self, locNameWeb, autotracker=False):
-        locName = self.locNameWeb2Internal(locNameWeb)
-        loc = self.container.getLoc(locName)
+    def removeItemAt(self, locNameWeb):
+        loc = self.getWebLoc(locNameWeb)
 
         if loc not in self.container.visitedLocations():
-            self.errorMsg = "Location '{}' has not been visited".format(locName)
+            self.errorMsg = "Location '{}' has not been visited".format(loc.Name)
             return
 
         # removeItemAt is only used from the tracker, so all the locs are in majorLocations
-        self.container.cancelTrackerLocation(loc, cleanup=True)
-
-        # access point
-        self.lastAP = self.container.lastAP()
-        self.lastArea = self.container.lastArea()
+        self.container.cancelTrackerLocation(loc, self.smbm)
 
         # in autotracker items are read from memory
-        if autotracker:
+        if self.conf.autotracker:
             return
 
         # item
@@ -691,8 +627,6 @@ class InteractiveSolver(CommonSolver):
 
     def rollbackTracker(self, count):
         self.container.rollbackTracker(count, self.smbm)
-        self.lastAP = self.container.lastAP()
-        self.lastArea = self.container.lastArea()
 
     def increaseItem(self, item):
         self.container.increaseInventoryItem(item)
@@ -716,8 +650,6 @@ class InteractiveSolver(CommonSolver):
         self.container.reset(reload)
         self.smbm.resetItems()
         self.objectives.resetCompletedGoals()
-        self.lastAP = self.container.lastAP()
-        self.lastArea = self.container.lastArea()
 
     def updatePlandoScavengerOrder(self, plandoScavengerOrder):
         self.romConf.plandoScavengerOrder = plandoScavengerOrder
@@ -887,6 +819,9 @@ class InteractiveSolver(CommonSolver):
     }
 
     def importDump(self, dumpData):
+        # to not update inventory when adding/removing locations
+        self.conf.autotracker = True
+
         # first update current access point
         self.container.updateOverrideAP(dumpData["newAP"])
 
@@ -902,8 +837,10 @@ class InteractiveSolver(CommonSolver):
         }
 
         currentState = dumpData["currentState"]
-        self.locDelta = 0
         bosses = []
+
+        # add locations after having added new items to inventory to avoid seq break locations
+        locationsToAdd = []
 
         for dataType, offset in dumpData["stateDataOffsets"].items():
             if dataType == dataEnum["items"]:
@@ -919,12 +856,11 @@ class InteractiveSolver(CommonSolver):
                     byteIndex = loc.Id >> 3
                     bitMask = 0x01 << (loc.Id & 7)
                     if currentState[offset + byteIndex] & bitMask != 0:
-                        if loc not in self.visitedLocations:
-                            self.pickItemAt(self.locNameInternal2Web(loc.Name), autotracker=True)
-                            self.locDelta += 1
+                        if loc not in self.container.visitedLocations():
+                            locationsToAdd.append(self.locNameInternal2Web(loc.Name))
                     else:
                         if loc in self.container.visitedLocations():
-                            self.removeItemAt(self.locNameInternal2Web(loc.Name), autotracker=True)
+                            self.removeItemAt(self.locNameInternal2Web(loc.Name))
             elif dataType == dataEnum["boss"]:
                 for boss, bossData in self.bossBitMasks.items():
                     byteIndex = bossData["byteIndex"]
@@ -937,11 +873,10 @@ class InteractiveSolver(CommonSolver):
 
                         # in tourian disabled mother brain is not available, but it gets auto killed during escape
                         if loc not in self.container.visitedLocations() and loc in self.container.majorLocations:
-                            self.pickItemAt(self.locNameInternal2Web(loc.Name), autotracker=True)
-                            self.locDelta += 1
+                            locationsToAdd.append(self.locNameInternal2Web(loc.Name))
                     else:
                         if loc in self.container.visitedLocations():
-                            self.removeItemAt(self.locNameInternal2Web(loc.Name), autotracker=True)
+                            self.removeItemAt(self.locNameInternal2Web(loc.Name))
 
             # Inventory
             elif dataType == dataEnum["inventory"]:
@@ -1051,8 +986,7 @@ class InteractiveSolver(CommonSolver):
                             # nothing has been seen, check if loc is already visited
                             if not loc in self.container.visitedLocations():
                                 # visit it
-                                self.pickItemAt(self.locNameInternal2Web(loc.Name))
-                                self.locDelta += 1
+                                locationsToAdd.append(self.locNameInternal2Web(loc.Name))
                         else:
                             # nothing not yet seed, check if loc is already visited
                             if loc in self.container.visitedLocations():
@@ -1104,6 +1038,14 @@ class InteractiveSolver(CommonSolver):
                     byteIndex = objectives_revealed_event >> 3
                     bitMask = 1 << (objectives_revealed_event & 7)
                     self.objectivesHidden = not bool(currentState[offset + byteIndex] & bitMask)
+
+        if locationsToAdd:
+            # recompute locations availability with the new inventory
+            self.container.resetLocsDifficulty()
+            self.computeLocationsDifficulty(self.container.majorLocations, startDiff=easy)
+
+            for locNameWeb in locationsToAdd:
+                self.pickItemAt(locNameWeb)
 
     def isElemAvailable(self, currentState, offset, apData):
         byteIndex = apData["byteIndex"]

@@ -114,6 +114,10 @@ class SolverState(object):
         # current graph
         solver.curGraphTransitions = self.state["curGraphTransitions"]
 
+        # custom objectives
+        solver.objectives.setState(self.state["objectives"], tourianRequired=solver.romConf.tourian != 'Disabled')
+        solver.objectives.setTotalItemsCount(self.state["totalItemsCount"])
+
         # location container
         # logic is already loaded
         solver.container = SolverContainer(Logic.locations(), solver.conf, solver.romConf)
@@ -124,10 +128,6 @@ class SolverState(object):
 
         # doors
         DoorsManager.unserialize(self.state["doors"])
-
-        # custom objectives
-        solver.objectives.setState(self.state["objectives"], tourianRequired=solver.romConf.tourian != 'Disabled')
-        solver.objectives.setTotalItemsCount(self.state["totalItemsCount"])
 
 
     #############################################

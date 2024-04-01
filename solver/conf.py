@@ -12,6 +12,8 @@ class SolverConf:
         self.mode = mode
         self.interactive = interactive
         self.magic = None
+        # set to true when the auto tracker starts, then to false when it ends
+        self.autotracker = False
 
         # keep getting majors of at most this difficulty before going for minors or changing area
         self.difficultyTarget = SolverConf.defaultDifficultyTarget

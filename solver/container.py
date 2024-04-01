@@ -57,6 +57,18 @@ class SolverContainer(object):
                 step.rollback(self, smbm)
         self.overrideAP = None
 
+    def rollbackTracker(self, count, smbm):
+        # in tracker we cancel X item locations, so don't count objective steps
+        self.log.debug("rollback {} steps for tracker".format(count))
+        # cancel count steps
+        cancelled = 0
+        while self.steps and cancelled < count:
+            step = self.steps.pop()
+            if self.isStepLocation(step):
+                cancelled += 1
+            step.rollback(self, smbm)
+        self.overrideAP = None
+
     def removeTrackerLocation(self, locName):
         # used in isolver to remove mother brain location
         loc = self.getLoc(locName)

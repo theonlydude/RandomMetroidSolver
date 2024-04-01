@@ -165,8 +165,7 @@ class InteractiveSolver(CommonSolver):
                         self.removeItemAt(params['loc'])
                     elif 'count' in params:
                         # remove last collected item
-                        # TODO::this method no longer exists
-                        self.cancelLastItems(params['count'])
+                        self.rollbackTracker(params['count'])
                     else:
                         self.decreaseItem(params['item'])
                 elif action == 'replace':
@@ -690,6 +689,11 @@ class InteractiveSolver(CommonSolver):
             if item not in self.container.collectedItems():
                 self.smbm.removeItem(item)
 
+    def rollbackTracker(self, count):
+        self.container.rollbackTracker(count, self.smbm)
+        self.lastAP = self.container.lastAP()
+        self.lastArea = self.container.lastArea()
+
     def increaseItem(self, item):
         self.container.increaseInventoryItem(item)
         self.smbm.addItem(item)
@@ -712,6 +716,8 @@ class InteractiveSolver(CommonSolver):
         self.container.reset(reload)
         self.smbm.resetItems()
         self.objectives.resetCompletedGoals()
+        self.lastAP = self.container.lastAP()
+        self.lastArea = self.container.lastArea()
 
     def updatePlandoScavengerOrder(self, plandoScavengerOrder):
         self.romConf.plandoScavengerOrder = plandoScavengerOrder

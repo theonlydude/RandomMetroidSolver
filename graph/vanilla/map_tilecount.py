@@ -1,17 +1,17 @@
 tilecount = {
     "vanilla_layout": {
         "GreenPinkBrinstar": 145,
-        "Crateria": 166,
+        "Crateria": 165,
         "RedBrinstar": 67,
         "Kraid": 25,
         "Ceres": 12,
+        "Tourian": 80,
         "WreckedShip": 141,
         "WestMaridia": 96,
         "EastMaridia": 170,
         "Norfair": 185,
         "Crocomire": 55,
-        "LowerNorfair": 121,
-        "Tourian": 78
+        "LowerNorfair": 121
     },
     "area_rando": {
         "GreenPinkBrinstar": 146,

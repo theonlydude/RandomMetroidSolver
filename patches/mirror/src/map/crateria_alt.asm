@@ -40,11 +40,3 @@ org map_data_Crateria+$a5e  ; (47, 9)
 
 org map_data_Crateria+$a5c  ; (46, 9)
      dw $1c1d  ; BGtile[i=$1d p=$7 X]
-
-;;; tiles for room "Statues Room"
-
-org map_data_Crateria+$a5a  ; (45, 9)
-     dw $5c5b  ; BGtile[i=$5b p=$7 HX]
-
-org map_data_Crateria+$a9a  ; (45, 10)
-     dw $5c5f  ; BGtile[i=$5f p=$7 HX]

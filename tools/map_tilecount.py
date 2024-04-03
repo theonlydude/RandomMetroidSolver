@@ -63,13 +63,11 @@ for area in maps.keys():
         pass
 
 countAreaTiles(outData["vanilla_layout"])
-# remove the tile beneath golden 4 statues (it's counted in Tourian in area)
-outData["vanilla_layout"]["Crateria"] -= 1
 
 areaSum = sum(outData["area_rando"].values())
 vanillaSum = sum(outData["vanilla_layout"].values())
 
-assert areaSum == vanillaSum+1, f"Total tile count discrepency! area: {areaSum}, vanilla: {vanillaSum}"
+assert areaSum == vanillaSum, f"Total tile count discrepency! area: {areaSum}, vanilla: {vanillaSum}"
 
 print("Writing "+outPath)
 with open(outPath, "w") as fp:

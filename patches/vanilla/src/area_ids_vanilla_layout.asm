@@ -150,7 +150,7 @@ org $8fa60a
 	db $01, $04
 ;;; Statues Room
 org $8fa687
-	db $01, $04
+	db $0b, $04
 ;;; Green Brinstar Main Shaft [etecoon room]
 org $8f9af6
 	db $02, $00

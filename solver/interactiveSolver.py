@@ -84,7 +84,7 @@ class InteractiveSolver(CommonSolver):
         if self.conf.mode == 'plando' and not self.conf.debug:
             if fill is True:
                 # load the source seed transitions and items/locations
-                self.curGraphTransitions = self.bossTransitions + self.areaTransitions + self.escapeTransition
+                self.curGraphTransitions = self.romConf.bossTransitions + self.romConf.areaTransitions + self.romConf.escapeTransition
                 self.buildGraph(self.romConf)
                 self.fillPlandoLocs()
             else:
@@ -270,6 +270,10 @@ class InteractiveSolver(CommonSolver):
 
         (self.difficulty, self.itemsOk) = self.computeDifficulty()
 
+        # if last location is the gunship remove it as it's not handled by the tracker
+        if any(loc.Name == 'Gunship' for loc in self.container.visitedLocations()):
+            self.container.rollbackTracker(1, self.smbm)
+
         if self.itemsOk == False:
             # add remaining locs as sequence break
             for loc in self.container.majorLocations[:]:
@@ -417,6 +421,8 @@ class InteractiveSolver(CommonSolver):
 
         progItemLocs = []
         if majorsSplit == "Scavenger":
+            if not self.romConf.plandoScavengerOrder:
+                return {"errorMsg": "Scavenger Hunt is empty, fill it before saving"}
             for locName in self.romConf.plandoScavengerOrder:
                 loc = self.container.getLoc(locName)
                 if locName in locsItems:
@@ -435,8 +441,9 @@ class InteractiveSolver(CommonSolver):
 
         patches = ["Escape_Animals_Disable"]
 
-        doors = GraphUtils.getDoorConnections(AccessGraph(Logic.accessPoints(), self.fillGraph()), self.areaRando,
-                                              self.bossRando, self.escapeRando, False)
+        doors = GraphUtils.getDoorConnections(AccessGraph(Logic.accessPoints(), self.fillGraph()),
+                                              self.romConf.areaRando, self.romConf.bossRando,
+                                              self.romConf.escapeRando, False)
 
         from utils.version import displayedVersion
         from rom.rom_patches import groups, getPatchSet
@@ -492,7 +499,7 @@ class InteractiveSolver(CommonSolver):
                 "graphTrans": self.curGraphTransitions,
                 "maxTransitions": len(vanillaBossesTransitions) + len(vanillaTransitions),
                 "visitedLocations": self.container.visitedLocations(),
-                "additionalETanks": self.additionalETanks
+                "additionalETanks": self.romConf.additionalETanks
             }
         }
 
@@ -502,11 +509,11 @@ class InteractiveSolver(CommonSolver):
         data = romPatcher.romFile.data
         preset = os.path.splitext(os.path.basename(self.conf.presetFileName))[0]
         seedCode = 'FX'
-        if self.bossRando == True:
+        if self.romConf.bossRando:
             seedCode = 'B'+seedCode
         if DoorsManager.isRandom():
             seedCode = 'D'+seedCode
-        if self.areaRando == True:
+        if self.romConf.areaRando:
             seedCode = 'A'+seedCode
         from time import gmtime, strftime
         fileName = 'VARIA_Plandomizer_{}{}_{}.sfc'.format(seedCode, strftime("%Y%m%d%H%M%S", gmtime()), preset)

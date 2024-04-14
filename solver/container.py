@@ -73,7 +73,7 @@ class SolverContainer(object):
         # used in isolver to remove mother brain location
         loc = self.getLoc(locName)
         self.locations.remove(loc)
-        self.locationsDict[locName]
+        del self.locationsDict[locName]
 
     def cancelTrackerLocation(self, location, smbm):
         # we cancel a location anywhere in the already collected locations list,
@@ -182,6 +182,7 @@ class SolverContainer(object):
         mbLoc = self.getLoc('Mother Brain')
         self.majorLocations.remove(mbLoc)
         self.majorLocations.append(gunship)
+        # TODO::remove mb loc from locationsDict and add gunship ?
 
     # manage seedless inventory
     def increaseInventoryItem(self, itemName):

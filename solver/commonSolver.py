@@ -804,6 +804,7 @@ class CommonSolver(object):
     def getScavengerHuntState(self):
         # check where we are in the scavenger hunt
         huntInProgress = False
+        index = 0
         for index, loc in enumerate(self.romConf.scavengerOrder):
             if not self.container.isLocVisited(loc):
                 huntInProgress = True
@@ -829,9 +830,12 @@ class CommonSolver(object):
         if self.romConf.masterMajorsSplit != 'Scavenger':
             return SMBool(True)
         else:
-            # check that last loc from the scavenger hunt list has been visited
-            lastLoc = self.romConf.scavengerOrder[-1]
-            return SMBool(self.container.isLocVisited(lastLoc))
+            # check that last loc from the scavenger hunt list has been visited.
+            # avoid crash in plando if the list is empty (it shouldn't)
+            if self.romConf.scavengerOrder:
+                lastLoc = self.romConf.scavengerOrder[-1]
+                return SMBool(self.container.isLocVisited(lastLoc))
+            return SMBool(False)
 
     def getPriorityArea(self):
         # if scav returns solve area of next loc in the hunt

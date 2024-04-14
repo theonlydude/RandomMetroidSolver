@@ -461,6 +461,8 @@ class WS_item_upload_scav(WS):
             for loc in self.params["plandoScavengerOrder"]:
                 if loc not in scavLocs:
                     raiseHttp(400, "Unknown scavenger location: [{}]".format(loc), True)
+        else:
+            raiseHttp(400, "Scavenger Order is empty", True)
 
     def action(self):
         return self.callSolverAction("item", "upload_scav", self.params)

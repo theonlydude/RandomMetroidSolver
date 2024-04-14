@@ -201,17 +201,14 @@ class SolverContainer(object):
         state = {}
         state["locsData"] = self.getLocsData()
         state["steps"] = [step.dump() for step in self.steps]
-        # TODO::test with autotracker to see if it's required
-        #state["inventoryItems"] = self.inventoryItems
+        # required in seedless mode
+        state["inventoryItems"] = self.inventoryItems
         return state
 
     def setState(self, state, smbm):
         smbm.resetItems()
         Objectives.resetCompletedGoals()
-
-        # TODO::test with autotracker to see if it's required
-        #       if shouldn't as we load all the inventory when importing the autotracker dump
-        #self.inventoryItems = state["inventoryItems"]
+        self.inventoryItems = state["inventoryItems"]
 
         self.setLocsData(state["locsData"])
         for step in state["steps"]:

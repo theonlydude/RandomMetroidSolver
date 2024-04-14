@@ -41,7 +41,7 @@ class CommonSolver(object):
                 loc.itemName = 'Nothing'
 
             # set doors related to default patches
-            DoorsManager.setDoorsColor(seedless=self.conf.doorsRando)
+            DoorsManager.setDoorsColor(seedless=romConf.doorsRando)
 
             self.objectives.setVanilla()
         else:

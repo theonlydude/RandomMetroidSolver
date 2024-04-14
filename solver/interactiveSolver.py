@@ -201,13 +201,13 @@ class InteractiveSolver(CommonSolver):
             elif action == 'randomize':
                 self.randoPlando(params)
 
-        # compute new available locations
-        self.container.resetLocsDifficulty()
-        self.computeLocationsDifficulty(self.container.majorLocations, startDiff=easy)
-
         # autotracker handles objectives
         if not self.conf.autotracker:
             self.checkGoals()
+
+        # compute new available locations
+        self.container.resetLocsDifficulty()
+        self.computeLocationsDifficulty(self.container.majorLocations, startDiff=easy)
 
         # return them
         return self.dumpState()

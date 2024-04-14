@@ -41,7 +41,7 @@ class Addresses(object):
     @staticmethod
     def updateFromSymbols(symbols):
         Addresses.addresses = {
-            'plandoAddresses': ValueRange(0xdee000, length=128),
+            'plandoAddresses': ValueRange(0xdee000, length=256),
             'plandoTransitions': ValueSingle(0xdee100),
             'moonwalk': ValueSingle(0x81b35d),
             'hellrunRate': ValueSingle(0x8DE387),

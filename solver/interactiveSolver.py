@@ -109,7 +109,6 @@ class InteractiveSolver(CommonSolver):
     def iterate(self, instate, scope, action, params):
         self.debug = params["debug"]
         self.smbm = SMBoolManager()
-        self.locations = Logic.locations()
 
         state = SolverState()
         state.set(instate)
@@ -188,7 +187,7 @@ class InteractiveSolver(CommonSolver):
                 doorName = params['doorName']
                 DoorsManager.switchVisibility(doorName)
             elif action == 'clear':
-                DoorsManager.initTracker(self.doorsRando and self.conf.mode in ['standard', 'race'])
+                DoorsManager.initTracker(self.romConf.doorsRando and self.conf.mode in ['standard', 'race'])
         elif scope == 'dump':
             if action == 'import':
                 self.importDump(params["dump"])
@@ -248,6 +247,7 @@ class InteractiveSolver(CommonSolver):
         # get the addresses of the already filled locs, with the correct order
         addresses = self.romLoader.getPlandoAddresses()
 
+        # TODO::use container
         # create a copy of the locations to avoid removing locs from self.locations
         self.majorLocations = self.locations[:]
 
@@ -265,6 +265,7 @@ class InteractiveSolver(CommonSolver):
         # no time limitation
         self.runtimeLimiter = RuntimeLimiter(-1)
 
+        # TODO::use container
         # backup
         locationsBck = self.locations[:]
 
@@ -666,18 +667,18 @@ class InteractiveSolver(CommonSolver):
         self.curGraphTransitions.append((startPoint, endPoint))
 
     def cancelLastTransition(self):
-        if self.areaRando == True and self.bossRando == True:
+        if self.romConf.areaRando == True and self.romConf.bossRando == True:
             if len(self.curGraphTransitions) > 0:
                 self.curGraphTransitions.pop()
-        elif self.areaRando == True:
-            if len(self.curGraphTransitions) > len(self.bossTransitions) + (1 if self.escapeRando == False else 0):
+        elif self.romConf.areaRando == True:
+            if len(self.curGraphTransitions) > len(self.romConf.bossTransitions) + (1 if self.romConf.escapeRando == False else 0):
                 self.curGraphTransitions.pop()
-        elif self.bossRando == True:
-            print("len cur graph: {} len area: {} len escape: {} len sum: {}".format(len(self.curGraphTransitions), len(self.areaTransitions), 1 if self.escapeRando == False else 0, len(self.areaTransitions) + (1 if self.escapeRando == False else 0)))
-            if len(self.curGraphTransitions) > len(self.areaTransitions) + (1 if self.escapeRando == False else 0):
+        elif self.romConf.bossRando == True:
+            print("len cur graph: {} len area: {} len escape: {} len sum: {}".format(len(self.curGraphTransitions), len(self.romConf.areaTransitions), 1 if self.romConf.escapeRando == False else 0, len(self.romConf.areaTransitions) + (1 if self.romConf.escapeRando == False else 0)))
+            if len(self.curGraphTransitions) > len(self.romConf.areaTransitions) + (1 if self.romConf.escapeRando == False else 0):
                 self.curGraphTransitions.pop()
-        elif self.escapeRando == True:
-            if len(self.curGraphTransitions) > len(self.areaTransitions) + len(self.bossTransitions):
+        elif self.romConf.escapeRando == True:
+            if len(self.curGraphTransitions) > len(self.romConf.areaTransitions) + len(self.romConf.bossTransitions):
                 self.curGraphTransitions.pop()
 
     def cancelTransition(self, startPoint):
@@ -696,56 +697,56 @@ class InteractiveSolver(CommonSolver):
             return
 
         # check that transition is cancelable
-        if self.areaRando == True and self.bossRando == True and self.escapeRando == True:
+        if self.romConf.areaRando == True and self.romConf.bossRando == True and self.romConf.escapeRando == True:
             if len(self.curGraphTransitions) == 0:
                 return
-        elif self.areaRando == True and self.escapeRando == False:
-            if len(self.curGraphTransitions) == len(self.bossTransitions) + len(self.escapeTransition):
+        elif self.romConf.areaRando == True and self.romConf.escapeRando == False:
+            if len(self.curGraphTransitions) == len(self.romConf.bossTransitions) + len(self.romConf.escapeTransition):
                 return
-            elif [startPoint, endPoint] in self.bossTransitions or [endPoint, startPoint] in self.bossTransitions:
+            elif [startPoint, endPoint] in self.romConf.bossTransitions or [endPoint, startPoint] in self.romConf.bossTransitions:
                 return
-            elif [startPoint, endPoint] in self.escapeTransition or [endPoint, startPoint] in self.escapeTransition:
+            elif [startPoint, endPoint] in self.romConf.escapeTransition or [endPoint, startPoint] in self.romConf.escapeTransition:
                 return
-        elif self.bossRando == True and self.escapeRando == False:
-            if len(self.curGraphTransitions) == len(self.areaTransitions) + len(self.escapeTransition):
+        elif self.romConf.bossRando == True and self.romConf.escapeRando == False:
+            if len(self.curGraphTransitions) == len(self.romConf.areaTransitions) + len(self.romConf.escapeTransition):
                 return
-            elif [startPoint, endPoint] in self.areaTransitions or [endPoint, startPoint] in self.areaTransitions:
+            elif [startPoint, endPoint] in self.romConf.areaTransitions or [endPoint, startPoint] in self.romConf.areaTransitions:
                 return
-            elif [startPoint, endPoint] in self.escapeTransition or [endPoint, startPoint] in self.escapeTransition:
+            elif [startPoint, endPoint] in self.romConf.escapeTransition or [endPoint, startPoint] in self.romConf.escapeTransition:
                 return
-        elif self.areaRando == True and self.escapeRando == True:
-            if len(self.curGraphTransitions) == len(self.bossTransitions):
+        elif self.romConf.areaRando == True and self.romConf.escapeRando == True:
+            if len(self.curGraphTransitions) == len(self.romConf.bossTransitions):
                 return
-            elif [startPoint, endPoint] in self.bossTransitions or [endPoint, startPoint] in self.bossTransitions:
+            elif [startPoint, endPoint] in self.romConf.bossTransitions or [endPoint, startPoint] in self.romConf.bossTransitions:
                 return
-        elif self.bossRando == True and self.escapeRando == True:
-            if len(self.curGraphTransitions) == len(self.areaTransitions):
+        elif self.romConf.bossRando == True and self.romConf.escapeRando == True:
+            if len(self.curGraphTransitions) == len(self.romConf.areaTransitions):
                 return
-            elif [startPoint, endPoint] in self.areaTransitions or [endPoint, startPoint] in self.areaTransitions:
+            elif [startPoint, endPoint] in self.romConf.areaTransitions or [endPoint, startPoint] in self.romConf.areaTransitions:
                 return
-        elif self.escapeRando == True and self.areaRando == False and self.bossRando == False:
-            if len(self.curGraphTransitions) == len(self.areaTransitions) + len(self.bossTransitions):
+        elif self.romConf.escapeRando == True and self.romConf.areaRando == False and self.romConf.bossRando == False:
+            if len(self.curGraphTransitions) == len(self.romConf.areaTransitions) + len(self.romConf.bossTransitions):
                 return
-            elif [startPoint, endPoint] in self.areaTransitions or [endPoint, startPoint] in self.areaTransitions:
+            elif [startPoint, endPoint] in self.romConf.areaTransitions or [endPoint, startPoint] in self.romConf.areaTransitions:
                 return
-            elif [startPoint, endPoint] in self.bossTransitions or [endPoint, startPoint] in self.bossTransitions:
+            elif [startPoint, endPoint] in self.romConf.bossTransitions or [endPoint, startPoint] in self.romConf.bossTransitions:
                 return
 
         # remove transition
         self.curGraphTransitions.pop(i)
 
     def clearTransitions(self):
-        if self.areaRando == True and self.bossRando == True:
+        if self.romConf.areaRando == True and self.romConf.bossRando == True:
             self.curGraphTransitions = []
-        elif self.areaRando == True:
-            self.curGraphTransitions = self.bossTransitions[:]
-        elif self.bossRando == True:
-            self.curGraphTransitions = self.areaTransitions[:]
+        elif self.romConf.areaRando == True:
+            self.curGraphTransitions = self.romConf.bossTransitions[:]
+        elif self.romConf.bossRando == True:
+            self.curGraphTransitions = self.romConf.areaTransitions[:]
         else:
-            self.curGraphTransitions = self.bossTransitions + self.areaTransitions
+            self.curGraphTransitions = self.romConf.bossTransitions + self.romConf.areaTransitions
 
-        if self.escapeRando == False:
-            self.curGraphTransitions += self.escapeTransition
+        if self.romConf.escapeRando == False:
+            self.curGraphTransitions += self.romConf.escapeTransition
 
     def getDiffThreshold(self):
         # in interactive solver we don't have the max difficulty parameter
@@ -867,6 +868,7 @@ class InteractiveSolver(CommonSolver):
                             locationsToAdd.append(self.locNameInternal2Web(loc.Name))
                     else:
                         if loc in self.container.visitedLocations():
+                            # TODO::loc not removed
                             self.removeItemAt(self.locNameInternal2Web(loc.Name))
             elif dataType == dataEnum["boss"]:
                 for boss, bossData in self.bossBitMasks.items():
@@ -927,7 +929,7 @@ class InteractiveSolver(CommonSolver):
                             self.smbm.addItem(item)
 
             elif dataType == dataEnum["map"]:
-                if self.areaRando or self.bossRando or self.escapeRando:
+                if self.romConf.areaRando or self.romConf.bossRando or self.romConf.escapeRando:
                     availAPs = set()
                     for apName, apData in self.areaAccessPoints[self.logic].items():
                         if self.isElemAvailable(currentState, offset, apData):
@@ -940,22 +942,22 @@ class InteractiveSolver(CommonSolver):
                             availAPs.add(apName)
 
                     # static transitions
-                    if self.areaRando == True and self.bossRando == True:
+                    if self.romConf.areaRando == True and self.romConf.bossRando == True:
                         staticTransitions = []
-                        possibleTransitions = self.bossTransitions + self.areaTransitions
-                    elif self.areaRando == True:
-                        staticTransitions = self.bossTransitions[:]
-                        possibleTransitions = self.areaTransitions[:]
-                    elif self.bossRando == True:
-                        staticTransitions = self.areaTransitions[:]
-                        possibleTransitions = self.bossTransitions[:]
+                        possibleTransitions = self.romConf.bossTransitions + self.romConf.areaTransitions
+                    elif self.romConf.areaRando == True:
+                        staticTransitions = self.romConf.bossTransitions[:]
+                        possibleTransitions = self.romConf.areaTransitions[:]
+                    elif self.romConf.bossRando == True:
+                        staticTransitions = self.romConf.areaTransitions[:]
+                        possibleTransitions = self.romConf.bossTransitions[:]
                     else:
-                        staticTransitions = self.bossTransitions + self.areaTransitions
+                        staticTransitions = self.romConf.bossTransitions + self.romConf.areaTransitions
                         possibleTransitions = []
-                    if self.escapeRando == False:
-                        staticTransitions += self.escapeTransition
+                    if self.romConf.escapeRando == False:
+                        staticTransitions += self.romConf.escapeTransition
                     else:
-                        possibleTransitions += self.escapeTransition
+                        possibleTransitions += self.romConf.escapeTransition
 
                     # remove static transitions from current transitions
                     dynamicTransitions = self.curGraphTransitions[:]
@@ -984,9 +986,9 @@ class InteractiveSolver(CommonSolver):
                             if start not in fastTransCheck and end not in fastTransCheck:
                                 self.curGraphTransitions.append(transition)
 
-                if self.hasNothing:
+                if self.romConf.hasNothing:
                     # get locs with nothing
-                    locsNothing = [loc for loc in self.locations if loc.itemName == 'Nothing']
+                    locsNothing = [loc for loc in self.container.locations if loc.itemName == 'Nothing']
                     for loc in locsNothing:
                         locData = self.nothingScreens[self.logic][loc.Name]
                         if self.isElemAvailable(currentState, offset, locData):
@@ -999,7 +1001,7 @@ class InteractiveSolver(CommonSolver):
                             if loc in self.container.visitedLocations():
                                 # unvisit it
                                 self.removeItemAt(self.locNameInternal2Web(loc.Name))
-                if self.doorsRando:
+                if self.romConf.doorsRando:
                     # get currently hidden / revealed doors names in sets
                     (hiddenDoors, revealedDoor) = DoorsManager.getDoorsState()
                     for doorName in hiddenDoors:
@@ -1018,7 +1020,7 @@ class InteractiveSolver(CommonSolver):
                 objectivesState = self.objectives.getState()
                 goalsCompleted = objectivesState["goals"]
                 goalsCompleted = list(goalsCompleted.values())
-                for i, (event, eventData) in enumerate(self.eventsBitMasks.items()):
+                for i, (event, eventData) in enumerate(self.romConf.eventsBitMasks.items()):
                     assert i == event, "{}th event has code {} instead of {}".format(i, event, i)
                     if i >= len(goalsList):
                         continue
@@ -1036,7 +1038,7 @@ class InteractiveSolver(CommonSolver):
                         if goalCompleted:
                             self.objectives.setGoalCompleted(goalName, False)
 
-                if self.objectivesHiddenOption:
+                if self.romConf.objectivesHiddenOption:
                     # also check objectives revealed event
                     # !VARIA_event_base #= $0080
                     # !objectives_revealed_event #= !VARIA_event_base+33
@@ -1044,10 +1046,11 @@ class InteractiveSolver(CommonSolver):
                     objectives_revealed_event = VARIA_event_base+33
                     byteIndex = objectives_revealed_event >> 3
                     bitMask = 1 << (objectives_revealed_event & 7)
-                    self.objectivesHidden = not bool(currentState[offset + byteIndex] & bitMask)
+                    self.romConf.objectivesHidden = not bool(currentState[offset + byteIndex] & bitMask)
 
         if locationsToAdd:
             # recompute locations availability with the new inventory
+            self.buildGraph(self.romConf)
             self.container.resetLocsDifficulty()
             self.computeLocationsDifficulty(self.container.majorLocations, startDiff=easy)
 

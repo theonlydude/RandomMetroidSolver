@@ -221,12 +221,7 @@ class CommonSolver(object):
     def collectMajor(self, loc, itemName=None):
         self.log.debug("collect major at {}".format(loc.Name))
         self.container.collectMajor(loc)
-
-        # in autotracker items are read from memory
-        if self.conf.autotracker:
-            self.collectItem(loc, 'major', 'Nothing')
-        else:
-            self.collectItem(loc, 'major', itemName)
+        self.collectItem(loc, 'major', itemName)
         return loc
 
     def collectMinor(self, loc):
@@ -243,7 +238,9 @@ class CommonSolver(object):
             module.addLocation(loc.Name, item)
 
         if item not in self.conf.itemsForbidden:
-            self.smbm.addItem(item)
+            # in autotracker items are read from memory
+            if not self.conf.autotracker:
+                self.smbm.addItem(item)
         else:
             # update the name of the item
             item = "-{}-".format(item)

@@ -162,8 +162,12 @@ class SolverContainer(object):
         return {ap for step in self.steps for ap in step.APs}
 
     def collectedItems(self):
-        # return list of collected items
-        return self.inventoryItems + [step.location.itemName for step in self.steps if self.isStepLocation(step)]
+        # return list of collected items.
+        if self.conf.autotracker:
+            # in autotracker returns only inventoryItems read from memory
+            return self.inventoryItems
+        else:
+            return self.inventoryItems + [step.location.itemName for step in self.steps if self.isStepLocation(step)]
 
     def getMajorsAvailable(self):
         return [loc for loc in self.majorLocations if loc.difficulty is not None and loc.difficulty.bool == True]

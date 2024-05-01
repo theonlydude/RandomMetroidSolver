@@ -868,7 +868,6 @@ class InteractiveSolver(CommonSolver):
                             locationsToAdd.append(self.locNameInternal2Web(loc.Name))
                     else:
                         if loc in self.container.visitedLocations():
-                            # TODO::loc not removed
                             self.removeItemAt(self.locNameInternal2Web(loc.Name))
             elif dataType == dataEnum["boss"]:
                 for boss, bossData in self.bossBitMasks.items():
@@ -909,22 +908,26 @@ class InteractiveSolver(CommonSolver):
 
                     if item == "ETank":
                         tanks = int((val - 99) / 100)
+                        self.log.debug("importDump: add {} ETanks".format(tanks))
                         for _ in range(tanks):
                             self.container.increaseInventoryItem(item)
                             self.smbm.addItem(item)
                     elif item == "Reserve":
                         tanks = int(val / 100)
+                        self.log.debug("importDump: add {} Reserve".format(tanks))
                         for _ in range(tanks):
                             self.container.increaseInventoryItem(item)
                             self.smbm.addItem(item)
                     elif item in ("Missile", "Super", "PowerBomb"):
                         packs = int(val / 5)
+                        self.log.debug("importDump: add {} {}".format(packs, item))
                         for _ in range(packs):
                             self.container.increaseInventoryItem(item)
                             self.smbm.addItem(item)
                     else:
                         bitMask = itemData["bitMask"]
                         if val & bitMask != 0:
+                            self.log.debug("importDump: add {}".format(item))
                             self.container.increaseInventoryItem(item)
                             self.smbm.addItem(item)
 

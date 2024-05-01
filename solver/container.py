@@ -212,7 +212,6 @@ class SolverContainer(object):
 
     def setState(self, state, smbm):
         smbm.resetItems()
-        Objectives.resetCompletedGoals()
         self.inventoryItems = state["inventoryItems"]
 
         self.setLocsData(state["locsData"])

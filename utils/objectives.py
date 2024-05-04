@@ -31,6 +31,9 @@ class Synonyms(object):
     ]
     alreadyUsed = []
     @staticmethod
+    def reset():
+        Synonyms.alreadyUsed = []
+    @staticmethod
     def getVerb(maxLen):
         possibleVerbs = [syn for syn in Synonyms.killSynonyms if len(syn) <= maxLen]
         assert len(possibleVerbs) > 0, "could not find short enough synonym"
@@ -132,15 +135,16 @@ class Goal(object):
             outLen = maxLen + 1
         assert outLen <= maxLen, "Goal '{}' text is too long: '{}'".format(self.name, out)
         out = out.rstrip()        
+        # as we can save the plando multiple time in the same instance we have to use new intro text each time
         if self.introText is not None:
-            self.introText = idxTxt + self.introText
+            self.curIntroText = idxTxt + self.introText
         else:
-            self.introText = out
+            self.curIntroText = out
         return out
 
     def getIntroText(self):
-        assert self.introText is not None
-        return self.introText
+        assert self.curIntroText is not None
+        return self.curIntroText
 
     def isLimit(self):
         return "type" in self.exclusion
@@ -1410,6 +1414,8 @@ class Objectives(object):
         # write objectives text
         romFile.seek(Addresses.getOne('objectives_objs_txt'))
         addrs = []
+        # for plando reset already used synonyms to avoid an infinite loop when all short synonyms have been used
+        Synonyms.reset()
         for i, goal in enumerate(Objectives.activeGoals):
             addrs.append(romFile.tell())
             writeString(goal.getText())

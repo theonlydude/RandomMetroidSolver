@@ -145,7 +145,7 @@ class SolverContainer(object):
         return len(self.steps)
 
     def getLoc(self, locName):
-        return self.locationsDict[locName]
+        return self.locationsDict.get(locName)
 
     def isStepLocation(self, step):
         return type(step) == SolverStepLocation
@@ -205,6 +205,7 @@ class SolverContainer(object):
     def getState(self):
         state = {}
         state["locsData"] = self.getLocsData()
+
         state["steps"] = [step.dump() for step in self.steps]
         # required in seedless mode
         state["inventoryItems"] = self.inventoryItems
@@ -246,8 +247,6 @@ class SolverContainer(object):
 
     def setLocsData(self, locsData):
         for locName, locData in locsData.items():
-            if locName == 'Mother Brain' and self.romConf.tourian == 'Disabled':
-                continue
             loc = self.getLoc(locName)
             loc.distance = locData["distance"]
             loc.accessPoint = locData["accessPoint"]

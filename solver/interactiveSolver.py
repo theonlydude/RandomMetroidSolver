@@ -120,6 +120,8 @@ class InteractiveSolver(CommonSolver):
             mbLoc = self.container.getLoc('Mother Brain')
             assert mbLoc is not None, "Mother Brain loc is None !"
             mbLoc.AccessFrom['Golden Four'] = self.getMotherBrainAccess()
+        else:
+            self.container.removeTrackerLocation('Mother Brain')
 
         # save current AP
         previousAP = self.container.lastAP()
@@ -860,14 +862,15 @@ class InteractiveSolver(CommonSolver):
                     byteIndex = bossData["byteIndex"]
                     bitMask = bossData["bitMask"]
                     loc = self.container.getLoc(boss)
+                    # mother brain is removed in tourian disabled,
+                    # but it gets auto killed during espace in autotracker
+                    if loc is None:
+                        continue
                     if currentState[offset + byteIndex] & bitMask != 0:
                         # as we clear collected items we have to add bosses back.
                         # some bosses have a space in their names, remove it.
                         bosses.append(boss.replace(' ', ''))
-
-                        # in tourian disabled mother brain is not available, but it gets auto killed during escape
-                        if loc not in self.container.visitedLocations() and loc in self.container.majorLocations:
-                            locationsToAdd.append(self.locNameInternal2Web(loc.Name))
+                        locationsToAdd.append(self.locNameInternal2Web(loc.Name))
                     else:
                         if loc in self.container.visitedLocations():
                             self.removeItemAt(self.locNameInternal2Web(loc.Name))

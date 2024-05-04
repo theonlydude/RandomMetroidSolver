@@ -247,10 +247,6 @@ class InteractiveSolver(CommonSolver):
         # get the addresses of the already filled locs, with the correct order
         addresses = self.romLoader.getPlandoAddresses()
 
-        # TODO::use container
-        # create a copy of the locations to avoid removing locs from self.locations
-        self.majorLocations = self.locations[:]
-
         for address in addresses:
             # TODO::compute only the difficulty of the current loc
             self.computeLocationsDifficulty(self.container.majorLocations)
@@ -264,10 +260,6 @@ class InteractiveSolver(CommonSolver):
 
         # no time limitation
         self.runtimeLimiter = RuntimeLimiter(-1)
-
-        # TODO::use container
-        # backup
-        locationsBck = self.locations[:]
 
         (self.difficulty, self.itemsOk) = self.computeDifficulty()
 
@@ -283,8 +275,6 @@ class InteractiveSolver(CommonSolver):
                     # take first ap of the loc
                     loc.accessPoint = list(loc.AccessFrom)[0]
                 self.collectMajor(loc)
-
-        self.locations = locationsBck
 
     def fillGraph(self):
         # add self looping transitions on unused acces points
@@ -358,10 +348,6 @@ class InteractiveSolver(CommonSolver):
         if "itemLocs" in data:
             self.clearItems(reload=True)
             itemsLocs = data["itemLocs"]
-
-            # create a copy because we need self.locations to be full, else the state will be empty
-            # TODO::is it still required ?
-            #self.majorLocations = self.locations[:]
 
             # if tourian is disabled remove mother brain from itemsLocs if the rando added it
             if self.romConf.tourian == 'Disabled':

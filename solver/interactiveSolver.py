@@ -544,8 +544,11 @@ class InteractiveSolver(CommonSolver):
 
     def setItemAt(self, locNameWeb, itemName, hide):
         # set itemName at locName
-
         loc = self.getWebLoc(locNameWeb)
+        if loc is None:
+            # mother brain may not be there if tourian is disabled
+            self.errorMsg = "Mother Brain location is disabled"
+            return
 
         # check if location has not already been visited
         if loc in self.container.visitedLocations():

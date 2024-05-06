@@ -180,7 +180,7 @@ org $80987C
 !vcounter_target_begin = 2
 !vcounter_target_colors #= 31-!hud_draw_offset
 !vcounter_target_end = 31
-!hcounter_target = 178
+!hcounter_target = 160
 !hcounter_end_hud_door_transitions_offset #= 0
 
 ;; direct page flag to offset hcounter when HUD HDMA is not active and main gameplay IRQ is used (pause/message boxe)

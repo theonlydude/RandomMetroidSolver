@@ -31,10 +31,12 @@ if __name__ == "__main__":
                                  'refill_before_save.ips', 'remove_elevators_speed.ips',
                                  'remove_fast_doors.ips', 'remove_Infinite_Space_Jump.ips',
                                  'remove_rando_speed.ips', 'remove_spinjumprestart.ips',
-                                 'remove_itemsounds.ips', 'vanilla_music.ips', 'custom_ship.ips',
-                                 'Ship_Takeoff_Disable_Hide_Samus', 'widescreen.ips',
+                                 'remove_itemsounds.ips', 'vanilla_music.ips',
+                                 'custom_ship.ips', 'Ship_Takeoff_Disable_Hide_Samus',
+                                 'disable_minimap_colors.ips', 'widescreen.ips',
                                  'hell.ips', 'lava_acid_physics.ips', 'hard_mode.ips',
-                                 'color_blind.ips', 'disable_screen_shake.ips', 'noflashing.ips', 'better_reserves.ips'])
+                                 'color_blind.ips', 'disable_screen_shake.ips', 'noflashing.ips',
+                                 'better_reserves.ips'])
     parser.add_argument('--controls',
                         help="specify controls, comma-separated, in that order: Shoot,Jump,Dash,ItemSelect,ItemCancel,AngleUp,AngleDown. Possible values: A,B,X,Y,L,R,Select,None",
                         dest='controls')

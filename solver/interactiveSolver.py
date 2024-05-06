@@ -75,7 +75,7 @@ class InteractiveSolver(CommonSolver):
         self.romConf.majorsSplit = 'Full'
 
         # hide doors
-        DoorsManager.initTracker(self.romConf.doorsRando and self.conf.mode in ['standard', 'race'])
+        DoorsManager.initTracker(self.romConf.doorsRando and self.conf.mode in ['standard', 'race', 'seedless'])
 
         self.container = SolverContainer(Logic.locations(), self.conf, self.romConf)
         self.clearItems()
@@ -189,7 +189,7 @@ class InteractiveSolver(CommonSolver):
                 doorName = params['doorName']
                 DoorsManager.switchVisibility(doorName)
             elif action == 'clear':
-                DoorsManager.initTracker(self.romConf.doorsRando and self.conf.mode in ['standard', 'race'])
+                DoorsManager.initTracker(self.romConf.doorsRando and self.conf.mode in ['standard', 'race', 'seedless'])
         elif scope == 'dump':
             if action == 'import':
                 self.importDump(params["dump"])

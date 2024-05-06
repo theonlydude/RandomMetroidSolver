@@ -10,6 +10,7 @@ from utils.parameters import diff4solver
 from utils.doorsmanager import DoorsManager
 from rom.rom_patches import RomPatches
 from graph.graph_utils import getAccessPoint
+from web.backend.utils import locName4isolver
 
 class SolverState(object):
     def set(self, state):
@@ -57,7 +58,7 @@ class SolverState(object):
         self.state["web"]["visitedLocations"] = solver.container.visitedLocationsWeb()
         self.state["web"]["collectedItems"] = solver.container.collectedItems()
         self.state["web"]["remainLocations"] = solver.container.remainLocationsWeb()
-        self.state["web"]["lastAP"] = solver.container.lastAP()
+        self.state["web"]["lastAP"] = locName4isolver(solver.container.lastAP())
         self.state["web"]["last"] = solver.container.lastWeb()
 
         # area tracker

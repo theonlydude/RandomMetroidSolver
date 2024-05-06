@@ -186,7 +186,7 @@ org $80987C
 ;; direct page flag to offset hcounter when HUD HDMA is not active and main gameplay IRQ is used (pause/message boxe)
 !no_hud_hdma_flag = $ce
 !no_hud_hdma_offset #= !hcounter_end_hud_door_transitions_offset ; value to offset when no_hud_hdma_offset is non-zero
-
+!NMI_overrun_flag = $cd         ; 1 byte
 
 org $888338
         jsl raise_hud
@@ -246,6 +246,12 @@ org $828B4B
 ;; long writes to INIDISP mitigates early read glitch (https://undisbeliever.net/snesdev/registers/inidisp.html#early-read-glitch)
 !INIDISP_begin_fblank #= $800000+!INIDISP
 !INIDISP_end_fblank #= $0f0000+!INIDISP
+
+;; to be able to read v counter and detect NMI overrun
+!OPVCT = $213D
+!STAT78 = $213F
+!WRIO = $4201
+
 
 macro setNextColor(addr)
         lda <addr> : sta.w !CGDATA
@@ -335,6 +341,12 @@ org $8097D4
 org $8097D7
         db !hcounter_target+!hcounter_end_hud_door_transitions_offset
 
+;; in main gameplay, trigger 1st IRQ earlier to account for NMI overrun check code
+;; reminder:
+;; CPU cycle and FastROM/IO access is 6 master cycles of 21MHz : 1/3.5 MHz
+;; total screen is 340*262 = 89080 px, so 5344800 px/s => 1.527 px per CPU cycle
+org $8096D1
+        db $6e
 
 ;; replace etank tile with a custom one using palette 7,
 ;; so etanks don't change color with minimap
@@ -393,7 +405,16 @@ end_hud:
 
 irq_colors_begin_hud_main_gameplay:
         %a8()
-        jsr begin_hud
+        ;; check if an NMI overrun occurred to avoid black flash (HUD colors will still glitch for a frame)
+        stz.w !WRIO : lda.b #$80 : sta.w !WRIO ; latch OPVCT
+        lda.w !OPVCT
+        beq +
+        inc !NMI_overrun_flag
++
+        lda.w !STAT78           ; reset OPVCT flip-flop
+        lda !NMI_overrun_flag : bne +
+        jsr begin_hud           ; swap HUD colors if no NMI overrun
++
         LDA.b #$5A : STA.w $2109
         STZ.w $2130 : STZ.w $2131
         LDA.b #$04 : STA.w $212C
@@ -417,7 +438,9 @@ irq_colors_begin_hud_main_gameplay_end:
 
 irq_colors_end_hud_main_gameplay:
         %a8()
+        lda !NMI_overrun_flag : bne +
         %beginFBlank()
++
         LDA.b $70;| 8096AB | 80 | \
         STA.w $2130                      ;| 8096AD | 80 | } Colour math control register A = [gameplay colour math control register A]
         LDA.b $73;| 8096B0 | 80 | \
@@ -426,8 +449,10 @@ irq_colors_end_hud_main_gameplay:
         STA.w $2109                      ;| 8096B7 | 80 | } BG3 tilemap base address and size = [gameplay BG3 tilemap base address and size]
         LDA.b $6a      ;| 8096BA | 80 | \
         STA.w $212C                      ;| 8096BC | 80 | } Main screen layers = [gameplay main screen layers]
+        lda !NMI_overrun_flag : bne +
         jsr end_hud
         %clearFBlank()
++
         %a16()
         ldx.w #!hcounter_target
         lda !no_hud_hdma_flag : beq +
@@ -438,8 +463,9 @@ irq_colors_end_hud_main_gameplay:
         rts
 
 irq_colors_end_hud_main_gameplay_end:
-        %a8()        
+        %a8()
         %endFBlank()
+        stz !NMI_overrun_flag
         jmp $96BF
 
 irq_colors_begin_hud_start_transition:

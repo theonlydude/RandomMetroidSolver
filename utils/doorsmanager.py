@@ -96,6 +96,9 @@ class Door(object):
         self.forbiddenColors = forbiddenColors
         self.indicator = indicator
 
+    def vanilla(self):
+        self.setColor(self.vanillaColor)
+
     def setAddress(self, symbols):
         # using door id get symbol label containing PLM id and its associated address
         # labels are: Door_95_Room_D48E_PLM_C884, need namespace as prefix: bank_8f
@@ -342,8 +345,10 @@ class DoorsManager():
     @staticmethod
     def setDoorsColor(seedless=False):
         if seedless:
+            # reset to vanilla colors
             for door in DoorsManager.doors.values():
-                door.hide()
+                door.vanilla()
+
         # depending on loaded patches, force some doors to blue, excluding them from randomization
         if RomPatches.has(RomPatches.BlueBrinstarBlueDoor):
             DoorsManager.doors['ConstructionZoneRight'].forceBlue()

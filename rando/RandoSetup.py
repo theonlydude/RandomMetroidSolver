@@ -21,7 +21,7 @@ class RandoSetup(object):
         self.sm = SMBoolManager()
         self.settings = services.settings
         self.graphSettings = graphSettings
-        self.startAP = graphSettings.startAP
+        self.startAP = graphSettings.startAP if graphSettings.startAP != "Ceres" else "Landing Site"
         self.superFun = self.settings.getSuperFun()
         self.container = None
         self.services = services
@@ -309,7 +309,7 @@ class RandoSetup(object):
             if len(aps) == 0:
                 continue
             escAPs = [ap for ap in aps if ap in availAPs]
-            self.log.debug("escAPs="+str(sorted(escAPs)))
+            self.log.debug(f"escAPs={sorted(escAPs)}, n={n}")
             if len(escAPs) < n:
                 ret = False
                 msg = "Objective '{}' impossible to complete".format(goal.name)

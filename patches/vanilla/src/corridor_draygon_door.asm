@@ -1,0 +1,17 @@
+lorom
+arch 65816
+
+org $8fd9b3
+        dw space_jump_room_doors
+
+org $8ff728
+space_jump_room_doors:
+        dw $A924, space_jump_back_door
+        dw $0000                ; terminator for SMILE?
+
+org $83ae10
+space_jump_back_door:
+        ;; placeholder: wraps back in room (copy of $a978)
+        dw $D9AA
+        db $00,$05,$0E,$06,$00,$00
+        dw $8000,$0000

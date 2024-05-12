@@ -45,7 +45,7 @@ org $8ff700
 below_botwoon_doors:
 	dw $a7d4,$a534
 
-warnpc $8ff72f
+warnpc $8ff727
 
 ;;; add door in room below botwoon etank (room header update)
 org $8FD706

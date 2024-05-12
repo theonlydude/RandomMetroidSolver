@@ -7,7 +7,6 @@ org $8fd9b3
 org $8ff728
 space_jump_room_doors:
         dw $A924, space_jump_back_door
-        dw $0000                ; terminator for SMILE?
 
 org $83ae10
 space_jump_back_door:

@@ -228,6 +228,9 @@ class SolverContainer(object):
         smbm.resetItems()
         self.inventoryItems = state["inventoryItems"]
 
+        if self.conf.mode in ['seedless', 'race']:
+            smbm.addItems(self.inventoryItems)
+
         self.setLocsData(state["locsData"])
         for step in state["steps"]:
             if step["type"] == "location":

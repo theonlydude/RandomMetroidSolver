@@ -1,3 +1,4 @@
+import logging
 from utils.objectives import Objectives
 from logic.smbool import SMBool
 from graph.graph import Path
@@ -80,20 +81,26 @@ class SolverContainer(object):
         # doing so could invalidate some objectives but we can't revalidate all of them,
         # so we are only checking if the location to cancel is the last location in the container,
         # if so use the rollbackTracker method which also cancels objectives added after the location.
+        self.log.debug("cancelTrackerLocation {}".format(location.Name))
         for step in self.steps[::-1]:
             if self.isStepLocation(step):
                 break
         if step.location == location:
+            self.log.debug("cancelTrackerLocation location is last collected")
             self.rollbackTracker(1, smbm)
         else:
             for stepIndex, step in enumerate(self.steps):
                 if self.isStepLocation(step) and step.location == location:
                     break
 
+            self.log.debug("cancelTrackerLocation location is at index {}".format(stepIndex))
+
             # remove location step
             self.steps = self.steps[0:stepIndex] + self.steps[stepIndex+1:]
             # in tracker all locs are major
             self.majorLocations.append(location)
+
+        self.debug()
 
         location.difficulty = None
         location.distance = None
@@ -200,6 +207,12 @@ class SolverContainer(object):
 
     def resetInventoryItems(self):
         self.inventoryItems.clear()
+
+    def debug(self):
+        if self.log.getEffectiveLevel() == logging.DEBUG:
+            self.log.debug("solver container content: inventory items: {}".format(self.inventoryItems))
+            for step in self.steps:
+                step.debug()
 
     # serialize the solver state for the tracker
     def getState(self):
@@ -412,6 +425,9 @@ class SolverStepLocation(SolverStep):
     def restore(dump, location):
         return SolverStepLocation(location, dump["itemName"], dump["_class"])
 
+    def debug(self):
+        self.log.debug("  step location: {}".format(self.location.Name))
+
 class SolverStepObjective(SolverStep):
     def __init__(self, objectiveName, lastAP, lastArea, paths):
         self.log = utils.log.get('SolverStepObjective')
@@ -449,3 +465,6 @@ class SolverStepObjective(SolverStep):
 
         # instanciate SolverStepObjective
         return SolverStepObjective(dump["objectiveName"], dump["lastAP"], dump["lastArea"], paths)
+
+    def debug(self):
+        self.log.debug("  step objective: {}".format(self.objectiveName))

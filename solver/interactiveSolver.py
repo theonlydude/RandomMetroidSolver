@@ -128,8 +128,6 @@ class InteractiveSolver(CommonSolver):
 
         self.loadPreset(self.conf.presetFileName)
 
-        # add already collected items to smbm
-        self.smbm.addItems(self.container.collectedItems())
         # always reset autotracker to false, then set it in importDump when importing autotracker state
         self.conf.autotracker = False
 

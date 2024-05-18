@@ -61,7 +61,7 @@ class Location:
 
     def evalPostAvailable(self, smbm, mode):
         if self.difficulty.bool == True and self.PostAvailable is not None:
-            if mode == 'standard':
+            if mode == 'solver':
                 smbm.addItem(self.itemName)
                 postAvailable = self.PostAvailable(smbm)
                 smbm.removeItem(self.itemName)

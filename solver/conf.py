@@ -36,7 +36,7 @@ class SolverConf:
 
 class StandardSolverConf(SolverConf):
     def __init__(self, args):
-        super().__init__(mode='standard', interactive=False)
+        super().__init__(mode='solver', interactive=False)
         if args.difficultyTarget is not None:
             self.difficultyTarget = args.difficultyTarget
         if args.pickupStrategy is not None:
@@ -50,7 +50,7 @@ class StandardSolverConf(SolverConf):
 
 class RandoSolverConf(SolverConf):
     def __init__(self):
-        super().__init__(mode='standard', interactive=False)
+        super().__init__(mode='solver', interactive=False)
         self.difficultyTarget = easy
         self.pickupStrategy = 'all_strict'
         self.displayGeneratedPath = False

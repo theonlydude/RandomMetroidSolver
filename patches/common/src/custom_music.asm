@@ -155,3 +155,41 @@ ceres_escape:
 	and #$00ff
 	jsl !song_routine
 	rtl
+
+; SPC Engine Echo Improvements
+; By H A M
+; The echo on a channel when a sound is finished gets re-activated, and the echo never applies to a sound.
+; Use asar 1.90.
+; I actually made this while i was porting songs from "Zelda no Densetsu - Kamigami no Triforce".
+; Version 1.02: save more bytes in SPC RAM
+; Version 1.01: save 1 byte each in ROM and SPC RAM
+
+!SPCFreespace = $04BE ; put it in somewhere that mITroid's key off patches never touch
+
+org $808459 : JML SPC_Engine_Upload ; hijack
+
+org $81fe00
+SPC_Engine_Upload:
+        LDA $80845D : STA $00 : LDA $80845E : STA $01 : JSL $808024 ; upload SPC engine to APU (gets repointed by SMART)
+        TDC : - : DEC : BNE - ; wait for SPC to be available for upload
+        JSL $80800A : dl Patch ; upload patch
+        JML $808482 ; back to normal code
+Patch:
+arch spc700
+spcblock $1A4B nspc ; echo enable command
+	mov $4F,a ; store to unused ram
+endspcblock
+spcblock $15FE nspc
+	call ResumeEchoAfterHandlingMusicTrack
+endspcblock
+spcblock !SPCFreespace nspc
+ResumeEchoAfterHandlingMusicTrack:
+	call $1793
+	mov a,$1A ; Echo enable flags = [$4F] AND NOT [enabled sound voices]
+	eor a,#$FF
+	and a,$4F
+	mov $4A,a
+	ret
+endspcblock
+;; execute $1500
+        dw $0000, $1500

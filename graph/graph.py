@@ -1,5 +1,6 @@
 import copy, logging
 from operator import attrgetter
+from enum import IntFlag, auto
 import utils.log
 from logic.smbool import SMBool, smboolFalse
 from utils.parameters import infinity
@@ -12,6 +13,12 @@ class Path(object):
         self.path = path
         self.pdiff = pdiff
         self.distance = distance
+
+class BossAccessPointFlags(IntFlag):
+    G4 = auto()
+    MiniBoss = auto()
+    Inside = auto()
+    Backdoor = auto()
 
 class AccessPoint(object):
     # name : AccessPoint name
@@ -27,7 +34,7 @@ class AccessPoint(object):
     def __init__(self, name, graphArea, transitions,
                  traverse=lambda sm: SMBool(True),
                  exitInfo=None, entryInfo=None, roomInfo=None,
-                 internal=False, boss=False, escape=False,
+                 internal=False, boss=0, escape=False,
                  start=None,
                  dotOrientation='w'):
         self.Name = name
@@ -404,11 +411,12 @@ class AccessGraph(object):
     # gives theoretically accessible APs in the graph (no logic check)
     def getAccessibleAccessPoints(self, rootNode='Landing Site'):
         rootAp = self.accessPoints[rootNode]
-        inBossChk = lambda ap: ap.Boss and ap.Name.endswith("In")
+        inBossFlags = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside
+        inBossChk = lambda ap: ap.Boss & inBossFlags == inBossFlags
         allAreas = {dst.GraphArea for (src, dst) in self.InterAreaTransitions if not inBossChk(dst) and not dst.isLoop()}
         self.log.debug("allAreas="+str(sorted(allAreas)))
         nonBossAPs = [ap for ap in self.getAvailableAccessPoints(rootAp, None, 0) if ap.GraphArea in allAreas]
-        bossesAPs = [self.accessPoints[boss+'RoomIn'] for boss in Bosses.Golden4()] + [self.accessPoints['Draygon Room Bottom']]
+        bossesAPs = [ap for ap in self.accessPoints.values() if inBossChk(ap)] + [self.accessPoints['Draygon Room Bottom']]
         return nonBossAPs + bossesAPs
 
     # gives theoretically accessible locations within a base list

@@ -1,4 +1,4 @@
-from graph.graph import AccessPoint
+from graph.graph import AccessPoint, BossAccessPointFlags
 from utils.parameters import Settings
 from rom.rom_patches import RomPatches
 from logic.smbool import SMBool
@@ -206,7 +206,7 @@ accessPoints = [
        dotOrientation = 'e'),
     AccessPoint('PhantoonRoomOut', 'WreckedShip', {
         'Wrecked Ship Main': lambda sm: sm.canPassBombPassages()
-    }, boss = True,
+    }, boss = BossAccessPointFlags.G4,
        roomInfo = {'RoomPtr':0xcc6f, "area": 0x3},
        exitInfo = {'DoorPtr':0xa2ac, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
@@ -214,7 +214,7 @@ accessPoints = [
        traverse=lambda sm: sm.canOpenEyeDoors(),
        dotOrientation = 's'),
     AccessPoint('PhantoonRoomIn', 'WreckedShip', {},
-       boss = True,
+       boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside,
        roomInfo = {'RoomPtr':0xcd13, "area": 0x3},
        exitInfo = {'DoorPtr':0xa2c4, 'direction': 0x5, "cap": (0x4e, 0x6), "bitFlag": 0x0,
                    "screen": (0x4, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe1fe,
@@ -335,7 +335,7 @@ accessPoints = [
        dotOrientation = 'n'),
     AccessPoint('RidleyRoomOut', 'LowerNorfair', {
         'Ridley Zone': Cache.ldeco(lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']))
-    }, boss = True,
+    }, boss = BossAccessPointFlags.G4,
        roomInfo = {'RoomPtr':0xb37a, "area": 0x2},
        exitInfo = {'DoorPtr':0x98ca, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
@@ -344,7 +344,7 @@ accessPoints = [
                                                sm.canOpenEyeDoors())),
        dotOrientation = 'e'),
     AccessPoint('RidleyRoomIn', 'LowerNorfair', {},
-       boss = True,
+       boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside,
        roomInfo = {'RoomPtr':0xb32e, "area": 0x2},
        exitInfo = {'DoorPtr':0x98be, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
@@ -360,7 +360,7 @@ accessPoints = [
        dotOrientation = 'w'),
     AccessPoint('KraidRoomOut', 'Kraid', {
         'Warehouse Zeela Room Left': lambda sm: sm.canPassBombPassages()
-    }, boss = True,
+    }, boss = BossAccessPointFlags.G4,
        roomInfo = {'RoomPtr':0xa56b, "area": 0x1,
                    # put red brin song in both pre-kraid rooms,
                    # (vanilla music only makes sense if kraid is
@@ -372,7 +372,7 @@ accessPoints = [
        traverse=lambda sm: sm.canOpenEyeDoors(),
        dotOrientation = 'e'),
     AccessPoint('KraidRoomIn', 'Kraid', {},
-       boss = True,
+       boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside,
        roomInfo = {'RoomPtr':0xa59f, "area": 0x1},
        exitInfo = {'DoorPtr':0x91ce, 'direction': 0x5, "cap": (0x1e, 0x16), "bitFlag": 0x0,
                    "screen": (0x1, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0,
@@ -713,7 +713,7 @@ accessPoints = [
     # boss APs
     AccessPoint('DraygonRoomOut', 'EastMaridia', {
         'Precious Room Top': lambda sm: sm.canExitPreciousRoom()
-    }, boss = True,
+    }, boss = BossAccessPointFlags.G4,
        roomInfo = {'RoomPtr':0xd78f, "area": 0x4, "songs":[0xd7a5]},
        exitInfo = {'DoorPtr':0xa840, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
                    "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
@@ -724,7 +724,7 @@ accessPoints = [
         'Draygon Room Bottom': Cache.ldeco(lambda sm: sm.wor(Bosses.bossDead(sm, "Draygon"),
                                                              sm.wand(sm.canFightDraygon(),
                                                                      sm.enoughStuffsDraygon())))
-    }, boss = True,
+    }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside,
        roomInfo = {'RoomPtr':0xda60, "area": 0x4},
        exitInfo = {'DoorPtr':0xa96c, 'direction': 0x4, "cap": (0x1, 0x26), "bitFlag": 0x0,
                    "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe3d9,

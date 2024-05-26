@@ -2,6 +2,7 @@ import copy
 import random
 from logic.logic import Logic
 from utils.parameters import Knows
+from graph.graph import BossAccessPointFlags
 import utils.log
 
 # order expected by ROM patches
@@ -261,7 +262,8 @@ class GraphUtils:
         GraphUtils.log.debug("availAreas: {}".format(availAreas))
         GraphUtils.log.debug("forcedAreas: {}".format(forcedAreas))
         GraphUtils.log.debug("areas: {}".format(areas))
-        inBossCheck = lambda ap: ap.Boss and ap.Name.endswith("In")
+        inBossFlags = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside
+        inBossChk = lambda ap: ap.Boss & inBossFlags == inBossFlags
         nLocs = 0
         transitions = []
         usedAPs = []

@@ -553,7 +553,7 @@ backup_save:
 	sta !used_slots_mask
 	rts
 
-incsrc "saveload.asm"
+incsrc "base/saveload.asm"
 
 ;; Patch load and save routines
 patch_save:                     ; called from saveload patch
@@ -1381,3 +1381,6 @@ handle_special_xray:
         bra .skip
 org $848398
 .skip:
+
+;;; include H A M patch to gain cycles in NMI (does not impact game lag but can avoid occasional overruns)
+incsrc "base/samus_tiles_optim_animated_tiles_fix.asm"

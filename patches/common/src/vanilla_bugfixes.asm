@@ -172,3 +172,11 @@ org $84861a ; End of PLM processing. Probably the only particularly important on
 
 org $84e094 ; End of animated PLM drawing instruction. Could theoretically happen...
 	jsr drawPlmSafe
+
+; Fixes the water row at the bottom of the hud not rendering correctly (by H A M)
+org $88C57E
+        JMP SetXScroll
+
+org $88EE32
+SetXScroll:
+        ADC #$005E : STA $12 : LDA ($12) : TAX : LDA $7E9C00,x : STA $7ECADC : PLY : PLX : PLB : RTL

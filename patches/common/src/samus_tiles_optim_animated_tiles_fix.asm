@@ -1,8 +1,10 @@
 ;;; Transfer Samus tiles optimization + animated tiles fix v1.1 by H A M
 ;;; 
-;;; included mainly for the 1st feature, as it saves a lot of cycles in NMI routine
+;;; included mainly for the 1st feature, as it saves a lot of cycles in NMI routine,
+;;; and compensate for the time lost there by RTA timer and map gfx transfer
 
-include
+arch 65816
+lorom
 
 org $809376
 	LDX #$92 : STX $3E ; $3E low = $92

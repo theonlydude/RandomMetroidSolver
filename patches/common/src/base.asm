@@ -1381,6 +1381,3 @@ handle_special_xray:
         bra .skip
 org $848398
 .skip:
-
-;;; include H A M patch to gain cycles in NMI and compensate for the time lost there by RTA timer and map gfx transfer
-incsrc "base/samus_tiles_optim_animated_tiles_fix.asm"

@@ -180,3 +180,48 @@ org $88C57E
 org $88EE32
 SetXScroll:
         ADC #$005E : STA $12 : LDA ($12) : TAX : LDA $7E9C00,x : STA $7ECADC : PLY : PLX : PLB : RTL
+
+; Graphical fix for loading to start location with camera not aligned to screen boundary, by strotlog:
+; (See discussion in Metconst: https://discord.com/channels/127475613073145858/371734116955193354/1010003248981225572)
+org $80C473
+	stz $091d
+
+org $80C47C
+	stz $091f
+
+; Graphical fix for going through door transition with camera not aligned to screen boundary, by PJBoy
+!layer1PositionX = $0911
+!layer1PositionY = $0915
+!bg1ScrollX = $B1
+!bg1ScrollY = $B3
+!bg2ScrollX = $B5
+!bg2ScrollY = $B7
+
+org $80AE29
+	jsr fix_camera_alignment
+
+org $80dc00
+fix_camera_alignment:
+	SEP #$20
+	LDA !layer1PositionX : STA !bg1ScrollX : STA !bg2ScrollX
+	LDA !layer1PositionY : STA !bg1ScrollY : STA !bg2ScrollY
+	REP #$20
+
+	LDA $B1 : SEC
+	RTS
+pushpc
+
+; Fix water physics animation bug when transitioning to a dry room, by Benox (via dagit and moehr)
+
+org $82E659
+    JSL handle_door_transition
+
+pullpc
+handle_door_transition:
+    ; Lets fix the entering from water to no water animation bug 
+    STZ $0A9C
+    JSL $878064 ; run hi-jacked instruction
+    RTL
+
+print "b80 end: ", pc
+warnpc $80dc1f

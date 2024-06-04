@@ -180,9 +180,9 @@ org $80987C
 !vcounter_target_begin = 2
 !vcounter_target_colors #= 31-!hud_draw_offset
 !vcounter_target_end = 31
-!hcounter_target = 161
+!hcounter_target = 164
 !hcounter_target_main_gameplay_1st_scanline = !hcounter_target-50  ; adjusted for NMI overrun detection code
-!hcounter_end_hud_door_transitions_offset #= 18
+!hcounter_end_hud_door_transitions_offset #= 14
 
 ;; direct page flag to offset hcounter when HUD HDMA is not active and main gameplay IRQ is used (pause/message boxe)
 !no_hud_hdma_flag = $ce

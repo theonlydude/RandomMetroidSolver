@@ -731,6 +731,8 @@ reset_no_hud_hdma_flag:
         rtl
 
 print "b80 end: ", pc
+warnpc $80daff
+
 ;; table indexed by room type containing 8 byte entries of the form:
 ;; minimap_palettes_ptr_bank90, explored_0, explored_1, explored_2
 ;; actual data depends on flavor etc so it will be applied in separate patch

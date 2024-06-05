@@ -180,8 +180,9 @@ org $80987C
 !vcounter_target_begin = 2
 !vcounter_target_colors #= 31-!hud_draw_offset
 !vcounter_target_end = 31
-!hcounter_target = 160
-!hcounter_end_hud_door_transitions_offset #= 0
+!hcounter_target = 164
+!hcounter_target_main_gameplay_1st_scanline = !hcounter_target-50  ; adjusted for NMI overrun detection code
+!hcounter_end_hud_door_transitions_offset #= 14
 
 ;; direct page flag to offset hcounter when HUD HDMA is not active and main gameplay IRQ is used (pause/message boxe)
 !no_hud_hdma_flag = $ce
@@ -345,8 +346,8 @@ org $8097D7
 ;; reminder:
 ;; CPU cycle and FastROM/IO access is 6 master cycles of 21MHz : 1/3.5 MHz
 ;; total screen is 340*262 = 89080 px, so 5344800 px/s => 1.527 px per CPU cycle
-org $8096D1
-        db $6e
+org $8096D0
+        db !hcounter_target_main_gameplay_1st_scanline
 
 ;; replace etank tile with a custom one using palette 7,
 ;; so etanks don't change color with minimap
@@ -730,6 +731,8 @@ reset_no_hud_hdma_flag:
         rtl
 
 print "b80 end: ", pc
+warnpc $80daff
+
 ;; table indexed by room type containing 8 byte entries of the form:
 ;; minimap_palettes_ptr_bank90, explored_0, explored_1, explored_2
 ;; actual data depends on flavor etc so it will be applied in separate patch

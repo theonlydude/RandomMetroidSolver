@@ -41,6 +41,9 @@ org $8097D4
         db !vcounter_target
 org $8097D7
         db !hcounter_target
+.main_gameplay:
+org $8096D0
+        db !hcounter_target
 
 org map_get_room_minimap_table
 get_room_minimap_table:

@@ -553,7 +553,7 @@ backup_save:
 	sta !used_slots_mask
 	rts
 
-incsrc "saveload.asm"
+incsrc "base/saveload.asm"
 
 ;; Patch load and save routines
 patch_save:                     ; called from saveload patch

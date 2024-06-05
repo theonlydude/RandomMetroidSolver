@@ -263,7 +263,7 @@ class GraphUtils:
         GraphUtils.log.debug("forcedAreas: {}".format(forcedAreas))
         GraphUtils.log.debug("areas: {}".format(areas))
         inBossFlags = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside
-        inBossChk = lambda ap: ap.Boss & inBossFlags == inBossFlags
+        inBossCheck = lambda ap: ap.Boss & inBossFlags == inBossFlags
         nLocs = 0
         transitions = []
         usedAPs = []

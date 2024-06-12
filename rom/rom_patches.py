@@ -152,7 +152,7 @@ _baseIPS = [
     # boot, save files and backup management, stats infrastructure
     'base.ips',
     # NMI optimization
-    'samus_tiles_optim_animated_tiles_fix.ips',
+#    'samus_tiles_optim_animated_tiles_fix.ips',
     # quick reset hook
     'reset.ips',
     # handles starting location and start blue doors

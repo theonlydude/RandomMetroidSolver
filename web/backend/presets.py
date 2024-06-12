@@ -91,7 +91,7 @@ class Presets(object):
 
     def maxPresetsReach(self):
         # to prevent a spammer to create presets in a loop and fill the fs
-        maxPresets = 4096
+        maxPresets = 8192
         (stdPresets, tourPresets, comPresets) = loadPresetsList(self.cache)
         return len(comPresets) >= maxPresets
 

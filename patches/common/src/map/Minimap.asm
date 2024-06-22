@@ -354,7 +354,7 @@ org $8096D0
 org $809BDC
         ldx.w etank_tile
 
-org $80d600
+%freespaceStart($80d600)
 etank_tile:                     ; put this in ROM to be able to disable the minimap HUD colors
         dw BGtile($4f, 7, 1, 0, 0)
 
@@ -731,7 +731,7 @@ reset_no_hud_hdma_flag:
         rtl
 
 print "b80 end: ", pc
-warnpc $80daff
+%freespaceEnd($80daff)
 
 ;; table indexed by room type containing 8 byte entries of the form:
 ;; minimap_palettes_ptr_bank90, explored_0, explored_1, explored_2

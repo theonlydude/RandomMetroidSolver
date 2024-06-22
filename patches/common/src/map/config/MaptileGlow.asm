@@ -3,7 +3,7 @@
 ;|x|                                    MAPTILE GLOW                                             |x|
 ;---------------------------------------------------------------------------------------------------
 {
-ORG !Freespace_MaptileGlow
+%freespaceStart(!Freespace_MaptileGlow)
 ;Palettes for maptile glow: organized by area to account for additional colors
 !AreaColor_Undefined = $0802
 !Glow_Undefined = !AreaColor_Undefined,!AreaColor_Undefined,!AreaColor_Undefined,!AreaColor_Undefined,!AreaColor_Undefined,!AreaColor_Undefined,!AreaColor_Undefined,!AreaColor_Undefined
@@ -86,4 +86,5 @@ MaptileGlow_PalettePointer:
 MaptileGlow_PaletteOffset:
 	DW  $00E2, $00C2, $00A2, $0082
 }
-warnpc $8effff
+print "8e end: ", pc
+%freespaceEnd($8ee7ff)

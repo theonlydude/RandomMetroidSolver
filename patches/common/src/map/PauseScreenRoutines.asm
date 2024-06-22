@@ -292,7 +292,7 @@ is_explored:
 
 warnpc $82B7EB
 
-org !Freespace_VARIA_features
+%freespaceStart(!Freespace_VARIA_features)
 !AreaPalettes_RAM = !palettes_ram+(!AreaPalettes_BaseIndex*!palette_size)+(2*!AreaPalettes_ExploredColorIndex)
 load_area_palettes:
         ;; overwrite explored tile color in palettes based on area
@@ -513,7 +513,7 @@ print "VARIA gfx/code b85 end: ", pc
         padbyte $ca : pad !mapicons_tables_limit ; reserve space
 org !mapicons_tables_limit
 %export(mapicons_tables_limit)
-warnpc !mapicons_tables_limit
+%freespaceEnd(!mapicons_tables_limit)
 }
 ;---------------------------------------------------------------------------------------------------
 ;|x|                                    SELECT SWITCH AREA                                       |x|

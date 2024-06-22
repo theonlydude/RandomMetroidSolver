@@ -7,7 +7,7 @@
 !AlwaysActive = ""
 !MapStationActive = "LDA $0789 : BNE + : LDA #$0300 : STA $2E"	;check if mapstation is active in current area
 
-ORG !Freespace_MapConstruction
+%freespaceStart(!Freespace_MapConstruction)
 LoadMapFromPause:
 	PHP : REP #$30 : STZ $2E
         jsl load_area_palettes
@@ -164,4 +164,4 @@ LoadMapFromGameMenuBeforeStart:
 }
 
 print "MapConstruction b85 end: ", pc
-warnpc $85c2ff
+%freespaceEnd($85c2ff)

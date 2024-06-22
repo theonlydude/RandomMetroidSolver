@@ -28,7 +28,7 @@ org $908240		;//acid
 
 ;//[FREE SPACE]
 ;--------------
-org $90FF00		;//[087F00] ($12 bytes)
+%freespaceStart($90FF00)		;//[087F00] ($12 bytes)
 Hotstuff:
 	PHA
 	LDA $7ED808
@@ -41,5 +41,5 @@ Hotstuff:
 	PLA
 	STA $0A4E		;//deal damage to Samus (1/65536th)
 	RTS
-
+%freespaceStart($90FF1F)
 namespace off

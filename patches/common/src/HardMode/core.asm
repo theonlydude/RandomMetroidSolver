@@ -83,7 +83,7 @@ org $A0A6E4		;//projectile damage array
 
 ;//FREE SPACE
 ;------------
-org $A0FED0		;//[107ED0] ($20 bytes + $0E bytes HardMode:)
+%freespaceStart($A0FED0)		;//[107ED0] ($20 bytes + $0E bytes HardMode:)
 DamageReduction:	;//checks for hard mode
 	LDA $0C2C,x 			;//projectile damage array
 	PHA				;//get out the way
@@ -108,6 +108,9 @@ HardMode:		;//checks for hard mode ($0E bytes)
 +
 	LDA $09A2			;//equipped items
 	RTS				;//return
+
+print "a0 end: ", pc
+%freespaceStart($A0FEFF)
 
 org $A0A45E		;//suit damage division ($19 bytes)
 	STA $12
@@ -135,7 +138,7 @@ org $81A149
 
 ;//FREE SPACE
 ;------------
-org $81FB00
+%freespaceStart($81FB00)
 DisplayDifficulty:
 	STA $7E3642,x	;[$7E:379E]	;//moved (x=#$015C)
 	PHX
@@ -167,7 +170,7 @@ HardSprites:				;//mode:hff
 	NOP				;//to know where the data ends
 
 print "81 end: ", pc
-warnpc $81fb7f
+%freespaceEnd($81fb7f)
 
 ;--------------------------------------------------------------
 org $8DFFF0

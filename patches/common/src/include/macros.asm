@@ -12,6 +12,21 @@ export__<label>:
 <label>:
 endmacro
 
+!_freespace_idx #= 0
+macro freespaceStart(addr)
+!_freespace_idx #= !_freespace_idx+1
+org <addr>
+%export(freespace_alloc_start_!_freespace_idx)
+endmacro
+
+macro freespaceEnd(addr)
+warnpc <addr>
+pushpc
+org <addr>
+%export(freespace_alloc_end_!_freespace_idx)
+pullpc
+endmacro
+
 macro a8()
         sep #$20
 endmacro

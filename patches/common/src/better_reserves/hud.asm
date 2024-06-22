@@ -53,7 +53,7 @@ warnpc $809B8B
 org $809B8B ; vanilla branch destination
 BRANCH_NOT_AUTO_RESERVES:	
 
-org $81fb80
+%freespaceStart($81fb80)
 
 macro nextRowX()
         TXA : CLC : ADC #$003C : TAX
@@ -80,7 +80,7 @@ WriteTilemap:
 	JSL TransferNextVal					; stores to 7EC69A
 	RTL
 
-warnpc $81fbff
+%freespaceEnd($81fbff)
 ;print "freespace usage end:   ", pc ; DEBUG
 
 org $80998B ; overwrite now-unused vanilla reserve HUD tilemaps

@@ -15,7 +15,7 @@ HUD_MapTileOffset:
 ORG $809AF3 : STZ !SamusMapPositionMirror : NOP		;remove broken minimap update during start game
 ORG $80A153 : JSL RevertAreaNumber
 
-ORG !FreespaceBank80_VRAM
+%freespaceStart(!FreespaceBank80_VRAM)
 NMI_MinimapHijack:
 	LDA !Update_Minimap_VRAM_Flag : BEQ .end	;check if update minimap flag is set
         ;; if BG1/BG2 column or line update (increases NMI runtime), skip minimap to trigger it next frame
@@ -64,7 +64,7 @@ RevertAreaNumber:
 	JMP $835D		;return
 print "bank 80 end: ", pc
 
-warnpc $80CE3F
+%freespaceEnd($80CE3F)
 }
 ;---------------------------------------------------------------------------------------------------
 ;|x|                                    BANK $81        Planet Zebes Map                         |x|
@@ -233,7 +233,7 @@ ORG $8EE4E2 : DW $4631, $7FF4, $001F, $7FE0, $7EA0, $7D40, $7C00, $6417, $4C12, 
 
 ;---------------------------------------BANK $8F----------------------------------------------------
 ;Custom setup ASM (set collected map on current area)
-ORG $8F0000+!SetCollectedAreaCodePosition
+%freespaceStart($8F0000+!SetCollectedAreaCodePosition)
 set_collected_map:
 	REP #$30
 	LDX !area_index : LDA !map_station_ram,x
@@ -242,4 +242,5 @@ set_collected_map:
 	JSL ConstructMap							;reload active map
 + : RTS
 print "bank 8F end ", pc
+%freespaceEnd($8FE9B8)
 }

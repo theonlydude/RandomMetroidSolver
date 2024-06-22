@@ -3,7 +3,7 @@
 ;|x|                                    MAP DECORATION                                           |x|
 ;---------------------------------------------------------------------------------------------------
 {
-ORG !Freespace_MapDecoration
+%freespaceStart(!Freespace_MapDecoration)
 
 ;Pointer to deco tilegroups for each area
 MapDecoration_AreaPointer:
@@ -14,6 +14,7 @@ MapDecoration_AreaPointer:
 MapDecoration_NoDecoration:
         DW $0000
 
+%freespaceEnd(!Freespace_MapDecoration+$20)
 
 ;Example of one deco tilegroup instruction
 ;This will draw "YOU CAN DO IT" on crateria landing site.

@@ -5,13 +5,14 @@
 {
 ;The tile on the list will be replaced by this tile number, if the map has been loaded but not been explored.
 ; (disabled in VARIA, original data provided in comment)
-ORG !Freespace_CoverTiles
+%freespaceStart(!Freespace_CoverTiles)
 CoverTileList:
 !b #= 0
 while !b <= $ff
         db !b
         !b #= !b+1
 endif
+%freespaceEnd(!Freespace_CoverTiles+$100)
 }
 	;; DB $00, $01, $02, $5C, $5C, $5C, $5C, $5C, $0A, $0A, $0A, $0A, $15, $15, $0E, $0F	;tile $00 - $0F
 	;; DB $10, $11, $12, $15, $15, $15, $15, $15, $1A, $1A, $1A, $52, $15, $15, $15, $1F	;tile $10 - $1F

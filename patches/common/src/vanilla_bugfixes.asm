@@ -4,6 +4,8 @@
 arch 65816
 lorom
 
+incsrc "macros.asm"
+
 ;;; Fix the crash that occurs when you kill an eye door whilst a eye door projectile is alive
 ;;; See the comments in the bank logs for $86:B6B9 for details on the bug
 ;;; The fix here is setting the X register to the enemy projectile index,
@@ -79,7 +81,7 @@ org $84ee02
 org $a08ae5
 	;; hijack enemy list empty check
 	jsr check_empty
-org $a0f820
+%freespaceStart($a0f820)
 check_empty:
 	cmp #$ffff		; original empty enemy list check
 	bne .end		; it not empty: return
@@ -88,7 +90,7 @@ check_empty:
 .end:
 	rts
 
-warnpc $a0f830
+%freespaceEnd($a0f830)
 
 ;;; Fixes for the extra save stations in area rando/random start :
 
@@ -200,7 +202,7 @@ org $80C47C
 org $80AE29
 	jsr fix_camera_alignment
 
-org $80dc00
+%freespaceStart($80dc00)
 fix_camera_alignment:
 	SEP #$20
 	LDA !layer1PositionX : STA !bg1ScrollX : STA !bg2ScrollX
@@ -224,4 +226,4 @@ handle_door_transition:
     RTL
 
 print "b80 end: ", pc
-warnpc $80dc1f
+%freespaceEnd($80dc1f)

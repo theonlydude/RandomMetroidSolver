@@ -12,6 +12,7 @@ incsrc "sym/base.asm"
 ;;; -------------------------------
 
 incsrc "constants.asm"
+incsrc "macros.asm"
 
 ;; Temp variables
 !door_timer_tmp = $7fff00
@@ -143,7 +144,7 @@ warnpc $82EF18
 ;; -------------------------------
 ;; CODE (using bank A1 free space)
 ;; -------------------------------
-org $a1ec00
+%freespaceStart($a1ec00)
 update_and_store_region_time:
 	phx
 	jsr update_region_time
@@ -451,9 +452,9 @@ game_end:
     lda #$000a
     rtl
 
-warnpc $a1efff
+%freespaceEnd($a1efff)
 
-org $85cf00
+%freespaceStart($85cf00)
 SetMessageBoxFlag:
         STA.w $1C1F ; What we wrote over
         INC.w !skip_lag_count_flag
@@ -465,4 +466,4 @@ UnsetMessageBoxFlag:
         RTS
 
 print "b85 end: ", pc
-warnpc $85cf0f
+%freespaceEnd($85cf0f)

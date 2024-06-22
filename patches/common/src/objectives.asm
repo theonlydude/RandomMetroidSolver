@@ -99,7 +99,7 @@ org $A6C5ED
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; CODE
-org $85d000
+%freespaceStart($85d000)
 print "85 start: ", pc
 
 ;;; total possible objectives
@@ -915,7 +915,7 @@ org $a0d02f
 org $a0d031
 	dw check_cac_shot
 
-org $a2f4a0
+%freespaceStart($a2f4a0)
 check_cac_grapple:
 	jsl $a2800A
 	bra check_cac
@@ -940,8 +940,9 @@ check_cac:
         %markEvent(!king_cac_event)
 .end:
 	rtl
+%freespaceEnd($a2f4ff)
 
-org $a3f350
+%freespaceStart($a3f350)
 check_red_fish_tickle:
 	lda !current_room : cmp #$d104 : bne .end
 	;; we're using grapple on a fish, in red fish room:
@@ -972,13 +973,13 @@ check_orange_geemer:
 .end:
 	rtl
 
-warnpc $a3f38f
+%freespaceEnd($a3f38f)
 
 ;; hijack when bowling chozo gives control back to samus
 org $AAE706
 	jsr set_bowling_event
 
-org $aaf800
+%freespaceStart($aaf800)
 
 check_shak_shot:
 	jsl $aadf34
@@ -1000,7 +1001,7 @@ set_bowling_event:
 	LDA #$0001		; hijacked code
 	rts
 
-warnpc $aaf82f
+%freespaceEnd($aaf82f)
 
 ;;; Pause stuff
 
@@ -1122,7 +1123,7 @@ macro drawTileOffset(tile)
 endmacro
 
 ;;; continue in bank 85 for obj screen management code
-org obj_85_end
+%freespaceStart(obj_85_end)
 ;;; load base screen tilemap from ROM to RAM
 load_obj_tilemap:
         %loadRamDMA(obj_bg1_tilemap, !BG1_tilemap, obj_txt_ptrs-obj_bg1_tilemap)
@@ -1296,11 +1297,11 @@ obj_scroll:
 .end:
         rtl
 
-warnpc $85f7ff
+%freespaceEnd($85f7ff)
 print "pause 85 end: ", pc
 
 ;;; main pause menu interaction in 82 after InfoStr in seed_display.asm
-org $82FB6D
+%freespaceStart($82FB6D)
 
 ;;; check for L or R input and update pause_index && pause_screen_button_mode
 check_l_r_pressed:
@@ -1634,7 +1635,7 @@ func_obj2map_fading_out:
 print "82 end: ", pc
 
 ;;; start of equipment screen patch
-warnpc $82febf
+%freespaceEnd($82febf)
 
 ;;; keep 'MAP' left button visible on map screen by keeping palette 2 instead of palette 5 (grey one)
 org $82A820
@@ -1659,7 +1660,7 @@ org $82C1E6
 ;;; new tiles for 'OBJ' button in unused tiles : included in map patch gfx
 
 ;;; obj screen tilemap, obj text
-org $B6F200
+%freespaceStart($B6F200)
 %export(obj_bg1_tilemap)
         ;; line 0 : pause "window title"
         fillbyte $00 : fill 20
@@ -1719,11 +1720,15 @@ warnpc $B6FA00
 org $B6FA00
 %export(objs_txt_limit)
 
+%freespaceEnd($b6ffff)
+
 ;;; function to use as door asm when entering the room that reveals objectives
-org $8ffe80
+%freespaceStart($8ffe80)
 %export(reveal_objectives)
         %markEvent(!objectives_revealed_event)
         rts
+print "8f end: ", pc
+%freespaceEnd($8ffe8f)
 
 ;;; hardcode here the rooms for vanilla tourian (and disabled tourian with Tourian still in the graph)
 ;;; in case Tourian is not in the graph, the door asm will be added to the transition leading to climb

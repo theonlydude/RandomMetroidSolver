@@ -13,7 +13,7 @@ org $82ecbb
 	jsr seed_display
 
 ;; in $82 free space after stats.ips
-org $82F717
+%freespaceStart($82F717)
 seed_display:
 	pha
 	phx
@@ -166,12 +166,13 @@ WordTable:
     db "SOVA    "
     db "BULL    "
 print "After seed display : ", pc
+%freespaceEnd($82F97F)
 
-org $82fb6c
+%freespaceStart($82fb6c)
 ;; place holder for VARIA seed type
 print "InfoStr : ", pc
 %export(InfoStr)
     db 0
 
 print "82 end : ", pc
-
+%freespaceEnd($82fb6f)

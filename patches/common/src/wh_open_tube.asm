@@ -6,13 +6,15 @@
 arch 65816
 lorom
 
+incsrc "macros.asm"
+
 ;;; door ASM ptr for door associated to save starting point
 org $83a4a2
     dw open_tube
 
-org $8ff400
+%freespaceStart($8ff400)
 open_tube:
     lda #$000b : jsl $8081fa
     rts
 
-warnpc $8ff40f
+%freespaceEnd($8ff40f)

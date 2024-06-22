@@ -3,6 +3,8 @@
 lorom
 arch 65816
 
+incsrc "macros.asm"
+
 ;;; MSU memory map I/O
 !MSU_STATUS = $2000
 !MSU_ID = $2002
@@ -45,7 +47,7 @@ endmacro
 org $808F27
 	jsr MSU_Main
 
-org $80D02F
+%freespaceStart($80D02F)
 MSU_Main:
 	php
 	rep #$30
@@ -261,3 +263,6 @@ TrackNeedLooping:
 NoLooping:
 	lda.b #$01
 	rts
+
+print "80 end: ", pc
+%freespaceEnd($80d12f)

@@ -12,6 +12,8 @@
 arch 65816
 lorom
 
+incsrc "macros.asm"
+
 org $8095A1
         jsr transfer_samus_tiles ; overwrite call to original transfer tiles routine to our own
 
@@ -55,7 +57,7 @@ process_animated_tiles:
 +
         RTS
 
-org $80db00
+%freespaceStart($80db00)
 transfer_samus_tiles:
 	LDX #$92 : STX $3E ; $3E low = $92
 	LDX #$80 : STX $2115 ; VRAM address increment mode = 16-bit access
@@ -102,4 +104,4 @@ UnpauseAnimatedTiles:
 	RTL
 
 print "b80 end: ", pc
-warnpc $80dbff
+%freespaceEnd($80dbff)

@@ -194,7 +194,7 @@ org $809B99
 	NOP 
 ;end of etank row combine
 
-org $80d130
+%freespaceStart($80d130)
 draw_info:
 	phx
 	phy
@@ -516,9 +516,9 @@ cleartable
 
 print "b80 end: ", pc
 
-warnpc $80d5ff
+%freespaceEnd($80d5ff)
 
-org $a1f560
+%freespaceStart($a1f560)
 
 ;;; used only in scavenger hunt mode, written to by rando
 ;;; have a word for each location of required order in scavenger mode:
@@ -775,4 +775,4 @@ objective_notified_events:
 %objectivesNotifiedEventArray()
 
 print "a1 end: ", pc
-warnpc $a1f8ff
+%freespaceEnd($a1f8ff)

@@ -6,11 +6,12 @@ arch 65816
 lorom
 
 incsrc "constants.asm"
+incsrc "macros.asm"
 
 !RNG		= $808111	; RNG function
 !RNG_seed	= $05e5
 
-org $a1f2a0
+%freespaceStart($a1f2a0)
 ;;; single use (will give the same result if called several times in the same frame)
 ;;; random function that leaves game rng untouched
 ;;; result in A
@@ -82,6 +83,6 @@ div32:
     ply
     rtl
 
-warnpc $A1F31F
-
 print "A1 end: ", pc
+
+%freespaceEnd($A1F31F)

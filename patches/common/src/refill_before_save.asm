@@ -8,6 +8,8 @@
 
 lorom
 
+incsrc "macros.asm"
+
 ; hijack point: reconfigure the save-station PLM instructions. do not edit.
 ; the original instructions read:
 ; [8CF1=prompt][B008][B00E=freeze/pose Samus][8C07,2E=saving sound]...
@@ -45,8 +47,7 @@ plm_more:
 
 ; this can be any free space, anywhere in the ROM.
 ; all it needs is 86 ($56) bytes of space there.
-; for demonstration, I just picked the first possible location.
-org $A1F400
+%freespaceStart($A1F400)
 refill_start:
 	STZ $0A6A          ; zero "health alarm on" flag
 	LDA #$0001         ; stop sound
@@ -104,4 +105,4 @@ inc_reserve_write:
 inc_reserve_is_full:
 	RTS                ; return
 
-warnpc $a1f46f
+%freespaceEnd($a1f46f)

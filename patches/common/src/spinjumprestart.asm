@@ -1,6 +1,8 @@
 LoRom
 
-org $90F63A		;I put a lot of custom ASM here, so you should check whether it's  free first
+incsrc "macros.asm"
+
+%freespaceStart($90F63A)		;I put a lot of custom ASM here, so you should check whether it's  free first
 	LDA $0A23
 	AND #$00FF
 	CMP #$0003
@@ -14,6 +16,8 @@ org $90F63A		;I put a lot of custom ASM here, so you should check whether it's  
 	JSL $9098BC
 ENDAIR:
 	RTL
+
+%freespaceEnd($90F65F)
 
 org $919EE2
 	DW T00,T01,T02,T03,T04,T05,T06,T07,T08,T09,T0A,T0B,T0C,T0D,T0E,T0F
@@ -848,6 +852,6 @@ DW $0000,$0800,$00F0
 DW $0000,$0400,$00F0
 DW $FFFF
 
-org $91FC99	
+org $91FC99
 	JSL $90F63A
 	RTS

@@ -16,7 +16,7 @@ org $82eb8b
     jsl add_plms
 
 ;;; DATA in bank 8F free space
-org $8FE9BF
+%freespaceStart($8FE9BF)
 ;;; additional zero-terminated PLM lists go here (written at ROM generation)
 print "downwards plm_lists table start: ", pc
 %export(plm_lists)
@@ -57,13 +57,14 @@ room_plms:
 ;;     dw  $99bd, $99ca, $8b1a, plm_lists
 ;;; 
 %export(room_plms_upwards)
+%freespaceEnd(room_plms_upwards)
 
 ;;; fill plm table with placeholder data to detect colisions with other patches
 org plm_lists_continued
     padbyte $CA : pad room_plms_upwards
 
 ;;; CODE in bank 8F
-org $8ff300
+%freespaceStart($8ff300)
 
 add_plms:
     phx
@@ -101,4 +102,4 @@ add_plms:
     jsl $8fe8a3
     rtl
 
-warnpc $8ff3ff
+%freespaceEnd($8ff3ff)

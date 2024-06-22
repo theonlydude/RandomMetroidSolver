@@ -14,6 +14,8 @@ arch 65816
 
 incsrc "sym/utils.asm"
 
+incsrc "macros.asm"
+
 ;;; CONSTANTS
 !tracks_tbl_sz	= #$0018    ; table size, in bytes, for unique tracks
 !nb_tracks_8b	= #$15      ; nb of tracks total, including duplicates
@@ -37,7 +39,7 @@ org $88B446
     rep 4 : nop     ; disables lava sounds to avoid weird noises in Norfair
 
 ;;; DATA
-org $A1F320
+%freespaceStart($A1F320)
 musics_list:
     ;; music set index. unique tracks to randomize between themselves
     ;; hi: music data index
@@ -179,6 +181,5 @@ load_room_music_escape_rando:
     jsr load_room_music
     rtl
 
-warnpc $a1f3ff
-
 print "A1 end: ", pc
+%freespaceEnd($a1f3ff)

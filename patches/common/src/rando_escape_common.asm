@@ -71,7 +71,7 @@ org $83aaf6
     dw escape_setup
 
 
-org $83ADA0
+%freespaceStart($83ADA0)
 print "flyway_door_lists : ", pc
 %export(flyway_door_lists)              ; defined in flavor rando_escape.asm
 
@@ -81,10 +81,10 @@ print "bt_door_list : ", pc
 	;; placeholder for inside BT door to get back from animals during escape
 	db $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca, $ca
 
-warnpc $83ae0f
+%freespaceEnd($83ae0f)
 
 ;;; CODE in bank 84 (PLM)
-org $84f860
+%freespaceStart($84f860)
 
 ;;; Disables "ammo locked" elements b/c of no ammo in escape :
 ;;; makes them react to hyper beam shots
@@ -145,7 +145,7 @@ save_station:
     jmp $8cf6
 
 print "B84 end: ", pc
-warnpc $84f8ff
+%freespaceEnd($84f8ff)
 
 ;;; other door tweaks
 ;; open Tourian grey doors to disable one way
@@ -181,7 +181,7 @@ org $8fcb3a
 
 ;; ws map door handled with PLM spawn table, as it is blue in vanilla (see plm_spawn.asm)
 
-org $8ff500
+%freespaceStart($8ff500)
 
 ;;; CODE (in a tiny bit of bank 8F free space)
 escape_setup_l:
@@ -266,10 +266,10 @@ wrecked_ship_main_setup:
 	rts
 
 ;;; stop before area rando door transition patch
-warnpc $8ff5ff
+%freespaceEnd($8ff5ff)
 
 ;;; flyway door list pointers for escape animals (same place as animals surprise patches)
-org $8ff000
+%freespaceStart($8ff000)
 flyway_door_ptrs:
 macro FlywayDoorPtrs(n)
     dw flyway_door_lists+(!door_sz*2*<n>)
@@ -292,8 +292,6 @@ flyway_escape_setup:
     ;; run vanilla setup ASM
     jmp $91BB
 
-warnpc $8ff02f
-
 ;; to call during BT door asm
 org $8ff030
 %export(setup_next_escape)
@@ -312,10 +310,10 @@ bt_escape_setup:
     ;; run vanilla setup ASM
     jmp $91B2
 
-warnpc $8ff0ff
+%freespaceEnd($8ff0ff)
 
 ;;; DATA (bank A1 free space)
-org $a1f000
+%freespaceStart($a1f000)
 
 ;;; OPTIONS
 print "opt_remove_enemies: ", pc
@@ -491,7 +489,7 @@ set_timer_value:
 	rtl
 
 print "A1 end: ", pc
-warnpc $a1f1ff
+%freespaceEnd($a1f1ff)
 
 ;; ;;; TEST
 ;; org $83AB34

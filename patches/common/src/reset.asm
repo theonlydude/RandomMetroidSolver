@@ -22,7 +22,7 @@ org $828BB3
 org $90e8a1
         jsl give_control_back_to_samus : nop : nop
 
-org $81fa80
+%freespaceStart($81fa80)
 hook_main:
 	jsl $A09169  ; run hi-jacked instruction
 check_reload:
@@ -68,4 +68,4 @@ give_control_back_to_samus:
         lda #!reset_flag : sta !softreset
         rtl
 
-warnpc $81fadf
+%freespaceEnd($81fadf)

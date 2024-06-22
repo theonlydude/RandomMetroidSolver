@@ -26,7 +26,7 @@ org $82eeda
 
 ;;; DATA in bank A1 (start options)
 
-org $a1f200
+%freespaceStart($a1f200)
 %export(start_location)
     ;; start location: $0000=Zebes Landing site, $fffe=Ceres,
     ;; otherwise hi byte is area and low is save index.
@@ -85,9 +85,9 @@ gameplay_start:
 .end:
     rtl
 
-warnpc $a1f28f
+%freespaceEnd($a1f28f)
 
-org $a1f470
+%freespaceStart($a1f470)
 %export(additional_etanks)
 	db $00
 
@@ -103,7 +103,7 @@ add_etanks_and_save:
 	jsl base_new_save
 	rts
 
-warnpc $a1f4ff
+%freespaceEnd($a1f4ff)
 
 ;;; patch pit and climb room states
 org $8fe652

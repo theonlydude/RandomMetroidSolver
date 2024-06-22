@@ -131,7 +131,6 @@ class RomReader:
         'rando_speed': {'address': 0x7FDC, 'value': 0xB4, 'vanillaValue': 0x20},
         'red_tower': {'address': 0x2304F7, 'value': 0xC4, 'vanillaValue': 0x44},
         'ridleyimals': {'address': 0x1ADAC, 'value': 0x2E, 'vanillaValue': 0xff},
-        'ridley_platform': {'address': 0x246C09, 'value': 0x00, 'vanillaValue': 0x02},
         'seed_display': {'address': 0x16CBB, 'value': 0x20, 'vanillaValue': 0xa2},
         'skip_ceres': {'address': 0x7F17, 'value': 0xB6, 'vanillaValue': 0xff},
         'skip_intro': {'address': 0x7F1F, 'value': 0xB6, 'vanillaValue': 0xff},

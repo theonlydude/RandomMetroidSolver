@@ -23,7 +23,7 @@ incsrc "macros.asm"
 !samus_reserve         = $09d6
 !samus_max_reserve     = $09d4
 
-org $8ff700
+%freespaceStart($8ff700)
         db $ca                  ; marker to detect we have area rando
 
 ;;; "ship refill" for tourian elevator
@@ -45,7 +45,7 @@ org $8ff700
 below_botwoon_doors:
 	dw $a7d4,$a534
 
-warnpc $8ff727
+%freespaceEnd($8ff727)
 
 ;;; add door in room below botwoon etank (room header update)
 org $8FD706

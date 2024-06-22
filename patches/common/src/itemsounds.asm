@@ -3,7 +3,10 @@
 ;Uses free space from $26FD3 to $27023 ($51/81 bytes)
 ;Made by Sadiztyk Fish
 
+arch 65816
 lorom
+
+incsrc "macros.asm"
 
 ;--------------------------------SOUNDFX VALUES----------------------------------
 
@@ -284,7 +287,7 @@ org $848BF2
 NORMAL:
 	JSR CLIPSET
 
-org $84EFD3			;You can safely change this address to free space in bank $84 ($20000-$27FFF)
+%freespaceStart($84EFD3)			;You can safely change this address to free space in bank $84 ($20000-$27FFF)
 CLIPCHECK:
 	LDA $05D7
 	CMP #$0002
@@ -321,3 +324,5 @@ SETFX:
 	LDA $0000,y
 	INY
 	RTS
+
+%freespaceEnd($84F036)

@@ -14,6 +14,8 @@
 lorom
 arch 65816
 
+incsrc "macros.asm"
+
 ;;; divides projectile damage by 3
 macro divprojdmg3()
 	lda $0C2C,X
@@ -45,7 +47,7 @@ org $90ccd2
 	jmp sba_ammo
 
 ;;; nerfed charge : damage modification
-org $90f6a0
+%freespaceStart($90f6a0)
 charge:
 	lda $09A6		; equipped beams
 	bit #$1000		; check for charge
@@ -55,8 +57,9 @@ charge:
 .end:
 	lda $0C18,X
 	rts
+%freespaceEnd($90f6cf)
 
-org $90f810
+%freespaceStart($90f810)
 nochargesba:
 ; This alternate table is just as inefficient as the original
         dw $0000 ; 0: Power
@@ -86,6 +89,8 @@ sba_ammo:
 .notenough:			    ; else:
 	jmp $ccc8		    ;   make original function return with carry clear (SBA failed)
 
+%freespaceEnd($90f87f)
+
 ;;; what's below works, uncomment to enable nerfed SBA damage
 ;; ;;; nerf SBA damage
 ;; org $9381b9
@@ -106,7 +111,7 @@ sba_ammo:
 org $a0a4cc
 	jsr pseudo
 
-org $a0f800
+%freespaceStart($a0f800)
 pseudo:
 	;; we can't freely use A here. Y shall contain pseudo screw dmg at the end
 	pha
@@ -122,4 +127,4 @@ pseudo:
 	pla
 	rts
 
-warnpc $a0f820
+%freespaceEnd($a0f820)

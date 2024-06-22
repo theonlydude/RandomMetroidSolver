@@ -195,7 +195,7 @@ warnpc $808FC1 ;; next used routine start
 ;;; -------------------------------
 ;;; Boot
 ;; Patch boot to init stuff
-org $80fe00
+%freespaceStart($80fe00)
 boot1:
     ;; check timer integrity: if not ok disable soft reset flag
     lda !timer1
@@ -308,12 +308,11 @@ boot2:
     jml $8084af
 
 print "bank 80 end: ", pc
-
-warnpc $80feff
+%freespaceEnd($80feff)
 
 ;;; -------------------------------
 ;;; Save files management : adds timer, stats and backup features to save files
-org $81ef20
+%freespaceStart($81ef20)
 
 ;; stats SRAM offsets lookup tables
 stats_sram_offsets:
@@ -1213,13 +1212,13 @@ control_lock:
 
 print "b81 end 1: ", pc
 
-warnpc $81fa7f
+%freespaceEnd($81fa7f)
 
 !arrow_tile_idx #= $c0
 !menu_bg1_tilemap #= $7e3600
 !lock_help_tilemap_size #= 8*2
 
-org $81fc00
+%freespaceStart($81fc00)
 draw_lock_help:
         lda.l !used_slots_mask : beq .end
         ldx.w #!lock_help_tilemap_size
@@ -1237,6 +1236,7 @@ lock_help_tilemap:
         dw "TOGGLE"
 
 print "b81 end 2: ", pc
+%freespaceEnd($81fcff)
 
 org $8e8000+(32*!arrow_tile_idx)
 incbin "base/arrow_tile.gfx"
@@ -1284,7 +1284,7 @@ org $8580D6
         jsr ship_actually_save
 
 
-org $859643
+%freespaceStart($859643)
 FixMessageDefOffset:
     CLC : ADC $34               ; hijacked code
     CMP.w #!n_vanilla_entries*6 : BMI + ; if we are reading from before the end of message box 1C data, return
@@ -1371,7 +1371,7 @@ tilemap_backup_done:
 tilemap_backup_not_needed:
         dw "   BACKUP NOT NECESSARY.  "
 
-warnpc $85afff
+%freespaceEnd($85afff)
 
 ;;; Disable special X-Ray handler for animals room during escape, as
 ;;; this otherwise unused state header field is used to hold VARIA

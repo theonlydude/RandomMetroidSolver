@@ -23,6 +23,7 @@ lorom
 !tourian_eye_door_room = #$ddc4
 
 incsrc "event_list.asm"
+incsrc "macros.asm"
 
 incsrc "sym/objectives.asm"
 incsrc "sym/area_rando_doors.asm"
@@ -71,14 +72,14 @@ org $83aa66
 	;; dw $f76e
 
 
-org $91ffee
+%freespaceStart($91ffee)
 enable_hyper:
 	jsr $e5f0
 	rtl
 
-warnpc $91ffff
+%freespaceEnd($91ffff)
 
-org $8ff730
+%freespaceStart($8ff730)
 ;;; gadora door asm
 tourian_door:
 	;; remove MB glass and kill zebetites
@@ -127,7 +128,7 @@ mb_room_main:
 .end:
 	rts
 
-warnpc $8ff797
+%freespaceEnd($8ff797)
 
 ;;; change MB2 main AI script pointer to MB3 death instead
 ;;; of triggering rainbow beam, baby cutscene etc
@@ -150,7 +151,7 @@ org $a9b1be
 org $a9cfdb
 	bra $1f
 
-org $a9fc00
+%freespaceStart($a9fc00)
 hyper_start:
         ;; clear current charging beam to avoid vanilla bug related to flares
         STZ $0CD0
@@ -201,4 +202,4 @@ reset_samus_palette:
 	stz $0b62
 	rts
 
-warnpc $a9fc7f
+%freespaceEnd($a9fc7f)

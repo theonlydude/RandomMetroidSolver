@@ -111,7 +111,7 @@ org $8b8943
 compute_tile_offset:
 
 ;; Load credits script data from bank $df instead of $8c
-org $8bf770
+%freespaceStart($8bf770)
 ;; set scroll speed routine (!speed instruction in credits script)
 set_scroll:
     rep #$30
@@ -204,7 +204,7 @@ copy:
     jsl $8b95ce
     rtl
 
-warnpc $8bf88f
+%freespaceEnd($8bf88f)
 
 ;;; tweak the list for DMA transfers of mode 7 samus beam :
 ;;; the last few entries are supposed to transfer zeroes from $7FA000 through $7FC000,
@@ -215,7 +215,7 @@ org $8bf6d0
         dw $b800, $b800, $b800, $b800
 
 ;; configurable hh:mm values for samus animations at the end
-org $8bf900
+%freespaceStart($8bf900)
 samus_times:
 ;; "good time" limit: 1h30m
 samus_good_time_h:
@@ -246,9 +246,9 @@ check_samus_avg_time:
 .end:
 	rts
 
-warnpc $8bf92f
+%freespaceEnd($8bf92f)
 
-org $dfd6f0
+%freespaceStart($dfd6f0)
 ;; Draw full time as hh:mm:ss:ff
 ;; Pointer to first byte of RAM in A
 draw_full_time:
@@ -1016,10 +1016,10 @@ stats:
 print "bank DF end : ", pc
 
 ;; palette rando stores its relocated palette there
-warnpc $dfe1ff
+%freespaceEnd($dfe1ff)
 
 ;; Relocated credits tilemap to free space in bank CE
-org $ceb240
+%freespaceStart($ceb240)
 credits:
     ;; When using big text, it has to be repeated twice, first in UPPERCASE and then in lowercase since it's split into two parts
     ;; Numbers are mapped in a special way as described below:
@@ -1200,10 +1200,10 @@ credits:
     dw "         insanefirebat          " ;; 246
     dw $0000                              ;; End of credits tilemap
 
-warnpc $ceffff
+%freespaceEnd($ceffff)
 
 ;; Placeholder label for item locations inserted by the randomizer
-org $ded200
+%freespaceStart($ded200)
 itemlocations:
     !pink
     dw "         ITEM LOCATIONS         " ;; 640
@@ -1353,7 +1353,7 @@ org $8bF08C
 org $8bF09B
         dw $00AC
 
-org $8bf930
+%freespaceStart($8bf930)
 hijack_push_rta:
 	;; vanilla
         STA $0DF2
@@ -1936,7 +1936,7 @@ str_items:
         dw $0000
 
 print "bank 8B end : ", pc
-warnpc $8bffff
+%freespaceEnd($8bffff)
 
 org $8be780
 prepare_see_you_next_mission:

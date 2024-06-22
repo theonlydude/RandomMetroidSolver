@@ -1,7 +1,7 @@
 ;;; Shows a single page of text and start the game
 
-lorom
 arch 65816
+lorom
 
 incsrc "macros.asm"
 

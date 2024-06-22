@@ -5,6 +5,8 @@
 lorom
 arch 65816
 
+incsrc "macros.asm"
+
 !temp = $0743		; from pause screen RAM
 
 ;;; relative to the ship. midway between top and bottom samus position
@@ -22,7 +24,7 @@ org $A2AB7A
 org $A2A95C
 	jsl raise_samus_land
 
-org $a1f900
+%freespaceStart($a1f900)
 landing_descent:
 	jsr hide_samus
 	;; hijacked code
@@ -68,4 +70,4 @@ show_samus:
 	LDA #$EB52 : STA $0A5C
 	rts
 
-warnpc $a1f97f
+%freespaceEnd($a1f97f)

@@ -8,6 +8,8 @@
 lorom
 arch 65816
 
+incsrc "macros.asm"
+
 !song_routine = $808fc1
 
 ;;; max out the SPC communication timeout 
@@ -105,7 +107,7 @@ macro loadMusicTrack(data)
 	rts
 endmacro
 
-org $8bf890
+%freespaceStart($8bf890)
 load_title_screen_music_data:
 	%loadMusicData(title_screen_intro)
 
@@ -125,9 +127,9 @@ load_credits_music_data:
 load_credits_music_track:
 	%loadMusicTrack(credits)
 
-warnpc $8bf8ff
+%freespaceEnd($8bf8ff)
 
-org $a9fc80
+%freespaceStart($a9fc80)
 load_escape_music_data:
 	%loadMusicData(escape)
 
@@ -168,7 +170,7 @@ ceres_escape:
 
 org $808459 : JML SPC_Engine_Upload ; hijack
 
-org $81fe00
+%freespaceStart($81fe00)
 SPC_Engine_Upload:
         LDA $80845D : STA $00 : LDA $80845E : STA $01 : JSL $808024 ; upload SPC engine to APU (gets repointed by SMART)
         TDC : - : DEC : BNE - ; wait for SPC to be available for upload

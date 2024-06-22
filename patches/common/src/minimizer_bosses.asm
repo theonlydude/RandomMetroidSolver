@@ -6,6 +6,7 @@
 arch 65816
 lorom
 
+incsrc "macros.asm"
 incsrc "sym/door_transition.asm"
 
 !mark_boss = $8081a6
@@ -26,7 +27,7 @@ org $A6C590
 org $8391E4
         dw door_transition_kraid_exit_fix
 
-org $a1f500
+%freespaceStart($a1f500)
 kraid_death:
 	LDA $0FA8 : CMP #$C537	; vanilla comparison
 	beq .dead
@@ -50,7 +51,7 @@ ridley_death:
 	LDA $7E7836		; hijacked code
 	rtl
 
-warnpc $a1f54f
+%freespaceEnd($a1f54f)
 
 org $a7d4e5
 phantoon_door_spawn:

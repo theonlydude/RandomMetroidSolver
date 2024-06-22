@@ -3,10 +3,11 @@
 arch 65816
 lorom
 
+incsrc "macros.asm"
 incsrc "doors_plms_common.asm"
 
 ;;; define vanilla color indicators here to be able to have them as a separate patch
-org $84f900
+%freespaceStart($84f900)
 
 %defineIndicator(missile,left)
 %defineIndicator(missile,right)
@@ -42,4 +43,4 @@ org $84f900
 %defineIndicatorPLM(none,bottom)
 
 print "bank 84 end: ", pc
-warnpc $84fc1f
+%freespaceEnd($84fc1f)

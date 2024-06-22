@@ -1,6 +1,13 @@
 {
     "boss_exit_fix": 9435057,
     "explore_tile": 9435061,
+    "freespace_alloc_end_2": 9434879,
+    "freespace_alloc_end_3": 9435135,
+    "freespace_alloc_end_4": 9436415,
+    "freespace_alloc_start_1": 9500416,
+    "freespace_alloc_start_2": 9434624,
+    "freespace_alloc_start_3": 9435040,
+    "freespace_alloc_start_4": 9435136,
     "generated_door_asm": 9435136,
     "generated_door_asm_end": 9436415,
     "giveiframes": 9434715,

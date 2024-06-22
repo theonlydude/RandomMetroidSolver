@@ -6,10 +6,11 @@
 arch 65816
 lorom
 
+incsrc "macros.asm"
 incsrc "doors_plms_common.asm"
 
 ;;; Free space after itemsounds.asm
-ORG $84F037
+%freespaceStart($84F037)
 ;;; Common functions to set doors open
 set_open_left:
 	dw $8A91
@@ -429,7 +430,7 @@ org $84f70f                                ;
                                                             ;  
        draw_plasma_bottom: dw $0004,$CCEF,$5CEE,$58EE,$58EF,$0000;  
 
-warnpc $84F82F			; start of endingtotals.asm
+%freespaceEnd($84F82F)			; start of endingtotals.asm
 
 ;;; alterations to vanilla door open/close animations (blue door open for all)
 org $84a6b5

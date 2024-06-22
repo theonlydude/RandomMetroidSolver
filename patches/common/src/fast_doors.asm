@@ -3,6 +3,7 @@ arch 65816
 lorom
 
 incsrc "decompression.asm"
+incsrc "macros.asm"
 
 ;;; Door Transition Speed by kazuto + extra code to fix samus initial position
 ;;; just double the speed, discard configurability due to the extra code
@@ -90,7 +91,7 @@ org $82E339	;Vertical doors
 	PLP
 	JSL SlideCode
 
-org !FreeSpace
+%freespaceStart(!FreeSpace)
 SlideCode:
 	SEP #$20
 	BMI $09
@@ -151,4 +152,4 @@ fix_samus_pos:
 	lda !samus_x : and #$00ff		; hijacked code
 	jml $82e3cb
 
-warnpc !FreeSpace+$A0
+%freespaceEnd(!FreeSpace+$A0)

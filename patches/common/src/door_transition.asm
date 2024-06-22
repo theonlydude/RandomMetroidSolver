@@ -27,7 +27,7 @@ incsrc "macros.asm"
 org $90d2ba
 	;; do a jsr to overwrite the lda
 	jsr shinespark_end
-org $90f700
+%freespaceStart($90f700)
 shinespark_end:
 	;; at this point A should contain samus health and is
 	;; about to be compared to 30 so when we return from this,
@@ -43,7 +43,7 @@ shinespark_end:
 	stz !spark_flag
 	rts
 
-org $8ff600
+%freespaceStart($8ff600)
 print "incompatible_doors:"
 print pc
 ;;; routine called from door ASM when connecting two incompatible doors
@@ -98,9 +98,9 @@ print pc
 	sta !iframes
 	rts
 
-warnpc $8ff6ff
+%freespaceEnd($8ff6ff)
 
-org $8ff7a0
+%freespaceStart($8ff7a0)
 
 ;;; if exiting the room when Kraid is alive, call some vanilla functions to restore BG3 tiles
 %export(kraid_exit_fix)
@@ -136,10 +136,11 @@ org $8ff7a0
         plb
         rts
 
-warnpc $8ff7ff
+%freespaceEnd($8ff7ff)
 
 ;;; "reserve" area for generated door asm, to mark it as used
-org $8ff800
+%freespaceStart($8ff800)
 %export(generated_door_asm)
 	padbyte $ca : pad $8ffcff
 %export(generated_door_asm_end)
+%freespaceEnd($8ffcff)

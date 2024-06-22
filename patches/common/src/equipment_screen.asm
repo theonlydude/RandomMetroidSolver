@@ -55,7 +55,7 @@ org $8290F6
         jsr display_time : nop
 
 ; Free space at end of bank 82 after objectives
-org $82FEC0
+%freespaceStart($82FEC0)
 display_time:
         JSL $809B44             ; vanilla code
         jsr display_RTA_time_frame
@@ -149,7 +149,7 @@ draw_digit_menu:
         rts
 
 print "End of items percent: ", pc
-warnpc $82ffff
+%freespaceEnd($82ffff)
 
 ;;; needed additional tiles are in pause screen gfx included by map patch
 

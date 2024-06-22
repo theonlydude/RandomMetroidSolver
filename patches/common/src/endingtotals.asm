@@ -17,7 +17,7 @@ incsrc "sym/nothing_item_plm.asm"
 org $84889F
         JSL COLLECTTANK
 
-org $85CF10                     ; FLO: changed original adress to avoid conflict with other patches
+%freespaceStart($85CF10)                     ; FLO: changed original adress to avoid conflict with other patches
 COLLECTTANK:
         ;; don't increment collected item counter when "collecting" a nothing
         cpy.w #nothing_item_plm_instr_list_visible_block_end : beq .end
@@ -31,7 +31,7 @@ COLLECTTANK:
         JSL $80818E             ; hijacked code
         RTL
 
-warnpc $85cf2f
+%freespaceEnd($85cf2f)
 
 org $8BE627
 display_item_count_end_game:

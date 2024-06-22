@@ -5,6 +5,7 @@ lorom
 arch 65816
 
 incsrc "constants.asm"
+incsrc "macros.asm"
 
 incsrc "sym/objectives_options.asm"
 
@@ -33,7 +34,7 @@ org $84D33B ; Pre-instruction - wake PLM if Samus has bombs
 
 warnpc $84D357
 
-org $84f840
+%freespaceStart($84f840)
 btcheck:
         ;; check if BT should never wake up
         lda.l objectives_options_settings_flags
@@ -44,4 +45,4 @@ btcheck:
         rts
 
 print "b84 end: ", pc
-warnpc $84f860
+%freespaceEnd($84f860)

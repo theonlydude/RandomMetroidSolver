@@ -1018,6 +1018,10 @@ print "bank DF end : ", pc
 ;; palette rando stores its relocated palette there
 %freespaceEnd($dfe1ff)
 
+;; mark relocated palette space as used
+%freespaceStart($dfe200)
+%freespaceEnd($dfffff)
+
 ;; Relocated credits tilemap to free space in bank CE
 %freespaceStart($ceb240)
 credits:

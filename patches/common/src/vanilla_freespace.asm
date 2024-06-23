@@ -53,6 +53,21 @@ incsrc "macros.asm"
 %freespaceStart($8fe99b)
 %freespaceEnd($8fffff)
 
+%freespaceStart($90f63a)
+%freespaceEnd($90ffff)
+
+%freespaceStart($91ffee)
+%freespaceEnd($91ffff)
+
+%freespaceStart($92edf4)
+%freespaceEnd($92ffff)
+
+%freespaceStart($93f61d)
+%freespaceEnd($93ffff)
+
+%freespaceStart($94dc00)
+%freespaceEnd($94dfff)
+
 %freespaceStart($9afc20)
 %freespaceEnd($9affff)
 
@@ -139,6 +154,9 @@ incsrc "macros.asm"
 
 %freespaceStart($b7fd00)
 %freespaceEnd($b7ffff)
+
+%freespaceStart($CEB22E)
+%freespaceEnd($CEFFFF)
 
 %freespaceStart($ded1c0)
 %freespaceEnd($deffff)

@@ -389,6 +389,8 @@ class DoorsManager():
             DoorsManager.doors['CrocomireSpeedwayBottom'].forceBlue()
         if RomPatches.has(RomPatches.CrabShaftBlueDoor):
             DoorsManager.doors['CrabShaftRight'].forceBlue()
+        if RomPatches.has(RomPatches.WsEtankBlueDoor):
+            DoorsManager.doors['ElectricDeathRoomTopLeft'].forceBlue()
 
     @staticmethod
     def randomize(allowGreyDoors, forbiddenColors=None):

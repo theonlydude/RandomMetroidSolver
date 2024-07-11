@@ -103,6 +103,7 @@ class InteractiveSolver(CommonSolver):
         # compute new available locations
         self.computeLocationsDifficulty(self.container.majorLocations, startDiff=easy)
         self.checkGoals()
+        self.updateScavLocs()
 
         return self.dumpState()
 
@@ -207,6 +208,7 @@ class InteractiveSolver(CommonSolver):
         # compute new available locations
         self.container.resetLocsDifficulty()
         self.computeLocationsDifficulty(self.container.majorLocations, startDiff=easy)
+        self.updateScavLocs()
 
         # return them
         return self.dumpState()

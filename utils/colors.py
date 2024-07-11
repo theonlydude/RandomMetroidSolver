@@ -1,4 +1,5 @@
 from rom.rom import RealROM, snes_to_pc
+import random
 
 # minimap colors in R, G, B bytes (0-255 range)
 areaColors = {
@@ -47,6 +48,40 @@ def adjust_hue_degree(hsl_color, degree):
     hue_adj = (hue + degree) % 360
 
     return hue_adj/360.0
+
+
+class RandomColors:
+    @staticmethod
+    def get_random_color(pastel_factor = 0.5):
+        return tuple([(x+pastel_factor)/(1.0+pastel_factor) for x in [random.uniform(0,1.0) for _ in range(3)]])
+
+    @staticmethod
+    def color_distance(c1, c2):
+        return sum([abs(x[0]-x[1]) for x in zip(c1,c2)])
+
+    @staticmethod
+    def generate_new_color(existing_colors,pastel_factor = 0.5):
+        max_distance = None
+        best_color = None
+        for i in range(0,100):
+            color = RandomColors.get_random_color(pastel_factor = pastel_factor)
+            if not existing_colors:
+                return color
+            best_distance = min([RandomColors.color_distance(color,c) for c in existing_colors])
+            if not max_distance or best_distance > max_distance:
+                max_distance = best_distance
+                best_color = color
+        return best_color
+
+    @staticmethod
+    def generate_random_colors(nColors, pastel_factor = 0.5):
+        colors = []
+
+        for i in range(0, nColors):
+            colors.append(RandomColors.generate_new_color(colors, pastel_factor = pastel_factor))
+
+        return colors
+
 
 class Palette(object):
     def __init__(self, nLines=16, nColors=16):

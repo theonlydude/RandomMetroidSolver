@@ -91,6 +91,8 @@ class Symbols(object):
             symbolsAbsolute = self.getAbsoluteSymbols()
         with open(mslPath, "a") as msl:
             for sym in symbolsAbsolute:
+                if sym.startswith("freespace_alloc_"):
+                    continue
                 addr = self._symbolsAbsolute[sym]
                 msl.write("PRG:%X:%s\n" % (snes_to_pc(addr), sym))
 
@@ -138,3 +140,104 @@ class Symbols(object):
 
     def getAbsoluteSymbols(self):
         return self._symbolsAbsolute.keys()
+
+    def getNamespaces(self):
+        return self._symbols.keys()
+
+    def getLabels(self, namespace):
+        return self._symbols[namespace].keys() if namespace in self._symbols else None
+
+
+class Freespace(object):
+    def __init__(self, symbols, base=["vanilla_freespace"]):
+        self.log = symbols.log
+        self._symbols = symbols
+        self.freespace = self._loadFreespace(base)
+        self.allocs = self._loadAllocs(base)
+        self.bankLayouts = self._buildBankLayouts()
+
+    def _getRanges(self, ret, namespace):
+        labels = self._symbols.getLabels(namespace)
+        if labels is None:
+            return ret
+        allocStarts = [label for label in labels if label.startswith("freespace_alloc_start_")]
+        allocEnds = [label for label in labels if label.startswith("freespace_alloc_end_")]
+        assert len(allocStarts) >= len(allocEnds)
+        allocIdx = lambda label: int(label.split('_')[-1])
+        getBank = lambda addr: addr >> 16
+        for start in allocStarts:
+            i = allocIdx(start)
+            startAddr = self._symbols.getAddress(namespace, start)
+            startBank = getBank(startAddr)
+            endLabel = "freespace_alloc_end_" + str(i)
+            endAddr = self._symbols.getAddress(namespace, endLabel) if endLabel in allocEnds else None
+            if endAddr is None:
+                self.log.warning("No end for freespace alloc %d in namespace %s (addr: $%06x)" % (i, namespace, startAddr))
+                # try to find the next closest freespace in the same bank
+                endAddr = startAddr | 0xffff # end bank if not found
+                for possibleEnd in allocStarts:
+                    if possibleEnd == start:
+                        continue
+                    addr = self._symbols.getAddress(namespace, possibleEnd)
+                    if getBank(addr) != startBank:
+                        continue
+                    if addr >= startAddr and addr < endAddr:
+                        self.log.debug("Selected %s for alloc %d end in namespace %s (addr: $%06x)" % (possibleEnd, i, namespace, addr))
+                        endAddr = addr
+                self.log.info("Selected $%06x as end" % endAddr)
+            assert startBank == getBank(endAddr)
+            self.log.debug("Freespace alloc %d in namespace %s : ($%06x, $%06x)" % (i, namespace, startAddr, endAddr))
+            ret[startBank].append((startAddr, endAddr))
+
+    def _loadFreespace(self, freespaceDefs):
+        ranges = defaultdict(list)
+        for namespace in freespaceDefs:
+            self._getRanges(ranges, namespace)
+        return ranges
+
+    def _findContainingFreespace(self, start, end):
+        for rstart, rend in self.freespace[start >> 16]:
+            if rstart <= start and rend >= end:
+                return (rstart, rend)
+        return None
+
+    def _loadAllocs(self, base):
+        ret = {}
+        for namespace in self._symbols.getNamespaces():
+            if namespace in base:
+                continue
+            rangesByBank = defaultdict(list)
+            self._getRanges(rangesByBank, namespace)
+            # find a containing freespace range
+            for bank, ranges in rangesByBank.items():
+                assert bank in self.freespace, "No freespace defined in bank %02x" % bank
+                for start, end in ranges:
+                    assert self._findContainingFreespace(start, end) is not None, "No suitable freespace range found in bank %02x for range ($%06x, $%06x)" % (bank, start, end)
+            ret[namespace] = rangesByBank
+        return ret
+
+    def _buildBankLayouts(self):
+        ret = defaultdict(dict)
+        for bank in sorted(self.freespace.keys()):
+            for start, end in sorted(self.freespace[bank]):
+                patches = []
+                for namespace, rangesByBank in self.allocs.items():
+                    if bank in rangesByBank:
+                        patches.append({"patch": namespace, "ranges": [(rs, re) for rs, re in sorted(rangesByBank[bank]) if rs >= start and re <= end]})
+                ret[bank][(start, end)] = sorted(patches, key=lambda p: p["ranges"][0])
+        return ret
+
+    @property
+    def banks(self):
+        return list(self.bankLayouts.keys())
+
+    def getSpan(self, bank):
+        start, end = 0xffff, 0
+        for rs, re in self.bankLayouts[bank]:
+            r = rs & 0xffff
+            if r < start:
+                start = r
+            r = re & 0xffff
+            if r > end:
+                end = r
+        return (start, end)

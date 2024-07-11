@@ -8,7 +8,6 @@ class RomFlavor(object):
     flavor = None
     symbols = None
     patchAccess = None
-    manager = None
 
     @staticmethod
     def factory(baseDir=None):

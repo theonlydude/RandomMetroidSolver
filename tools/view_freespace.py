@@ -31,7 +31,9 @@ pygame.init()
 SCREEN_WIDTH, SCREEN_HEIGHT = 1280, 720
 FREESPACE_COLOR = pygame.Color("antiquewhite1")
 BANK_COLOR = pygame.Color("azure4")
-PATCH_SCALE = 0.95
+PATCH_SCALE = 0.925
+BANK_SCREEN_FONT_SIZE = 24
+
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
@@ -57,7 +59,7 @@ def renderBankBackground(surface, bank, bankLayout):
     yoff = int((h*(1 - PATCH_SCALE))/2)
     print(f"w = {w}, h = {h}, span = ({spanStart}, {spanEnd}), scale = {scale}, yoff = {yoff}")
     X = lambda addr: int((bankWidth - spanEnd + addr & 0xffff)*scale)
-    W = lambda rg: spanWidth(rg)*scale
+    W = lambda rg: max(spanWidth(rg)*scale, 1)
     Rpatch = lambda rg: pygame.Rect(X(rg[0]), yoff, W(rg), h - yoff*2)
     Rfree = lambda rg: pygame.Rect(X(rg[0]), 0, W(rg), h)
     for free, patches in bankLayout.items():
@@ -70,6 +72,15 @@ def renderBankBackground(surface, bank, bankLayout):
                 r = Rpatch(rg)
                 print(patch, r)
                 pygame.draw.rect(surface, col, r)
+
+bankFont = pygame.font.SysFont(None, BANK_SCREEN_FONT_SIZE)
+bankFontColor = pygame.Color("darkslategray")
+
+def drawBankText(surface, bank):
+    text = bankFont.render("%02X" % bank, True, (bankFontColor.r, bankFontColor.g, bankFontColor.b))
+    r = text.get_rect()
+    r.center = surface.get_rect().center
+    surface.blit(text, r.topleft)
 
 ROWS, COLS = 8, 7
 XSTEP, YSTEP = 15, 10
@@ -91,6 +102,7 @@ def renderBankScreen(surface, banks):
             surf = surface.subsurface(pygame.Rect(x, y, w, h))
             bank = banks[i]
             renderBankBackground(surf, bank, freespace.bankLayouts[bank])
+            drawBankText(surf, bank)
             i += 1
             y += h
         x += w

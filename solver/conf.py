@@ -9,6 +9,7 @@ class SolverConf:
 
     def __init__(self, mode, interactive):
         self.debug = False
+        # solver/standard (tracker)/seedless/plando/race/debug
         self.mode = mode
         self.interactive = interactive
         self.magic = None

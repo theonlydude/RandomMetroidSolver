@@ -823,6 +823,21 @@ class CommonSolver(object):
 
         return majorsAvailable
 
+    def updateScavLocs(self):
+        # for scav tracker
+        if self.romConf.masterMajorsSplit != 'Scavenger' or self.conf.mode != 'standard':
+            return
+
+        huntInProgress, index = self.getScavengerHuntState()
+        self.log.debug("updateScavLocs huntInProgress: {} index: {}".format(huntInProgress, index))
+        if huntInProgress and index < len(self.romConf.scavengerOrder)-1:
+            # set all next locs in the hunt as sequence break
+            nextHuntLocs = self.romConf.scavengerOrder[index+1:]
+            for loc in nextHuntLocs:
+                if loc.difficulty:
+                    self.log.debug("updateScavLocs update loc: {} set as seq break".format(loc.Name))
+                    loc.difficulty = SMBool(True, -1)
+
     def scavengerHuntComplete(self, smbm=None, ap=None):
         if self.romConf.masterMajorsSplit != 'Scavenger':
             return SMBool(True)

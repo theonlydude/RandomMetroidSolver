@@ -10,6 +10,7 @@ import utils.log
 from logic.logic import Logic
 from rom.flavor import RomFlavor
 from rom.symbols import Symbols, Freespace
+from collections import namedtuple
 
 flavor = "vanilla" if len(sys.argv) < 2 else sys.argv[1]
 
@@ -33,7 +34,9 @@ FREESPACE_COLOR = pygame.Color("antiquewhite1")
 BANK_COLOR = pygame.Color("azure4")
 PATCH_SCALE = 0.925
 BANK_SCREEN_FONT_SIZE = 24
-BANK_VIEWER_WSCALE = 0.9
+BANK_VIEWER_TITLE_FONT_SIZE = 48
+PATCH_INFO_FONT_SIZE = 32
+BANK_VIEWER_WSCALE = 0.95
 BANK_VIEWER_HSCALE = 0.25
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -51,6 +54,8 @@ def fillPatchInfo():
     for patch in allPatches:
         patchColors[patch] = patchColorList.pop()
 
+Region = namedtuple("Region", ["rect", "range", "patch"])
+
 def renderBankBackground(surface, bank, bankLayout, freeOnly=False):
     w, h = surface.get_width(), surface.get_height()
     pygame.draw.rect(surface, BANK_COLOR, surface.get_rect())
@@ -64,25 +69,29 @@ def renderBankBackground(surface, bank, bankLayout, freeOnly=False):
     W = lambda rg: max(spanWidth(rg)*scale, 1)
     Rpatch = lambda rg: pygame.Rect(X(rg[0]), yoff, W(rg), h - yoff*2)
     Rfree = lambda rg: pygame.Rect(X(rg[0]), 0, W(rg), h)
+    ret = { "free": [], "patches": []}
     for free, patches in bankLayout.items():
         r = Rfree(free)
 #        print(r)
         pygame.draw.rect(surface, FREESPACE_COLOR, r)
+        ret["free"].append(Region(r, free, None))
         for patch in patches:
             col = patchColors[patch["patch"]]
             for rg in patch["ranges"]:
                 r = Rpatch(rg)
 #                print(patch, r)
                 pygame.draw.rect(surface, col, r)
+                ret["patches"].append(Region(r, rg, patch["patch"]))
+    return ret
 
 bankFont = pygame.font.SysFont(None, BANK_SCREEN_FONT_SIZE)
 bankFontColor = pygame.Color("darkslategray")
 
-def drawBankText(surface, bank):
-    text = bankFont.render("%02X" % bank, True, bankFontColor)
-    r = text.get_rect()
-    r.center = surface.get_rect().center
-    surface.blit(text, r.topleft)
+bankTitleFont = pygame.font.SysFont(None, BANK_VIEWER_TITLE_FONT_SIZE)
+bankTitleFontColor = pygame.Color("antiquewhite1")
+
+patchInfoFont = pygame.font.SysFont(None, PATCH_INFO_FONT_SIZE)
+patchInfoFontColor = pygame.Color("darkolivegreen1")
 
 ROWS, COLS = 8, 7
 XSTEP, YSTEP = 15, 10
@@ -151,10 +160,16 @@ class BankOverview(Mode):
                 bank = banks[i]
                 print(f"{bank:x}: c={c}, r={r} : xmin = {x}, xmax = {x+w}, ymin={y}, ymax={y+h}")
                 renderBankBackground(surf, bank, freespace.bankLayouts[bank])
-                drawBankText(surf, bank)
+                self.drawBankText(surf, bank)
                 i += 1
                 y += h
             x += w
+
+    def drawBankText(self, surface, bank):
+        text = bankFont.render("%02X" % bank, True, bankFontColor)
+        r = text.get_rect()
+        r.center = surface.get_rect().center
+        surface.blit(text, r.topleft)
 
     def isInsideBank(self, pos):
         x, y = pos
@@ -180,23 +195,77 @@ overview = BankOverview()
 class BankViewer(Mode):
     def __init__(self, bank):
         self._bank = bank
+        self._bankRect = screen.get_rect().scale_by(BANK_VIEWER_WSCALE, BANK_VIEWER_HSCALE)
+        self._bankRect.center = screen.get_rect().center
+        self._displayedRegion = None
+        self._patchInfoArea = None
+        self._regions = None
 
     def draw(self):
         super().draw()
-        rect = screen.get_rect().scale_by(BANK_VIEWER_WSCALE, BANK_VIEWER_HSCALE)
-        rect.center = screen.get_rect().center
-        surf = screen.subsurface(rect)
-        renderBankBackground(surf, self._bank, freespace.bankLayouts[self._bank], freeOnly=True)
+        text = bankTitleFont.render("BANK %02X" % self._bank, True, bankTitleFontColor)
+        r = text.get_rect()
+        r.centerx = screen.get_rect().centerx
+        r.y = 2 * YSTEP
+        screen.blit(text, r.topleft)
+        self._patchInfoArea = pygame.Rect(0, r.bottom + 1, screen.get_width(), self._bankRect.top - 1 - r.bottom)
+        surf = screen.subsurface(self._bankRect)
+        self._regions = renderBankBackground(surf, self._bank, freespace.bankLayouts[self._bank], freeOnly=True)
 
     def clicked(self, clickPos):
-        Mode.current = overview
+        super().clicked(clickPos)
+        if not self._bankRect.collidepoint(clickPos):
+            Mode.current = overview
+
+    def mouseMoved(self, mousePos):
+        super().mouseMoved(mousePos)
+        if not self._bankRect.collidepoint(mousePos):
+            self._clearText()
+            return
+        region = self._findRegion(mousePos)
+        if region != self._displayedRegion:
+            self._clearText()            
+            self._displayedRegion = region
+            if region is not None:
+                self._showRegionText(region)
+
+    def _clearText(self):
+        pygame.draw.rect(screen, (0, 0, 0), self._patchInfoArea)
+
+    def _findRegion(self, pos):
+        x, y = pos
+        x -= self._bankRect.left
+        y -= self._bankRect.top
+        def findRegion(regionList):
+            nonlocal x, y
+            return next((region for region in regionList if region.rect.collidepoint((x, y))), None)
+        ret = findRegion(self._regions["patches"])
+        if ret is None:
+            ret = findRegion(self._regions["free"])
+        return ret
+
+    def _showRegionText(self, region):
+        regionName = region.patch if region.patch is not None else "Free Space"
+        size = spanWidth(region.range) + 1
+        start, end = region.range
+        y = self._patchInfoArea.top + 2 * YSTEP
+        def showText(txt):
+            nonlocal y
+            text = patchInfoFont.render(txt, True, patchInfoFontColor)
+            r = text.get_rect()
+            r.x = XSTEP
+            r.y = y
+            screen.blit(text, r.topleft)
+            y = r.bottom + 2 * YSTEP
+        showText(regionName)
+        showText("%d bytes" % size)
+        showText("[$%06x, $%06x]" % (start, end))
 
 def mainLoop():
     prevMode = None
     Mode.current = overview
     while True:
         if prevMode != Mode.current:
-            print("draw mode")
             Mode.current.draw()
             prevMode = Mode.current
         for event in pygame.event.get():

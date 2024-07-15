@@ -32,7 +32,7 @@ pygame.init()
 SCREEN_WIDTH, SCREEN_HEIGHT = 1280, 720
 FREESPACE_COLOR = pygame.Color("antiquewhite1")
 BANK_COLOR = pygame.Color("azure4")
-PATCH_SCALE = 0.925
+PATCH_SCALE = 0.9
 BANK_SCREEN_FONT_SIZE = 24
 BANK_VIEWER_TITLE_FONT_SIZE = 48
 PATCH_INFO_FONT_SIZE = 32
@@ -82,6 +82,19 @@ def renderBankBackground(surface, bank, bankLayout, freeOnly=False):
 #                print(patch, r)
                 pygame.draw.rect(surface, col, r)
                 ret["patches"].append(Region(r, rg, patch["patch"]))
+    # add free space sections between patches
+    ret["patches"].sort(key=lambda region: region.range[0])
+    freeSections = []
+    for i, region in enumerate(ret["patches"]):
+        current = region.range
+        previous = ret["patches"][i - 1].range
+        if i > 0 and current[0] - previous[1] > 2:
+            free = (previous[1] + 1, current[0] - 1)
+            freeSections.append(Region(Rpatch(free), free, None))
+        if i == len(ret["patches"]) - 1 and current[1] & 0xffff != 0xffff:
+            free = (current[1] + 1, current[1] | 0xffff)
+            freeSections.append(Region(Rpatch(free), free, None))
+    ret["patches"] += freeSections
     return ret
 
 bankFont = pygame.font.SysFont(None, BANK_SCREEN_FONT_SIZE)
@@ -158,7 +171,7 @@ class BankOverview(Mode):
                 y += YSTEP
                 surf = surface.subsurface(pygame.Rect(x, y, w, h))
                 bank = banks[i]
-                print(f"{bank:x}: c={c}, r={r} : xmin = {x}, xmax = {x+w}, ymin={y}, ymax={y+h}")
+#                print(f"{bank:x}: c={c}, r={r} : xmin = {x}, xmax = {x+w}, ymin={y}, ymax={y+h}")
                 renderBankBackground(surf, bank, freespace.bankLayouts[bank])
                 self.drawBankText(surf, bank)
                 i += 1
@@ -224,7 +237,7 @@ class BankViewer(Mode):
             return
         region = self._findRegion(mousePos)
         if region != self._displayedRegion:
-            self._clearText()            
+            self._clearText()
             self._displayedRegion = region
             if region is not None:
                 self._showRegionText(region)

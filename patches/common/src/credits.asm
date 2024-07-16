@@ -1204,7 +1204,8 @@ credits:
     dw "         insanefirebat          " ;; 246
     dw $0000                              ;; End of credits tilemap
 
-%freespaceEnd($ceffff)
+print "ce end: ", pc
+%freespaceEnd($cedfff)
 
 ;; Placeholder label for item locations inserted by the randomizer
 %freespaceStart($ded200)

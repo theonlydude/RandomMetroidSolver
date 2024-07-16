@@ -237,9 +237,11 @@ class BankViewer(Mode):
         super().mouseMoved(mousePos)
         if not self._bankRect.collidepoint(mousePos):
             self._clearText()
+            self._displayedRegion = None
             return
         region = self._findRegion(mousePos)
         if region != self._displayedRegion:
+#            print(f"switch region to {region}")
             self._clearText()
             self._displayedRegion = region
             if region is not None:

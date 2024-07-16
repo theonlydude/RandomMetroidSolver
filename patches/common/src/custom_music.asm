@@ -158,6 +158,9 @@ ceres_escape:
 	jsl !song_routine
 	rtl
 
+print "a9 end: ", pc
+%freespaceEnd($a9fcff)
+
 ; SPC Engine Echo Improvements
 ; By H A M
 ; The echo on a channel when a sound is finished gets re-activated, and the echo never applies to a sound.
@@ -170,7 +173,7 @@ ceres_escape:
 
 org $808459 : JML SPC_Engine_Upload ; hijack
 
-%freespaceStart($81fe00)
+%freespaceStart($81ff80)
 SPC_Engine_Upload:
         LDA $80845D : STA $00 : LDA $80845E : STA $01 : JSL $808024 ; upload SPC engine to APU (gets repointed by SMART)
         TDC : - : DEC : BNE - ; wait for SPC to be available for upload

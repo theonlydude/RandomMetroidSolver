@@ -43,6 +43,9 @@ shinespark_end:
 	stz !spark_flag
 	rts
 
+print "90 end: ", pc
+%freespaceEnd($90f7ff)
+
 %freespaceStart($8ff600)
 print "incompatible_doors:"
 print pc

@@ -13,4 +13,4 @@ setup_asm_hook:
         ldx $07bb               ; vanilla code
         rts
 print "bank 8f end: ", pc
-%freespaceStart($8FE9BF)
+%freespaceEnd($8FE9BF)

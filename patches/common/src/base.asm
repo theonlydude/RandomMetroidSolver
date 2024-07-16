@@ -1371,7 +1371,8 @@ tilemap_backup_done:
 tilemap_backup_not_needed:
         dw "   BACKUP NOT NECESSARY.  "
 
-%freespaceEnd($85afff)
+print "85 end: ", pc
+%freespaceEnd($8598ff)
 
 ;;; Disable special X-Ray handler for animals room during escape, as
 ;;; this otherwise unused state header field is used to hold VARIA

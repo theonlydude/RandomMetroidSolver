@@ -1220,6 +1220,9 @@ while !counter < 1239
 endif
         dw $0000
 
+print "de end: ", pc
+%freespaceEnd($dedfff)
+
 ;; update 'clear time' to display 'real  time'
 org $8cb49b
 ;; 'R'

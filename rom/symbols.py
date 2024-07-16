@@ -232,12 +232,10 @@ class Freespace(object):
         return list(self.bankLayouts.keys())
 
     def getSpan(self, bank):
-        start, end = 0xffff, 0
+        start, end = bank << 16 | 0xffff, bank << 16 | 0x8000
         for rs, re in self.bankLayouts[bank]:
-            r = rs & 0xffff
-            if r < start:
-                start = r
-            r = re & 0xffff
-            if r > end:
-                end = r
+            if rs < start:
+                start = rs
+            if re > end:
+                end = re
         return (start, end)

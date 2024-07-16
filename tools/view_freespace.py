@@ -88,11 +88,14 @@ def renderBankBackground(surface, bank, bankLayout, freeOnly=False):
     for i, region in enumerate(ret["patches"]):
         current = region.range
         previous = ret["patches"][i - 1].range
+        if i == 0 and current[0] != span[0]:
+            free = (span[0], current[0] - 1)
+            freeSections.append(Region(Rpatch(free), free, None))
         if i > 0 and current[0] - previous[1] > 2:
             free = (previous[1] + 1, current[0] - 1)
             freeSections.append(Region(Rpatch(free), free, None))
-        if i == len(ret["patches"]) - 1 and current[1] & 0xffff != 0xffff:
-            free = (current[1] + 1, current[1] | 0xffff)
+        if i == len(ret["patches"]) - 1 and current[1] != span[1]:
+            free = (current[1] + 1, span[1])
             freeSections.append(Region(Rpatch(free), free, None))
     ret["patches"] += freeSections
     return ret
@@ -266,7 +269,7 @@ class BankViewer(Mode):
             nonlocal y
             text = patchInfoFont.render(txt, True, patchInfoFontColor)
             r = text.get_rect()
-            r.x = XSTEP
+            r.x = 2 * XSTEP
             r.y = y
             screen.blit(text, r.topleft)
             y = r.bottom + 2 * YSTEP

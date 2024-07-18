@@ -633,8 +633,15 @@ class CommonSolver(object):
                             missingAPs = set(requiredAPs) - self.container.visitedAPs()
                             paths = None
                             if missingAPs:
-                                self.log.debug("try to access objective missing APs: {}".format(missingAPs))
-                                paths = self.areaGraph.exploreAPs(self.smbm, self.container.lastAP(), missingAPs, infinity)
+                                # loop on difficulties to avoid having the solver choosing a mania path when a medium one exists
+                                for maxDiff in [easy, medium, hard, harder, hardcore, mania, infinity]:
+                                    self.log.debug("try to access objective missing APs: {} with max diff {}".format(missingAPs, maxDiff))
+                                    paths = self.areaGraph.exploreAPs(self.smbm, self.container.lastAP(), missingAPs, infinity)
+                                    if paths:
+                                        break
+                                    else:
+                                        self.log.debug("can't access missings APs for objective {} with max diff {}".format(goalName, maxDiff))
+
                                 if not paths:
                                     self.log.debug("can't access missings APs for objective {}".format(goalName))
                                     continue

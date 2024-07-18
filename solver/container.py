@@ -277,10 +277,10 @@ class SolverContainer(object):
 
     # serialize data for front web
     def availableLocationsWeb(self):
-        return self.getLocationsWeb(self.majorLocations)
+        return self.getLocationsWeb(self.majorLocations, True)
 
     def visitedLocationsWeb(self):
-        return self.getLocationsWeb(self.visitedLocations())
+        return self.getLocationsWeb(self.visitedLocations(), False)
 
     def name4isolver(self, locName):
         # remove space and special characters
@@ -295,10 +295,12 @@ class SolverContainer(object):
                 result.append(know)
         return list(set(result))
 
-    def getLocationsWeb(self, locations):
+    def getLocationsWeb(self, locations, onlyAvailable):
         ret = {}
         for loc in locations:
-            if loc.difficulty is not None and loc.difficulty.bool:
+            # in plando we can set items to seq break locations which have difficulty set to false,
+            # so when iterating on visited locations we ignore location difficulty
+            if (onlyAvailable and loc.difficulty is not None and loc.difficulty.bool) or not onlyAvailable:
                 diff = loc.difficulty
                 locName = self.name4isolver(loc.Name)
                 # we have loc.comeBack which tells if you can comeback from loc access point to current player accesspoint.

@@ -1640,18 +1640,18 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
     },
     {
       element: "#color_blindStep",
-      title: "Color blind friendly colors for doors / Disable screen shake",
-      content: "<p>Color blind friendly colors for Missile, Super and Power Bomb doors.</p>\
-<p>This patch was developed by Colors and theonlydude.</p>\
-<p>Disable screen shake during escape and lava/acid rising earthquake.</p>\
-<p>This patch was developed by flo.</p>"
+      title: "Disable minimap colors / Color blind friendly colors for doors",
+      content: "<p>Disable the colored minimap if you encounter visual glitches on real SNES hardware.</p>\
+<p>This patch was developed by flo.</p>\
+<p>Color blind friendly colors for Missile, Super and Power Bomb doors.</p>\
+<p>This patch was developed by Colors and theonlydude.</p>"
     },
     {
       element: "#noflashingStep",
-      title: "Disable flashing / Disable minimap colors",
+      title: "Disable flashing / Disable screen shake",
       content: "<p>Disable bosses, escape and power bomb flashing, Landing Site lightning, ...</p>\
 <p>This patch was developed by Kara.</p>\
-<p>Disable the colored minimap if you encounter visual glitches on real SNES hardware.</p>\
+<p>Disable screen shake during escape and lava/acid rising earthquake.</p>\
 <p>This patch was developed by flo.</p>"
     },
     {
@@ -2077,12 +2077,12 @@ for name, values in musics["_dropdown"].items():
                 <colgroup><col class="half" /><col class="half" /></colgroup>
                 <tr>
                   <td>
-                    {{displayCheckbox("color_blind")}}
-                    <span id="color_blindText">Color blind friendly colors for doors</span>
+                    {{displayCheckbox("disable_minimap_colors")}}
+                    <span id="disable_minimap_colorsText">Disable minimap colors</span>
                   </td>
                   <td>
-                    {{displayCheckbox("disable_screen_shake")}}
-                    <span id="disable_screen_shakeText">Disable screen shake during escape</span>
+                    {{displayCheckbox("color_blind")}}
+                    <span id="color_blindText">Color blind friendly colors for doors</span>
                   </td>
                   <td id="color_blindStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
@@ -2092,8 +2092,8 @@ for name, values in musics["_dropdown"].items():
                     <span id="noflashingText">Remove flashing</span>
                   </td>
                   <td>
-                    {{displayCheckbox("disable_minimap_colors")}}
-                    <span id="disable_minimap_colorsText">Disable minimap colors</span>
+                    {{displayCheckbox("disable_screen_shake")}}
+                    <span id="disable_screen_shakeText">Disable screen shake during escape</span>
                   </td>
                   <td id="noflashingStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>

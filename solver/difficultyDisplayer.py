@@ -7,32 +7,32 @@ class DifficultyDisplayer:
     def scale(self):
         if self.difficulty >= impossibru:
             return "IMPOSSIBRU!"
-        else:
-            previous = 0
-            for d in sorted(diff2text):
-                if self.difficulty >= d:
-                    previous = d
-                else:
-                    displayString = diff2text[previous]
-                    displayString += ' '
-                    scale = d - previous
-                    pos = int(self.difficulty - previous)
-                    displayString += '-' * pos
-                    displayString += '^'
-                    displayString += '-' * (scale - pos)
-                    displayString += ' '
-                    displayString += diff2text[d]
-                    break
 
-            return displayString
+        previous = 0
+        for d in sorted(diff2text):
+            if self.difficulty >= d:
+                previous = d
+            else:
+                displayString = diff2text[previous]
+                displayString += ' '
+                scale = d - previous
+                pos = int(self.difficulty - previous)
+                displayString += '-' * pos
+                displayString += '^'
+                displayString += '-' * (scale - pos)
+                displayString += ' '
+                displayString += diff2text[d]
+                break
+
+        return displayString
 
     def percent(self):
         # return the difficulty as a percent
         if self.difficulty == -1:
             return -1
-        elif self.difficulty in [0, easy]:
+        if self.difficulty in [0, easy]:
             return 0
-        elif self.difficulty >= mania:
+        if self.difficulty >= mania:
             return 100
 
         difficultiesPercent = {

@@ -16,6 +16,7 @@ class Path(object):
 class AccessPoint(object):
     # name : AccessPoint name
     # graphArea : graph area the node is located in
+    # solveArea : solve area the node is located in (used by the solver for objectives)
     # transitions : intra-area transitions
     # traverse: traverse function, will be wand to the added transitions
     # exitInfo : dict carrying vanilla door information : 'DoorPtr': door address, 'direction', 'cap', 'screen', 'bitFlag', 'distanceToSpawn', 'doorAsmPtr' : door properties
@@ -24,7 +25,7 @@ class AccessPoint(object):
     # roomInfo : dict with 'RoomPtr' : room address, 'area'
     # shortName : short name for the credits
     # internal : if true, shall not be used for connecting areas
-    def __init__(self, name, graphArea, transitions,
+    def __init__(self, name, graphArea, solveArea, transitions,
                  traverse=lambda sm: SMBool(True),
                  exitInfo=None, entryInfo=None, roomInfo=None,
                  internal=False, boss=False, escape=False,
@@ -32,6 +33,7 @@ class AccessPoint(object):
                  dotOrientation='w'):
         self.Name = name
         self.GraphArea = graphArea
+        self.SolveArea = solveArea
         self.ExitInfo = exitInfo
         self.EntryInfo = entryInfo
         self.RoomInfo = roomInfo
@@ -53,7 +55,7 @@ class AccessPoint(object):
         roomInfo = copy.deepcopy(self.RoomInfo) if self.RoomInfo is not None else None
         start = copy.deepcopy(self.Start) if self.Start is not None else None
         # in any case, do not copy connections
-        return AccessPoint(self.Name, self.GraphArea, self.intraTransitions, self.traverse,
+        return AccessPoint(self.Name, self.GraphArea, self.SolveArea, self.intraTransitions, self.traverse,
                            exitInfo, entryInfo, roomInfo,
                            self.Internal, self.Boss, self.Escape,
                            start, self.DotOrientation)
@@ -389,6 +391,41 @@ class AccessGraph(object):
             smbm.removeItem(item)
         #print("canAccess: {}".format(can))
         return can
+
+    # try to visite all missingAPsNames and return a path visiting them with difficulty
+    def exploreAPs(self, smbm, srcAPName, missingAPsNames, maxDiff):
+        srcAP = self.accessPoints[srcAPName]
+        missingAPs = [self.accessPoints[apName] for apName in missingAPsNames]
+
+        paths = []
+        while missingAPs:
+            # compute available APs from src AP
+            availAPs = self.getAvailableAccessPoints(srcAP, smbm, maxDiff)
+            # check that all missing APs are available
+            if any(ap not in availAPs for ap in missingAPs):
+                return None
+            # get path for all missing APs from src AP, keep the one with the shortest distance
+            missingAPs.sort(key=lambda ap: ap.distance)
+            dstAP = missingAPs[0]
+
+            # add smbool and all nodes between src -> dest
+            path = self.getPath(dstAP, availAPs)
+            pdiff = SMBool.wandmax(*(availAPs[ap]['difficulty'] for ap in path))
+            distance = len(path)
+            paths.append(Path(path, pdiff, distance))
+
+            # start again from the new src AP
+            srcAP = missingAPs.pop(0)
+
+        # check that we can come back to src AP
+        endPathAP = paths[-1].path[-1]
+        startPathAP = paths[0].path[0]
+        self.log.debug("check if can comeback from {} to {}".format(endPathAP.Name, startPathAP.Name))
+        if not self.canAccess(smbm, endPathAP.Name, startPathAP.Name, infinity):
+            self.log.debug("Can't return to {} after visiting {}".format(srcAPName, missingAPsNames))
+            return None
+
+        return paths
 
     # returns a list of AccessPoint instances from srcAccessPointName to destAccessPointName
     # (not including source ap)

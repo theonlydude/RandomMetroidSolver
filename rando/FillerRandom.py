@@ -239,7 +239,7 @@ class FillerRandomSpeedrun(FillerRandom):
         orderedItemLocations = []
         # keep only first minors
         firstMinors = {"Missile": False, "Super": False, "PowerBomb": False}
-        for loc in solver.visitedLocations:
+        for loc in solver.container.visitedLocations():
             if loc.itemName == "Gunship":
                 continue
             itemLoc = self.container.getItemLoc(loc)
@@ -258,9 +258,9 @@ class FillerRandomSpeedrun(FillerRandom):
         # also sort regular itemLocs (used by graph builder to create escape when tourian is disabled)
         def indexInVisited(itemLoc):
             nonlocal solver
-            ret = len(solver.visitedLocations)
+            ret = len(solver.container.visitedLocations())
             try:
-                ret = solver.visitedLocations.index(itemLoc.Location)
+                ret = solver.container.visitedLocations().index(itemLoc.Location)
             except ValueError:
                 pass
             return ret

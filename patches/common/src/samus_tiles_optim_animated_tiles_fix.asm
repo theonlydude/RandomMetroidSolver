@@ -23,13 +23,13 @@ org $829392 : JSL UnpauseAnimatedTiles
 
 org $928040
         TAX : EOR $071F : ASL : BEQ + ; If [A] != [Samus top half tiles definition]:
-        WDM #$00 ; Same as NOP : NOP but twice as fast
+        NOP : NOP
         STX $071F ; Samus top half tiles definition = [A], flag transfer for Samus top half tiles to VRAM
 +
 
 org $92807E
         TAX : EOR $0721 : ASL : BEQ + ; If [A] != [Samus bottom half tiles definition]:
-        WDM #$00
+        NOP : NOP
         STX $0721 ; Samus bottom half tiles definition = [A], flag transfer for Samus bottom half tiles to VRAM
 +
 

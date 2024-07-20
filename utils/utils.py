@@ -589,3 +589,7 @@ def dumpErrorMsg(outFileName, msg):
     if outFileName is not None:
         with open(outFileName, 'w') as jsonFile:
             json.dump({"errorMsg": msg}, jsonFile)
+
+def transition2isolver(transition):
+    transition = str(transition)
+    return transition[0].lower() + removeChars(transition[1:], " ,()-")

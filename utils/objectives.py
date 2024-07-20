@@ -31,6 +31,9 @@ class Synonyms(object):
     ]
     alreadyUsed = []
     @staticmethod
+    def reset():
+        Synonyms.alreadyUsed = []
+    @staticmethod
     def getVerb(maxLen):
         possibleVerbs = [syn for syn in Synonyms.killSynonyms if len(syn) <= maxLen]
         assert len(possibleVerbs) > 0, "could not find short enough synonym"
@@ -132,15 +135,16 @@ class Goal(object):
             outLen = maxLen + 1
         assert outLen <= maxLen, "Goal '{}' text is too long: '{}'".format(self.name, out)
         out = out.rstrip()        
+        # as we can save the plando multiple time in the same instance we have to use new intro text each time
         if self.introText is not None:
-            self.introText = idxTxt + self.introText
+            self.curIntroText = idxTxt + self.introText
         else:
-            self.introText = out
+            self.curIntroText = out
         return out
 
     def getIntroText(self):
-        assert self.introText is not None
-        return self.introText
+        assert self.curIntroText is not None
+        return self.curIntroText
 
     def isLimit(self):
         return "type" in self.exclusion
@@ -276,6 +280,10 @@ def getEnemiesAccessPoints(nmyType):
     for apDict in enemiesLogic[nmyType]:
         allAPs += list(apDict.keys())
     return list(set(allAPs))
+
+def getEnemiesAccessibleAccessPoints(nmyType):
+    accessibleApNames = [ap.Name for ap in Objectives.accessibleAPs]
+    return [ap for ap in getEnemiesAccessPoints(nmyType) if ap in accessibleApNames]
 
 def getEnemiesEscapeAccessPoints(nmyType):
     return (1, getEnemiesAccessPoints(nmyType))
@@ -687,7 +695,7 @@ _goalsList = [
          mapIcons=getEnemiesMapIcons("SpacePirates"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Space Pirates"),
-         objCompletedFuncVisit=lambda ap: (getEnemiesAccessPoints("Space Pirates"), [])),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessibleAccessPoints("Space Pirates"), [])),
     Goal("kill all ki hunters", "enemies",
          getEnemiesLogicFunc("Ki Hunters"),
          "kill_all_ki_hunters", romInProgressFunc="kill_all_ki_hunters_progress",
@@ -696,7 +704,7 @@ _goalsList = [
          mapIcons=getEnemiesMapIcons("KiHunters"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Ki Hunters"),
-         objCompletedFuncVisit=lambda ap: (getEnemiesAccessPoints("Ki Hunters"),[])),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessibleAccessPoints("Ki Hunters"),[])),
     Goal("kill all beetoms", "enemies",
          getEnemiesLogicFunc("Beetoms"),
          "kill_all_beetoms", romInProgressFunc="kill_all_beetoms_progress",
@@ -704,7 +712,7 @@ _goalsList = [
          mapIcons=getEnemiesMapIcons("Beetoms"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Beetoms"),
-         objCompletedFuncVisit=lambda ap: (getEnemiesAccessPoints("Beetoms"), [])),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessibleAccessPoints("Beetoms"), [])),
     Goal("kill all cacatacs", "enemies",
          getEnemiesLogicFunc("Cacatacs"),
          "kill_all_cacatacs", romInProgressFunc="kill_all_cacatacs_progress",
@@ -712,7 +720,7 @@ _goalsList = [
          mapIcons=getEnemiesMapIcons("Cacatacs"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Cacatacs"),
-         objCompletedFuncVisit=lambda ap: (getEnemiesAccessPoints("Cacatacs"), [])),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessibleAccessPoints("Cacatacs"), [])),
     Goal("kill all kagos", "enemies",
          getEnemiesLogicFunc("Kagos"),
          "kill_all_kagos", romInProgressFunc="kill_all_kagos_progress",
@@ -720,7 +728,7 @@ _goalsList = [
          mapIcons=getEnemiesMapIcons("Kagos"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Kagos"),
-         objCompletedFuncVisit=lambda ap: (getEnemiesAccessPoints("Kagos"), [])),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessibleAccessPoints("Kagos"), [])),
     Goal("kill all yapping maws", "enemies",
          getEnemiesLogicFunc("Yapping Maws"),
          "kill_all_yapping_maws", romInProgressFunc="kill_all_yapping_maws_progress",
@@ -729,7 +737,7 @@ _goalsList = [
          mapIcons=getEnemiesMapIcons("YappingMaws"),
          category="Enemies",
          escapeAccessPoints=getEnemiesEscapeAccessPoints("Yapping Maws"),
-         objCompletedFuncVisit=lambda ap: (getEnemiesAccessPoints("Yapping Maws"), []))
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessibleAccessPoints("Yapping Maws"), []))
 ]
 
 _goals = {goal.name:goal for goal in _goalsList}
@@ -788,7 +796,8 @@ class Objectives(object):
         assert Objectives.tourianRequired is not None
         return Objectives.tourianRequired
 
-    def resetGoals(self):
+    @staticmethod
+    def resetGoals():
         Objectives.activeGoals = []
         Objectives.nbActiveGoals = 0
         for goal in Objectives.goals.values():
@@ -920,6 +929,12 @@ class Objectives(object):
         return SMBool(any(ap.GraphArea == area for ap in availAPs))
 
     # XXX consider "explore map" equivalent to "access all locations and APs"
+    @staticmethod
+    def locPostAvailable(sm, loc):
+        if loc.PostAvailable is None:
+            return True
+        diff = loc.PostAvailable(sm)
+        return diff.bool == True and diff.difficulty < Objectives.maxDiff
 
     @staticmethod
     def canExploreArea(sm, rootApName, area):
@@ -940,7 +955,9 @@ class Objectives(object):
         accessibleLocs = graph.getAccessibleLocations(Logic.locationsDict().values(), rootApName)
         # in solver we don't want to recompute already visited locations difficulty, so copy them first
         areaLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea == area]
-        availLocs = graph.getAvailableLocations(areaLocs, sm, maxDiff, rootApName)
+        LOG.debug("canExploreArea {} all   locs: {}".format(area, sorted([loc.Name for loc in areaLocs])))
+        availLocs = [loc for loc in graph.getAvailableLocations(areaLocs, sm, maxDiff, rootApName) if Objectives.locPostAvailable(sm, loc)]
+        LOG.debug("canExploreArea {} avail locs: {}".format(area, sorted([loc.Name for loc in availLocs])))
         if not areaLocs:
             LOG.debug(f"canExploreArea {area} no loc available")
             return SMBool(False)
@@ -973,7 +990,7 @@ class Objectives(object):
 
         accessibleLocs = graph.getAccessibleLocations(Logic.locationsDict().values(), rootApName)
         allLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea not in skipAreas]
-        availLocs = graph.getAvailableLocations(allLocs, sm, maxDiff, rootApName)
+        availLocs = [loc for loc in graph.getAvailableLocations(allLocs, sm, maxDiff, rootApName) if Objectives.locPostAvailable(sm, loc)]
         if len(availLocs) != len(allLocs):
             if LOG.getEffectiveLevel() == logging.DEBUG:
                 missingLocs = [loc for loc in allLocs if loc not in availLocs]
@@ -1063,16 +1080,16 @@ class Objectives(object):
             if area in goalsByArea:
                 goalsByArea[area].setClearFunc(func)
 
-    def setSolverMode(self, solver):
+    def setSolverMode(self, solver, romConf):
         self.setScavengerHuntFunc(solver.scavengerHuntComplete)
         # in rando we know the number of items after randomizing, so set the functions only for the solver
-        self.setItemPercentFuncs(allUpgradeTypes=solver.majorUpgrades)
+        self.setItemPercentFuncs(allUpgradeTypes=romConf.majorUpgrades)
 
         def getObjAreaFunc(area):
             def f(sm, ap):
                 nonlocal solver, area
-                visitedLocs = set([loc.Name for loc in solver.visitedLocations])
-                allVisited = SMBool(all(locName in visitedLocs for locName in solver.splitLocsByArea[area]))
+                visitedLocs = set([loc.Name for loc in solver.container.visitedLocations()])
+                allVisited = SMBool(all(locName in visitedLocs for locName in solver.romConf.splitLocsByArea[area]))
                 return sm.wand(Objectives.canReachArea(sm, ap, area), allVisited)
             return f
         self.setAreaFuncs({area:getObjAreaFunc(area) for area in graphAreas})
@@ -1123,14 +1140,16 @@ class Objectives(object):
 
         return ret
 
-    def setGoalCompleted(self, goalName, completed):
+    @staticmethod
+    def setGoalCompleted(goalName, completed):
         for goal in Objectives.activeGoals:
             if goal.name == goalName:
                 goal.completed = completed
                 return
         assert False, "Can't set goal {} completion to {}, goal not active".format(goalName, completed)
 
-    def enoughGoalsCompleted(self):
+    @staticmethod
+    def enoughGoalsCompleted():
         nCompleted = len([goal for goal in Objectives.activeGoals if goal.completed])
         return nCompleted >= Objectives.nbRequiredGoals
 
@@ -1217,6 +1236,7 @@ class Objectives(object):
         }
 
     def setState(self, state, tourianRequired):
+        self.resetGoals()
         rank = 1
         for goalName, completed in state["goals"].items():
             goal = Objectives.goals[goalName]
@@ -1231,7 +1251,8 @@ class Objectives(object):
     def setTotalItemsCount(self, totalItemsCount):
         Objectives.totalItemsCount = totalItemsCount
 
-    def resetCompletedGoals(self):
+    @staticmethod
+    def resetCompletedGoals():
         for goal in Objectives.activeGoals:
             goal.completed = False
 
@@ -1396,6 +1417,8 @@ class Objectives(object):
         # write objectives text
         romFile.seek(Addresses.getOne('objectives_objs_txt'))
         addrs = []
+        # for plando reset already used synonyms to avoid an infinite loop when all short synonyms have been used
+        Synonyms.reset()
         for i, goal in enumerate(Objectives.activeGoals):
             addrs.append(romFile.tell())
             writeString(goal.getText())

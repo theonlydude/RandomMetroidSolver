@@ -153,6 +153,7 @@ class Customizer(object):
             self.session.customizer['color_blind'] = "off"
             self.session.customizer['disable_screen_shake'] = "off"
             self.session.customizer['noflashing'] = "off"
+            self.session.customizer['disable_minimap_colors'] = "off"
 
             musics = self.loadMusics()
             for song, songId in musics["_list"]:
@@ -177,7 +178,7 @@ class Customizer(object):
                    'remove_rando_speed', 'remove_spinjumprestart', 'gamepadMapping', 'widescreen',
                    'hell', 'lava_acid_physics', 'colorsRandomization', 'suitsPalettes', 'beamsPalettes',
                    'tilesPalettes', 'enemiesPalettes', 'bossesPalettes', 'invert',
-                   'color_blind', 'disable_screen_shake', 'noflashing', 'hard_mode']
+                   'color_blind', 'disable_screen_shake', 'noflashing', 'hard_mode', 'disable_minimap_colors']
         others = ['minDegree', 'maxDegree', 'hellrun_rate', 'etanks', 'logic']
         validateWebServiceParams(self.request, switchs, [], [], others, isJson=True)
         if self.vars.customSpriteEnable == 'on':
@@ -258,6 +259,7 @@ class Customizer(object):
         self.session.customizer['color_blind'] = self.vars.color_blind
         self.session.customizer['disable_screen_shake'] = self.vars.disable_screen_shake
         self.session.customizer['noflashing'] = self.vars.noflashing
+        self.session.customizer['disable_minimap_colors'] = self.vars.disable_minimap_colors
 
         if self.vars.music == 'Customize':
             musics = self.loadMusics()
@@ -332,6 +334,8 @@ class Customizer(object):
             params += ['-c', 'disable_screen_shake.ips']
         if self.vars.noflashing == 'on':
             params += ['-c', 'noflashing.ips']
+        if self.vars.disable_minimap_colors == 'on':
+            params += ['-c', 'disable_minimap_colors.ips']
 
         if self.vars.colorsRandomization == 'on':
             params.append('--palette')

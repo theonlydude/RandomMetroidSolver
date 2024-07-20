@@ -57,6 +57,27 @@ vanillaBossesTransitions = [
     ('RidleyRoomOut', 'RidleyRoomIn')
 ]
 
+vanillaMiniBossesTransitions = [
+    ('SporeSpawnFrontDoorOut', 'SporeSpawnFrontDoorIn'),
+    ('CrocomireFrontDoorOut', 'CrocomireFrontDoorIn'),
+    ('GoldenTorizoFrontDoorOut', 'GoldenTorizoFrontDoorIn'),
+    ('BotwoonFrontDoorOut', 'BotwoonFrontDoorIn')
+]
+
+# vanillaBossesTransitionsBack = [
+#     ('KraidBackDoorOut', 'KraidBackDoorIn'),
+#     ('PhantoonBackDoorOut', 'PhantoonBackDoorIn'),
+#     ('DraygonBackDoorOut', 'DraygonBackDoorIn'),
+#     ('RidleyBackDoorOut', 'RidleyBackDoorIn')
+# ]
+
+# vanillaMiniBossesTransitionsBack = [
+#     ('SporeSpawnBackDoorOut', 'SporeSpawnBackDoorIn'),
+#     ('CrocomireBackDoorOut', 'CrocomireBackDoorIn'),
+#     ('GoldenTorizoBackDoorOut', 'GoldenTorizoBackDoorIn'),
+#     ('BotwoonBackDoorOut', 'BotwoonBackDoorIn')
+# ]
+
 # vanilla escape transition in first position
 vanillaEscapeTransitions = [
     ('Tourian Escape Room 4 Top Right', 'Climb Bottom Left'),
@@ -165,10 +186,10 @@ class GraphUtils:
             'variaTweaks': ap.Start.get('variaTweaks', [])
         }
 
-    def createBossesTransitions():
-        transitions = vanillaBossesTransitions
+    def _createBossesTransitions(vanillaTransitions, back):
+        transitions = vanillaTransitions
         def isVanilla():
-            for t in vanillaBossesTransitions:
+            for t in vanillaTransitions:
                 if t not in transitions:
                     return False
             return True
@@ -176,13 +197,36 @@ class GraphUtils:
             transitions = []
             srcs = []
             dsts = []
-            for (src,dst) in vanillaBossesTransitions:
+            for (src,dst) in vanillaTransitions:
                 srcs.append(src)
                 dsts.append(dst)
             while len(srcs) > 0:
                 src = srcs.pop(random.randint(0,len(srcs)-1))
                 dst = dsts.pop(random.randint(0,len(dsts)-1))
                 transitions.append((src,dst))
+        return transitions
+
+    def _addBackDoorTransitions(transitions):
+        apList = Logic.accessPoints()
+        
+        pass
+
+    def createBossesTransitions(transitionFlags, split):
+        if not split:
+            vanillaTransitions = []
+            if transitionFlags & BossAccessPointFlags.G4:
+                vanillaTransitions += vanillaBossesTransitions
+            if transitionFlags & BossAccessPointFlags.Minibosses:
+                vanillaTransitions += vanillaMiniBossesTransitions
+            transitions = GraphUtils._createBossesTransitions(vanillaTransitions)
+        else:
+            transitions = []
+            if transitionFlags & BossAccessPointFlags.G4:
+                transitions += GraphUtils._createBossesTransitions(vanillaBossesTransitions)
+            if transitionFlags & BossAccessPointFlags.Minibosses:
+                transitions += GraphUtils._createBossesTransitions(vanillaMiniBossesTransitions)
+        if transitionFlags & BossAccessPointFlags.Minibosses:
+            GraphUtils._addBackDoorTransitions(transitions)
         return transitions
 
     def createAreaTransitions(lightAreaRando=False):

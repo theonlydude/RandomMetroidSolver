@@ -167,10 +167,10 @@ loc.Available = (
 
 loc = locationsDict["Varia Suit"]
 loc.AccessFrom = {
-    'KraidRoomIn': lambda sm: SMBool(True)
+    'KraidBackDoorIn': lambda sm: SMBool(True)
 }
 loc.Available = (
-    lambda sm: Bosses.bossDead(sm, 'Kraid')
+    lambda sm: SMBool(True)
 )
 
 
@@ -290,7 +290,7 @@ loc.Available = (
 
 loc = locationsDict["Energy Tank, Ridley"]
 loc.AccessFrom = {
-    'RidleyRoomIn': lambda sm: sm.wand(sm.haveItem('Ridley'), sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']))
+    'RidleyBackDoorIn': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
 }
 loc.Available = (
     lambda sm: sm.haveItem('Morph')
@@ -452,13 +452,10 @@ loc.Available = (
 
 loc = locationsDict["Space Jump"]
 loc.AccessFrom = {
-    'Draygon Room Bottom': lambda sm: SMBool(True)
+    'DraygonBackDoorIn': lambda sm: SMBool(True)
 }
 loc.Available = (
     lambda sm: SMBool(True)
-)
-loc.PostAvailable = (
-    lambda sm: Bosses.bossDead(sm, 'Draygon')
 )
 
 

@@ -1716,11 +1716,11 @@ endif
 ;; strings written by randomizer
 print "B6 end: ", pc
 
-warnpc $B6FA00
-org $B6FA00
+%freespaceEnd($b6faff)
+
+org $B6FB00
 %export(objs_txt_limit)
 
-%freespaceEnd($b6ffff)
 
 ;;; function to use as door asm when entering the room that reveals objectives
 %freespaceStart($8ffe80)

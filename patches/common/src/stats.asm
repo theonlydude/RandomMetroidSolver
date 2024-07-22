@@ -452,7 +452,8 @@ game_end:
     lda #$000a
     rtl
 
-%freespaceEnd($a1efff)
+print "a1 end: ", pc
+%freespaceEnd($a1eeff)
 
 %freespaceStart($85cf00)
 SetMessageBoxFlag:

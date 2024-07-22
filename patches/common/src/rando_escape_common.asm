@@ -266,6 +266,7 @@ wrecked_ship_main_setup:
 	rts
 
 ;;; stop before area rando door transition patch
+print "8f esc end: ", pc
 %freespaceEnd($8ff5ff)
 
 ;;; flyway door list pointers for escape animals (same place as animals surprise patches)
@@ -310,7 +311,8 @@ bt_escape_setup:
     ;; run vanilla setup ASM
     jmp $91B2
 
-%freespaceEnd($8ff0ff)
+print "8f bt end: ", pc
+%freespaceEnd($8ff07f)
 
 ;;; DATA (bank A1 free space)
 %freespaceStart($a1f000)

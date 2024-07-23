@@ -135,8 +135,11 @@ if __name__ == "__main__":
                 i += 1
             else:
                 raise ValueError("Invalid button name : " + str(b))
-
+    colorBlind = 'color_blind.ips' in args.patches
+    if colorBlind:
+        args.patches.append('colorblind_palettes.ips')
     try:
+
         if args.rom is not None:
             # patch local rom
             inFileName = args.rom
@@ -218,7 +221,7 @@ if __name__ == "__main__":
             }
             for param in paletteSettings:
                 paletteSettings[param] = getattr(args, param)
-            PaletteRando(romPatcher, paletteSettings, args.sprite, 'color_blind.ips' in args.patches).randomize()
+            PaletteRando(romPatcher, paletteSettings, args.sprite, colorBlind).randomize()
         if musicPatcher is not None:
             musicPatcher.replace(musicMapping,
                                  updateReferences=musicParams.get('room_states', True),

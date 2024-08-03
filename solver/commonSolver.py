@@ -152,7 +152,8 @@ class CommonSolver(object):
                                                                      sm.haveItem("MotherBrain"))
 
         self.areaGraph = AccessGraph(Logic.accessPoints(), self.curGraphTransitions)
-        Objectives.setGraph(self.areaGraph, romConf.startLocation, infinity)
+        Objectives.startAP = romConf.startLocation
+        Objectives.setGraph(self.areaGraph, infinity)
 
     def loadPreset(self, presetFileName):
         presetLoader = PresetLoader.factory(presetFileName)

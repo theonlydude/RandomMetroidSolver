@@ -11,6 +11,8 @@
 lorom
 arch 65816
 
+incsrc "macros.asm"
+
 ;;; $9D98: Draw two HUD digits ;;;
 ;;; Parameters:
 ;;;     A: Number to draw                   ; 0 -> 99
@@ -172,7 +174,7 @@ org $809D6E
 ;;; parameters set by vanilla before all hijacks:
 ;;; LDA !HUD_digits_tilemap_row3
 ;;; STA $00    [$7E:0000]
-org $80CE40
+%freespaceStart($80CE40)
 
 ;;; parameters set before hijack:
 ;;; LDX !row3_super_index_vanilla
@@ -420,7 +422,7 @@ HUD_digits_tilemap_row1:
 print "bank 80 end: ", pc
 
 ;;; next patch start address (msu1)
-warnpc $80D02F
+%freespaceEnd($80D02F)
 
 ;;; 85/ MISSILE/SUPER/POWER BOMB message tilemaps
 org $858851

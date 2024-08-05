@@ -3,8 +3,8 @@
 arch 65816
 lorom
 
-!bank_80_freespace_start = $80CE40
-!bank_80_freespace_end = $80CE7F
+!bank_80_freespace_start = $80DC20
+!bank_80_freespace_end = $80DC5F
 !bank_A1_freespace_start = $A1F980
 !bank_A1_freespace_end = $A1F9FF
 

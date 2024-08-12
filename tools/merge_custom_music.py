@@ -74,7 +74,7 @@ for fromTrack, fromTrackData in patcherFrom.allTracks.items():
     else:
         # compare/update track data (including actual spc/nspc file contents)
         trackData, modified = copyTrackData(fromTrackData)        
-        if not eqTrackData(trackData, fromTrackData) or modified:
+        if not eqTrackData(trackData, toTrackData) or modified:
             updatedTracks[fromTrack] = trackData
 
 with open("new.json", 'w') as fp:

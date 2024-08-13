@@ -435,7 +435,7 @@ p {
 .main {
     padding-left: 0.5em;
     padding-right: 0.5em;
-    margin-bottom: 5em;
+    padding-bottom: 5em;
     margin-top: 2em;
     position: relative;
 }

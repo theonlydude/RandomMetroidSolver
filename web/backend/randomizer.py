@@ -46,8 +46,8 @@ class Randomizer(object):
 
             # on the front end we're using objective.name.startsWith('clear ')
             # remove this?
-            if o_exclusions.get('tourian') == 'Disabled':
-                objective['disable_tourian'] = True
+            if o_exclusions.get('canAutoClear'):
+                objective['canAutoClear'] = True
 
             if o_exclusions.get('limit') is not None:
                 # o_exclusions also has 'type' but it's always objective['category']

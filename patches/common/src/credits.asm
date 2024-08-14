@@ -1040,8 +1040,8 @@ credits:
     !purple
     dw "          CONTRIBUTORS          " ;; 134
     !big
-    dw "    RAND 0   COUT   CHRISC      " ;; 135
-    dw "    rand }   cout   chrisc      " ;; 136
+    dw "     RAND 0   COUT   CASSC      " ;; 135
+    dw "     rand }   cout   cassc      " ;; 136
     dw "        DJLO   PRANKARD         " ;; 137
     dw "        djlo   prankard         " ;; 138
     !cyan

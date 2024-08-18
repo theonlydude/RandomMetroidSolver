@@ -29,6 +29,8 @@ def loadDataPath(area, prefix="normal"):
     print("Loaded "+mapDataPath)
     for graphArea, rooms in mapData.items():
         for room, coords in rooms.items():
+            if room == "__unexplorable__":
+                continue
             for c in coords:
                 x, y = c[0], c[1]
                 regionMap.setTile(x, y, graphArea)
@@ -61,13 +63,11 @@ for area in maps.keys():
         pass
 
 countAreaTiles(outData["vanilla_layout"])
-# remove the tile beneath golden 4 statues (it's counted in Tourian in area)
-outData["vanilla_layout"]["Crateria"] -= 1
 
 areaSum = sum(outData["area_rando"].values())
 vanillaSum = sum(outData["vanilla_layout"].values())
 
-assert areaSum == vanillaSum+1, f"Total tile count discrepency! area: {areaSum}, vanilla: {vanillaSum}"
+assert areaSum == vanillaSum, f"Total tile count discrepency! area: {areaSum}, vanilla: {vanillaSum}"
 
 print("Writing "+outPath)
 with open(outPath, "w") as fp:

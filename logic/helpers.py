@@ -82,7 +82,7 @@ class Helpers(object):
         difficulties = Settings.hardRooms[roomName]
         (dmgRed, items) = self.getDmgReduction()
         mult *= dmgRed
-        result = self.energyReserveCountOkDiff(difficulties, mult)
+        result = self.energyReserveCountOkDiff(difficulties, mult, reserveRestriction=True)
 
         if result == True:
             result.knows = ['HardRoom-'+roomName]
@@ -775,20 +775,20 @@ class Helpers(object):
         return ret
 
 class Pickup:
-    def __init__(self, itemsPickup):
-        self.itemsPickup = itemsPickup
+    def __init__(self, pickupStrategy):
+        self.pickupStrategy = pickupStrategy
         self.endGameLocations = ["Mother Brain", "Gunship"]
 
     # don't count end game location in the mix as it's now in the available locations
     def enoughMinors(self, smbm, minorLocations):
-        if self.itemsPickup in ('all', 'all_strict'):
+        if self.pickupStrategy in ('all', 'all_strict'):
             return (len(minorLocations) == 0
                     or (len(minorLocations) == 1 and minorLocations[0].Name in self.endGameLocations))
         else:
             return True
 
     def enoughMajors(self, smbm, majorLocations):
-        if self.itemsPickup in ('all', 'all_strict'):
+        if self.pickupStrategy in ('all', 'all_strict'):
             return (len(majorLocations) == 0
                     or (len(majorLocations) == 1 and majorLocations[0].Name in self.endGameLocations))
         else:

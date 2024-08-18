@@ -10,6 +10,7 @@ from utils.objectives import Objectives
 from logic.logic import Logic
 from rom.flavor import RomFlavor
 from rom.rom_options import RomOptions
+from rom.rom_patches import groups as patch_groups
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.http import HTTP
@@ -79,7 +80,7 @@ def getAddressesToRead(cache):
         options = RomOptions(None, RomFlavor.symbols)
 
         # locations
-        for loc in Logic.locations:
+        for loc in Logic.locations():
             addresses["locations"].append(loc.Address)
 
         # doors
@@ -89,19 +90,20 @@ def getAddressesToRead(cache):
         addresses["misc"] += options.getAddressesToRead()
 
         # transitions
-        for ap in Logic.accessPoints:
+        for ap in Logic.accessPoints():
             if ap.Internal == True:
                 continue
             addresses["transitions"].append(0x10000 | ap.ExitInfo['DoorPtr'])
 
         maxDoorAsmPatchLen = 22
         customDoorsAsm = Addresses.getOne('customDoorsAsm')
-        addresses["ranges"] += [customDoorsAsm, customDoorsAsm+(maxDoorAsmPatchLen * len([ap for ap in Logic.accessPoints if ap.Internal == False]))]
+        addresses["ranges"] += [customDoorsAsm, customDoorsAsm+(maxDoorAsmPatchLen * len([ap for ap in Logic.accessPoints() if ap.Internal == False]))]
 
     # patches
     for (_class, patches) in RomReader.patches.items():
         for patch, values in patches.items():
-            addresses["patches"].append(values["address"])
+            if "address" in values:
+                addresses["patches"].append(values["address"])
 
     # flavor patches
     for patch, values in RomReader.flavorPatches.items():
@@ -166,6 +168,20 @@ def getFloat(request, param, isJson=False):
         return float(request.vars[param])
     except:
         raiseHttp(400, "Wrong value for {}, must be a float".format(param), isJson)
+
+def validatePatches(group_name, values):
+    if values is None:
+        return
+    extra = []
+    if values == '':
+        values = []
+    elif type(values) == str:
+        values = values.split(',')
+    for value in values:
+        if not value in patch_groups[group_name]:
+            extra.append(value)
+    if extra:
+        raiseHttp(400, f"Unknown values for {group_name}Custom: {','.join(extra)}")
 
 def validateWebServiceParams(request, switchs, quantities, multis, others, isJson=False):
     parameters = switchs + quantities + multis + others
@@ -260,7 +276,7 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
         if request.vars.objectiveRandom == 'true':
             nbObjective = request.vars.nbObjective
             if nbObjective.isdigit():
-                if not int(nbObjective) in range(19):
+                if int(nbObjective) not in range(19):
                     raiseHttp(400, "Number of objectives must be 0-18", isJson)
             elif nbObjective != "random":
                 raiseHttp(400, "Number of objectives must be 0-18 or \"random\"", isJson)
@@ -336,6 +352,11 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
         value = request.vars.nbObjectivesRequired
         if value not in ("off", "random", *numbers):
             raiseHttp(400, f"Wrong value for nbObjectivesRequired {value}", isJson)
+
+    for key in patch_groups.keys():
+        custom_key = key + 'Custom'
+        if custom_key in others:
+            validatePatches(key, getattr(request.vars, custom_key))
 
     return errors
 
@@ -427,16 +448,17 @@ def get_client_files(include_css=True):
     with open('applications/solver/static/client/manifest.json', 'r') as manifest:
         data = json.loads(manifest.read())
     js = [v for k, v in data.items() if k.endswith('.js')]
-    css = [
+    css = []
+    if include_css:
+        # The tracker contains some css that doesn't play nice with the randomizer/customizer
+        # Until those pages are redesigned, these are tracker-only
+        css += [v for k, v in data.items() if k.endswith('.css')]
+    css += [
         "/solver/static/client/icons/super-metroid.css",
         "/solver/static/client/icons/inventory.css",
         "/solver/static/client/icons/varia.css",
         "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css",
     ]
-    if include_css:
-        # The tracker contains some css that doesn't play nice with the randomizer/customizer
-        # Until those pages are redesigned, these are tracker-only
-        css += [v for k, v in data.items() if k.endswith('.css')]
     js_tags = [f'<script src="{url}"></script>' for url in js]
     css_tags =  [f'<link href="{url}" rel="stylesheet" />' for url in css]
     return {

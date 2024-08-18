@@ -80,3 +80,4 @@ $(MESEN_DEBUG_FILE_TARGET):	$(SYM_WLA_FILES)
 	@echo "Updating debug file $@ ..."
 	@cp $(DEBUG_DIR)/$(MESEN_DEBUG_FILE_BASE) $@
 	@$(MSL_TOOL) $@ $^
+	@cp $@ $(DEBUG_DIR)/$$(basename $@ .msl).mlb

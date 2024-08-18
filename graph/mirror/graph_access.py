@@ -1,7 +1,10 @@
-from graph.vanilla.graph_access import accessPointsDict
+from graph.vanilla.graph_access import accessPointsDict as vanillaAPDict
 from logic.cache import Cache
 from rom.rom_patches import RomPatches
 from utils.parameters import Settings
+import copy
+
+accessPointsDict = copy.deepcopy(vanillaAPDict)
 
 # can now ggg
 accessPointsDict['Business Center'].connectInternal(
@@ -12,7 +15,7 @@ accessPointsDict['Business Center'].connectInternal(
     )
 )
 accessPointsDict['East Tunnel Top Right'].traverse = Cache.ldeco(lambda sm: sm.wor(
-    RomPatches.has(RomPatches.AreaRandoGatesBase),
+    RomPatches.has(RomPatches.EastTunnelGreenGateRemoved),
     sm.canGreenGateGlitch())
 )
 # can no longer bgg
@@ -47,7 +50,7 @@ accessPointsDict['Bubble Mountain Bottom'].connectInternal(
 accessPointsDict['Noob Bridge Right'].connectInternal(
     'Green Hill Zone Top Right',
     Cache.ldeco(lambda sm: sm.wor(sm.haveItem('Wave'),
-                                  RomPatches.has(RomPatches.AreaRandoGatesOther))
+                                  RomPatches.has(RomPatches.GreenHillsGateRemoved))
     )
 )
 # can no longer ggg
@@ -57,14 +60,14 @@ accessPointsDict['Crab Hole Bottom Left'].connectInternal(
     'Main Street Bottom',
     Cache.ldeco(lambda sm: sm.wand(
         sm.canExitCrabHole(),
-        RomPatches.has(RomPatches.AreaRandoGatesOther))
+        RomPatches.has(RomPatches.CrabTunnelGreenGateRemoved))
     )
 )
 accessPointsDict['West Sand Hall Left'].connectInternal(
     'Main Street Bottom',
     Cache.ldeco(lambda sm: sm.wand(
         sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
-        RomPatches.has(RomPatches.AreaRandoGatesOther))
+        RomPatches.has(RomPatches.CrabTunnelGreenGateRemoved))
     )
 )
 

@@ -315,16 +315,18 @@ load_area_palettes:
         rtl
 
 ;;; custom map icons
-!extra_gfx_size = $600
+!extra_gfx_size = $6A0
 !draw_spritemap_routine = $818A5F
 
 VARIA_init:
         ;; construct map
 	JSL $8293C3		; hijacked code
         ;; Load extra gfx for VARIA map icons
-        %gfxDMA(extra_gfx, $2D00, !extra_gfx_size) 	; DMA transfer from extra_gfx to VRAM:2D00
+        %gfxDMA(extra_gfx, $2CB0, !extra_gfx_size) 	; DMA transfer from extra_gfx to VRAM:2CB0
         ;; mirror map explored for area portals inside the same map to work
         jsl $8085c6
+        ;; Clear force blank and wait for NMI because F-blank was set before VRAM transfers
+        jsl $808382
 	rtl
 
 ;;; Y: pointer to spritemap entry
@@ -395,9 +397,12 @@ draw_portal_icons:
 	lda $0002, x : jsr load_icon
         sta $18
 	stx $04			; backup X in $04
-	;; skip entry if tile unexplored
+	;; if tile unexplored: draw unexplored portal if map station active
 	ldx $14 : ldy $18
-	jsl is_explored : beq .next
+	jsl is_explored : bne .explored
+        ldx !area_index : lda.l !map_station_ram,x : and #$00ff : beq .next
+        ldy #portal_Unexplored : bra .draw
+.explored:
         ;; check if the other end of the portal is explored
         ldy $04 : lda $0006, y : jsr load_icon
         tax
@@ -408,6 +413,7 @@ draw_portal_icons:
         lda $0004, x : jsr load_icon
         asl : tax
         ldy portals_mapicons_sprite_table, x
+.draw:
         %drawMapIcon()
 .next:
 	lda $04 : clc : adc.w #10 : tax : bra .loop	; continue loop
@@ -581,7 +587,11 @@ PrepareAreaIndex:
 + : SEP #$30 : LDA $01,s : TAX
 	LDA !ExploredAreaBits : ORA.w $B7C9,x : STA !ExploredAreaBits : REP #$30
 ++ : PLA : INC : CMP.w #!AccessableAreaNumber : BCC .arealoop	;check as many areas as set
-	PLP : RTS
+	PLP
+        ;; Set force blank and wait for NMI because VRAM transfers may not finish in time,
+        ;; due to more complex Minimap IRQs
+        jsl $80836f
+        RTS
 
 
 ;Construct next explored map during switch routine

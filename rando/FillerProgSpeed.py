@@ -44,6 +44,7 @@ class FillerProgSpeed(Filler):
     def __init__(self, graphSettings, areaGraph, restrictions, container, endDate):
         super(FillerProgSpeed, self).__init__(graphSettings.startAP, areaGraph, restrictions, container, endDate)
         distanceProp = 'GraphArea' if graphSettings.areaRando else 'Area'
+        self.graphSettings = graphSettings
         self.stdStart = GraphUtils.isStandardStart(self.startAP)
         self.progSpeedParams = ProgSpeedParameters(self.restrictions, len(container.unusedLocations))
         self.choice = ItemThenLocChoiceProgSpeed(restrictions, self.progSpeedParams, distanceProp, self.services)
@@ -193,7 +194,10 @@ class FillerProgSpeed(Filler):
         return self.restrictions.split == 'Chozo' or (len(collectedEnergy) <= 2 and self.settings.progSpeed != 'slowest')
 
     def nonProgItemCheck(self, item):
-        return (item.Category == 'Energy' and self.addEnergyAsNonProg()) or (not self.stdStart and item.Category == 'Ammo') or (self.restrictions.isEarlyMorph() and item.Type == 'Morph') or not self.isProgItem(item)
+        return (item.Category == 'Energy' and self.addEnergyAsNonProg())\
+            or (not self.stdStart and not self.graphSettings.areaRando and item.Category == 'Ammo' and not self.settings.progSpeed.startswith('slow'))\
+            or (self.restrictions.isEarlyMorph() and item.Type == 'Morph')\
+            or not self.isProgItem(item)
 
     def getNonProgItemPoolRestriction(self):
         return self.nonProgItemCheck

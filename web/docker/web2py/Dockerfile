@@ -15,7 +15,7 @@ RUN apt-get update && \
     apt-get install curl wget unzip jq -y && \
     apt-get -y install python3 python3-pip && \
     pip3 install gunicorn mysql-connector-python
-RUN apt-get install -y supervisor unzip git
+RUN apt-get install -y supervisor unzip git graphviz imagemagick
 
 WORKDIR /root
 RUN wget https://mdipierro.pythonanywhere.com/examples/static/web2py_src.zip && \

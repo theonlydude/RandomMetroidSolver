@@ -3,6 +3,8 @@
     "flyway_door_lists": 8629664,
     "opt_remove_enemies": 10612736,
     "setup_next_escape": 9433136,
+    "timer_half_value": 10612984,
+    "timer_half_values_by_area_id": 10612964,
     "timer_value": 8429089,
     "timer_values_by_area_id": 10612944
 }

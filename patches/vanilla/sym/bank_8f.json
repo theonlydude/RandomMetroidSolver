@@ -140,5 +140,7 @@
     "Door_A9_Room_DDF3_PLM_C890": 9422955,
     "Door_AA_Room_DE7A_PLM_C854": 9422991,
     "Door_AB_Room_DEA7_PLM_C848": 9423005,
-    "Door_AC_Room_DEDE_PLM_C848": 9423019
+    "Door_AC_Room_DEDE_PLM_C848": 9423019,
+    "Room_C98E_Missile": 9421551,
+    "Room_C98E_Reserve": 9421545
 }

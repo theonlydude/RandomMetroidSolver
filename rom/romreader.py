@@ -12,6 +12,7 @@ from logic.logic import Logic
 from collections import defaultdict
 from utils.objectives import Objectives
 from utils.doorsmanager import DoorsManager
+from rom.rom_patches import definitions as patches_definitions, getPatchSet
 
 class RomReader:
     nothings = ['0xbae9', '0xbaed']
@@ -88,47 +89,10 @@ class RomReader:
         '0xbaed': {'name': 'Nothing'}  # new hidden Nothing
     }
 
-    # we could use symbols/names addresses here, but the bytes are chosen in vanilla ROM space (hijacks)
-    patches = {
-        'common': {
-            'startCeres': {'address': snes_to_pc(0x80ff1f), 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
-            'startLS': {'address': snes_to_pc(0x80ff17), 'value': 0xB6, 'desc': "Blue Brinstar and Red Tower blue doors"},
-            'casual': {'address': snes_to_pc(0xc5e87a), 'value': 0x9F, 'desc': "Switch Blue Brinstar Etank and missile"},
-            'gravityNoHeatProtection': {'address': snes_to_pc(0x90e9dd), 'value': 0x01, 'desc': "Gravity suit heat protection removed"},
-            'progressiveSuits': {'address': snes_to_pc(0x90e9df), 'value': 0xF0, 'desc': "Progressive suits"},
-            # nerfed charge taken in vanilla ROM space value works for both DASH and VARIA variants
-            'nerfedCharge': {'address': snes_to_pc(0x90b821), 'value': 0x80, 'desc': "Nerfed charge beam from the start of the game"},
-            'variaTweaks': {'address': snes_to_pc(0x8fcc4d), 'value': 0x37, 'desc': "VARIA tweaks"},
-            'areaEscape': {'address': snes_to_pc(0x848c91), 'value': 0x4C, 'desc': "Area escape randomization"},
-            'newGame': {'address': snes_to_pc(0x82801d), 'value': 0x22, 'desc': "Custom new game"},
-            'nerfedRainbowBeam': {'address': snes_to_pc(0xa9ba2e), 'value': 0x13, 'desc': 'nerfed rainbow beam'},
-            'minimizer_bosses': {'address': snes_to_pc(0xa7afad), 'value': 0x5C, 'desc': "Minimizer"},
-            'minimizer_tourian': {'address': snes_to_pc(0xa9b90e), 'value': 0xCF, 'desc': "Fast Tourian"},
-            'beam_doors': {'address': snes_to_pc(0x84a6e5), 'value': 0x0D, 'desc': "Beam doors"},
-            'red_doors': {'address': snes_to_pc(0x84c32c), 'value':0x01, 'desc': "Red doors open with one Missile and do not react to Super"},
-            'objectives': {'address': snes_to_pc(0x82a822), 'value': 0x08, 'desc': "Objectives displayed in pause"},
-            'round_robin_cf': {'address': snes_to_pc(0x90d5d6), 'value': 0x0, 'desc': "Round robin Crystal Flash"}
-        },
-        'vanilla': {
-            'layout': {'address': snes_to_pc(0xc3bd80), 'value': 0xD5, 'desc': "Anti soft lock layout modifications"},
-            'area': {'address': snes_to_pc(0x8f88a0), 'value': 0x2B, 'desc': "Area layout modifications"},
-            'areaLayout': {'address': snes_to_pc(0xcaafa7), 'value': 0xF8, 'desc': "Area layout additional modifications"},
-            'traverseWreckedShip': {'address': snes_to_pc(0xc39dbf), 'value': 0xFB, 'desc': "Area layout additional access to east Wrecked Ship"},
-            'aqueductBombBlocks': {'address': snes_to_pc(0xcc82d6), 'value': 0x44, 'desc': "Aqueduct entrance bomb blocks instead of power bombs"},
-            'open_zebetites': {'address': snes_to_pc(0xcddf22), 'value': 0xc3, 'desc': "Zebetites without morph"}
-        },
-        'mirror': {
-            'layout': {'address': snes_to_pc(0xc3bd80), 'value': 0x32, 'desc': "Anti soft lock layout modifications"},
-            'area': {'address': snes_to_pc(0x8f88a0), 'value': 0x04, 'desc': "Area layout modifications"},
-            'areaLayout': {'address': 0x78666, 'value': 0x1D, 'desc': "Area layout additional modifications"},
-            'traverseWreckedShip': {'address': snes_to_pc(0xc39df6), 'value': 0x84, 'desc': "Area layout additional access to east Wrecked Ship"},
-            'aqueductBombBlocks': {'address': snes_to_pc(0xcc82d6), 'value': 0x6c, 'desc': "Aqueduct entrance bomb blocks instead of power bombs"},
-            'open_zebetites': {'address': snes_to_pc(0xcddf22), 'value': 0x48, 'desc': "Zebetites without morph"}
-        }
-    }
+    patches = patches_definitions
 
     flavorPatches = {
-        'mirror': {'address': snes_to_pc(0x84d650), 'value': 0x29, 'desc': "MirrorTroid hack"}
+        'mirror': patches_definitions["mirror"]["logic"]
     }
 
     # FIXME use symbols/names addresses here?
@@ -376,13 +340,21 @@ class RomReader:
     def loadTransitions(self, tourian):
         # return the transitions
         rooms = GraphUtils.getRooms()
+        def getTransition(doorPtr):
+            nonlocal rooms
+            key = self._getTransition(doorPtr)
+            if key not in rooms:
+                key = self._getTransition(doorPtr, oldFormat=True)
+            if key not in rooms:
+                return None
+            return key
         bossTransitions = {}
         areaTransitions = {}
-        for accessPoint in Logic.accessPoints:
+        for accessPoint in Logic.accessPoints():
             if accessPoint.isInternal() == True:
                 continue
-            key = self.getTransition(accessPoint.ExitInfo['DoorPtr'])
-            if key not in rooms:
+            key = getTransition(accessPoint.ExitInfo['DoorPtr'])
+            if key is None:
                 # can happen with race mode seeds
                 continue
             destAP = rooms[key]
@@ -409,9 +381,9 @@ class RomReader:
             escapeSrcAP = getAccessPoint('Climb Bottom Left')
         else:
             escapeSrcAP = getAccessPoint('Tourian Escape Room 4 Top Right')
-        key = self.getTransition(escapeSrcAP.ExitInfo['DoorPtr'])
+        key = getTransition(escapeSrcAP.ExitInfo['DoorPtr'])
         # may not be set in plandomizer
-        if key in rooms:
+        if key is not None:
             escapeDstAP = rooms[key]
             escapeTransition = [(escapeSrcAP.Name, escapeDstAP.Name)]
         else:
@@ -428,7 +400,7 @@ class RomReader:
         else:
             return self.race.readDoorTransition(address)
 
-    def getTransition(self, doorPtr):
+    def _getTransition(self, doorPtr, oldFormat=False):
         # room ptr is in two bytes
         roomPtr = self.readRoomPtr(0x10000 | doorPtr)
 
@@ -444,18 +416,22 @@ class RomReader:
             # as incompatible transition change the value of direction
             asmAddress = 0x70000 | self.romFile.readWord()
 
-            offset = 0
-            b = self.romFile.readByte(asmAddress+3)
-            if b == 0x20:
-                # ignore original door asm ptr call
-                offset += 3
-            b = self.romFile.readByte(asmAddress+6)
-            if b == 0x20:
-                # ignore exit asm ptr call
-                offset += 3
+            if not oldFormat:
+                x = self.romFile.readWord(asmAddress+1)
+                y = self.romFile.readWord(asmAddress+7)
+            else:
+                offset = 0
+                b = self.romFile.readByte(asmAddress+1)
+                if b == 0x20:
+                    # ignore original door asm ptr call
+                    offset += 3
+                b = self.romFile.readByte(asmAddress+6)
+                if b == 0x20:
+                    # ignore exit asm ptr call
+                    offset += 3
 
-            x = self.romFile.readWord(asmAddress+4+offset)
-            y = self.romFile.readWord(asmAddress+10+offset)
+                x = self.romFile.readWord(asmAddress+4+offset)
+                y = self.romFile.readWord(asmAddress+10+offset)
 
             return (roomPtr, (sx, sy), (x, y))
         else:
@@ -464,21 +440,20 @@ class RomReader:
     def _patchPresent(self, patchName, patchDict):
         if patchName not in patchDict:
             return False
-        value = self.romFile.readByte(patchDict[patchName]['address'])
-        return value == patchDict[patchName]['value']
+        addr, val = patchDict[patchName].get('address'), patchDict[patchName].get('value')
+        if addr is None or val is None:
+            return False
+        value = self.romFile.readByte(addr)
+        return value == val
 
     def patchPresent(self, patchName):
         return self._patchPresent(patchName, self.patches['common']) or self._patchPresent(patchName, self.patches[RomFlavor.flavor])
 
-    def getPatches(self):
-        # for display in the solver
+    def getPatchIds(self):
         result = []
         def getPatchesFromDict(patchDict):
             nonlocal result
-            for patch, patchEntry in patchDict.items():
-                if self._patchPresent(patch, patchDict) == True:
-                    result.append(patchEntry['desc'])
-        getPatchesFromDict(self.flavorPatches)
+            result += [patch for patch in patchDict if self._patchPresent(patch, patchDict) == True]
         getPatchesFromDict(self.patches['common'])
         getPatchesFromDict(self.patches[RomFlavor.flavor])
         return result
@@ -565,7 +540,7 @@ class RomReader:
         startLocation = 'Landing Site'
         startArea = 'Crateria Landing Site'
         startPatches = []
-        for ap in Logic.accessPoints:
+        for ap in Logic.accessPoints():
             if ap.Start is not None and 'spawn' in ap.Start and ap.Start['spawn'] == value:
                 startLocation = ap.Name
                 startArea = ap.Start['solveArea']

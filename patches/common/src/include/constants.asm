@@ -16,6 +16,9 @@ include
 !obj_check_index = $7fff46
 ;;; RAM for remaining items in current area
 !n_items = $7fff3e
+;;; RAM flag set to non-0 if we loaded a new game
+!new_game_flag = $7fff38
+
 ;;; vanilla bit array to keep track of collected items
 !item_bit_array = $7ed870
 ;;; bit index to byte index/bitmask routine
@@ -30,6 +33,9 @@ include
 ;; game state
 !game_state = $0998
 
+;; current save slot
+!current_save_slot = $0952
+
 ;; RTA timer RAM updated during NMI
 !timer1 = $05b8
 !timer2 = $05ba
@@ -37,20 +43,31 @@ include
 !skip_lag_count_flag = $033c
 !timer_lag = $033a
 
+;; special value here to check on boot if console was just reset
+!softreset = $7fffe6
+!reset_flag = $babe             ; if !softreset is set to this, reuse RAM stats
+!dec_reset_flag = $decc         ; if !softreset is set to this, decrement reset count, then reuse RAM stats
+
+;; RAM for VARIA room data
+;; low byte: VARIA area ID, high byte: minimap room type
+!VARIA_room_data = $07d3
+;; use these when in 8-bit mode
+!VARIA_area_id = !VARIA_room_data
+!VARIA_minimap_room_type = !VARIA_room_data+1
+
 ;; stats RAM
 !_stats_ram = fc00
 !stats_ram = $7f!_stats_ram
 !stats_timer = !stats_ram
 
-
 ;;; collected items
-!CollectedItems  = $7ED86E
+!CollectedItems  = $7ED8F6
 !collected_beams_mask = $09A8
 !collected_items_mask = $09A4
 
 ;;; collected map tiles ($e bytes)
 !nb_areas = 12
-!map_tilecounts_table = $7ED850 ; saved to SRAM automatically
+!map_tilecounts_table = $7ED8E0 ; saved to SRAM automatically
 !map_total_tilecount = !map_tilecounts_table+!nb_areas
 
 ;; bitfields
@@ -79,6 +96,7 @@ include
 
 ;; vanilla area check
 !area_index = $079f
+!map_station_ram = $7ED908      ; area byte indexed array
 !brinstar = $0001
 !norfair = $0002
 

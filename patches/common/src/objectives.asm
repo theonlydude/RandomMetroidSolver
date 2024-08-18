@@ -74,6 +74,14 @@ org $82A505
 org $82A61D
         jsr (new_pause_palettes_func_list,x)
 
+org $a0a3b9
+enemy_death_hook:
+        jml enemy_death
+org $A0A3C1
+.grapple:
+org $A0A3C7
+.nograpple:
+
 ;;; For minimizer or scavenger with ridley as last loc, disable
 ;;; elevator music change when boss drops appear if escape is
 ;;; triggered.
@@ -217,8 +225,8 @@ room_earthquake:
         ;; don't trigger if no screen shake patch if detected
         lda.l disable_screen_shake_marker : and #$00ff
         cmp #!disable_earthquake_id : beq .end
-	LDA #$0018             ;\
-	STA $183E              ;} Earthquake type = BG1, BG2 and enemies; 3 pixel displacement, horizontal
+	LDA #$0015             ;\
+	STA $183E              ;} Earthquake type = BG1, BG2 and enemies; 2 pixel displacement, horizontal
 	LDA #$FFFF
 	STA $1840
 .end:
@@ -388,10 +396,7 @@ endmacro
 	lda.l objectives_options_escape_flag : and #$00ff : beq .ok
 	lda.l objectives_options_settings_flags : and.w #!option_nothing_trigger_escape_crateria_mask : beq .ok
 	;; determine current graph area in special byte in room state header
-	phx
-	ldx $07bb
-	lda $8f0010,x : and #$00ff
-	plx
+        lda !VARIA_room_data : and #$00ff
 	;; crateria ID is 1
 	cmp #$0001 : beq .ok
 	clc
@@ -509,6 +514,14 @@ endmacro
 %exploredAreaChecker(lower_norfair, 8)
 %exploredAreaChecker(west_maridia, 9)
 %exploredAreaChecker(east_maridia, 10)
+
+;; kill all <enemy> objectives
+%eventChecker(kill_all_space_pirates, !space_pirates_all_event)
+%eventChecker(kill_all_ki_hunters, !ki_hunters_all_event)
+%eventChecker(kill_all_beetoms, !beetoms_all_event)
+%eventChecker(kill_all_cacatacs, !cacatacs_all_event)
+%eventChecker(kill_all_kagos, !kagos_all_event)
+%eventChecker(kill_all_yapping_maws, !yapping_maws_all_event)
 
 ;;; "in progress" objective checkers
 
@@ -759,7 +772,89 @@ endmacro
 %exploredAreaPercent(west_maridia, 9)
 %exploredAreaPercent(east_maridia, 10)
 
-warnpc $85ffff
+
+!enemy_counters = $7ed8d0
+
+macro inProgressEnemy(enemy)
+%export(kill_all_<enemy>_progress)
+        %a8()
+        lda.l !enemy_counters+!<enemy>_type_index
+        bne .progress
+        clc
+        bra .end
+.progress:
+        sta !tmp_in_progress_done
+        lda.l <enemy>_type : sta !tmp_in_progress_total
+        sec
+.end:
+        %a16()
+        rts
+endmacro
+
+%inProgressEnemy(space_pirates)
+%inProgressEnemy(ki_hunters)
+%inProgressEnemy(beetoms)
+%inProgressEnemy(cacatacs)
+%inProgressEnemy(kagos)
+%inProgressEnemy(yapping_maws)
+
+
+;;; "kill all" enemies objectives events handling :
+!enemies_extra_props = $0F88
+!enemy_index = $0e54
+!enemy_count_flag #= %0100000000000000
+!enemy_count_index_mask #= %0011111111111000
+
+enemy_death:
+        phx
+        ldx !enemy_index
+        lda !enemies_extra_props, x : bit.w #!enemy_count_flag : beq .end
+        ;; change data bank to current
+        phy
+        phb : phk : plb
+        ;; get enemy entry in table :
+        ;; to get index number we should >> 3, but actual offset is
+        ;; index << 3, so we can use this directly
+        and.w #!enemy_count_index_mask : tax
+        lda.w enemies_table, x : jsl !check_event
+        bcs .nmy_end            ; do nothing if enemy already killed
+        lda.w enemies_table, x : jsl !mark_event
+        ;; enemies in room
+        ldy enemies_table+4, x : sty $12
+        lda $0000, y : sta $14
+        ldy.w #2
+.loop:
+        lda ($12), y
+        jsl !check_event : bcc .cont
+        iny : iny
+        cpy $14
+        bcc .loop
+.all:
+        lda ($12), y : jsl !mark_event
+.cont:
+        ;; enemy type
+        ldy enemies_table+2, x
+        ldx $0001, y
+        %a8()
+        lda.l !enemy_counters, x : inc : sta.l !enemy_counters, x
+        cmp $0000, y
+        %a16()
+        bcc .nmy_end
+        lda $0003, y : jsl !mark_event
+.nmy_end:
+        plb
+        ply
+.end:
+        plx
+        ;; vanilla code
+        LDA $0F8A,x : cmp.w #1 : beq .grapple
+        jml enemy_death_hook_nograpple
+.grapple:
+        jml enemy_death_hook_grapple
+
+incsrc "objectives/enemies.asm"
+
+warnpc $85f7ff
 obj_85_end:
 print "obj 85 end: ", pc
 
@@ -969,8 +1064,7 @@ table "tables/pause.tbl",rtl
 ;; relative to tilemap
 !obj_1st_line #= 5
 !obj_last_line #= 18
-%tileOffset(2, !obj_last_line)
-!draw_obj_tile_limit #= !_tile_offset
+!draw_obj_tile_limit #= tileOffset(2, !obj_last_line)
 
 ;; box tiles
 !box_top_left = $3941
@@ -983,20 +1077,14 @@ table "tables/pause.tbl",rtl
 !box_bottom_right = $F941
 
 ;; obj completion tiles
-%BGtile($176, 1, 1, 0, 0)
-!completed_tick #= !_tile
-%BGtile($177, 1, 1, 0, 0)
-!in_progress_dots #= !_tile
+!completed_tick #= BGtile($176, 1, 1, 0, 0)
+!in_progress_dots #= BGtile($177, 1, 1, 0, 0)
 
 ;; scroll arrows tiles
-%BGtile($1B8, 6, 1, 0, 0)
-!scroll_up_left #= !_tile
-%BGtile($1B8, 6, 1, 1, 0)
-!scroll_up_right #= !_tile
-%BGtile($1B8, 6, 1, 0, 1)
-!scroll_down_left #= !_tile
-%BGtile($1B8, 6, 1, 1, 1)
-!scroll_down_right #= !_tile
+!scroll_up_left #= BGtile($1B8, 6, 1, 0, 0)
+!scroll_up_right #= BGtile($1B8, 6, 1, 1, 0)
+!scroll_down_left #= BGtile($1B8, 6, 1, 0, 1)
+!scroll_down_right #= BGtile($1B8, 6, 1, 1, 1)
 
 !click_sfx = $37
 !scroll_blocked_sfx = $36
@@ -1011,9 +1099,8 @@ table "tables/pause.tbl",rtl
 ;;; digit to draw in A
 ;;; x, y are relative to viewable area
 macro drawDigit(x, y)
-        %tileOffset(<x>, <y>)
         clc : adc.w #'0'
-        sta.l !BG1_tilemap+!_tile_offset
+        sta.l !BG1_tilemap+tileOffset(<x>, <y>)
 endmacro
 
 ;;; digit to draw in A
@@ -1025,8 +1112,7 @@ endmacro
 
 ;;; x, y are relative to viewable area
 macro drawTile(tile, x, y)
-        %tileOffset(<x>, <y>)
-        lda.w #<tile> : sta.l !BG1_tilemap+!_tile_offset
+        lda.w #<tile> : sta.l !BG1_tilemap+tileOffset(<x>, <y>)
 endmacro
 
 ;;; tile offset in X (updated)
@@ -1210,7 +1296,7 @@ obj_scroll:
 .end:
         rtl
 
-warnpc $85ffff
+warnpc $85f7ff
 print "pause 85 end: ", pc
 
 ;;; main pause menu interaction in 82 after InfoStr in seed_display.asm
@@ -1300,7 +1386,7 @@ display_unpause:
 .map:
         JSL $82BB30  ; Display map elevator destinations
         JSL $82B672  ; Draw map icons
-        JMP $B9C8    ; Map screen - draw Samus position indicator
+        JMP map_DrawIndicatorIfInCurrentArea    ; Map screen - draw Samus position indicator
 .equip:
         JSR $B267    ; Draw item selector
         JSR $B2A2    ; Display reserve tank amount

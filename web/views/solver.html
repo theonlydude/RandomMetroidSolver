@@ -58,8 +58,42 @@ if (hs.registerOverlay) {
 .tdGrey {
     border: 1px solid #ddd;
 }
-.HL {
+/* for HL to have precedence over minimap colors */
+tr.HL {
     background-color: #F8B000
+}
+.Crateria {
+    background-color: {{=minimapColors["Crateria"]}}
+}
+.GreenPinkBrinstar {
+    background-color: {{=minimapColors["GreenPinkBrinstar"]}}
+}
+.RedBrinstar {
+    background-color: {{=minimapColors["RedBrinstar"]}}
+}
+.WreckedShip {
+    background-color: {{=minimapColors["WreckedShip"]}}
+}
+.Kraid {
+    background-color: {{=minimapColors["Kraid"]}}
+}
+.Norfair {
+    background-color: {{=minimapColors["Norfair"]}}
+}
+.Crocomire {
+    background-color: {{=minimapColors["Crocomire"]}}
+}
+.LowerNorfair {
+    background-color: {{=minimapColors["LowerNorfair"]}}
+}
+.WestMaridia {
+    background-color: {{=minimapColors["WestMaridia"]}}
+}
+.EastMaridia {
+    background-color: {{=minimapColors["EastMaridia"]}}
+}
+.Tourian {
+    background-color: {{=minimapColors["Tourian"]}}
 }
 .marginKnows {
     margin-right: 0.5em;
@@ -993,9 +1027,19 @@ if result is not None and result["difficulty"] != -1:
       <div class="column">
         <ul>
 {{
-    for i, patch in enumerate(sorted(result["patches"])):
-      if i % 2 == 0:
-        response.write("<li>{}</li>".format(patch), escape=False)
+    for group, patches in result["patches"].items():
+      if group == 'Other':
+        continue
+      else:
+        if type(patches) is str:
+          response.write("<li>{}: {}</li>".format(group, patches), escape=False)
+        else:
+          response.write("<li>{}:<ul>".format(group), escape=False)
+          for patch in patches:
+            response.write("<li>{}</li>".format(patch), escape=False)
+            pass
+          response.write("</ul></li>", escape=False)
+          pass
         pass
       pass
 }}
@@ -1004,9 +1048,13 @@ if result is not None and result["difficulty"] != -1:
       <div class="column">
         <ul>
 {{
-    for i, patch in enumerate(sorted(result["patches"])):
-      if i % 2 == 1:
-        response.write("<li>{}</li>".format(patch), escape=False)
+    for group, patches in result["patches"].items():
+      if group != 'Other':
+        continue
+      else:
+        for patch in patches:
+          response.write("<li>{}</li>".format(patch), escape=False)
+          pass
         pass
       pass
 }}

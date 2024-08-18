@@ -31,10 +31,12 @@ if __name__ == "__main__":
                                  'refill_before_save.ips', 'remove_elevators_speed.ips',
                                  'remove_fast_doors.ips', 'remove_Infinite_Space_Jump.ips',
                                  'remove_rando_speed.ips', 'remove_spinjumprestart.ips',
-                                 'remove_itemsounds.ips', 'vanilla_music.ips', 'custom_ship.ips',
-                                 'Ship_Takeoff_Disable_Hide_Samus', 'widescreen.ips',
+                                 'remove_itemsounds.ips', 'vanilla_music.ips',
+                                 'custom_ship.ips', 'Ship_Takeoff_Disable_Hide_Samus',
+                                 'disable_minimap_colors.ips', 'widescreen.ips',
                                  'hell.ips', 'lava_acid_physics.ips', 'hard_mode.ips',
-                                 'color_blind.ips', 'disable_screen_shake.ips', 'noflashing.ips'])
+                                 'color_blind.ips', 'disable_screen_shake.ips', 'noflashing.ips',
+                                 'better_reserves.ips'])
     parser.add_argument('--controls',
                         help="specify controls, comma-separated, in that order: Shoot,Jump,Dash,ItemSelect,ItemCancel,AngleUp,AngleDown. Possible values: A,B,X,Y,L,R,Select,None",
                         dest='controls')
@@ -42,6 +44,7 @@ if __name__ == "__main__":
                         help="Enables moonwalk by default",
                         dest='moonWalk', action='store_true', default=False)
     parser.add_argument('--palette', help="Randomize the palettes", dest='palette', action='store_true')
+    parser.add_argument('--grayscale', help="Turn the palettes to grayscale", dest='grayscale', action='store_true')
     parser.add_argument('--individual_suit_shift', help="palette param", action='store_true',
                         dest='individual_suit_shift', default=False)
     parser.add_argument('--individual_tileset_shift', help="palette param", action='store_true',
@@ -111,8 +114,8 @@ if __name__ == "__main__":
         # extract logic from ips
         logic = RomReader.getLogicFromIPS(args.seedIps)
 
-    if args.base:
-        args.patches += ["utils.ips", "base.ips", "stats.ips", "credits.ips", "endingtotals.ips", "area_ids.ips", "area_ids_alt.ips"]
+    if args.base:        
+        args.patches += ["utils.ips", "base.ips", "start.ips", "stats.ips", "credits.ips", "endingtotals.ips", "area_ids.ips", "area_ids_alt.ips"]
 
     Logic.factory(logic)
     RomFlavor.factory()
@@ -132,8 +135,11 @@ if __name__ == "__main__":
                 i += 1
             else:
                 raise ValueError("Invalid button name : " + str(b))
-
+    colorBlind = 'color_blind.ips' in args.patches
+    if colorBlind:
+        args.patches.append('colorblind_palettes.ips')
     try:
+
         if args.rom is not None:
             # patch local rom
             inFileName = args.rom
@@ -210,11 +216,12 @@ if __name__ == "__main__":
                 "min_degree": None,
                 "max_degree": None,
                 "invert": None,
-                "no_blue_door_palette": None
+                "no_blue_door_palette": None,
+                "grayscale": None
             }
             for param in paletteSettings:
                 paletteSettings[param] = getattr(args, param)
-            PaletteRando(romPatcher, paletteSettings, args.sprite, 'color_blind.ips' in args.patches).randomize()
+            PaletteRando(romPatcher, paletteSettings, args.sprite, colorBlind).randomize()
         if musicPatcher is not None:
             musicPatcher.replace(musicMapping,
                                  updateReferences=musicParams.get('room_states', True),

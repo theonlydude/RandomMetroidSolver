@@ -4,7 +4,12 @@
 arch 65816
 lorom
 
+incsrc "sym/rando_escape_common.asm"
+
 ;;; disable earthquake in various escape setup/main asm (also covers random escape)
+org rando_escape_common_setup_room_shaking
+        rts
+
 org $8f919c
 marker:
         rts

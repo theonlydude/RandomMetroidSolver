@@ -31,6 +31,8 @@ with open(asmPath, "w") as asm:
 ''')
         pal = palettes[graphArea]
         for room, coords in rooms.items():
+            if room == "__unexplorable__":
+                continue
             asm.write(f'''
 ;;; tiles for room "{room}"
 ''')

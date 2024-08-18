@@ -285,3 +285,7 @@ org $8fc89d
 org $8fc8ab
 %export(Door_AC_Room_DEDE_PLM_C848)
 
+org $8fc2e9
+%export(Room_C98E_Reserve)
+org $8fc2ef
+%export(Room_C98E_Missile)

@@ -96,6 +96,9 @@ class Door(object):
         self.forbiddenColors = forbiddenColors
         self.indicator = indicator
 
+    def vanilla(self):
+        self.setColor(self.vanillaColor)
+
     def setAddress(self, symbols):
         # using door id get symbol label containing PLM id and its associated address
         # labels are: Door_95_Room_D48E_PLM_C884, need namespace as prefix: bank_8f
@@ -243,13 +246,15 @@ class Door(object):
         else:
             self.hide()
 
-    # to send/receive state to tracker/plando
+    # to send/receive state to tracker/plando.
+    # having Facing object in the state makes web2py create a new session with it restarts,
+    # so serialize to integer.
     def serialize(self):
-        return (self.color, self.facing, self.hidden)
+        return (self.color, int(self.facing), self.hidden)
 
     def unserialize(self, data):
         self.setColor(data[0])
-        self.facing = data[1]
+        self.facing = Facing(data[1])
         self.hidden = data[2]
 
 class DoorsManager():
@@ -340,8 +345,10 @@ class DoorsManager():
     @staticmethod
     def setDoorsColor(seedless=False):
         if seedless:
+            # reset to vanilla colors
             for door in DoorsManager.doors.values():
-                door.hide()
+                door.vanilla()
+
         # depending on loaded patches, force some doors to blue, excluding them from randomization
         if RomPatches.has(RomPatches.BlueBrinstarBlueDoor):
             DoorsManager.doors['ConstructionZoneRight'].forceBlue()
@@ -361,6 +368,8 @@ class DoorsManager():
             DoorsManager.doors['FishTankRight'].forceBlue()
         if RomPatches.has(RomPatches.HellwayBlueDoor):
             DoorsManager.doors['RedTowerElevatorLeft'].forceBlue()
+        if RomPatches.has(RomPatches.AlphaPowerBombBlueDoor):
+            DoorsManager.doors['RedTowerElevatorBottomLeft'].forceBlue()
         if RomPatches.has(RomPatches.RedTowerBlueDoors):
             DoorsManager.doors['RedBrinstarElevatorTop'].forceBlue()
         if RomPatches.has(RomPatches.AreaRandoBlueDoors):
@@ -380,6 +389,8 @@ class DoorsManager():
             DoorsManager.doors['CrocomireSpeedwayBottom'].forceBlue()
         if RomPatches.has(RomPatches.CrabShaftBlueDoor):
             DoorsManager.doors['CrabShaftRight'].forceBlue()
+        if RomPatches.has(RomPatches.WsEtankBlueDoor):
+            DoorsManager.doors['ElectricDeathRoomTopLeft'].forceBlue()
 
     @staticmethod
     def randomize(allowGreyDoors, forbiddenColors=None):
@@ -484,9 +495,13 @@ class DoorsManager():
 
     # when using the tracker, first set all colored doors to grey until the user clicks on it
     @staticmethod
-    def initTracker():
-        for door in DoorsManager.doors.values():
-            door.hide()
+    def initTracker(hide):
+        if hide:
+            for door in DoorsManager.doors.values():
+                door.hide()
+        else:
+            for door in DoorsManager.doors.values():
+                door.reveal()
 
     # when the user clicks on a door in the tracker
     @staticmethod
@@ -508,41 +523,41 @@ class DoorsManager():
         return (hiddenDoors, revealedDoor)
 
 doors_mapicons = {
-    ('red', Facing.Left): DoorMapIcon(0xD0, x=-1, y=-1),
-    ('green', Facing.Left): DoorMapIcon(0xD1, x=-1, y=-1),
-    ('yellow', Facing.Left): DoorMapIcon(0xD2, x=-1, y=-1),
-    ('grey', Facing.Left): DoorMapIcon(0xD3, x=-1, y=-1),
-    ('wave', Facing.Left): DoorMapIcon(0xD4, x=-1, y=-1),
-    ('plasma', Facing.Left): DoorMapIcon(0xD5, x=-1, y=-1),
-    ('spazer', Facing.Left): DoorMapIcon(0xD6, x=-1, y=-1),
-    ('ice', Facing.Left): DoorMapIcon(0xD7, x=-1, y=-1),
+    ('red', Facing.Left): DoorMapIcon(0xCB, x=-1, y=-1),
+    ('green', Facing.Left): DoorMapIcon(0xCC, x=-1, y=-1),
+    ('yellow', Facing.Left): DoorMapIcon(0xCD, x=-1, y=-1),
+    ('grey', Facing.Left): DoorMapIcon(0xCE, x=-1, y=-1),
+    ('wave', Facing.Left): DoorMapIcon(0xCF, x=-1, y=-1),
+    ('plasma', Facing.Left): DoorMapIcon(0xD0, x=-1, y=-1),
+    ('spazer', Facing.Left): DoorMapIcon(0xD1, x=-1, y=-1),
+    ('ice', Facing.Left): DoorMapIcon(0xD2, x=-1, y=-1),
 
-    ('red', Facing.Bottom): DoorMapIcon(0xD8, y=1),
-    ('green', Facing.Bottom): DoorMapIcon(0xD9, y=1),
-    ('yellow', Facing.Bottom): DoorMapIcon(0xDA, y=1),
-    ('grey', Facing.Bottom): DoorMapIcon(0xDB, y=1),
-    ('wave', Facing.Bottom): DoorMapIcon(0xDC, y=1),
-    ('plasma', Facing.Bottom): DoorMapIcon(0xDD, y=1),
-    ('spazer', Facing.Bottom): DoorMapIcon(0xDE, y=1),
-    ('ice', Facing.Bottom): DoorMapIcon(0xDF, y=1),
+    ('red', Facing.Bottom): DoorMapIcon(0xD3, y=1),
+    ('green', Facing.Bottom): DoorMapIcon(0xD4, y=1),
+    ('yellow', Facing.Bottom): DoorMapIcon(0xD5, y=1),
+    ('grey', Facing.Bottom): DoorMapIcon(0xD6, y=1),
+    ('wave', Facing.Bottom): DoorMapIcon(0xD7, y=1),
+    ('plasma', Facing.Bottom): DoorMapIcon(0xD8, y=1),
+    ('spazer', Facing.Bottom): DoorMapIcon(0xD9, y=1),
+    ('ice', Facing.Bottom): DoorMapIcon(0xDA, y=1),
 
-    ('red', Facing.Right): DoorMapIcon(0xD0, hFlip=True, x=1, y=-1),
-    ('green', Facing.Right): DoorMapIcon(0xD1, hFlip=True, x=1, y=-1),
-    ('yellow', Facing.Right): DoorMapIcon(0xD2, hFlip=True, x=1, y=-1),
-    ('grey', Facing.Right): DoorMapIcon(0xD3, hFlip=True, x=1, y=-1),
-    ('wave', Facing.Right): DoorMapIcon(0xD4, hFlip=True, x=1, y=-1),
-    ('plasma', Facing.Right): DoorMapIcon(0xD5, hFlip=True, x=1, y=-1),
-    ('spazer', Facing.Right): DoorMapIcon(0xD6, hFlip=True, x=1, y=-1),
-    ('ice', Facing.Right): DoorMapIcon(0xD7, hFlip=True, x=1, y=-1),
+    ('red', Facing.Right): DoorMapIcon(0xCB, hFlip=True, x=1, y=-1),
+    ('green', Facing.Right): DoorMapIcon(0xCC, hFlip=True, x=1, y=-1),
+    ('yellow', Facing.Right): DoorMapIcon(0xCD, hFlip=True, x=1, y=-1),
+    ('grey', Facing.Right): DoorMapIcon(0xCE, hFlip=True, x=1, y=-1),
+    ('wave', Facing.Right): DoorMapIcon(0xCF, hFlip=True, x=1, y=-1),
+    ('plasma', Facing.Right): DoorMapIcon(0xD0, hFlip=True, x=1, y=-1),
+    ('spazer', Facing.Right): DoorMapIcon(0xD1, hFlip=True, x=1, y=-1),
+    ('ice', Facing.Right): DoorMapIcon(0xD2, hFlip=True, x=1, y=-1),
 
-    ('red', Facing.Top): DoorMapIcon(0xD8, vFlip=True, y=-1),
-    ('green', Facing.Top): DoorMapIcon(0xD9, vFlip=True, y=-1),
-    ('yellow', Facing.Top): DoorMapIcon(0xDA, vFlip=True, y=-1),
-    ('grey', Facing.Top): DoorMapIcon(0xDB, vFlip=True, y=-1),
-    ('wave', Facing.Top): DoorMapIcon(0xDC, vFlip=True, y=-1),
-    ('plasma', Facing.Top): DoorMapIcon(0xDD, vFlip=True, y=-1),
-    ('spazer', Facing.Top): DoorMapIcon(0xDE, vFlip=True, y=-1),
-    ('ice', Facing.Top): DoorMapIcon(0xDF, vFlip=True, y=-1),
+    ('red', Facing.Top): DoorMapIcon(0xD3, vFlip=True, y=-1),
+    ('green', Facing.Top): DoorMapIcon(0xD4, vFlip=True, y=-1),
+    ('yellow', Facing.Top): DoorMapIcon(0xD5, vFlip=True, y=-1),
+    ('grey', Facing.Top): DoorMapIcon(0xD6, vFlip=True, y=-1),
+    ('wave', Facing.Top): DoorMapIcon(0xD7, vFlip=True, y=-1),
+    ('plasma', Facing.Top): DoorMapIcon(0xD8, vFlip=True, y=-1),
+    ('spazer', Facing.Top): DoorMapIcon(0xD9, vFlip=True, y=-1),
+    ('ice', Facing.Top): DoorMapIcon(0xDA, vFlip=True, y=-1),
 }
 
 def assignMapIconSpriteTableIndices():

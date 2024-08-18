@@ -8,6 +8,7 @@ routers = dict(
             'solver',
             'infos',
             'randomizer',
+            'randomizerData',
             'home',
             'randomizerWebService',
             'presetWebService',

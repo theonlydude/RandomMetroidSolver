@@ -12,7 +12,6 @@
 arch 65816
 lorom
 
-!full_refill = $f700    ; short ptr in bank 8F (see area_rando_doors.asm)
 !bit_index   = $80818e  ; returns X=byte index, $05e7=bitmask
 !refill_f    = $7fff36	; health refill during hyper beam acquisition
 !hyper_animation_2frames = #$9d	; nb of frames of hyper animation/2 (because divisor has to be 8-bits)
@@ -24,7 +23,9 @@ lorom
 !tourian_eye_door_room = #$ddc4
 
 incsrc "event_list.asm"
+
 incsrc "sym/objectives.asm"
+incsrc "sym/area_rando_doors.asm"
 
 ;;; connect Statues Hallway to Tourian Eye Door Room...
 org $8fa616
@@ -86,7 +87,9 @@ tourian_door:
 	lda #$0004 : jsl !mark_event
 	lda #$0005 : jsl !mark_event
 	;; free ship refill here instead of Tourian elevator
-	jsr !full_refill
+        ;; (area_rando_doors might not be present, but in that case a
+	;; RTS will be written at the full_refill routine location)
+	jsr area_rando_doors_full_refill
 	rts
 
 ;;; statues door asm leading to gadora room
@@ -124,7 +127,7 @@ mb_room_main:
 .end:
 	rts
 
-warnpc $8ff7ef
+warnpc $8ff79f
 
 ;;; change MB2 main AI script pointer to MB3 death instead
 ;;; of triggering rainbow beam, baby cutscene etc

@@ -1,7 +1,10 @@
 ;;; Display in HUD the maximum number of ammo that samus can carry
-;;; 
+;;;
 ;;; compile with asar v1.81 (https://github.com/RPGHacker/asar/releases/tag/v1.81)
-;;; 
+;;;
+;;; original patch by Personitis, added support for 3-digit supers/PBs by theonlydude
+;;; speed-up by maddo: reduce lag by keeping vanilla checks to only update ammo HUD when it changes
+;;;
 ;;; NOTE: apply after map patch, which touches HUD tiles as well (different ones,
 ;;;       but the map patch includes the whole gfx area)
 
@@ -118,20 +121,16 @@ org $8099E1
         nop : nop : nop
         nop : nop : nop : nop
 
-org $809ACE
-        ;; nop it:
-        ;; $80:9ACE 22 CF 99 80 JSL $8099CF            ; Add missiles to HUD tilemap
-        nop : nop : nop : nop
+org $809AC9
+        ; set previous missile, super, and power bomb counts to invalid value, to ensure they get redrawn:
+	lda #$FFFF
+	sta $0A08
+	sta $0A0A
+	sta $0A0C
+        bra skip_init  ; skip the rest of ammo HUD initialization
 
-org $809AD7
-        ;; nop it:
-        ;; $80:9AD7 22 0E 9A 80 JSL $809A0E            ; Add super missiles to HUD tilemap
-        nop : nop : nop : nop
-
-org $809AE0
-        ;; nop it:
-        ;; $80:9AE0 22 1E 9A 80 JSL $809A1E            ; Add power bombs to HUD tilemap
-        nop : nop : nop : nop
+org $809AF0
+skip_init:
 
 ;;; HIJACKS
 org $809B1A
@@ -151,11 +150,29 @@ org $809C00
         ;; $80:9C03 F0 11       BEQ $11    [$9C16]     ;} If [Samus' max missiles] != 0:
         jmp hud_ammo_drawing
 
+;;; when super missiles/power bombs are displayed with three digits make the first digit highlight too with auto-cancel
+org $809D41
+        ;; $80:9D41 C0 00 00    CPY #$0000             ;\
+        ;; $80:9D44 F0 01       BEQ $01    [$9D47]     ;} If not missiles: return
+        ;; $80:9D46 60          RTS                    ;/
+        nop : nop : nop
+        nop : nop
+        nop
+
+;;; handle supers/pbs as three tiles wide items by moving them one tile to the left
+org $809D6E
+        ;; ; HUD item tilemap offsets
+        ;; $80:9D6E             dw 0014, ; Missiles
+        ;;                         001C, ; Super missiles
+        ;;                         0022, ; Power bombs
+        ;;                         0028, ; Grapple beam
+        ;;                         002E  ; X-ray
+	dw $0014, $001A, $0020
 
 ;;; parameters set by vanilla before all hijacks:
 ;;; LDA !HUD_digits_tilemap_row3
 ;;; STA $00    [$7E:0000]
-org $80CE30
+org $80CE40
 
 ;;; parameters set before hijack:
 ;;; LDX !row3_super_index_vanilla
@@ -199,14 +216,26 @@ hud_ammo_drawing:
         pha 
         phx 
         phy 
+        LDA $09C6          ;\
+        CMP $0A08          ;} If [Samus missiles] != [Samus previous missiles]:
+        BEQ .no_missile    ;/
+        STA $0A08          ; Samus previous missiles = [Samus missiles]
         lda !samus_max_missiles
         beq .no_missile
         jsr draw_missile
 .no_missile:
+        LDA $09CA          ;\
+        CMP $0A0A          ;} If [Samus super missiles] != [Samus previous super missiles]:
+        BEQ .no_super      ;/
+        STA $0A0A          ; Samus previous super missiles = [Samus super missiles]
         lda !samus_max_super_missiles
         beq .no_super
         jsr draw_super
 .no_super:
+        LDA $09CE          ;\
+        CMP $0A0C          ;} If [Samus power bombs] != [Samus previous power bombs]:
+        BEQ .no_power_bomb ;/
+        STA $0A0C          ; Samus previous power bombs = [Samus power bombs]
         lda !samus_max_power_bombs
         beq .no_power_bomb
         jsr draw_power_bomb

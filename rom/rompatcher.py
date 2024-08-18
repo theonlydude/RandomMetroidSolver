@@ -8,16 +8,17 @@ from rom.compression import Compressor
 from rom.ips import IPS_Patch
 from utils.doorsmanager import DoorsManager, IndicatorFlag
 from utils.objectives import Objectives
-from graph.graph_utils import GraphUtils, getAccessPoint, graphAreas
+from graph.graph_utils import GraphUtils, getAccessPoint, graphAreas, gameAreas
 from logic.logic import Logic
 from rom.rom import RealROM, FakeROM, snes_to_pc, pc_to_snes
 from rom.addresses import Addresses
-from rom.rom_patches import RomPatches
+from rom.rom_patches import RomPatches, getPatchSet, getPatchSetsFromPatcherSettings
 from rom.rom_options import RomOptions
 from rom.flavor import RomFlavor
-from rom.map import AreaMap, getTileIndex, portal_mapicons
+from rom.map import AreaMap, getTileIndex, portal_mapicons, areaSpriteMaps
+from rom.enemies_objectives_data import enemies_objectives_data
 from patches.patchaccess import PatchAccess
-from utils.parameters import appDir
+from utils.parameters import appDir, Settings
 from logic.helpers import Bosses
 import utils.log
 
@@ -25,138 +26,6 @@ def getWord(w):
     return (w & 0x00FF, (w & 0xFF00) >> 8)
 
 class RomPatcher:
-    # possible patches. see patches asm source if applicable and available for more information
-    IPSPatches = {
-        # applied on all seeds
-        'Standard': [
-            # common utility routines
-            'utils.ips',
-            # MFreak map patch, tweaked for VARIA
-            'map.ips',
-            # game map
-            'map_data.ips',
-            # game map palettes for graph areas
-            'map_data_area.ips',
-            # boot, save files and backup management, stats infrastructure
-            'base.ips',
-            # handles starting location and start blue doors
-            'start.ips',
-            # generic PLM spawner used for extra saves, blinking doors etc.
-            'plm_spawn.ips',
-            # needed fixes for VARIA
-            'vanilla_bugfixes.ips',
-            # use a byte in a unused room state header field to store area ID in the VARIA sense
-            'area_ids.ips',
-            # custom credits
-            'credits.ips',
-            # actual game hijacks to update tracking stats
-            'stats.ips',
-            # enemy names in menu for seed ID
-            'seed_display.ips',
-            # door ASM to wake zebes early in blue brinstar
-            'wake_zebes.ips',
-            # "Balanced" suit mode
-            'Removes_Gravity_Suit_heat_protection',
-            # use any button for angle up/down
-            'AimAnyButton.ips',
-            # credits item% based on actual number of items in the game
-            'endingtotals.ips',
-            # MSU-1 patch
-            'supermetroid_msu1.ips',
-            # displays max ammo 
-            'max_ammo_display.ips',
-            # VARIA logo on startup screen
-            'varia_logo.ips',
-            # new nothing plm
-            'nothing_item_plm.ips',
-            # objectives management and display
-            'objectives.ips',
-            # objectives ROM options
-            'objectives_options.ips',
-            # display collected items percentage and RTA time in pause inventory menu
-            'equipment_screen.ips',
-            # new PLMs for indicating the color of the door on the other side
-            'door_indicators_plms.ips',
-            # always disable demos as it causes crashes in area, hud and mirrortroid
-            'no_demo.ips'
-        ],
-        # VARIA tweaks
-        'VariaTweaks' : ['WS_Etank', 'LN_Chozo_SpaceJump_Check_Disable',
-                         'ln_chozo_platform.ips', 'bomb_torizo.ips'],
-        # anti-softlock/game opening layout patches
-        'Layout': ['dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
-                   'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips',
-                   'brinstar_map_room.ips', 'kraid_save.ips', 'mission_impossible.ips'],
-        # base patchset for area rando
-        'AreaBaseSet': [
-            # remove maridia red fish exit green gate (move plm in room A322: Caterpillar Room - flavor)
-            'area_rando_gate_caterpillar.ips',
-            # remove maridia tube exit green gate (move plm in room CF80: East Tunnel - common)
-            'area_rando_gate_east_tunnel.ips',
-            # remove lower norfair exit crumble blocks (change layout in room AD5E: Single Chamber - flavor)
-            'area_layout_ln_exit.ips',
-            # additionnal save at crab shaft (change layout in room D1A3: Crab Shaft - flavor)
-            'crab_shaft.ips',
-            'Save_Crab_Shaft',
-            # additionnal save at main street
-            'Save_Main_Street',
-            # make incompatible door transitions work
-            'door_transition.ips',
-            # east maridia looping doors (common)
-            'area_rando_doors.ips',
-            # change door connection in bank 83 (room D461: West Sand Hall - flavor)
-            'area_door_west_sand_hall.ips',
-            # change layout (room D6FD: Sand falls sand pit - flavor)
-            'area_rando_warp_door.ips'
-        ],
-        # optional layout for area rando
-        'AreaComfortSet': [
-            # remove crab geen gate in maridia (move plm in room D08A: Crab Tunnel - common)
-            'area_rando_gate_crab_tunnel.ips',
-            # update ceiling on top on the gate (change layout in room D08A: Crab Tunnel - flavor)
-            'area_layout_crabe_tunnel.ips',
-            # remove blue gate in green hill zone (move plm in room 9E52: Green Hill Zone - flavor)
-            'area_rando_gate_greenhillzone.ips',
-            # access transition door in green hill zone (change layout in room 9E52: Green Hill Zone - flavor)
-            'area_layout_greenhillzone.ips',
-            # set sponge bath door to blue in wreckedship
-            'Sponge_Bath_Blinking_Door',
-            # add platforms to traverse forgotten hiway both ways (change layout in room 94FD: east ocean - flavor)
-            'east_ocean.ips',
-            # aqueduct entrance pb blocks changed to bomb blocks (change layout in room D5A7: aqueduct - flavor)
-            'aqueduct_bomb_blocks.ips',
-            # reveal opening to portal (change layout in room CF80: east tunnel - flavor)
-            'area_layout_east_tunnel.ips',
-            # reveal opening to portal (change layout in room A322: Caterpillar Room - flavor)
-            'area_layout_caterpillar.ips',
-            # reveal opening to portal (change layout in room AD5E: Single Chamber - flavor)
-            # to be applied on top of patch area_layout_ln_exit.ips
-            'area_layout_single_chamber.ips'
-        ],
-        # patches for boss rando
-        'Bosses': ['door_transition.ips'],
-        # patches for escape rando
-        'Escape' : ['rando_escape_common.ips', 'rando_escape.ips',
-                    'rando_escape_ws_fix.ips', 'door_transition.ips'],
-        # patches for minimizer with fast Tourian
-        'MinimizerTourian': ['minimizer_tourian_common.ips', 'minimizer_tourian.ips', 'open_zebetites.ips'],
-        # patches for door color rando
-        'DoorsColors': ['beam_doors_plms.ips', 'beam_doors_gfx.ips', 'red_doors.ips'],
-        # patches on top of map patch to always reveal the whole map
-        'MapReveal': ['reveal_map.ips', 'reveal_map_data.ips'],
-        # patches for each "logic" to convert vanilla ROM to "logic" base ROM
-        'Logic': {
-            "vanilla": [],
-            "mirror": ['mirrortroid.ips', 'bank_8f.ips', 'bank_83.ips', 'map_icon_data.ips',
-                       'baby_room.ips', 'baby_remove_blocks.ips', 'escape_animals.ips',
-                       'snails.ips', 'boulders.ips', 'rinkas.ips', 'etecoons.ips', 'crab_main_street.ips',
-                       'crab_mt_everest.ips', 'mother_brain.ips', 'kraid.ips', 'torizos.ips', 'botwoon.ips',
-                       'crocomire.ips', 'ridley.ips', 'ws_treadmill.ips']
-        },
-        # add debug tools
-        'Debug': ['Debug_Full.ips']
-    }
-
     def __init__(self, settings=None, romFileName=None, magic=None):
         self.log = utils.log.get('RomPatcher')
         self.settings = settings
@@ -193,6 +62,8 @@ class RomPatcher:
 
     def patchRom(self):
         self._mapIconTableAddr = Addresses.getOne("map_mapicons_tables")
+        self._accessibleAreasNoBoss = self._getAccessibleAreasNoBoss(self.settings["itemLocs"])
+        self._updateMapIconsGraphAreas(self.settings["itemLocs"])
         # apply patches first
         self.applyIPSPatches()
         self.commitIPS()
@@ -203,8 +74,6 @@ class RomPatcher:
             self.romOptions.write('escapeRandoRemoveEnemies', int(self.settings['escapeRandoRemoveEnemies']))
         self.romOptions.write('objectivesSFX', 0 if self.settings['vanillaObjectives'] else 0x80)
         self.romOptions.write("objectivesHidden", 0 if not Objectives.hidden else 0x2)
-        backupSaves = self.settings["area"] == True or self.settings["doorsColorsRando"] == True or not GraphUtils.isStandardStart(self.settings["startLocation"])
-        self.romOptions.write("backupSaves", int(backupSaves))
         if self.settings["tourian"] == "Fast" and self.settings["area"] == False:
             # skip Tourian entrance full refill if not area rando
             # (we actually overwrite code, so we actually decide the condition before writing this time)
@@ -219,16 +88,15 @@ class RomPatcher:
         self.writeItemsNumber()
         # objectives
         self.writeObjectives(self.settings["itemLocs"], self.settings["tourian"])
-        self.writeObjectivesMapIcons()
+        self.writeObjectivesMapIcons(self.settings["tourian"])
         # area connections
         self.writeDoorConnections(self.settings["doors"])
-        self.writeDoorConnectionsMapIcons(self.settings["doors"])
+        self.writeDoorConnectionsMapIcons(self.settings["doors"], self.settings["tourian"])
         # door caps
         self.writeDoorsColor()
         self.writeDoorsMapIcons()
         # map tile count
-        self.writeMapTileCount(self.settings["itemLocs"], self.settings["area"],
-                               self.settings["escapeAttr"] is not None, self.settings["tourian"])
+        self.writeMapTileCount(self.settings["area"], self.settings["escapeAttr"] is not None, self.settings["tourian"])
         # credits stuff
         self.writeSpoiler(self.settings["itemLocs"], self.settings["progItemLocs"])
         self.writeRandoSettings(self.settings["randoSettings"], self.settings["itemLocs"])
@@ -339,17 +207,14 @@ class RomPatcher:
         for il in itemLocs:
             if il.Location.isBoss():
                 continue
+            if not il.Location.SolveArea.endswith("Boss") and il.Location.GraphArea not in self._accessibleAreasNoBoss:
+                continue
 #            print("loc %s, area %s" % (il.Location.Name, il.Location.Area))
             self.areaMaps[il.Location.Area].setItemLoc(il, split)
         itemMaskOffset = Addresses.getOne("map_ItemTileCheckList")
         for area, areaMap in self.areaMaps.items():
             mapOffset = Addresses.getOne("map_data_" + area)
             areaMap.writeItemTiles(self.romFile, mapOffset, itemMaskOffset)
-        if self.settings['revealMap'] == True:
-            # reveal item tiles
-            self.romFile.seek(Addresses.getOne("map_CoverTileList"))
-            for b in range(0xff):
-                self.romFile.writeByte(b)
 
     # trigger morph eye enemy on whatever item we put there,
     # not just morph ball
@@ -461,98 +326,108 @@ class RomPatcher:
             for (messageKey, newMessage) in messageBoxes[sprite].items():
                 messageBox.updateMessage(messageKey, newMessage, doVFlip, doHFlip)
 
+    def getPatchSetsFromSettings(self):
+        return getPatchSetsFromPatcherSettings(self.settings)
+
+    def applyPatchSet(self, patchSetName, plms):
+        patchSet = getPatchSet(patchSetName, RomFlavor.flavor)
+        ipsPatches = patchSet.get('ips', [])
+        for ips in ipsPatches:
+            self.applyIPSPatch(ips)
+        plmList = patchSet.get('plms', [])
+        plms += [plm for plm in plmList if plm not in plms]
+
+    def removeMinimizerUnusedAreas(self):
+        # remove map tiles
+        allAreas = list(self._accessibleAreasNoBoss) + ['Ceres', 'Tourian']
+        missingAreas = [area for area in graphAreas if area not in allAreas]
+        removeAreaPatches = [f"remove_{area}.ips" for area in missingAreas]
+        for patch in removeAreaPatches:
+            self.applyIPSPatch(patch)
+        # remove spritemaps above elevators
+        spritemapsRemoved = {
+            "Crateria": {
+                "Brinstar Left": "GreenPinkBrinstar",
+                "Brinstar Middle": "Crateria",
+                "Brinstar Right": "RedBrinstar",
+                "Wrecked Ship": "WreckedShip",
+                "Maridia": "EastMaridia"
+            },
+            "Brinstar": {
+                "Crateria Left": "GreenPinkBrinstar",
+                "Crateria Middle": "Crateria",
+                "Crateria Right": "RedBrinstar",
+                "Maridia": "RedBrinstar",
+                "Norfair": "Norfair"
+            },
+            "Norfair": {
+                "Brinstar": "Norfair"
+            },
+            "Maridia": {
+                "Crateria": "EastMaridia",
+                "Brinstar Left": "RedBrinstar",
+                "Brinstar Right": "RedBrinstar"
+            }
+        }
+        spritemaps = areaSpriteMaps[RomFlavor.flavor]
+        for area, areaData in spritemaps.items():
+            self.romFile.seek(snes_to_pc(areaData["addr"]))
+            for iconName, icon in areaData["icons"].items():
+                graphArea = spritemapsRemoved[area][iconName]
+                if graphArea in missingAreas:
+                    continue
+                self.romFile.writeWord(icon["x"])
+                self.romFile.writeWord(icon["y"])
+                self.romFile.writeWord(icon["type"])
+            self.romFile.writeWord(0xffff)
+
     def applyIPSPatches(self):
         try:
-            # apply standard patches
-            stdPatches = RomPatcher.IPSPatches['Logic'][Logic.implementation][:]
+            ## apply base patches, then special patches, PLMs and other modifications, then optional patches
             plms = []
-            stdPatches += RomPatcher.IPSPatches['Standard'][:]
-            if not self.settings["layout"]:
-                # when disabling anti softlock protection also disable doors indicators
-                stdPatches.remove('door_indicators_plms.ips')
+            patchSets = self.getPatchSetsFromSettings()
+            for patchSet in patchSets:
+                self.applyPatchSet(patchSet, plms)
+            # special patches
             if self.race is not None:
-                stdPatches.append('race_mode_post.ips')
-            if self.settings["suitsMode"] != "Balanced":
-                stdPatches.remove('Removes_Gravity_Suit_heat_protection')
-            if self.settings["suitsMode"] == "Progressive":
-                stdPatches.append('progressive_suits.ips')
-            if self.settings["nerfedCharge"] == True:
-                stdPatches.append('nerfed_charge.ips')
-            if self.settings["nerfedRainbowBeam"] == True:
-                stdPatches.append('nerfed_rainbow_beam.ips')
-            if self.settings["boss"] == True or self.settings["area"] == True:
-                stdPatches += ["WS_Main_Open_Grey", "WS_Save_Active"]
-                plms.append('WS_Save_Blinking_Door')
-            if self.settings["boss"] == True:
-                stdPatches.append("Phantoon_Eye_Door")
-            for patchName in stdPatches:
-                self.applyIPSPatch(patchName)
+                self.applyIPSPatch('race_mode_post.ips')
             # show objectives and Tourian status in a shortened intro sequence
             # if not full vanilla objectives+tourian
             if not self.settings["vanillaObjectives"] or self.settings["tourian"] != "Vanilla":
                 self.applyIPSPatch("Restore_Intro") # important to apply this after start.ips
                 self.applyIPSPatch("intro_text.ips")
-            if self.settings["layout"]:
-                # apply layout patches
-                for patchName in RomPatcher.IPSPatches['Layout']:
-                    self.applyIPSPatch(patchName)
-            if self.settings["variaTweaks"]:
-                # VARIA tweaks
-                for patchName in RomPatcher.IPSPatches['VariaTweaks']:
-                    self.applyIPSPatch(patchName)
             if (self.settings["majorsSplit"] == 'Scavenger'
                 and any(il for il in self.settings["progItemLocs"] if il.Location.Name == "Ridley")):
                 # ridley as scav loc
                 self.applyIPSPatch("Blinking[RidleyRoomIn]")
-
             # random escape
             if self.settings["escapeAttr"] is not None:
-                for patchName in RomPatcher.IPSPatches['Escape']:
-                    self.applyIPSPatch(patchName)
                 # animals and timer
                 self.applyEscapeAttributes(self.settings["escapeAttr"], plms)
-
-            # map reveal
-            if self.settings['revealMap'] == True:
-                for patchName in RomPatcher.IPSPatches['MapReveal']:
-                    self.applyIPSPatch(patchName)
-
-            # apply area patches
-            if self.settings["area"] == True:
-                for patchName in RomPatcher.IPSPatches['AreaBaseSet']:
-                    self.applyIPSPatch(patchName)
-                if self.settings["areaLayout"]:
-                    for patchName in RomPatcher.IPSPatches['AreaComfortSet']:
-                        self.applyIPSPatch(patchName)
-            else:
-                self.applyIPSPatch('area_ids_alt.ips')
+            # VARIA area IDs/minimap room types/area map palettes
+            if self.settings["area"] == False:
+                self.applyIPSPatch('area_ids_vanilla_layout.ips')
+                self.applyIPSPatch('minimap_data_vanilla_layout.ips')
                 self.applyIPSPatch('map_data_area_alt.ips')
-            if self.settings["boss"] == True:
-                for patchName in RomPatcher.IPSPatches['Bosses']:
-                    self.applyIPSPatch(patchName)
+            else:
+                self.applyIPSPatch('area_ids_area_rando.ips')
+                self.applyIPSPatch('minimap_data_area_rando.ips')
             if self.settings["minimizerN"] is not None:
-                self.applyIPSPatch('minimizer_bosses.ips')
-            if self.settings["tourian"] == "Fast":
-                for patchName in RomPatcher.IPSPatches['MinimizerTourian']:
-                    self.applyIPSPatch(patchName)
+                self.removeMinimizerUnusedAreas()
+            # blue doors
             doors = self.getStartDoors(plms, self.settings["area"], self.settings["minimizerN"])
-            if self.settings["doorsColorsRando"] == True:
-                for patchName in RomPatcher.IPSPatches['DoorsColors']:
-                    self.applyIPSPatch(patchName)
             DoorsManager.getBlueDoors(doors)
-            if self.settings["layout"]:
+            # door indicators
+            if "door_indicators_plms" in patchSets:
                 self.writeDoorIndicators(plms, self.settings["area"], self.settings["doorsColorsRando"])
+            # starting locations
             self.applyStartAP(self.settings["startLocation"], plms, doors)
+            # patch PLMs
             self.applyPLMs(plms)
 
             # apply optional patches
             for patchName in self.settings["optionalPatches"]:
                 self.applyIPSPatch(patchName)
-
-            # debug tools
-            if self.settings["debug"]:
-                for patchName in RomPatcher.IPSPatches['Debug']:
-                    self.applyIPSPatch(patchName)
         except Exception as e:
             raise Exception("Error patching {}. ({})".format(self.romFileName, e))
 
@@ -580,7 +455,7 @@ class RomPatcher:
                 plms.append(key)
         if area == True:
             plms += ['Maridia Sand Hall Seal', "Save_Main_Street", "Save_Crab_Shaft"]
-            for accessPoint in Logic.accessPoints:
+            for accessPoint in Logic.accessPoints():
                 if accessPoint.Internal == True or accessPoint.Boss == True:
                     continue
                 addBlinking(accessPoint.Name)
@@ -588,7 +463,7 @@ class RomPatcher:
             addBlinking("Below Botwoon Energy Tank Right")
         if minimizerN is not None:
             # add blinking doors inside and outside boss rooms
-            for accessPoint in Logic.accessPoints:
+            for accessPoint in Logic.accessPoints():
                 if accessPoint.Boss == True:
                     addBlinking(accessPoint.Name)
         return doors
@@ -629,20 +504,31 @@ class RomPatcher:
             timerPatch = patchDict["Escape_Timer"]
             def getTimerBytes(t):
                 minute = int(t / 60)
-                second = t % 60
+                second = int(t % 60)
                 minute = int(minute / 10) * 16 + minute % 10
                 second = int(second / 10) * 16 + second % 10
                 return [second, minute]
+            def calcTimer(t):
+                a, b = Settings.algoSettings['escapeRandoTimeComputeParams']
+                div = a * Settings.skillScore + b
+                t = t / div
+                return 5 * ceil(t / 5)
             if 'TimerTable' not in escapeAttr:
-                timerPatch[Addresses.getOne('escapeTimer')] = getTimerBytes(escapeTimer)
+                t = calcTimer(escapeTimer)
+#                print(f"escapeTimer = {escapeTimer}, t = {t}")
+                timerPatch[Addresses.getOne('escapeTimer')] = getTimerBytes(t)
+                timerPatch[Addresses.getOne("rando_escape_common_timer_half_value")] = getTimerBytes(t/2)
             else:
                 # timer table for Disabled Tourian escape: write 0 time as marker to use the table
                 timerPatch[Addresses.getOne('escapeTimer')] = [0,0]
                 tableBytes = []
+                halfTableBytes = []
                 timerPatch[Addresses.getOne('escapeTimerTable')] = tableBytes
+                timerPatch[Addresses.getOne('rando_escape_common_timer_half_values_by_area_id')] = halfTableBytes
                 for area in graphAreas[1:-1]: # no Ceres or Tourian
-                    t = escapeAttr['TimerTable'][area]
+                    t = calcTimer(escapeAttr['TimerTable'][area])
                     tableBytes += getTimerBytes(t)
+                    halfTableBytes += getTimerBytes(t/2)
             self.applyIPSPatch('Escape_Timer', patchDict)
         # animals door to open
         if escapeAttr['Animals'] is not None:
@@ -1099,6 +985,7 @@ class RomPatcher:
         incompatible_doors = loadDoorTransitionShortPtrBytes("incompatible_doors")
         giveiframes = loadDoorTransitionShortPtrBytes("giveiframes")
         reveal_objectives = loadDoorTransitionShortPtrBytes("reveal_objectives", patch="objectives")
+        explore_tile = loadDoorTransitionShortPtrBytes("explore_tile")
         for conn in doorConnections:
             # write door ASM for transition doors (code and pointers)
             if 'DoorPtrSym' not in conn:
@@ -1138,6 +1025,19 @@ class RomPatcher:
 
             # write door asm
             asmPatch = []
+            # incompatible transition
+            if 'SamusX' in conn:
+                SamusX = getWordBytes(conn['SamusX'])
+                SamusY = getWordBytes(conn['SamusY'])
+                # force samus position
+                asmPatch += [ 0xA9 ] + SamusX             # LDA #$SamusX        ; fixed Samus X position
+                asmPatch += [ 0x8D, 0xF6, 0x0A ]          # STA $0AF6           ; update Samus X position in memory
+                asmPatch += [ 0xA9 ] + SamusY             # LDA #$SamusY        ; fixed Samus Y position
+                asmPatch += [ 0x8D, 0xFA, 0x0A ]          # STA $0AFA           ; update Samus Y position in memory
+                asmPatch += [ 0x20 ] + incompatible_doors # JSR incompatible_doors
+            else:
+                # still give I-frames
+                asmPatch += [ 0x20 ] + giveiframes        # JSR giveiframes
             # call original door asm ptr if needed
             if conn['doorAsmPtr'] != 0x0000:
                 # may be a symbol
@@ -1152,39 +1052,46 @@ class RomPatcher:
                 # endian convert
                 exitAsm = symbolWordBytes(conn['exitAsm'])
                 asmPatch += [ 0x20 ] + exitAsm            # JSR exitAsm
-            # incompatible transition
-            if 'SamusX' in conn:
-                SamusX = getWordBytes(conn['SamusX'])
-                SamusY = getWordBytes(conn['SamusY'])
-                # force samus position
-                asmPatch += [ 0x20 ] + incompatible_doors # JSR incompatible_doors
-                asmPatch += [ 0xA9 ] + SamusX             # LDA #$SamusX        ; fixed Samus X position
-                asmPatch += [ 0x8D, 0xF6, 0x0A ]          # STA $0AF6           ; update Samus X position in memory
-                asmPatch += [ 0xA9 ] + SamusY             # LDA #$SamusY        ; fixed Samus Y position
-                asmPatch += [ 0x8D, 0xFA, 0x0A ]          # STA $0AFA           ; update Samus Y position in memory
-            else:
-                # still give I-frames
-                asmPatch += [ 0x20 ] + giveiframes        # JSR giveiframes
             # for special access points display on map, artificially explore the tile where 
             # the portal is drawn, since it's not the same as the actual map tile checked to
             # see if the portal is taken
             src, dst = conn['transition']
-            def writeExploreMapAsm(ap):
+            def writeExploreMapAsm(ap, matching):
                 nonlocal asmPatch
                 apInfo = Logic.map_tiles.areaAccessPointsInGameDisplay.get(ap.Name)
                 if apInfo is not None:
                     areaMap = self.areaMaps[apInfo['area']]
                     byteIndex, bitMask = areaMap.getByteIndexMask(*apInfo['coords'])
-                    ramAddr = getWordBytes(self._getExploredMapRam(apInfo['area'], byteIndex)) + [ 0x7E ]
-                    # LDA.l $7E[map tile byte index]
-                    asmPatch += [ 0xAF ] + ramAddr
-                    # ORA.w #[map tile mask]
-                    asmPatch += [ 0x09 ] + getWordBytes(bitMask)
-                    # STA.l $7E[map tile byte index]
-                    asmPatch += [ 0x8F ] + ramAddr
-            writeExploreMapAsm(src)
+                    ramAddr = self._getExploredMapRam(apInfo['area'], byteIndex)
+                    if apInfo.get("coversTile", False):
+                        # in that case, the tile we want to explore could be explored by the player,
+                        # call a dedicated function
+                        # LDX #[map tile byte index]
+                        asmPatch += [ 0xA2 ] + getWordBytes(ramAddr)
+                        # LDA #[graph area]
+                        asmPatch += [ 0xA9 ] + getWordBytes(graphAreas.index(ap.GraphArea))
+                        # STA $12
+                        asmPatch += [ 0x85, 0x12 ]
+                        # LDA #[map tile mask]
+                        asmPatch += [ 0xA9 ] + getWordBytes(bitMask)
+                        # JSR explore_tile
+                        asmPatch += [ 0x20 ] + explore_tile
+                    else:
+                        ramAddrBytes = getWordBytes(ramAddr) + [ 0x7E ]
+                        # LDA.l $7E[map tile byte index]
+                        asmPatch += [ 0xAF ] + ramAddrBytes
+                        # ORA.w #[map tile mask]
+                        asmPatch += [ 0x09 ] + getWordBytes(bitMask)
+                        # STA.l $7E[map tile byte index]
+                        asmPatch += [ 0x8F ] + ramAddrBytes
+                    # for index
+                    if apInfo['area'] == gameAreas[matching.RoomInfo['area']]:
+                        # JSL $80858C ; Load mirror of current area's map explored
+                        # (needed for current area explored tiles to be synced)
+                        asmPatch += [ 0x22, 0x8C, 0x85, 0x80 ]
+            writeExploreMapAsm(src, dst)
             if src != dst:
-                writeExploreMapAsm(dst)
+                writeExploreMapAsm(dst, src)
             # if crateria-less minimizer, append reveal_objectives function to door asm leading to climb
             if dst.Name == "Climb Bottom Left":
                 asmPatch += [ 0x20 ] + reveal_objectives
@@ -1211,12 +1118,28 @@ class RomPatcher:
 
     def _getExploredMapRam(self, area, index=0):
         if isinstance(area, str):
-            area = ['Crateria', 'Brinstar', 'Norfair', 'WreckedShip', 'Maridia', 'Tourian'].index(area)
+            area = gameAreas.index(area)
         exploredBaseRam = 0xCD52
         exploredAreaSize = 0x100
         return exploredBaseRam + area*exploredAreaSize + index
 
-    def _writePortalIcons(self, doorConnections, area, areaMap):
+    def _updateMapIconsGraphAreas(self, itemLocs):
+        mapIcons = Logic.map_tiles
+        def updateAccessPoints(apIcons):
+            for apName, icon in apIcons.items():
+                ap = getAccessPoint(apName)
+                icon['graphArea'] = ap.GraphArea
+        updateAccessPoints(mapIcons.areaAccessPoints)
+        updateAccessPoints(mapIcons.areaAccessPointsInGameDisplay)
+        updateAccessPoints(mapIcons.bossAccessPoints)
+        updateAccessPoints(mapIcons.escapeAccessPoints)
+        for il in itemLocs:
+            if il.Location.isBoss():
+                continue
+            icon = mapIcons.itemLocations[il.Location.Name]
+            icon["graphArea"] = il.Location.GraphArea
+
+    def _writePortalIcons(self, doorConnections, area, areaMap, tourian):
         def getMapInfo(apName, isSrc):
             if isSrc and apName in Logic.map_tiles.areaAccessPointsInGameDisplay:
                 return Logic.map_tiles.areaAccessPointsInGameDisplay[apName]
@@ -1225,10 +1148,21 @@ class RomPatcher:
             elif apName in Logic.map_tiles.bossAccessPoints:
                 return Logic.map_tiles.bossAccessPoints[apName]
             return None
+        graphAreaOverride = {
+            "KraidRoomIn": "KraidBoss",
+            "PhantoonRoomIn": "PhantoonBoss",
+            "DraygonRoomIn": "DraygonBoss",
+            "RidleyRoomIn": "RidleyBoss"
+        }
+        allAreas = list(self._accessibleAreasNoBoss)
+        if tourian != "Disabled":
+            allAreas.append("Tourian")
         for conn in doorConnections:
             src, dst = conn['transition']
             srcMapInfo, dstMapInfo = getMapInfo(src.Name, True), getMapInfo(dst.Name, False)
             if srcMapInfo is None or dstMapInfo is None or srcMapInfo['area'] != area:
+                continue
+            if src.Name not in graphAreaOverride and src.GraphArea not in allAreas:
                 continue
             if "coords" in srcMapInfo:
                 x, y = srcMapInfo['coords']
@@ -1236,19 +1170,20 @@ class RomPatcher:
                 x, y = areaMap.getCoordsByte(srcMapInfo['byteIndex'], srcMapInfo['bitMask'])
             self.writeWordMagic(x*8)
             self.writeWordMagic(y*8)
-            self.writeWordMagic(portal_mapicons[dst.GraphArea].table_index)
+            graphArea = graphAreaOverride.get(dst.Name, dst.GraphArea)
+            self.writeWordMagic(portal_mapicons[graphArea].table_index)
             self.writeWordMagic(self._getExploredMapRam(dst.RoomInfo['area'], dstMapInfo['byteIndex']))
             self.romFile.writeWord(dstMapInfo['bitMask'])
         self.writeWordMagic(0xffff) # terminator
 
-    def writeDoorConnectionsMapIcons(self, doorConnections):
+    def writeDoorConnectionsMapIcons(self, doorConnections, tourian):
         assert len(self.areaMaps) > 0, "call writeDoorConnectionsMapIcons when areaMaps are built"
         # write area portal tables
         self.romFile.seek(self._mapIconTableAddr)
         mapicon_ptrs = {}
         for area, areaMap in self.areaMaps.items():
             mapicon_ptrs[area] = self.romFile.tell()
-            self._writePortalIcons(doorConnections, area, areaMap)
+            self._writePortalIcons(doorConnections, area, areaMap, tourian)
         self._mapIconTableAddr = self.romFile.tell()
         self._writeMapIconTable(mapicon_ptrs, Addresses.getOne("map_portals_mapicons_by_area"))
 
@@ -1430,14 +1365,17 @@ class RomPatcher:
             else:
                 self.applyIPSPatch(plmName)
 
-    def writeMapTileCount(self, itemLocs, isArea, isEscape, tourian):
+    def _getAccessibleAreasNoBoss(self, itemLocs):
         # filter areas : exclude Tourian and Ceres, and filter excluded areas in minimizer
         #
         # special boss check to avoid varia/space jump/ridley E locs in minimizer and get only graph
         # areas entirely in layout :
         bossSolveAreeas = [b + " Boss" for b in Bosses.Golden4()]
         bossChk = lambda loc: loc.isBoss() or loc.SolveArea in bossSolveAreeas
-        accessibleAreasNoBoss = {il.Location.GraphArea for il in itemLocs if not bossChk(il.Location) and not il.Location.restricted}
+        return {il.Location.GraphArea for il in itemLocs if not bossChk(il.Location) and not il.Location.restricted}
+
+    def writeMapTileCount(self, isArea, isEscape, tourian):
+        accessibleAreasNoBoss = self._accessibleAreasNoBoss
         self.log.debug(f"writeMapTileCount. accessibleareas: {accessibleAreasNoBoss}")
         # G4 are always there, even when their area is not in minimizer layout
         bossTiles = {
@@ -1480,10 +1418,18 @@ class RomPatcher:
             addr = Addresses.getOne("objectives_explored_map_%d_pct" % percent)
             self.romFile.writeWord(ceil((total * percent)/100), addr)
 
+    def writeEnemiesTotals(self, itemLocs):
+        accessibleAreasNoBoss = self._accessibleAreasNoBoss
+        for nmyType, nmyEntry in enemies_objectives_data.items():
+            areaCounts = nmyEntry["area_count"]
+            total = sum(areaCounts[area] for area in areaCounts if area in accessibleAreasNoBoss)
+            self.romFile.writeByte(total, Addresses.getOne(nmyEntry["total_sym"]))
+
     def writeObjectives(self, itemLocs, tourian):
         objectives = Objectives()
         objectives.writeGoals(self.romFile, tourian)
         self.writeItemsMasks(itemLocs)
+        self.writeEnemiesTotals(itemLocs)
         # change etecoons/dachora map tiles depending on ROM flavor
         if objectives.isGoalActive("visit the animals"):
             animals = {
@@ -1520,7 +1466,7 @@ class RomPatcher:
         self.romFile.writeWord(itemsMask, Addresses.getOne('itemsMask'))
         self.romFile.writeWord(beamsMask, Addresses.getOne('beamsMask'))
 
-    def writeObjectivesMapIcons(self):
+    def writeObjectivesMapIcons(self, tourian):
         assert len(self.areaMaps) > 0, "call writeObjectivesMapIcons when areaMaps are built"
         # create a dict area => {(x, y) => (obj, mapIcon)}
         objByArea = defaultdict(dict)
@@ -1529,6 +1475,9 @@ class RomPatcher:
             for mapIcon in goal.mapIcons:
                 coords = objTiles[mapIcon]["map_coords_px"]
                 area = objTiles[mapIcon]["area"]
+                graphArea = objTiles[mapIcon].get("graphArea")
+                if graphArea is not None and graphArea not in self._accessibleAreasNoBoss:
+                    continue
                 addIcon = coords not in objByArea[area]
                 if not addIcon:
                     # icon coords conflict, choose one

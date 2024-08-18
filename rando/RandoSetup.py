@@ -21,7 +21,7 @@ class RandoSetup(object):
         self.sm = SMBoolManager()
         self.settings = services.settings
         self.graphSettings = graphSettings
-        self.startAP = graphSettings.startAP
+        self.startAP = graphSettings.startAP if graphSettings.startAP != "Ceres" else "Landing Site"
         self.superFun = self.settings.getSuperFun()
         self.container = None
         self.services = services
@@ -114,8 +114,8 @@ class RandoSetup(object):
         return self.container
 
     def getRestrictionsDict(self):
-        itemTypes = {item.Type for item in self.container.itemPool if item.Category not in Restrictions.NoCheckCat}
-        allAreas = {loc.GraphArea for loc in self.locations}
+        itemTypes = sorted({item.Type for item in self.container.itemPool if item.Category not in Restrictions.NoCheckCat})
+        allAreas = sorted({loc.GraphArea for loc in self.locations})
         items = [self.container.getNextItemInPool(itemType) for itemType in itemTypes]
         restrictionDict = {}
         for area in allAreas:
@@ -294,10 +294,7 @@ class RandoSetup(object):
         for loc in locs:
             ap = loc.accessPoint
             if ap not in comeBack:
-                # we chose Golden Four because it is always there.
-                # Start APs might not have comeback transitions
-                # possible start AP issues are handled in checkStart
-                comeBack[ap] = self.areaGraph.canAccess(self.sm, ap, 'Golden Four', self.settings.maxDiff)
+                comeBack[ap] = self.areaGraph.canAccess(self.sm, ap, self.startAP, self.settings.maxDiff)
             if comeBack[ap]:
                 totalAvailLocs.append(loc)
         self.areaGraph.useCache(False)
@@ -312,7 +309,7 @@ class RandoSetup(object):
             if len(aps) == 0:
                 continue
             escAPs = [ap for ap in aps if ap in availAPs]
-            self.log.debug("escAPs="+str(escAPs))
+            self.log.debug(f"escAPs={sorted(escAPs)}, n={n}")
             if len(escAPs) < n:
                 ret = False
                 msg = "Objective '{}' impossible to complete".format(goal.name)
@@ -320,7 +317,7 @@ class RandoSetup(object):
                 self.errorMsgs.append(msg)
                 continue
             for ap in escAPs:
-                if not self.areaGraph.canAccess(self.sm, ap, "Golden Four", self.settings.maxDiff):
+                if not self.areaGraph.canAccess(self.sm, ap, self.startAP, self.settings.maxDiff):
                     ret = False
                     msg = "Objective '{}' impossible to complete".format(goal.name)
                     self.log.debug("checkPool. {}".format(msg))
@@ -329,7 +326,7 @@ class RandoSetup(object):
         if ret:
             checkedGoals = [goal for goal in Objectives.activeGoals if goal.category != "Bosses" and goal.category != "Minibosses"]
             for goal in checkedGoals:
-                if not goal.canClearGoal(self.sm, 'Golden Four'):
+                if not goal.canClearGoal(self.sm, self.startAP):
                     ret = False
                     msg = f"Objective {goal} is not completable"
                     self.log.debug('checkPool. {}'.format(msg))
@@ -368,6 +365,7 @@ class RandoSetup(object):
                       and self.areaGraph.canAccess(self.sm, self.startAP, 'DraygonRoomIn', maxDiff)
                 if ret:
                     # see if we can beat bosses with this equipment (infinity as max diff for a "onlyBossesLeft" type check
+                    Objectives.maxDiff = infinity
                     allBosses = [loc for loc in totalAvailLocs if loc.isBoss() and loc.Name != "Mother Brain"]
                     availLocs = self.services.currentLocations(self.startAP, container, diff=infinity)
                     beatableBosses = [loc for loc in availLocs if loc in allBosses]
@@ -377,7 +375,7 @@ class RandoSetup(object):
                         # check that we can then kill mother brain if needed
                         if Objectives.tourianRequired == True:
                             self.sm.addItems(Bosses.Golden4() + Bosses.miniBosses())
-                            beatableMotherBrain = [loc for loc in self.services.currentLocations(self.startAP, container, diff=infnity) if loc.Name == 'Mother Brain']
+                            beatableMotherBrain = [loc for loc in self.services.currentLocations(self.startAP, container, diff=infinity) if loc.Name == 'Mother Brain']
                             ret = len(beatableMotherBrain) > 0
                             self.log.debug("checkPool. beatable Mother Brain={}".format(ret))
                             if ret:
@@ -392,6 +390,7 @@ class RandoSetup(object):
                         msg = "can't kill all mandatory bosses/minibosses"
                         self.log.debug("checkPool. {}".format(msg))
                         self.errorMsgs.append(msg)
+                    Objectives.maxDiff = maxDiff
                 else:
                     msg = "locked by Phantoon or Draygon"
                     self.log.debug('checkPool. {}'.format(msg))

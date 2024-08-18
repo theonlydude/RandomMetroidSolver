@@ -5,8 +5,6 @@ from web.backend.ws import WS
 from graph.graph_utils import vanillaTransitions, vanillaBossesTransitions, vanillaEscapeTransitions, GraphUtils
 from graph.vanilla.graph_access import accessPoints
 from solver.interactiveSolver import InteractiveSolver
-from logic.logic import Logic
-from rom.flavor import RomFlavor
 from rom.romreader import RomReader
 
 from gluon.html import OPTGROUP
@@ -17,11 +15,6 @@ class Tracker(object):
         self.request = request
         self.cache = cache
         self.response = response
-        # required for GraphUtils access to access points
-        # TODO will have to be changed when handling mirror/rotation etc
-        flavor = "vanilla"
-        Logic.factory(flavor)
-        RomFlavor.factory()
 
     def run(self):
         # init session
@@ -54,7 +47,7 @@ class Tracker(object):
 
         # generate list of addresses to read in the ROM
         addresses = getAddressesToRead(self.cache)
-        startAPs = GraphUtils.getStartAccessPointNamesCategory()
+        startAPs = GraphUtils.getStartAccessPointNamesCategory('vanilla')
         startAPs = [OPTGROUP(_label="Standard", *startAPs["regular"]),
                     OPTGROUP(_label="Custom", *startAPs["custom"]),
                     OPTGROUP(_label="Custom (Area rando only)", *startAPs["area"])]

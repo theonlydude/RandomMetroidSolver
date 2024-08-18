@@ -32,5 +32,6 @@
   "refill_before_save": "on",
   "relaxed_round_robin_cf": "on",
   "hud": "on",
+  "better_reserves": "on",
   "doorsColorsRando": "off"
 }

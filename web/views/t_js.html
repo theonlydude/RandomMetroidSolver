@@ -334,7 +334,6 @@ window.onload = function(){
         var base = re.exec(file.name)[1];
   
         var outFileName = file.name.replace(/\.[^/.]+$/, ".json");
-        document.getElementById("fileName").value = file.name;
 
         var fileSize = file.size;
         crc32.update(e.target.result);
@@ -527,7 +526,7 @@ function setGuessedPreset(romName){
 }
 
 function guessVARIAPreset(filename) {
-  var re = /VARIA_[A-Za-z_]+[A]?[D]?[B]?[F]?[M]?[Z]?[S]?X\d+_(\w+)/;
+  var re = /VARIA_[A-Za-z_]*[A]?[D]?[B]?[F]?[M]?[Z]?[S]?X\d+_(\w+)/;
   var match = filename.match(re);
   if(match != null) {
     var data = match[1];
@@ -581,6 +580,9 @@ function initSolver() {
 
   console.log("initSolver");
 
+  // clear local storage in tracker
+  $tracker.$store.seed.save({});
+
   // seedless debug plando race standard
   var mode = "seedless";
   var romJson = document.getElementById("romJson");
@@ -617,7 +619,6 @@ function initSolver() {
             scope: "common",
             romJson: romJsonValue,
             preset: document.getElementById("preset").value,
-            fileName: document.getElementById("fileName").value,
             fill: document.getElementById("fillPlando").checked,
             startLocation: document.getElementById("startLocation").value,
             doorsRando: document.getElementById("doorsRando").checked,
@@ -776,7 +777,6 @@ $(window).scroll(function(){
 function clearInputSeed() {
   document.getElementById("uploadFile").value = "";
   document.getElementById("romJson").value = "";
-  document.getElementById("fileName").value = "";
   if(mode != "plando") {
     document.getElementById("startLocationVisibility").style.display = "table-row";
     document.getElementById("doorsRandoVisibility").style.display = "table-row";

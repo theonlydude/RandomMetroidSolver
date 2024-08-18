@@ -122,6 +122,10 @@ class PaletteRando(object):
         self.max_degree = settings["max_degree"]
         self.min_degree = settings["min_degree"]
         self.invert = settings["invert"]
+        if not settings['grayscale']:
+            self.transform = self.update_hue
+        else:
+            self.transform = self.grayscale
 
         self.adjust_luminance = False
 
@@ -354,6 +358,12 @@ class PaletteRando(object):
 
         return BE_hex_color
 
+    def grayscale(self, int_value_LE, degree):
+        r, g, b = RGB_15_to_24(int_value_LE)
+        gray = 0.299*r + 0.587*g + 0.114*b # weighted sum for human perception of luminance
+        rgb_final = (int(gray*255), int(gray*255), int(gray*255))
+        return RGB_24_to_15(rgb_final)
+
     def read_word(self, address):
         return self.palettesROM.readWord(address)
 
@@ -391,7 +401,7 @@ class PaletteRando(object):
             degree = self.getDegree()
             self.boss_degree_list.append(degree)
 
-    def hue_shift_palette_lists(self, degree, address_list, size_list):
+    def transform_palette_lists(self, degree, address_list, size_list):
         for count, address in enumerate(address_list):
             for i in range(size_list[count]+1):
                 self.logger.debug("Fx1 address: {} at offset: {}".format(hex(address), hex(i*2)))
@@ -399,23 +409,21 @@ class PaletteRando(object):
                 read_address = address + (i*2)
                 int_value_LE = self.read_word(read_address)
 
-                BE_hex_color = self.update_hue(int_value_LE, degree)
+                BE_hex_color = self.transform(int_value_LE, degree)
 
                 self.write_word(read_address, BE_hex_color)
 
-    def hue_shift_palette_single_offsets(self, data, offset_list, degree, address):
+    def transform_palette_single_offsets(self, data, offset_list, degree, address):
         #if green brinstar or crateria palette, shuffle blue door caps to also shuffle lower crateria color
-        if not self.settings['no_blue_door_palette'] and ( (address == 0x213264) or (address == 0x21335F) ):
+        if (not self.settings['no_blue_door_palette'] or self.settings['grayscale']) and ( (address == 0x213264) or (address == 0x21335F) ):
             copy_offset_list = (offset_list+self.bluedoor_bytes)
         else:
             copy_offset_list = offset_list
-
-        copy_offset_list = offset_list
         for offset in copy_offset_list:
             #Convert from LE to BE
             int_value_LE = self.get_word(data, offset)
 
-            BE_hex_color = self.update_hue(int_value_LE, degree)
+            BE_hex_color = self.transform(int_value_LE, degree)
 
             self.logger.debug("15bit BE_hex_color: {}".format(hex(BE_hex_color)))
 
@@ -424,7 +432,7 @@ class PaletteRando(object):
             self.logger.debug("write decomp palette offset: {} value: {}".format(hex(offset), BE_hex_color))
 
     #Function to shift palette hues by set degree for a palette with fixed size 0x0F
-    def hue_shift_fixed_size_palette(self, base_address, degree,size, exclude = [""]):
+    def transform_fixed_size_palette(self, base_address, degree,size, exclude = [""]):
         self.logger.debug("Shifting suit palette at {} by degree {}".format(hex(base_address), degree))
         
         for i in range(0,size+1):
@@ -435,11 +443,11 @@ class PaletteRando(object):
             read_address=base_address+(i*2)
             int_value_LE = self.read_word(read_address)
 
-            BE_hex_color = self.update_hue(int_value_LE, degree)
+            BE_hex_color = self.transform(int_value_LE, degree)
 
             self.write_word(read_address, BE_hex_color)
 
-    def hue_shift_tileset_palette(self, degree):
+    def transform_tileset_palette(self, degree):
         # adjust luminance for tilesets
         self.adjust_luminance = True
 
@@ -451,7 +459,7 @@ class PaletteRando(object):
 
             data = self.decompress(address)
 
-            self.hue_shift_palette_single_offsets(data, self.palette_single_bytes, degree, address)
+            self.transform_palette_single_offsets(data, self.palette_single_bytes, degree, address)
 
             #special case for mother brain room
             if address == 0x213BC1:
@@ -471,7 +479,7 @@ class PaletteRando(object):
                     #Convert from LE to BE
                     int_value_LE = self.get_word(data, subset+(j*2))
 
-                    BE_hex_color = self.update_hue(int_value_LE, degree)
+                    BE_hex_color = self.transform(int_value_LE, degree)
 
                     self.logger.debug("15bit BE_hex_color: {}".format(hex(BE_hex_color)))
 
@@ -491,39 +499,39 @@ class PaletteRando(object):
 
     def boss_palette_shift(self, degree):
         if self.settings["global_shift"] == True:
-            self.hue_shift_palette_lists(degree, self.spore_spawn_palettes, self.spore_spawn_length)
-            self.hue_shift_palette_lists(degree, self.kraid_palettes, self.kraid_length)
-            self.hue_shift_palette_lists(degree, self.phantoon_palettes, self.phantoon_length)
-            self.hue_shift_palette_lists(degree, self.botwoon_palettes, self.botwoon_length)
-            self.hue_shift_palette_lists(degree, self.draygon_palettes, self.draygon_length)
-            self.hue_shift_palette_lists(degree, self.crocomire_palettes, self.crocomire_length)
-            self.hue_shift_palette_lists(degree, self.bomb_torizo_palettes, self.bomb_torizo_length)
-            self.hue_shift_palette_lists(degree, self.gold_torizo_palettes, self.gold_torizo_length)
-            self.hue_shift_palette_lists(degree, self.ridley_palettes, self.ridley_length)
-            self.hue_shift_palette_lists(degree, self.mbrain_palettes, self.mbrain_length)
+            self.transform_palette_lists(degree, self.spore_spawn_palettes, self.spore_spawn_length)
+            self.transform_palette_lists(degree, self.kraid_palettes, self.kraid_length)
+            self.transform_palette_lists(degree, self.phantoon_palettes, self.phantoon_length)
+            self.transform_palette_lists(degree, self.botwoon_palettes, self.botwoon_length)
+            self.transform_palette_lists(degree, self.draygon_palettes, self.draygon_length)
+            self.transform_palette_lists(degree, self.crocomire_palettes, self.crocomire_length)
+            self.transform_palette_lists(degree, self.bomb_torizo_palettes, self.bomb_torizo_length)
+            self.transform_palette_lists(degree, self.gold_torizo_palettes, self.gold_torizo_length)
+            self.transform_palette_lists(degree, self.ridley_palettes, self.ridley_length)
+            self.transform_palette_lists(degree, self.mbrain_palettes, self.mbrain_length)
         elif self.settings["match_room_shift_with_boss"]:
-            self.hue_shift_palette_lists(self.degree_list[6], self.spore_spawn_palettes, self.spore_spawn_length)
-            self.hue_shift_palette_lists(self.degree_list[22], self.kraid_palettes, self.kraid_length)
-            self.hue_shift_palette_lists(self.degree_list[4], self.phantoon_palettes, self.phantoon_length)
-            self.hue_shift_palette_lists(self.degree_list[11], self.botwoon_palettes, self.botwoon_length)
-            self.hue_shift_palette_lists(self.degree_list[24], self.draygon_palettes, self.draygon_length)
-            self.hue_shift_palette_lists(self.degree_list[23], self.crocomire_palettes, self.crocomire_length)
-            self.hue_shift_palette_lists(self.degree_list[0], self.bomb_torizo_palettes, self.bomb_torizo_length)
-            self.hue_shift_palette_lists(self.degree_list[9], self.gold_torizo_palettes, self.gold_torizo_length)
-            self.hue_shift_palette_lists(self.degree_list[9], self.ridley_palettes, self.ridley_length)
-            self.hue_shift_palette_lists(self.degree_list[14], self.mbrain_palettes, self.mbrain_length)
+            self.transform_palette_lists(self.degree_list[6], self.spore_spawn_palettes, self.spore_spawn_length)
+            self.transform_palette_lists(self.degree_list[22], self.kraid_palettes, self.kraid_length)
+            self.transform_palette_lists(self.degree_list[4], self.phantoon_palettes, self.phantoon_length)
+            self.transform_palette_lists(self.degree_list[11], self.botwoon_palettes, self.botwoon_length)
+            self.transform_palette_lists(self.degree_list[24], self.draygon_palettes, self.draygon_length)
+            self.transform_palette_lists(self.degree_list[23], self.crocomire_palettes, self.crocomire_length)
+            self.transform_palette_lists(self.degree_list[0], self.bomb_torizo_palettes, self.bomb_torizo_length)
+            self.transform_palette_lists(self.degree_list[9], self.gold_torizo_palettes, self.gold_torizo_length)
+            self.transform_palette_lists(self.degree_list[9], self.ridley_palettes, self.ridley_length)
+            self.transform_palette_lists(self.degree_list[14], self.mbrain_palettes, self.mbrain_length)
         else:
             #[sporespawn,kraid,phantoon,botwoon,draygon,crocomire,bomb-torizo,gold-torizo,ridley,mbrain]
-            self.hue_shift_palette_lists(self.boss_degree_list[0], self.spore_spawn_palettes, self.spore_spawn_length)
-            self.hue_shift_palette_lists(self.boss_degree_list[1], self.kraid_palettes, self.kraid_length)
-            self.hue_shift_palette_lists(self.boss_degree_list[2], self.phantoon_palettes, self.phantoon_length)
-            self.hue_shift_palette_lists(self.boss_degree_list[3], self.botwoon_palettes, self.botwoon_length)
-            self.hue_shift_palette_lists(self.boss_degree_list[4], self.draygon_palettes, self.draygon_length)
-            self.hue_shift_palette_lists(self.boss_degree_list[5], self.crocomire_palettes, self.crocomire_length)
-            self.hue_shift_palette_lists(self.boss_degree_list[6], self.bomb_torizo_palettes, self.bomb_torizo_length)
-            self.hue_shift_palette_lists(self.boss_degree_list[7], self.gold_torizo_palettes, self.gold_torizo_length)
-            self.hue_shift_palette_lists(self.boss_degree_list[8], self.ridley_palettes, self.ridley_length)
-            self.hue_shift_palette_lists(self.boss_degree_list[9], self.mbrain_palettes, self.mbrain_length)    
+            self.transform_palette_lists(self.boss_degree_list[0], self.spore_spawn_palettes, self.spore_spawn_length)
+            self.transform_palette_lists(self.boss_degree_list[1], self.kraid_palettes, self.kraid_length)
+            self.transform_palette_lists(self.boss_degree_list[2], self.phantoon_palettes, self.phantoon_length)
+            self.transform_palette_lists(self.boss_degree_list[3], self.botwoon_palettes, self.botwoon_length)
+            self.transform_palette_lists(self.boss_degree_list[4], self.draygon_palettes, self.draygon_length)
+            self.transform_palette_lists(self.boss_degree_list[5], self.crocomire_palettes, self.crocomire_length)
+            self.transform_palette_lists(self.boss_degree_list[6], self.bomb_torizo_palettes, self.bomb_torizo_length)
+            self.transform_palette_lists(self.boss_degree_list[7], self.gold_torizo_palettes, self.gold_torizo_length)
+            self.transform_palette_lists(self.boss_degree_list[8], self.ridley_palettes, self.ridley_length)
+            self.transform_palette_lists(self.boss_degree_list[9], self.mbrain_palettes, self.mbrain_length)    
 
         if self.settings["shift_tileset_palette"] and len(self.pointers_to_insert) == 0:
             raise Exception("tileset shifting needs to be called before boss palette shifting if both are active!")
@@ -566,7 +574,7 @@ class PaletteRando(object):
                     #Convert from LE to BE
                     int_value_LE = self.get_word(data, subset+(j*2))
 
-                    BE_hex_color = self.update_hue(int_value_LE, degree)
+                    BE_hex_color = self.transform(int_value_LE, degree)
 
                     self.logger.debug("15bit BE_hex_color: {}".format(hex(BE_hex_color)))
 
@@ -618,39 +626,39 @@ class PaletteRando(object):
             self.generate_boss_degrees()
 
         if self.settings["shift_tileset_palette"]:
-            self.hue_shift_tileset_palette(degree)
+            self.transform_tileset_palette(degree)
 
             if self.settings["individual_tileset_shift"]:
-                self.hue_shift_palette_lists(self.degree_list[0], self.fx1_palettes_cr, self.fx1_length_cr)
-                self.hue_shift_palette_lists(self.degree_list[6], self.fx1_palettes_gb, self.fx1_length_gb)
-                self.hue_shift_palette_lists(self.degree_list[7], self.fx1_palettes_rb, self.fx1_length_rb)
-                self.hue_shift_palette_lists(self.degree_list[4], self.fx1_palettes_ws, self.fx1_length_ws)
-                self.hue_shift_palette_lists(self.degree_list[13], self.fx1_palettes_tr, self.fx1_length_tr)
-                self.hue_shift_palette_lists(self.degree_list[11], self.fx1_palettes_ma, self.fx1_length_ma)
-                self.hue_shift_palette_lists(self.degree_list[7], self.fx1_palettes_lanterns, self.fx1_length_lanterns)
-                self.hue_shift_palette_lists(self.degree_list[6], self.crateria_special_enemies, [0x0F,0x0F]) 
+                self.transform_palette_lists(self.degree_list[0], self.fx1_palettes_cr, self.fx1_length_cr)
+                self.transform_palette_lists(self.degree_list[6], self.fx1_palettes_gb, self.fx1_length_gb)
+                self.transform_palette_lists(self.degree_list[7], self.fx1_palettes_rb, self.fx1_length_rb)
+                self.transform_palette_lists(self.degree_list[4], self.fx1_palettes_ws, self.fx1_length_ws)
+                self.transform_palette_lists(self.degree_list[13], self.fx1_palettes_tr, self.fx1_length_tr)
+                self.transform_palette_lists(self.degree_list[11], self.fx1_palettes_ma, self.fx1_length_ma)
+                self.transform_palette_lists(self.degree_list[7], self.fx1_palettes_lanterns, self.fx1_length_lanterns)
+                self.transform_palette_lists(self.degree_list[6], self.crateria_special_enemies, [0x0F,0x0F]) 
                 self.logger.debug("Wrecked Ship sparks shifted by {}".format(self.degree_list[4]))
-                self.hue_shift_palette_lists(self.degree_list[4], self.wrecked_ship_special_enemies, [0x0F])
-                self.hue_shift_palette_lists(self.degree_list[13], self.tourian_special_enemies, [0x0F,0x0F])
-                self.hue_shift_fixed_size_palette(self.statue_palette_ridley, self.degree_list[17], 0x0F)
-                self.hue_shift_fixed_size_palette(self.statue_palette_phantoon, self.degree_list[17], 0x0F)
-                self.hue_shift_fixed_size_palette(self.statue_base, self.degree_list[17], 0x0F)
-                self.hue_shift_palette_lists(self.degree_list[17], self.statue_fadeout_palettes, self.statue_fadeout_size)
+                self.transform_palette_lists(self.degree_list[4], self.wrecked_ship_special_enemies, [0x0F])
+                self.transform_palette_lists(self.degree_list[13], self.tourian_special_enemies, [0x0F,0x0F])
+                self.transform_fixed_size_palette(self.statue_palette_ridley, self.degree_list[17], 0x0F)
+                self.transform_fixed_size_palette(self.statue_palette_phantoon, self.degree_list[17], 0x0F)
+                self.transform_fixed_size_palette(self.statue_base, self.degree_list[17], 0x0F)
+                self.transform_palette_lists(self.degree_list[17], self.statue_fadeout_palettes, self.statue_fadeout_size)
             else:
-                self.hue_shift_palette_lists(degree, self.fx1_palettes_cr, self.fx1_length_cr)
-                self.hue_shift_palette_lists(degree, self.fx1_palettes_gb, self.fx1_length_gb)
-                self.hue_shift_palette_lists(degree, self.fx1_palettes_rb, self.fx1_length_rb)
-                self.hue_shift_palette_lists(degree, self.fx1_palettes_ws, self.fx1_length_ws)
-                self.hue_shift_palette_lists(degree, self.fx1_palettes_tr, self.fx1_length_tr)
-                self.hue_shift_palette_lists(degree, self.fx1_palettes_ma, self.fx1_length_ma)
-                self.hue_shift_palette_lists(degree, self.fx1_palettes_lanterns, self.fx1_length_lanterns)
-                self.hue_shift_palette_lists(degree, self.crateria_special_enemies, [0x0F,0x0F])
-                self.hue_shift_palette_lists(degree, self.wrecked_ship_special_enemies, [0x0F])
-                self.hue_shift_palette_lists(degree, self.tourian_special_enemies, [0x0F,0x0F])
-                self.hue_shift_fixed_size_palette(self.statue_palette_ridley,degree, 0x0F)
-                self.hue_shift_fixed_size_palette(self.statue_palette_phantoon,degree, 0x0F)
-                self.hue_shift_fixed_size_palette(self.statue_base,degree, 0x0F)
-                self.hue_shift_palette_lists(degree, self.statue_fadeout_palettes, self.statue_fadeout_size)
+                self.transform_palette_lists(degree, self.fx1_palettes_cr, self.fx1_length_cr)
+                self.transform_palette_lists(degree, self.fx1_palettes_gb, self.fx1_length_gb)
+                self.transform_palette_lists(degree, self.fx1_palettes_rb, self.fx1_length_rb)
+                self.transform_palette_lists(degree, self.fx1_palettes_ws, self.fx1_length_ws)
+                self.transform_palette_lists(degree, self.fx1_palettes_tr, self.fx1_length_tr)
+                self.transform_palette_lists(degree, self.fx1_palettes_ma, self.fx1_length_ma)
+                self.transform_palette_lists(degree, self.fx1_palettes_lanterns, self.fx1_length_lanterns)
+                self.transform_palette_lists(degree, self.crateria_special_enemies, [0x0F,0x0F])
+                self.transform_palette_lists(degree, self.wrecked_ship_special_enemies, [0x0F])
+                self.transform_palette_lists(degree, self.tourian_special_enemies, [0x0F,0x0F])
+                self.transform_fixed_size_palette(self.statue_palette_ridley,degree, 0x0F)
+                self.transform_fixed_size_palette(self.statue_palette_phantoon,degree, 0x0F)
+                self.transform_fixed_size_palette(self.statue_base,degree, 0x0F)
+                self.transform_palette_lists(degree, self.statue_fadeout_palettes, self.statue_fadeout_size)
 
 
             i=-1
@@ -667,17 +675,17 @@ class PaletteRando(object):
         if self.settings["shift_enemy_palettes"]:
             if self.settings["seperate_enemy_palette_groups"]:
                 enemy_degree = self.getDegree()
-                self.hue_shift_palette_lists(enemy_degree, self.metroid_palettes, [0x0F,0x0F,0x0F,0x0F])
-                self.hue_shift_palette_lists(enemy_degree, self.various_metroid_palettes, self.various_metroid_length)
+                self.transform_palette_lists(enemy_degree, self.metroid_palettes, [0x0F,0x0F,0x0F,0x0F])
+                self.transform_palette_lists(enemy_degree, self.various_metroid_palettes, self.various_metroid_length)
                 enemy_degree = self.getDegree()
-                self.hue_shift_palette_lists(enemy_degree, self.desgeega_palettes, [0x0F,0x0F])
+                self.transform_palette_lists(enemy_degree, self.desgeega_palettes, [0x0F,0x0F])
                 enemy_degree = self.getDegree()
-                self.hue_shift_palette_lists(enemy_degree, self.sidehopper_palettes, [0x0F,0x0F])
+                self.transform_palette_lists(enemy_degree, self.sidehopper_palettes, [0x0F,0x0F])
                 enemy_degree = self.getDegree()
-                self.hue_shift_palette_lists(enemy_degree, self.animal_palettes, [0x0F,0x0F,0x0F,0x0F])
+                self.transform_palette_lists(enemy_degree, self.animal_palettes, [0x0F,0x0F,0x0F,0x0F])
                 for address in self.enemy_palettes:
                     enemy_degree = self.getDegree()
-                    self.hue_shift_fixed_size_palette(address, enemy_degree, 0x0F)
+                    self.transform_fixed_size_palette(address, enemy_degree, 0x0F)
             else:
                 self.enemy_palettes.extend(self.metroid_palettes)
                 self.enemy_palettes.extend(self.desgeega_palettes)
@@ -687,13 +695,13 @@ class PaletteRando(object):
                     enemy_degree = degree
                 else:
                     enemy_degree = self.getDegree()
-                self.hue_shift_palette_lists(enemy_degree, self.various_metroid_palettes, self.various_metroid_length)
+                self.transform_palette_lists(enemy_degree, self.various_metroid_palettes, self.various_metroid_length)
                 for address in self.enemy_palettes:
                     if self.settings["global_shift"] == True:
                         enemy_degree = degree
                     else:
                         enemy_degree = self.getDegree()
-                    self.hue_shift_fixed_size_palette(address, enemy_degree, 0x0F)
+                    self.transform_fixed_size_palette(address, enemy_degree, 0x0F)
 
         self.logger.debug("degree_list: {}".format(self.degree_list))
 
@@ -702,10 +710,10 @@ class PaletteRando(object):
                 beam_degree = degree
             else:
                 beam_degree = self.getDegree()
-            self.hue_shift_palette_lists(beam_degree, self.beam_palettes, self.beam_palettes_length)
-            self.hue_shift_palette_lists(beam_degree, self.wave_beam_trail_palettes, self.wave_beam_trail_length)
-            self.hue_shift_palette_lists(beam_degree, self.grapple_beam_palettes, self.grapple_beam_length)
-            self.hue_shift_palette_lists(beam_degree, self.super_missile_palettes, self.super_missile_length)
+            self.transform_palette_lists(beam_degree, self.beam_palettes, self.beam_palettes_length)
+            self.transform_palette_lists(beam_degree, self.wave_beam_trail_palettes, self.wave_beam_trail_length)
+            self.transform_palette_lists(beam_degree, self.grapple_beam_palettes, self.grapple_beam_length)
+            self.transform_palette_lists(beam_degree, self.super_missile_palettes, self.super_missile_length)
 
         if self.settings["shift_ship_palette"] and not self.settings["shift_suit_palettes"]:
                 if self.settings["match_ship_and_power"]:
@@ -715,7 +723,7 @@ class PaletteRando(object):
                         ship_degree = degree
                     else:
                         ship_degree = self.getDegree()
-                self.hue_shift_fixed_size_palette(self.ship_palette, ship_degree, 0x0F)
+                self.transform_fixed_size_palette(self.ship_palette, ship_degree, 0x0F)
 
         if self.settings["shift_suit_palettes"]:
             if self.settings["global_shift"] == True:
@@ -724,7 +732,7 @@ class PaletteRando(object):
                 base_degree = self.getDegree()
 
             for address in self.power_palette_offsets:
-                self.hue_shift_fixed_size_palette(address, base_degree, 0x0F, [0x04])
+                self.transform_fixed_size_palette(address, base_degree, 0x0F, [0x04])
 
             if self.settings["match_ship_and_power"]:
                 ship_degree = base_degree
@@ -732,19 +740,19 @@ class PaletteRando(object):
                 ship_degree = self.getDegree()
 
             if self.settings["shift_ship_palette"]:
-                self.hue_shift_fixed_size_palette(self.ship_palette, ship_degree, 0x0F)
+                self.transform_fixed_size_palette(self.ship_palette, ship_degree, 0x0F)
 
             if self.settings["individual_suit_shift"]:
                 degree = self.getDegree()
 
             for address in self.varia_palette_offsets:
-                self.hue_shift_fixed_size_palette(address, degree, 0x0F, [0x04])
+                self.transform_fixed_size_palette(address, degree, 0x0F, [0x04])
 
             if self.settings["individual_suit_shift"]:
                 degree = self.getDegree()
 
             for address in self.gravity_palette_offsets:
-                self.hue_shift_fixed_size_palette(address, degree, 0x0F, [0x04])    
+                self.transform_fixed_size_palette(address, degree, 0x0F, [0x04])    
 
     def compress(self, address, data):
         length = self.romPatcher.compress(address, data)

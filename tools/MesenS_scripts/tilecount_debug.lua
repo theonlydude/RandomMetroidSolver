@@ -7,7 +7,7 @@ local function readByte(ramAddr)
   return emu.read(ramAddr, emu.memType.workRam)
 end
 
-local statsRamAddr = 0xd850
+local statsRamAddr = 0xd8e0
 
 local tileCountData = {
   {"Total", addr=statsRamAddr+12, region=false, word=true},

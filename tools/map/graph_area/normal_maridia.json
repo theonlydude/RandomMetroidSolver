@@ -777,9 +777,33 @@
                 31,
                 16
             ]
+        ],
+        "[Pants Room West half]": [
+            [
+                27,
+                17
+            ],
+            [
+                27,
+                16
+            ],
+            [
+                27,
+                15
+            ]
         ]
     },
     "RedBrinstar": {
+        "__unexplorable__": [
+            [
+                9,
+                19
+            ],
+            [
+                13,
+                19
+            ]
+        ],
         "[Glass Tunnel Save Room]": [
             [
                 12,

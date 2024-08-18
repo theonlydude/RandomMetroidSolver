@@ -16,7 +16,6 @@ class RomOptions(object):
         self._values = {}
         self._symbols = symbols
         self.addOption("escapeRandoRemoveEnemies", "rando_escape_common", "opt_remove_enemies")
-        self.addOption("backupSaves", "base", "opt_backup")
         self.addOption("escapeTrigger", "objectives_options", "escape_flag")
         self.addOption("escapeTriggerCrateria", "objectives_options", "settings_flags", mask=0x1)
         self.addOption("objectivesSFX", "objectives_options", "settings_flags", mask=0x80)

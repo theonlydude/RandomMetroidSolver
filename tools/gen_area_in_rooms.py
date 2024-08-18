@@ -2,11 +2,9 @@
 
 import sys, os
 
-# now that we're in directory 'tools/' we have to update sys.path
 sys.path.append(os.path.dirname(sys.path[0]))
 
-# generate asm files putting graph area ID in "Unused Pointer" field's first byte in
-# all room states
+# generate asm files putting graph area ID, and minimap room type ID in "Unused Pointer" field in all room states
 
 vanilla=sys.argv[1]
 asm=sys.argv[2]
@@ -18,12 +16,28 @@ if len(sys.argv) > 3:
 from graph.graph_utils import graphAreas as areas
 from rooms import rooms as rooms_area
 from rooms import rooms_alt
+from map.minimap import MinimapPalettesConfig
 
-rooms = rooms_area
-if layout == "alt":
-    rooms = rooms_alt
+rooms = {}
+for room in rooms_area:
+    rooms[room['Name']] = room
+alt = layout == "alt"
+if alt:
+    for room in rooms_alt:
+        rooms[room['Name']] = room
 
-from rom.rom import pc_to_snes,RealROM
+flavor = "vanilla"
+if "mirror" in asm:
+    flavor = "mirror"
+
+dataDirs = {
+    "vanilla": "tools/map/graph_area",
+    "mirror": "tools/map/graph_area_mirror"
+}
+
+minimapCfg = MinimapPalettesConfig(dataDir=dataDirs[flavor], binMapDir=f"patches/{flavor}/src/map", alt=alt)
+
+from rom.rom import pc_to_snes, RealROM
 
 rom = RealROM(vanilla)
 
@@ -35,10 +49,12 @@ statesChecksArgSize = {
 
 with open(asm, "w") as src:
     src.write("lorom\narch 65816\n\n")
-    for room in rooms:
+    for room in rooms.values():
 #        print(room["Name"])
         def processState(stateWordAddr):
-            src.write("org $8f%04x\n\tdb $%02x\n" % (stateWordAddr+16, areas.index(room['GraphArea'])))
+            graphAreaId = areas.index(room['GraphArea'])
+            minimapTypeId = minimapCfg.roomTypes[room["Name"]].id
+            src.write(";;; %s\norg $8f%04x\n\tdb $%02x, $%02x\n" % (room['Name'], stateWordAddr+16, graphAreaId, minimapTypeId))
         address = room['Address']+11
         # process additionnal states
         while True:

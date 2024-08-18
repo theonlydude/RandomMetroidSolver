@@ -272,7 +272,6 @@ rooms_alt = [
     {"Address": 0x07962A, "DoorCount": 3, "Name": "[Elevator to Red Brinstar]","GraphArea":"Crateria"},
     {"Address": 0x079938, "DoorCount": 3, "Name": "[Elevator to Green Brinstar]","GraphArea":"Crateria"},
     {"Address": 0x07A5ED, "DoorCount": 2, "Name": "Statues Hallway","GraphArea":"Crateria"},
-    {"Address": 0x07A66A, "DoorCount": 3, "Name": "Statues Room","GraphArea":"Crateria"},
     {"Address": 0x07A6A1, "DoorCount": 4, "Name": "Warehouse Entrance","GraphArea":"RedBrinstar"},
     {"Address": 0x07AF14, "DoorCount": 2, "Name": "Lava Dive Room","GraphArea":"Norfair"},
     {"Address": 0x07AF3F, "DoorCount": 4, "Name": "[Elevator to Lower Norfair]","GraphArea":"Norfair"},

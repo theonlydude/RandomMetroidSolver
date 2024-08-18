@@ -13,6 +13,9 @@ class VCR(object):
     def addLocation(self, locName, itemName):
         self.tape.append({'type': 'location', 'loc': locName, 'item': itemName})
 
+    def addObjective(self, objectiveName):
+        self.tape.append({'type': 'objective', 'obj': objectiveName})
+
     def addRollback(self, count):
         self.tape.append({'type': 'rollback', 'count': count})
 

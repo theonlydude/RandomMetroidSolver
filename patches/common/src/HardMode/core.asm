@@ -166,6 +166,9 @@ HardSprites:				;//mode:hff
 
 	NOP				;//to know where the data ends
 
+print "81 end: ", pc
+warnpc $81fb7f
+
 ;--------------------------------------------------------------
 org $8DFFF0
         db $ff

@@ -8,6 +8,8 @@
 lorom
 arch 65816
 
+incsrc "sym/map.asm"
+
 incsrc "macros.asm"
 
 ;;; Constants :
@@ -76,9 +78,16 @@ print pc
 	;; set cancel spark flag if a spark is active
 	lda !contact_dmg_idx
 	cmp #$0002		; contact damage is 2 if samus is sparking
-	bne .end
-	lda !MAGIC
-	sta !spark_flag
+	bne +
+	lda !MAGIC : sta !spark_flag
++
+        ;; reset contact damage index
+        stz !contact_dmg_idx
+        ;; set samus previous position with current position
+        lda $0AF6 : sta $0B10   ; X px
+        lda $0AF8 : sta $0B12   ; X subpx
+        lda $0AFA : sta $0B14   ; Y px
+        lda $0AFC : sta $0B16   ; Y subpx
 .end:
 print "giveiframes:"
 print pc
@@ -91,6 +100,17 @@ print pc
 
 warnpc $8ff6ff
 
+org $8ff7a0
+
+;;; if exiting the room when Kraid is alive, call some vanilla functions to restore BG3 tiles
+%export(kraid_exit_fix)
+        jsl $a7c77d
+        jsl $a7c7a3
+        jsl $a7c7c9
+        jsl $a7c7ef
+.end:
+        rts
+
 ;;; use this as exit door asm for croc, phantoon, draygon :
 ;;; bosses draw their tilemap on BG2, and a routine to draw enemy
 ;;; BG2 ($A0:9726) is also ran and at the end of every
@@ -98,10 +118,23 @@ warnpc $8ff6ff
 ;;; has to be done. If we exit during croc fight, the value can be
 ;;; non-0 and some garbage resulting from room tiles decompression
 ;;; of door transition is copied to BG2 tilemap in the next room.
-org $8ff7f0
 %export(boss_exit_fix)
     stz $0e1e	; clear the flag to disable enemy BG2 tilemap routine
     rts
+
+;;; args:
+;;; X: offset in bank 7E for tile to explore
+;;; A: bitmask for tile to explore
+;;; $12: graph area for tile to explore
+%export(explore_tile)
+        phb : pea $7e7e : plb : plb ; DB = $7E
+        bit $0000, x : bne .end ; already explored: return
+        ;; explore and increase tile counts
+        ora $0000, x : sta $0000, x
+        lda $12 : jsl map_update_area_tilecount
+.end:
+        plb
+        rts
 
 warnpc $8ff7ff
 

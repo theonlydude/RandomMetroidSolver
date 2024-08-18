@@ -6,9 +6,8 @@ from utils.parameters import Knows, diff2text, text2diff, diff4solver
 from utils.parameters import easy, medium, hard, harder, hardcore, mania
 from utils.utils import getPresetDir, getPythonExec
 from utils.db import DB
-from solver.conf import Conf
-from logic.logic import Logic
-from rom.flavor import RomFlavor
+from utils.colors import areaColors, RGB_24_to_html
+from solver.conf import SolverConf
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.http import redirect
@@ -19,11 +18,6 @@ class Solver(object):
         self.session = session
         self.request = request
         self.cache = cache
-        # required for symbols
-        # TODO will have to be changed when handling mirror/rotation etc
-        flavor = "vanilla"
-        Logic.factory(flavor)
-        RomFlavor.factory()
         self.vars = self.request.vars
 
     def run(self):
@@ -91,18 +85,21 @@ class Solver(object):
         # generate list of addresses to read in the ROM
         addresses = getAddressesToRead(self.cache)
 
+        # to display minimap colors in spoiler log
+        minimapColors = self.getMinimapColors()
+
         # send values to view
         return dict(desc=Knows.desc, stdPresets=stdPresets, tourPresets=tourPresets, comPresets=comPresets, roms=ROMs,
                     lastRomFile=lastRomFile, difficulties=diff2text, categories=Knows.categories,
-                    result=result, addresses=addresses,
+                    result=result, addresses=addresses, minimapColors=minimapColors,
                     easy=easy, medium=medium, hard=hard, harder=harder, hardcore=hardcore, mania=mania)
 
     def initSolverSession(self):
         if self.session.solver is None:
             self.session.solver = {
                 'preset': 'regular',
-                'difficultyTarget': Conf.difficultyTarget,
-                'pickupStrategy': Conf.itemsPickup,
+                'difficultyTarget': SolverConf.defaultDifficultyTarget,
+                'pickupStrategy': SolverConf.defaultPickupStrategy,
                 'itemsForbidden': [],
                 'romFiles': [],
                 'romFile': None,
@@ -133,6 +130,61 @@ class Solver(object):
     def getLastSolvedROM(self):
         return '{}.sfc'.format(self.session.solver['romFile']) if self.session.solver['romFile'] is not None else None
 
+    def getMinimapArea(self, subArea):
+        # associate sub areas with minimap areas
+        subAreas = {
+            "Blue Brinstar": "Crateria",
+            "Brinstar Hills": "GreenPinkBrinstar",
+            "Bubble Norfair Bottom": "Norfair",
+            "Bubble Norfair Reserve": "Norfair",
+            "Bubble Norfair Speed": "Norfair",
+            "Bubble Norfair Wave": "Norfair",
+            "Crateria Bombs": "Crateria",
+            "Crateria Gauntlet": "Crateria",
+            "Crateria Landing Site": "Crateria",
+            "Crateria Moat": "Crateria",
+            "Crateria Terminator": "Crateria",
+            "Crocomire": "Crocomire",
+            "Draygon Boss": "EastMaridia",
+            "Green Brinstar": "GreenPinkBrinstar",
+            "Green Brinstar Reserve": "GreenPinkBrinstar",
+            "Kraid": "Kraid",
+            "Kraid Boss": "Kraid",
+            "Left Sandpit": "EastMaridia",
+            "Lower Norfair After Amphitheater": "LowerNorfair",
+            "Lower Norfair Before Amphitheater": "LowerNorfair",
+            "Lower Norfair Screw Attack": "LowerNorfair",
+            "Lower Norfair Wasteland": "LowerNorfair",
+            "Maridia Forgotten Highway": "EastMaridia",
+            "Maridia Green": "WestMaridia",
+            "Maridia Pink Bottom": "EastMaridia",
+            "Maridia Pink Top": "EastMaridia",
+            "Maridia Sandpits": "EastMaridia",
+            "Norfair Cathedral": "Norfair",
+            "Norfair Entrance": "Norfair",
+            "Norfair Grapple Escape": "Norfair",
+            "Norfair Ice": "Norfair",
+            "Phantoon Boss": "WreckedShip",
+            "Pink Brinstar": "GreenPinkBrinstar",
+            "Red Brinstar Bottom": "RedBrinstar",
+            "Red Brinstar Middle": "RedBrinstar",
+            "Red Brinstar Top": "RedBrinstar",
+            "Ridley Boss": "LowerNorfair",
+            "Right Sandpit": "EastMaridia",
+            "Tourian": "Tourian",
+            "WreckedShip Back": "WreckedShip",
+            "WreckedShip Bottom": "WreckedShip",
+            "WreckedShip Gravity": "WreckedShip",
+            "WreckedShip Main": "WreckedShip",
+            "WreckedShip Top": "WreckedShip",
+        }
+        return subAreas[subArea]
+
+    def getMinimapColors(self):
+        # between 0 and 255
+        opacity = 80
+        return {area: RGB_24_to_html(color, opacity) for area, color in areaColors.items()}
+
     def genPathTable(self, locations, scavengerOrder, displayAPs=True):
         if locations is None or len(locations) == 0:
             return None
@@ -159,30 +211,32 @@ class Solver(object):
                 if displayAPs == True and not (len(path) == 1 and path[0] == lastAP):
                     pathTable += """<tr class="grey"><td colspan="3">{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>\n""".format(" -&gt; ".join(path), """<img alt="samus" class="imageItem" src="/solver/static/images/solver/samus_run_{}.gif" title="samus" />""".format(currentSuit), self.getDiffImg(pathDiff), self.getTechniques(pathTechniques), self.getItems(pathItems))
 
-            (name, room) = location
+            if location is not None:
+                (name, room) = location
 
-            # not picked up items start with an '-'
-            if item[0] != '-':
-                pathTable += """
-    <tr class="{}">
-      <td>{}</td>
-      <td>{}</td>
-      <td>{}</td>
-      <td>{}</td>
-      <td>{}</td>
-      <td>{}</td>
-      <td>{}</td>
-    </tr>
-    """.format(item, self.getRoomLink(name, room), self.getAreaLink(area), self.getSubArea(subarea),
-               self.getItemImg(item, location=name, scavengerOrder=scavengerOrder, boss="Boss" in _class),
-               self.getDiffImg(locDiff),
-               self.getTechniques(locTechniques),
-               self.getItems(locItems))
+                # not picked up items start with an '-'
+                if item[0] != '-':
+                    pathTable += """
+        <tr class="{} {}">
+          <td>{}</td>
+          <td>{}</td>
+          <td>{}</td>
+          <td>{}</td>
+          <td>{}</td>
+          <td>{}</td>
+          <td>{}</td>
+        </tr>
+        """.format(item, self.getMinimapArea(subarea),
+                   self.getRoomLink(name, room), self.getAreaLink(area), self.getSubArea(subarea),
+                   self.getItemImg(item, location=name, scavengerOrder=scavengerOrder, boss="Boss" in _class),
+                   self.getDiffImg(locDiff),
+                   self.getTechniques(locTechniques),
+                   self.getItems(locItems))
 
-                if item == 'Varia' and currentSuit == 'Power':
-                    currentSuit = 'Varia'
-                elif item == 'Gravity':
-                    currentSuit = 'Gravity'
+                    if item == 'Varia' and currentSuit == 'Power':
+                        currentSuit = 'Varia'
+                    elif item == 'Gravity':
+                        currentSuit = 'Gravity'
 
         pathTable += "</table>"
 
@@ -382,8 +436,8 @@ class Solver(object):
         start = datetime.now()
         ret = subprocess.call(params)
         end = datetime.now()
-        duration = (end - start).total_seconds()
-        print("ret: {}, duration: {}s".format(ret, duration))
+        duration = (end - start).total_seconds() * 1000
+        print("ret: {}, duration: {}ms".format(ret, duration))
 
         if ret == 0:
             with open(jsonFileName) as jsonFile:

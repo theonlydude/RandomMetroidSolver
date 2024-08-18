@@ -7,7 +7,7 @@ from shutil import copyfile
 sys.path.append(os.path.dirname(sys.path[0]))
 
 from rom.rom import RealROM, snes_to_pc
-from rom.leveldata import LevelData, Room
+from rom.leveldata import LevelData, Room, Transform
 from rom.ips import IPS_Patch
 
 from utils.log import init
@@ -53,6 +53,7 @@ patches = {
     'spazer': (0x8fa408, None),
     'kraid_save': (0x8fA4DA, None),
     'mission_impossible': (0x8f9e11, None),
+    'climb_supers': (0x8f96ba, None),
     # VARIA tweaks
     'ln_chozo_platform': (0x8fb1e5, None),
     # area layout
@@ -67,6 +68,7 @@ patches = {
     'area_layout_single_chamber': (0x8fad5e, None),
     'east_ocean': (0x8f94fd, None),
     'aqueduct_bomb_blocks': (0x8fd5a7, None),
+    'area_layout_crab_hole_lvl': (0x8fd21c, None),
     # custom start locations
     'mama_save': (0x8fD055, None),
     'firefleas_shot_block': (0x8fB55A, None),
@@ -122,17 +124,17 @@ for (sx, sy, tx, ty) in tiles:
     (vaTileD, vaBTSD) = vaLevelData.getTile((sx, sy), tx, ty+1)
     (vaTileU, vaBTSU) = vaLevelData.getTile((sx, sy), tx, ty-1)
 
-    if vaBTSL == 0x01:
+    if vaBTS != 0 and vaBTSL == 0x01:
         print("varia tile L    : {}/{}".format(vaLevelData.displayLayoutTile(vaTileL), hex(vaBTSL)))
         print("WARNING: h-copy left not handled")
-    if vaBTSD == 0xff:
+    if vaBTS != 0 and vaBTSD == 0xff:
         print("varia tile D    : {}/{}".format(vaLevelData.displayLayoutTile(vaTileD), hex(vaBTSD)))
         print("WARNING: v-copy down not handled")
-    if vaBTSU == 0x01:
+    if vaBTS != 0 and vaBTSU == 0x01:
         print("varia tile U    : {}/{}".format(vaLevelData.displayLayoutTile(vaTileU), hex(vaBTSU)))
         print("WARNING: v-copy up not handled")
 
-    if vaBTSR == 0xff:
+    if vaBTS != 0 and vaBTSR == 0xff:
         print("h-copy right detected")
         print("varia tile R    : {}/{}".format(vaLevelData.displayLayoutTile(vaTileR), hex(vaBTSR)))
         # invert tile and h-copy bts
@@ -152,6 +154,10 @@ for (sx, sy, tx, ty) in tiles:
         (msx, msy, mtx, mty) = transformPos(sx, sy, tx, ty, screenSize)
         print("new tile positions screen ({}, {}) pos ({}, {})".format(msx, msy, mtx, mty))
         mLevelData.updateTile((msx, msy), mtx, mty, mTile, vaBTS)
+
+print("")
+print("udpate scroll bts")
+mLevelData.updateScrollBts(Transform.Mirror)
 
 print("")
 print("save room")

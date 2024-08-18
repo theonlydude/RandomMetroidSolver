@@ -177,6 +177,9 @@ There's other scripts to start/stop the containers: start.sh / stop.sh, delete t
 To run your local code in a Docker container for development, you will need to pass the `-l` argument in the Docker `build` and `run` scripts to enable local mode. When using local mode, you do not need to rebuild the containers for any HTML, CSS or Javascript changes. Any changes to the Python code will require you to stop and restart. Any changes to the database will require a full rebuild of the container.
 
 ```sh
+# Set db_params.py to the docker container
+echo "dbParams = dict(host='varia-mysql', user='varia', database='varia', password='varia', port=3306)" > db_params.py
+
 # Build the local containers
 $ ./web/docker/build.sh -l
 
@@ -191,6 +194,39 @@ $ ./web/docker/start.sh
 
 # Remove
 $ ./web/docker/rm.sh
+```
+
+Other useful commands for local docker development
+
+```
+# All the following commands must be run from docker folder
+cd ./web/docker/
+
+# connect to docker bash container
+docker exec -it varia-local bash
+
+# watch logs from server
+docker exec -it varia-local sh -c "tail -f /var/log/supervisor/web2py*"
+
+# tear down and rebuild everything
+./stop.sh && ./rm.sh && ./build.sh -l && ./run.sh -l
+
+# delete all unused docker containers
+docker system prune -a
+```
+
+```sh
+# watch web2py error and logs
+# change to web2py-stderr for error and web2py-stdout for logs
+$ docker exec -it varia-local sh -c "tail -f /var/log/supervisor/web2py-std*"
+
+# copy web2py errors to a local directory
+CONTAINER_ID=`docker container ps |grep varia-local|awk '{print $1}'`
+rm -rf errors/;
+docker cp $CONTAINER_ID:/root/web2py/applications/solver/errors .
+
+# restart web2py (used when python changes don't appear on server)
+docker exec -it supervisorctl restart web2py
 ```
 
 # Front end client

@@ -63,8 +63,8 @@ org $828423
     nop
 
 ;; update current region stat
-org $82DEFD
-	jml load_state
+org $82DF29
+	jsl load_state : nop : nop
 
 ;; Firing uncharged beam
 org $90b911
@@ -120,6 +120,25 @@ org $858086
         JSR SetMessageBoxFlag
 org $8580B7
         JSR UnsetMessageBoxFlag
+
+;; increment reset count when starting a not new game
+org $82eeb7                     ; just overwrite debug mode handling code
+start_game_pressed:
+        lda !new_game_flag : bne .cont
+        bra .inc_reset
+warnpc $82EEC3
+org $82EEC3
+.cont:
+
+org $82EEF6                     ; overwrite more debug mode code
+.inc_reset:
+        ;; increment reset count
+        lda !stat_resets
+        jsl base_inc_stat
+        jsl base_save_last_stats
+        bra .cont
+
+warnpc $82EF18
 
 ;; -------------------------------
 ;; CODE (using bank A1 free space)
@@ -187,27 +206,19 @@ add_time_32:
 
 ;; ran when loading state header, to have up to date region stat
 load_state:
-    pha
-    phx
     ;; init region timer tmp if needed
     lda !region_tmp
     bne +
     jsr store_region_time
 +
     ;; Store (region*2) + stats_regions to region_tmp.(region == graph area, found in state header)
-    lda $7e07bb
-    tax
-    lda $8f0010,x : and #$00ff
+    lda !VARIA_room_data : and #$00ff
     asl
-    clc
-    adc !stat_rta_regions
-    sta !region_tmp
-    plx
-    pla
+    clc : adc !stat_rta_regions : sta !region_tmp
     ;; run hijacked code and return
-    and #$00ff
-    asl
-    jml $82DF01
+    LDX $07BB
+    LDA $0001,x
+    rtl
 
 ;; Samus hit a door block (Gamestate change to $09 just before hitting $0a)
 door_entered:

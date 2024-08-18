@@ -1,6 +1,9 @@
 arch snes.cpu
 lorom
 
+incsrc "macros.asm"
+
+
 org $83ADA0
 door_to_parlor:
 	db $FD, $92, $00, $05, $3E, $26, $03, $02, $00, $80, $A2, $B9	; door to parlor
@@ -11,6 +14,9 @@ door_from_phantoon:
 	
 org $8F98DC
 	dw setup_asm_bt			; setup asm pointer for pre-bt room
+
+org $8FCD3D
+	dw setup_asm_phantoon		; setup asm pointer for ghost
 	
 org $8FF000
 door_ptr_bt:
@@ -19,16 +25,14 @@ door_ptr_bt:
 	
 org $8FF006
 setup_asm_bt:
+        ; reset boss flags
 	LDA #$0000
-	STA $7ED82B			; reset boss flag
+        STA $7ED829
+	STA $7ED82B
 	LDA #door_ptr_bt		; load door pointer
 	STA $7E07B5			; change door out pointer
 	JML $8F91BB			; run original code
-	
-org $8FCD3D
-	dw setup_asm_phantoon		; setup asm pointer for ghost
-	
-org $8FF018
+
 setup_asm_phantoon:
 	LDA $7ED820 			; loads event flags
 	BIT #$4000  			; checks for escape flag set
@@ -45,4 +49,3 @@ quit:
 ;;; need to relocate this as it collides with plm spawn table
 door_ptr_phantoon:
 	dw door_from_phantoon		; door out pointer
-	

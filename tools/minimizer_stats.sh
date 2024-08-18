@@ -18,7 +18,7 @@ for q in $qties; do
     for a in $areas; do areas_count[$a]=0; done
     for i in $(seq 1 $nseeds); do
 	printf "\r$q locs. seed $i/$nseeds"
-	./randomizer.py  -r $VANILLA --runtime 20 --param standard_presets/regular.json --missileQty 3 --superQty 2 --powerBombQty 1 --minorQty 100 --majorsSplit Full --progressionSpeed speedrun --progressionDifficulty normal --morphPlacement normal --energyQty vanilla --startLocation random --startLocationList 'Landing Site,Gauntlet Top,Green Brinstar Elevator,Big Pink,Etecoons Supers,Wrecked Ship Main,Firefleas Top,Business Center,Bubble Mountain,Mama Turtle,Watering Hole,Aqueduct,Red Brinstar Elevator,Golden Four' --maxDifficulty hardcore -c itemsounds.ips --area --bosses --minimizer $q --tourian Fast --jm --debug > minimizer.log
+	./randomizer.py  -r $VANILLA --runtime 20 --param standard_presets/regular.json --missileQty 3 --superQty 2 --powerBombQty 1 --minorQty 100 --majorsSplit Full --progressionSpeed medium --progressionDifficulty normal --morphPlacement normal --energyQty vanilla --startLocation random --startLocationList 'Landing Site,Gauntlet Top,Green Brinstar Elevator,Big Pink,Etecoons Supers,Wrecked Ship Main,Firefleas Top,Business Center,Bubble Mountain,Mama Turtle,Watering Hole,Aqueduct,Red Brinstar Elevator,Golden Four' --maxDifficulty hardcore -c itemsounds.ips --areaRandomization full --bosses --minimizer $q --tourian Fast --jm --debug > minimizer.log
 	if [ $? -eq 0 ]; then
 	    nLocs=$(grep 'FINAL MINIMIZER nLocs' minimizer.log | tail -n 1 | cut -d ':' -f 4 | awk '{print $1}')
 	    if [ $nLocs -lt $min_locs ]; then

@@ -405,13 +405,16 @@ org map_data_Brinstar+$9ee  ; (55, 7)
      dw $1c1d  ; BGtile[i=$1d p=$7 X]
 
 org map_data_Brinstar+$9f0  ; (56, 7)
-     dw $5c52  ; BGtile[i=$52 p=$7 HX]
+     dw $1c74  ; BGtile[i=$74 p=$7 X]
 
 org map_data_Brinstar+$9f2  ; (57, 7)
-     dw $5c57  ; BGtile[i=$57 p=$7 HX]
+     dw $5c25  ; BGtile[i=$25 p=$7 HX]
 
 org map_data_Brinstar+$a32  ; (57, 8)
-     dw $dc90  ; BGtile[i=$90 p=$7 HVX]
+     dw $dc29  ; BGtile[i=$29 p=$7 HVX]
+
+org map_data_Brinstar+$a30  ; (56, 8)
+     dw $9c25  ; BGtile[i=$25 p=$7 VX]
 
 ;;; tiles for room "[Green Brinstar Missile Station]"
 

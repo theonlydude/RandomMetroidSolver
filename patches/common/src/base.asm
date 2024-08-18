@@ -18,6 +18,10 @@ incsrc "macros.asm"
 
 incsrc "constants.asm"
 
+;;; temp ram used
+!tmp_area_sz = $00df
+!temp = $0743                   ; general temp var in menus
+
 ;;; normal game SRAM
 !regular_save_size = $0900      ; expanded by saveload patch (modified, A00 in original patch)
 !regular_save_sram = $0010      ; after checksum
@@ -26,8 +30,8 @@ incsrc "constants.asm"
 !regular_save_sram_slot2 #= !regular_save_sram+!regular_save_size*2
 !sram_station_info_offset = $0156 ; offset in a save file where current save station and area are stored
 ;;; stats SRAM
-!stats_sram_sz_b = $0080
-!stats_sram_sz_w = !stats_sram_sz_b/2
+!stats_sram_sz_b #= $0080
+!stats_sram_sz_w #= !stats_sram_sz_b/2
 !full_stats_area_sz_b #= 2*!stats_sram_sz_b+$20   ; twice the size of stats to account for last stats + $20 extra SRAM
 !stats_sram_slot0 #= !regular_save_sram+!regular_save_size*3
 !stats_sram_slot1 #= !stats_sram_slot0+!full_stats_area_sz_b
@@ -39,7 +43,7 @@ incsrc "constants.asm"
 !backup_sram_slot0 #= !stats_sram_slot0+!backup_save_data_off
 !backup_sram_slot1 #= !stats_sram_slot1+!backup_save_data_off
 !backup_sram_slot2 #= !stats_sram_slot2+!backup_save_data_off
-!backup_counter = $7fff38
+!backup_counter = !temp
 !backup_candidate = $7fff3a
 
 ;;; boot and RTA timer
@@ -48,19 +52,15 @@ incsrc "constants.asm"
 !used_slots_mask #= !last_saveslot+2
 ;; SRAM magic set to seed ID to check if we ever booted the seed
 !was_started_flag32 #= !last_saveslot+4
-;; special value here to check on boot if console was just reset
-!softreset = $7fffe6
-!reset_flag = #$babe
+;; bitmask of which saves are locked (to know when to play the lock/unlock sound)
+!locked_slots_mask #= !last_saveslot+8
 ;; magic value used as marker in some places
-!magic_flag = #$caca
+!magic_flag = $caca
 ;; backup RAM for timer to avoid it to get cleared at boot
 !timer_backup1 = $7fffe2
 !timer_backup2 = !timer_backup1+2
 ;; timer integrity protection
 !timer_xor = $033e
-
-;;; temp ram used
-!tmp_area_sz = #$00df
 
 ;;; save-related vanilla RAM
 !area_index = $079f
@@ -100,9 +100,10 @@ org $818085
 org $81A24A
     jsl patch_load ;; patch load from menu only
 
-;; patch copy routine to copy SRAM stats, and fix save slot size
+;; hijack copy routine to copy stats
 org $819A66
     jsr copy_stats
+;; fix save slot size in copy routine
 org $819A62
         dw !regular_save_size
 
@@ -111,14 +112,6 @@ org $819cc3
 	jsr patch_clear
 org $819CBF
         dw !regular_save_size
-
-;; hijack menu display for backup saves
-org $819f13
-	jsr load_menu_1st_file
-org $819f46
-	jsr load_menu_2nd_file
-org $819f7c
-	jsr load_menu_3rd_file
 
 ;; hijack menu display to show save area instead of energy if backup saves are enabled
 org $81A09B
@@ -131,6 +124,22 @@ org $82805f
 ;; end gamestate hijack to resync IGT from RTA that stopped ~6 seconds earlier
 org $8284D3
         jsl igt_end
+
+;;; draw locked file status on top of samus helmet in load menu
+org $819e25
+        jsl draw_lock
+
+;;; control selected save locked status
+org $81A1DB
+        jsr control_lock
+
+;;; draw help for lock control
+org $819FEA
+        jsr draw_lock_help
+
+;;; hijack load state header to put area ID/minimap room type ID in RAM
+org $82DEF7
+        jsl load_state : nop : nop
 
 ;;; -------------------------------
 ;;; CODE ;;;
@@ -178,6 +187,7 @@ org $808FA3 ;; overwrite unused routine
     pla
     pld
     plb
+.rti:
     rti
 
 warnpc $808FC1 ;; next used routine start
@@ -192,7 +202,7 @@ boot1:
     eor !timer2
     cmp !timer_xor
     beq +
-    lda !magic_flag
+    lda #!magic_flag
     sta !softreset
 +
     lda #$0000
@@ -208,12 +218,13 @@ print "first boot check: ", pc
     beq .check_reset
 .first:
     ;; no game was ever saved:
-    ;; init used save slots bitmask
+    ;; init used save slots bitmasks
     lda #$0000
     sta !used_slots_mask
+    sta !locked_slots_mask
     ;; clear all save files by corrupting checksums
     ldx	#$0005
-    lda !magic_flag
+    lda #!magic_flag
 .clear_loop:
     sta $701ff0,x
     sta $701ff8,x
@@ -230,10 +241,14 @@ print "first boot check: ", pc
     ;; skip soft reset check, since it's the 1st boot
     bra .cont
 .check_reset:
-print "soft reset check: ", pc
-    ;; check if soft reset, if so, restore RAM timer
+    ;; check if special soft reset: dec reset count if set
     lda !softreset
-    cmp !reset_flag
+    cmp #!dec_reset_flag : bne +
+    lda !stat_resets : jsl dec_stat
+    ;; set it back to normal soft reset
+    lda #!reset_flag : sta !softreset
++
+    cmp #!reset_flag
     bne .cont
     lda !timer1
     sta !timer_backup1
@@ -282,7 +297,7 @@ boot2:
     lda !timer_backup2
     sta !timer2
     ;; clear temp variables
-    ldx !tmp_area_sz
+    ldx #!tmp_area_sz
     lda #$0000
 -
     sta $7fff00, x
@@ -299,80 +314,31 @@ warnpc $80feff
 ;;; -------------------------------
 ;;; Save files management : adds timer, stats and backup features to save files
 org $81ef20
-;; Rolling backup save mechanism:
-;;
-;; Additional data in saves :
-;;	- initial save slot ID
-;;	- a player usage flag, set when a game is loaded by the user
-;;	- a backup counter, incremented everytime a backup is made
-;; - when loading a game (i.e. the player actually uses a file),
-;;   mark the file as used with the player usage flag.
-;;	- if loading an existing file without the player flag (a backup),
-;;	  copy over stats from current player save (non-backup with the
-;;	  closest save counter? or highest?), or directly from RAM
-;;	  if possible
-;; - when saving a game, and it's not the first file creating save, and save
-;;   station used is different from the last one :
-;;	- scan through save files to determine the best candidate to use as
-;;	  backup
-;;	- priority: empty save, old backup, recent backup
-;;	- ignore save files with player flag set (was loaded once)
-;;	- ignore backup files from different slots
 
-;; make optional to auto backup save, set this flag to non-zero in ROM to enable the feature
-%export(opt_backup)
-	dw $0000
+;; stats SRAM offsets lookup tables
+stats_sram_offsets:
+    dw !stats_sram_slot0
+    dw !stats_sram_slot1
+    dw !stats_sram_slot2
 
-;;; zero flag set if we're starting a new game
-check_new_game:
-    ;; Make sure game mode is 1f
-    lda $7e0998
-    cmp #$001f : bne .end
-    ;; check that Game time and frames is equal zero for new game
-    lda $09DA
-    and #$fffe                  ; consider 1 IGT frame as 0 (workaround for start game with intro text)
-    ora $09DC
-    ora $09DE
-    ora $09E0
-.end:
-    rtl
+last_stats_sram_offsets:
+    dw !stats_sram_slot0+!stats_sram_sz_b
+    dw !stats_sram_slot1+!stats_sram_sz_b
+    dw !stats_sram_slot2+!stats_sram_sz_b
 
-;; a save will always be performed when starting a new game (see start.asm)
-new_save:
-	;; call save routine
-	lda !current_save_slot
-	jsl $818000
-	;; if backup saves are disabled, return
-	lda.l opt_backup
-	beq .end
-	;; set current save slot as used in SRAM bitmask
-	lda !current_save_slot
-	asl
-	tax
-	lda !used_slots_mask
-	ora.l slots_bitmasks,x	;; bitmask index table in ROM
-	sta !used_slots_mask
+;;; In: A = save file
+;;; Out: X = stats data offset in bank 70
+macro statsIndex()
+        asl : tax
+        lda.l stats_sram_offsets, x : tax
+endmacro
 
-	;; init backup save data :
-
-	;; first, get offset in SRAM, using save_index routine,
-	;; which is based on last_saveslot value, which is correct,
-	;; since we juste saved stats (through patch_save)
-	jsl save_index		;; A is non-0, so get standard stats addr
-	;; x += backup_save_data_off
-	txa
-	clc
-	adc.w #!backup_save_data_off
-	tax
-	;; store current save slot in the save itself (useful if we reload
-	;; a backup save, to copy over stats from original save)
-	lda !current_save_slot
-	sta $700000,x
-	;; store 0 + high bit set (player flag) as backup counter
-	lda #$8000
-	sta $700002,x
-.end:
-	rtl
+;;; In: A = save file
+;;; Out: X = last stats data offset in bank 70
+macro lastStatsIndex()
+        asl : tax
+        lda.l last_stats_sram_offsets, x : tax
+endmacro
 
 ;; save slot data:
 ;; slot ID, slot bitmask, SRAM addr for backup data, SRAM addr for load station info
@@ -386,6 +352,38 @@ slot1_data:
 
 slot2_data:
 	dw $0002,$0004,!backup_sram_slot2,!regular_save_sram_slot2+!sram_station_info_offset
+
+;;; In: A = save file
+;;; Out: X = backup data offset in bank 70
+macro backupIndex()
+    asl #3 : tax : lda.l slots_data+4,x : tax
+endmacro
+
+;; a save will always be performed when starting a new game (see start.asm)
+new_save:
+	;; set current save slot as used in SRAM bitmask
+	lda !current_save_slot : asl : tax
+	lda !used_slots_mask : ora.l slots_bitmasks,x : sta !used_slots_mask
+	lda !locked_slots_mask : ora.l slots_bitmasks,x : sta !locked_slots_mask
+	;; init backup save data :
+        lda !current_save_slot
+        pha
+        %backupIndex()
+        pla
+        sta $700000,x
+	;; store 0 + high bit set (player flag) as backup counter
+	lda #$8000
+	sta $700002,x        
+
+	;; call save routine
+	lda !current_save_slot
+	jsl $818000
+
+        ;; clear new game flag
+        lda.w #0 : sta !new_game_flag
+.end:
+	rtl
+
 
 ;; backup is needed if no existing backup of current save slot
 ;; or last backup is at a different save station than this one
@@ -403,12 +401,10 @@ is_backup_needed:
 	;; save X and Y as they will be used
 	phx
 	phy
+        ;; init backup candidate with special value meaning we did no check yet
+        lda #$8000 : sta !backup_candidate
 	;; first, check if current save station is different from last save
-	lda !current_save_slot
-	asl
-	asl
-	asl
-	tay
+	lda !current_save_slot : asl #3 : tay
 	ldx slots_data+6,y
 	lda $700000,x
 	cmp !load_station_index
@@ -419,9 +415,7 @@ is_backup_needed:
 .check_needed:
 	;; find out our backup counter, and save it in backup_counter
 	ldx slots_data+4,y
-	lda $700002,x
-	and #$7fff
-	sta !backup_counter
+	lda $700002,x : and #$7fff : sta !backup_counter
 	;; backup_candidate will be used to store the backup slot candidate
 	;; and various info as follows:
 	;;
@@ -434,19 +428,14 @@ is_backup_needed:
 	lda #$0003	;; 3 is used as invalid value marker, as slots are 0 to 2
 	sta !backup_candidate
 	;; check all slots
-	ldy #slot0_data
-	jsr check_slot
-	ldy #slot1_data
-	jsr check_slot
-	ldy #slot2_data
-	jsr check_slot
+	ldy #slot2_data : jsr check_slot
+	ldy #slot1_data : jsr check_slot
+	ldy #slot0_data : jsr check_slot
 	;; clear all our work flags from backup_candidate
-	lda !backup_candidate
-	and #$0003
+	lda !backup_candidate : and #$0003 : sta !backup_candidate
 	;; check that we can actually backup somewhere
-	cmp #$0003
-	beq .no_backup
-	sta !backup_candidate
+	cmp #$0003 : beq .no_backup
+.backup:
 	sec
 	bra .end
 .no_backup:
@@ -473,12 +462,12 @@ check_slot:
 	sta !backup_candidate
 	bra .end
 .not_empty:
-	;; if not our save slot, skip
+	;; if not our timeline, skip
 	ldx $0004,y
 	lda $700000,x
-	cmp !current_save_slot
+	cmp.l !last_saveslot
 	bne .end
-	;; if not a backup save, skip
+	;; if locked save, skip
 	lda $700002,x
 	bmi .end
 	;; if backup counter is different:
@@ -508,15 +497,8 @@ check_slot:
 backup_save:
 	;; increment backup counter in our save file
 	lda !current_save_slot
-	asl
-	asl
-	asl
-	tax
-	lda.l slots_data+4,x
-	tax
-	lda $700002,x
-	inc
-	sta $700002,x
+        %backupIndex()
+	lda $700002,x : inc : sta $700002,x
 
 	;; direct page indirect addressing copy :
 	;; reuse $47/$4A used in decompression routine (according to RAM map)
@@ -529,15 +511,11 @@ backup_save:
 	sta $49
 	sta $4c	
 	;; source slot is current one
-	lda !current_save_slot
-	asl
-	tax
+	lda !current_save_slot : asl : tax
 	lda.l slots_sram_offsets,x ;; get SRAM offset in bank 70 for slot
 	sta $47
 	;; destination slot is in backup_candidate
-	lda !backup_candidate
-	asl
-	tax
+	lda !backup_candidate : asl : tax
 	lda.l slots_sram_offsets,x ;; get SRAM offset in bank 70 for slot
 	sta $4a
 	;; copy save file
@@ -545,79 +523,42 @@ backup_save:
 -
 	lda [$47],y
 	sta [$4a],y
-	iny
-	iny
+	iny : iny
 	cpy #!regular_save_size
 	bmi -
 	;; copy checksum
+	lda !current_save_slot : asl : tax
+	lda $701ff0,x : pha
+	lda $701ff8,x : pha
+	lda $700000,x : pha
+	lda $700008,x : pha
+	lda !backup_candidate : asl : tax
+	pla : sta $700008,x
+	pla : sta $700000,x
+	pla : sta $701ff8,x
+	pla : sta $701ff0,x
+	;; copy timeline ID and backup counter (stats will be automatically up to date since we save them to all necessary slots)
 	lda !current_save_slot
-	asl
-	tax
-	lda $701ff0,x
-	pha
-	lda $701ff8,x
-	pha
-	lda $700000,x
-	pha
-	lda $700008,x
-	pha
-	lda !backup_candidate
-	asl
-	tax
-	pla
-	sta $700008,x
-	pla
-	sta $700000,x
-	pla
-	sta $701ff8,x
-	pla
-	sta $701ff0,x
-	;; copy stats (includes backup data)
-	lda !current_save_slot
-	asl
-	tax
-	lda.l save_slots,x
-	sta $47
-	lda !backup_candidate
-	asl
-	tax
-	lda.l save_slots,x
-	sta $4a
-	ldy #$0000
--
-	lda [$47],y
-	sta [$4a],y
-	iny
-	iny
-	cpy.w #!full_stats_area_sz_b
-	bcc -
-	;; clear player flag in backup data area
-	lda $4a		;; still has destination slot SRAM offset
-	clc
-	adc.w #!backup_save_data_off
-	tax
-	lda $700002,x
-	and #$7fff
-	sta $700002,x
+        %backupIndex()
+        lda.l $700002, x : pha
+        lda.l $700000, x : pha
+        lda !backup_candidate
+        %backupIndex()
+        pla : sta.l $700000, x
+        pla : and #$7fff : sta.l $700002, x  ; clear player flag in the backup
 	;; mark backup slot as used in bitmask
-	lda !backup_candidate
-	asl
-	tax
+	lda !backup_candidate : asl : tax
 	lda !used_slots_mask
 	ora.l slots_bitmasks,x	;; bitmask index table in ROM
 	sta !used_slots_mask
 	rts
 
-incsrc "saveload.asm"
+incsrc "base/saveload.asm"
 
 ;; Patch load and save routines
 patch_save:                     ; called from saveload patch
 	;; backup saves management:
-	jsl check_new_game
-	beq .save_stats
-	lda.l opt_backup
-	beq .stats
-	;; we have backup saves enabled, and it is not the 1st save:
+	lda !new_game_flag : bne .save_stats
 	;; check if we shall backup the save
 	jsr is_backup_needed
 	bcc .stats
@@ -644,66 +585,29 @@ patch_load:
     plb
     ;; call load routine
     jsl LoadGame
-    bcc .backup_check
-    ;; skip to end if new file or SRAM corrupt
-    jmp .end
-.backup_check:
-	lda.l opt_backup
-	beq .check
-	;; if backup saves are enabled:
-	;; check if we load a backup save, and if so, get stats
-	;; from original save slot, and mark this slot as non-backup
-	lda !current_save_slot
-	asl
-	asl
-	asl
-	tax
-	lda.l slots_data+4,x
-	tax
-	lda $700002,x
-	bmi .check
-.load_backup:
-	phx
-	;; n flag not set, we're loading a backup
-	;; check if we're soft resetting: if so, will take stats from RAM
-	lda !softreset
-	cmp !reset_flag
-	beq .load_backup_end
-	;; load stats from original save SRAM
-	lda $700000,x	;; save slot in SRAM
-	clc
-	adc #$0010
-	sta !last_saveslot
-	lda #$0000
-	jsl save_index
-	jsl load_stats_at
-	;; update live timer
-	lda !stats_timer : sta !timer1
-	lda !stats_timer+2 : sta !timer2
-        lda !stat_rta_lag_ram : sta !timer_lag
-.load_backup_end:
-	;; update current save slot in SRAM, and set player flag
-	plx
-	lda !current_save_slot
-	sta $700000,x
-	clc
-	adc #$0010
-	sta !last_saveslot
-	lda $700002,x
-	ora #$8000
-	sta $700002,x
-	bra .end_ok
-.check:
-    ;; check save slot
+    bcc .lock
+    ;; new save or SRAM corrupt, place flag for new game
+    lda.w #1 : sta !new_game_flag
+    ;; save current timeline
+    lda !current_save_slot : sta !last_saveslot
+    bra .end
+.lock:
+    ;; mark this slot as non-backup
     lda !current_save_slot
-    clc
-    adc #$0010
-    cmp !last_saveslot
+    %backupIndex()
+    lda $700002,x : ora #$8000 : sta $700002,x
+.check:
+    ;; check initial save slot and save it
+    lda $700000,x : cmp !last_saveslot
+    sta !last_saveslot
     bne .load
-    ;; we're loading the same save that's played last
+    ;; we're loading the same timeline that's played last
     lda !softreset
-    cmp !reset_flag
-    beq .end_ok     ;; soft reset, use stats and timer from RAM
+    cmp #!reset_flag
+    bne .load
+    ;; soft reset, use stats and timer from RAM
+    lda !stat_rta_lag_ram : sta !timer_lag ; restore lag timer, as it gets cleared on boot
+    bra .end_ok
     ;; TODO add menu time to pause stat and make it a general menus stat?
 .load:
     ;; load stats from SRAM
@@ -714,12 +618,10 @@ patch_load:
     lda !stat_rta_lag_ram : sta !timer_lag
 .end_ok:
     ;; place marker for resets
-    lda !reset_flag
+    lda #!reset_flag
     sta !softreset
-    ;; increment reset count
-    lda !stat_resets
-    jsl inc_stat
-    jsl save_last_stats
+    ;; clear new game flag
+    lda.w #0 : sta !new_game_flag
     ;; return carry clear
     clc
 .end:
@@ -730,23 +632,17 @@ patch_load:
 
 
 ;;; Patch copy and clear routines
-
-save_slots:
-    dw !stats_sram_slot0
-    dw !stats_sram_slot1
-    dw !stats_sram_slot2
-
 copy_stats:
     ;; src slot idx = 19b7, dst slot idx = 19b9
     lda $19b7
     asl
     tax
-    lda.l save_slots,x
+    lda.l stats_sram_offsets,x
     sta $00
     lda $19b9
     asl
     tax
-    lda.l save_slots,x
+    lda.l stats_sram_offsets,x
     sta $03
     ldy #$0000
     ;; bank part for indirect long in already setup by original
@@ -758,9 +654,14 @@ copy_stats:
     iny
     cpy.w #!full_stats_area_sz_b
     bcc .loop
-    ;; disable save slot check. if data is copied we cannot rely on RAM contents
-    lda #$0000
-    sta !last_saveslot
+.lock:
+    lda $19b9
+    %backupIndex()
+    lda $700002,x : ora #$8000 : sta $700002,x
+    ;; set locked status
+    lda $19b9 : asl : tax
+    lda !locked_slots_mask : ora.l slots_bitmasks, x : sta !locked_slots_mask
+.end:
     lda $19B7   ;; hijacked code
     rts
 
@@ -778,67 +679,276 @@ patch_clear:
 	lda $19b7	;; hijacked code
 	rts
 
+;;; -------------------------------
+;;; Stats base functions
 
-;;; Patch load file menu to show backup saves info
+;; clear stats on new game
+clear_values:
+    php
+    rep #$30
+    lda !new_game_flag : beq .ret
 
-files_tilemaps:
-	dw $b436,$b456,$b476
+    ldx #$0000
+    lda #$0000
+-
+    jsl store_stat
+    inx
+    cpx.w #!stats_sram_sz_w
+    bne -
 
-;; arg A=file
-load_menu_file:
-	phx
-	pha
-	lda.l opt_backup
-	beq .nochange
-.check_slot:
-	pla
-	pha
-	asl
-	tax
-	lda.l slots_bitmasks,x	;; bitmask index table in ROM
-	and !used_slots_mask
-	beq .nochange
-.load_slot:
-	;; load save slot value in SRAM
-	pla
-	pha
-	asl
-	asl
-	asl
-	tax
-	lda.l slots_data+4,x
-	tax
-	lda $700000,x
-	bra .load_tilemap
-.nochange:
-	pla
-	pha
-.load_tilemap:
-	asl
-	tax
-	lda.l files_tilemaps,x
-	tay
+    ;; Clear RTA Timer
+    lda #$0000
+    sta !timer1
+    sta !timer2
+    ;; place marker for resets
+    lda #!reset_flag
+    sta !softreset
+.ret:
+    plp
+    jsl $80a07b	;; hijacked code
+    rtl
+
+load_stats:
+    phx
+    phy
+    ;; tries to load from last stats
+    lda !current_save_slot : asl : tax
+    jsr is_last_save_flag_ok
+    bcc .notok
+    lda.l last_stats_sram_offsets, x : tax
+    bra .load
+.notok:
+    lda.l stats_sram_offsets, x : tax
+.load:
+    jsr load_stats_at
+    ply
+    plx
+    rtl
+
+;; arg X = index of where to load stats from in bank $70
+load_stats_at:
+    phb
+    pea $7f7f
+    plb
+    plb
+    ldy #$0000
+.loop:
+    lda $700000,x
+    sta $!_stats_ram,y
+    iny
+    iny
+    inx
+    inx
+    cpy.w #!stats_sram_sz_b
+    bcc .loop
+    plb
+    rts
+
+;; return carry flag set if flag ok
+is_last_save_flag_ok:
+        phx
+        lda !current_save_slot
+        %statsIndex()
+        lda #!magic_flag : cmp.l $700000+!last_stats_save_ok_off, x
+        beq .ok
+        clc
+        bra .end
+.ok:
+        sec
 .end:
-	pla
-	plx
-	rts
+        plx
+        rts
 
-load_menu_1st_file:
-	lda #$0000
-	jmp load_menu_file
+;; args: A = value to store
+;; X and A untouched
+set_last_save_ok_flag:
+        phx
+        pha
+        lda !current_save_slot
+        %statsIndex()
+        pla
+        sta $700000+!last_stats_save_ok_off,x
+        plx
+        rts
 
-load_menu_2nd_file:
-	lda #$0001
-	jmp load_menu_file
+;; arg X = index of where to save stats in bank $70
+save_stats_at:
+    phx
+    phy
+    phb
+    pea $7f7f
+    plb
+    plb
+    ldy #$0000
+.loop:
+    lda $!_stats_ram,y
+    sta $700000,x
+    iny
+    iny
+    inx
+    inx
+    cpy.w #!stats_sram_sz_b
+    bcc .loop
+    plb
+    ply
+    plx
+    rts
 
-load_menu_3rd_file:
-	lda #$0002
-	jmp load_menu_file
+;; save stats both in standard and last areas
+;; arg: A = 0 if we just want to save last stats
+;;      A != 0 save all stats (save stations)
+save_stats:
+        phx
+        phy
+        pha
+        ;; find all slots concerning our "timeline" (last_saveslot), and save stats everywhere
+        ldy.w #3
+.loop:
+        dey : bmi .end
+        tya : asl : tax
+        lda !used_slots_mask : and.l slots_bitmasks, x
+        beq .loop
+        tya
+        %backupIndex()
+        lda $700000, x : cmp !last_saveslot : bne .loop
+        pla : pha
+        beq .last
+        tya
+        %statsIndex()
+        jsr save_stats_at
+.last:
+        lda.w #0 : jsr set_last_save_ok_flag
+        tya
+        %lastStatsIndex()
+        jsr save_stats_at
+        lda.w #!magic_flag : jsr set_last_save_ok_flag
+        bra .loop
+.end:
+        pla
+        ply
+        plx
+        rtl
 
-;;; show save area and station instead of energy when backup saves are enabled
+;; Increment Statistic (in A)
+inc_stat:
+    phx
+    asl
+    tax
+    lda.l !stats_ram, x
+    inc
+    sta.l !stats_ram, x
+    plx
+    rtl
+
+;; save last stats. to be used from door transitions/menus
+;; keeps all registers intact
+save_last_stats:
+    pha
+    lda !timer1 : sta !stats_timer
+    lda !timer2 : sta !stats_timer+2
+    lda !timer_lag : sta !stat_rta_lag_ram
+    lda #$0000
+    jsl save_stats
+    pla
+    rtl
+
+;; Decrement Statistic (in A)
+dec_stat:
+    phx
+    asl
+    tax
+    lda.l !stats_ram, x
+    dec
+    sta.l !stats_ram, x
+    plx
+    rtl
+
+;; Store Statistic (value in A, stat in X)
+store_stat:
+    phx
+    pha
+    txa
+    asl
+    tax
+    pla
+    sta.l !stats_ram, x
+    plx
+    rtl
+
+;; Load Statistic (stat in A, returns value in A)
+load_stat:
+    phx
+    asl
+    tax
+    lda.l !stats_ram, x
+    plx
+    rtl
+
+;;; -------------------------------
+;;; RTA <> IGT sync
+;; resync IGT when game transitions away from gameplay state
+igt_end:
+        jsl update_igt
+        jsl $80834B ;; hijacked code
+        rtl
+
+;; load RTA in IGT
+update_igt:
+        php
+        rep #$30
+	;; divide total frames in 32 bits by 3600 to have 16bits minutes and remaining frames,
+        ;; to correctly handle times up to 99:59:59.59 like vanilla
+	lda !stats_timer
+	sta $16
+	lda !stats_timer+2
+	sta $14
+	lda #3600
+	sta $12
+	jsl utils_div32
+	lda $14
+	sta !igt_frames ;; store remainder to igt frames
+	lda $16  ;; RTA in minutes
+	sta $004204 ;; divide by 60 to get hours
+	sep #$20
+	lda #$3c
+	sta $004206
+	pha : pla :  pha : pla : rep #$20
+	lda $004216 ;; rta minutes
+	sta !igt_minutes ;; replace igt minutes
+	lda $004214 ;; hours
+        sta !igt_hours ;; replace igt hours
+        cmp #$0064 ;; if < 100 hours, continue
+        bpl .overflow
+        lda !igt_frames ;; frames remainder after initial division to get minutes
+	sta $004204 ;; divide by 60 to get seconds and frames
+	sep #$20
+	lda #$3c
+	sta $004206
+	pha : pla :  pha : pla : rep #$20
+	lda $004216 ;; rta frames
+	sta !igt_frames ;; replace igt frames
+	lda $004214 ;; rta seconds
+        sta !igt_seconds ;; replace igt seconds
+        bra .end
+.overflow: ;; IGT = 99:59:59.59
+        lda #$0063
+        sta !igt_hours
+        lda #$003b
+        sta !igt_minutes
+        sta !igt_seconds
+        sta !igt_frames
+.end:
+        plp
+        rtl
+
+load_state:
+        ldx $07bb               ; hijacked code
+        lda $0010, x : sta !VARIA_room_data
+        LDA $0003,x             ; hijacked code
+        rtl
+
+;;; show save area and station instead of energy
 menu_show_save_data:
-	lda.l opt_backup
-	beq .energy
 	;; draw save area: find station in table
 	ldx #$0000
 .loop:
@@ -1029,304 +1139,245 @@ table "tables/menu.tbl",rtl
 	dw " ENTRANCE"
 	dw $ffff
 
-
-;;; -------------------------------
-;;; Stats base functions
-
-;; clear stats on new game
-clear_values:
-    php
-    rep #$30
-    jsl check_new_game
-    bne .ret
-
-    ldx #$0000
-    lda #$0000
--
-    jsl store_stat
-    inx
-    cpx #!stats_sram_sz_w
-    bne -
-
-    ;; Clear RTA Timer
-    lda #$0000
-    sta !timer1
-    sta !timer2
-    ;; place marker for resets
-    lda !reset_flag
-    sta !softreset
-.ret:
-    plp
-    jsl $80a07b	;; hijacked code
-    rtl
-
-;; assuming a valid save slot is in last_saveslot,
-;; stores in X the bank $70 index to stats area
-;; arg A: if 0 we want last stats, otherwise standard stats
-save_index:
-    pha
-    lda !last_saveslot
-    cmp #$0010
-    beq .slot0
-    cmp #$0011
-    beq .slot1
-.slot2:
-    ldx.w #!stats_sram_slot2
-    bra .last
-.slot0:
-    ldx.w #!stats_sram_slot0
-    bra .last
-.slot1:
-    ldx.w #!stats_sram_slot1
-.last:
-    pla
-    bne .end
-    txa
-    clc
-    adc #!stats_sram_sz_b
-    tax
+;;; if "player flag" is set in the slot, draw a lock on top of samus helmet
+;;; (drawing the sprite before puts it on top)
+draw_lock:
+        pha : phx : phy
+        ;; infer the drawn save slot from context
+        ;; retrieve X register pushed at the start of calling routine
+        lda 11,s
+        ;; possible values are 4, 6, 8, apply x -> ((x - 1) >> 1) - 1 to get 0, 1, 2
+        dec : lsr : dec
+        ;; save value
+        sta !temp
+        ;; check if the save is actually used
+        asl : tax
+        lda !used_slots_mask : and.l slots_bitmasks, x
+        beq .end
+        ;; check for locked status in SRAM
+        lda !temp
+        %backupIndex()
+        lda $700002, x
+        bpl .unlocked
+.locked:
+        ;; check if previous status was unlocked
+        lda !temp : asl : tax
+        lda !locked_slots_mask : and.l slots_bitmasks, x
+        bne .draw_lock               ; already locked, just draw lock sprite
+        ;; set locked status
+        lda !locked_slots_mask : ora.l slots_bitmasks, x : sta !locked_slots_mask
+        ;; play "moved cursor" sound
+        lda #$0037 : JSL $809049
+        bra .draw_lock
+.unlocked:
+        ;; check if previous status was unlocked
+        lda !temp : asl : tax
+        lda !locked_slots_mask : and.l slots_bitmasks, x
+        beq .end               ; already unlocked
+        ;; clear locked status
+        lda.l slots_bitmasks, x : eor #$ffff : and.l !locked_slots_mask : sta !locked_slots_mask
+        ;; play "moved cursor" sound
+        lda #$0037 : JSL $809049
+        bra .end
+.draw_lock:
+        ply : plx : phx : phy
+        lda #$0a00 : sta $03    ; set palette to 5
+        lda #$0068 : jsl $81891F
 .end:
-    rtl
-
-load_stats:
-    phx
-    phy
-    lda !current_save_slot
-    clc
-    adc #$0010
-    sta !last_saveslot
-    ;; tries to load from last stats
-    jsr is_last_save_flag_ok
-    bcc .notok
-    lda #$0000
-    jsl save_index
-.notok:
-    jsl load_stats_at
-    ply
-    plx
-    rtl
-
-;; arg X = index of where to load stats from in bank $70
-load_stats_at:
-    phx
-    phb
-    pea $7f7f
-    plb
-    plb
-    ldy #$0000
-.loop:
-    lda $700000,x
-    sta $!_stats_ram,y
-    iny
-    iny
-    inx
-    inx
-    cpy #!stats_sram_sz_b
-    bcc .loop
-    plb
-    plx
-    rtl
-
-;; return carry flag set if flag ok
-is_last_save_flag_ok:
-    phx
-    pha
-    lda #$0001
-    jsl save_index
-    txa
-    clc
-    adc.w #!last_stats_save_ok_off
-    tax
-    lda !magic_flag
-    cmp $700000,x
-    beq .flag_ok
-    clc
-    bra .end
-.flag_ok:
-    sec
-.end:
-    pla
-    plx
-    rts
-
-;; args: A = value to store
-;; X and A untouched
-set_last_save_ok_flag:
-    phx
-    pha
-    lda #$0001
-    jsl save_index
-    txa
-    clc
-    adc.w #!last_stats_save_ok_off
-    tax
-    pla
-    sta $700000,x
-    plx
-    rts
-
-;; arg X = index of where to save stats in bank $70
-save_stats_at:
-    phx
-    phb
-    pea $7f7f
-    plb
-    plb
-    ldy #$0000
-.loop:
-    lda $!_stats_ram,y
-    sta $700000,x
-    iny
-    iny
-    inx
-    inx
-    cpy #!stats_sram_sz_b
-    bcc .loop
-    plb
-    plx
-    rts
-
-;; save stats both in standard and last areas
-;; arg: A = 0 if we just want to save last stats
-;;      A != 0 save all stats (save stations)
-;; used by gameend.asm, update address it in if moved
-save_stats:
-    phx
-    phy
-    pha
-    ;; actually save stats now
-    lda !current_save_slot
-    clc
-    adc #$0010
-    sta !last_saveslot
-    pla
-    beq .last   ;; skip standard save if A=0
-    jsl save_index ;; A is not 0, so we ask for standard stats index
-    jsr save_stats_at
-    lda #$0000
-.last:
-    jsl save_index ;; A is 0, so we ask for last stats index
-    lda #$0000
-    jsr set_last_save_ok_flag
-    jsr save_stats_at
-    lda !magic_flag
-    jsr set_last_save_ok_flag
-    ply
-    plx
-    rtl
-
-;; Increment Statistic (in A)
-inc_stat:
-    phx
-    asl
-    tax
-    lda.l !stats_ram, x
-    inc
-    sta.l !stats_ram, x
-    plx
-    rtl
-
-;; save last stats. to be used from door transitions/menus
-;; keeps all registers intact
-save_last_stats:
-    pha
-    lda !timer1 : sta !stats_timer
-    lda !timer2 : sta !stats_timer+2
-    lda !timer_lag : sta !stat_rta_lag_ram
-    lda #$0000
-    jsl save_stats
-    pla
-    rtl
-
-;; Decrement Statistic (in A)
-dec_stat:
-    phx
-    asl
-    tax
-    lda.l !stats_ram, x
-    dec
-    sta.l !stats_ram, x
-    plx
-    rtl
-
-;; Store Statistic (value in A, stat in X)
-store_stat:
-    phx
-    pha
-    txa
-    asl
-    tax
-    pla
-    sta.l !stats_ram, x
-    plx
-    rtl
-
-;; Load Statistic (stat in A, returns value in A)
-load_stat:
-    phx
-    asl
-    tax
-    lda.l !stats_ram, x
-    plx
-    rtl
-
-;;; -------------------------------
-;;; RTA <> IGT sync
-;; resync IGT when game transitions away from gameplay state
-igt_end:
-        jsl update_igt
-        jsl $80834B ;; hijacked code
+        ;; draw lock for help if needed
+        ;; (doing this here is not really efficient, but good enough)
+        lda.l !used_slots_mask : beq .helmet
+        ldx.w #(32*8-1) : ldy.w #(27*8+2)
+        lda #$0a00 : sta $03    ; set palette to 5
+        lda #$0068 : jsl $81891F
+.helmet:
+        ply : plx
+        lda #$0e00 : sta $03    ; set palette to 7
+        pla : jsl $81891F
         rtl
 
-;; load RTA in IGT
-update_igt:
+;;; when in load menu, check if left, right, X or Y are pressed, if so, change
+;;; selected file lock status
+control_lock:
+        jsr $9DE4               ; hijacked code
+        lda $8f                 ; read newly pressed buttons
+        bit #$1c80 : bne .end ; if A, B, start, up or down pressed, do nothing
+        bit #$4340 : beq .end ; check for left, right, X or Y
+        ;; check that we're actually selecting a slot
+        lda !current_save_slot : cmp.w #3 : bpl .end
+        ;; actually toggle lock
+        %backupIndex()
+        lda $700002, x : eor #$8000 : sta $700002, x
+.end:
+        rts
+
+print "b81 end 1: ", pc
+
+warnpc $81fa7f
+
+!arrow_tile_idx #= $c0
+!menu_bg1_tilemap #= $7e3600
+!lock_help_tilemap_size #= 8*2
+
+org $81fc00
+draw_lock_help:
+        lda.l !used_slots_mask : beq .end
+        ldx.w #!lock_help_tilemap_size
+.loop:
+        dex : dex
+        bmi .end
+        lda.l lock_help_tilemap, x : sta.l !menu_bg1_tilemap+tileOffset(21, 26), x
+        bra .loop
+.end:
+        JSR $969F               ; hijacked code
+        rts
+
+lock_help_tilemap:
+        dw BGtile(!arrow_tile_idx, 0, 1, 0, 0), BGtile(!arrow_tile_idx, 0, 1, 1, 0) ; <>
+        dw "TOGGLE"
+
+print "b81 end 2: ", pc
+
+org $8e8000+(32*!arrow_tile_idx)
+incbin "base/arrow_tile.gfx"
+
+;;; Spritemap pointers table end. It can be expanded, since we spill over unused data
+org $82c639
+        dw spritemap_lock       ; entry $68
+
+spritemap_lock:
+        dw $0001
+        %sprite($8A, 0, 492, 244, 0, %11, 0, 0)
+
+warnpc $82c749 ; useful data resumes here
+
+;;; when saving, inform the player in the "SAVE COMPLETED" message box of the backup status
+!n_vanilla_entries #= $1C
+!new_save_completed_msg_box #= $1d
+!line_strlen #= 26
+!msgbox_ram_tilemap = $7E3200
+!full_line_size #= $40
+!third_line_addr #= 3*!full_line_size+!msgbox_ram_tilemap+6
+
+org $8580CE
+        dw !new_save_completed_msg_box ; ship point to new save completed box
+
+org $84B027
+        dw !new_save_completed_msg_box ; save station point to new save completed box
+
+org $85848D
+        db !new_save_completed_msg_box ; special case in handle msg box interaction routine
+
+;;; some fixes to message box handling to add our own without touching the vanilla tables and tilemaps
+;;; code based on MessageBoxesV5 by Kejardon, JAM, Nodever2 (https://metroidconstruction.com/resource.php?id=334)
+org $85869B
+msgbox_vanilla_entries:
+        skip !n_vanilla_entries*6
+.end:
+
+org $85824B
+        JSR FixMessageDefOffset
+org $8582ED
+        JSR FixMessageDefOffset
+
+org $8580D6
+        jsr ship_actually_save
+
+
+org $859643
+FixMessageDefOffset:
+    CLC : ADC $34               ; hijacked code
+    CMP.w #!n_vanilla_entries*6 : BMI + ; if we are reading from before the end of message box 1C data, return
+    ;; adjust table offset for entries >= 1D
+    STA $34 : LDA #(msgbox_new_entries-msgbox_vanilla_entries_end) : CLC : ADC $34
++   RTS
+
+;;; vanilla code is a bit of a troll by actually saving once Samus
+;;; gets out of ship, we need to actually save before displaying the
+;;; save completed msg box
+ship_actually_save:
         php
-        rep #$30
-	;; divide total frames in 32 bits by 3600 to have 16bits minutes and remaining frames,
-        ;; to correctly handle times up to 99:59:59.59 like vanilla
-	lda !stats_timer
-	sta $16
-	lda !stats_timer+2
-	sta $14
-	lda #3600
-	sta $12
-	jsl utils_div32
-	lda $14
-	sta !igt_frames ;; store remainder to igt frames
-	lda $16  ;; RTA in minutes
-	sta $004204 ;; divide by 60 to get hours
-	sep #$20
-	lda #$3c
-	sta $004206
-	pha : pla :  pha : pla : rep #$20
-	lda $004216 ;; rta minutes
-	sta !igt_minutes ;; replace igt minutes
-	lda $004214 ;; hours
-        sta !igt_hours ;; replace igt hours
-        cmp #$0064 ;; if < 100 hours, continue
-        bpl .overflow
-        lda !igt_frames ;; frames remainder after initial division to get minutes
-	sta $004204 ;; divide by 60 to get seconds and frames
-	sep #$20
-	lda #$3c
-	sta $004206
-	pha : pla :  pha : pla : rep #$20
-	lda $004216 ;; rta frames
-	sta !igt_frames ;; replace igt frames
-	lda $004214 ;; rta seconds
-        sta !igt_seconds ;; replace igt seconds
+        %ai16()
+        ;; pasted from gunship code, will be ran again afterwards but who cares
+        LDA $7ED8F8
+        ORA #$0001             ;} Set Crateria save station 0
+        STA $7ED8F8            ;/
+        STZ $078B              ; Load station index = 0
+        LDA $0952              ;\
+        JSL $818000            ;} Save current save slot to SRAM
+        plp
+        ;; Play saving sound effect (hijacked code)
+        JSR $8119
+        rts
+
+;;; start at index 1D
+msgbox_new_entries:
+        dw save_completed_custom, $825A, tilemap_save_completed
+        dw $8436, $8289, tilemap_terminator
+
+;;; write info about last backup in save completed msg box
+save_completed_custom:
+        php
+        %ai16()
+        lda.l !backup_candidate
+        bmi .backup_not_necessary
+        and #$0003
+        cmp.w #3 : beq .backup_failed
+.backup_done:
+        pha
+        ldy #tilemap_backup_done : jsr replace_3rd_line
+        pla : clc : adc #$28e0  ; get pink letter for slot
+        sta.l 2*23+!third_line_addr
         bra .end
-.overflow: ;; IGT = 99:59:59.59
-        lda #$0063
-        sta !igt_hours
-        lda #$003b
-        sta !igt_minutes
-        sta !igt_seconds
-        sta !igt_frames
+.backup_not_necessary:
+        ldy #tilemap_backup_not_needed : jsr replace_3rd_line
+        bra .end
+.backup_failed:
+        ldy #tilemap_backup_failed : jsr replace_3rd_line
 .end:
         plp
-        rtl
+        jsr $8441
+        rts
 
-print "b81 end: ", pc
+;;; rewrite 3rd line of large message box in RAM tilemap
+;;; Y: offset of line string in bank 85
+replace_3rd_line:
+        ldx.w #0
+.loop:
+        lda $0000, y
+        sta.l !third_line_addr, x
+        iny : iny : inx : inx
+        cpx.w #(2*!line_strlen) : bmi .loop
+        rts
 
-warnpc $81faff
+;;; tilemap definitions
+table "tables/msgbox.tbl"
+
+!msg_box_border = $000e, $000e, $000e
+
+tilemap_save_completed:
+        dw !msg_box_border : dw "     SAVE COMPLETED.      " : dw !msg_box_border
+        dw !msg_box_border : dw "                          " : dw !msg_box_border
+        dw !msg_box_border : dw "                          " : dw !msg_box_border
+
+tilemap_terminator:
+
+tilemap_backup_failed:
+        dw " NO SLOT LEFT FOR BACKUP! "
+
+tilemap_backup_done:
+        dw " PREVIOUS SAVE TO SLOT X. "
+
+tilemap_backup_not_needed:
+        dw "   BACKUP NOT NECESSARY.  "
+
+warnpc $85afff
+
+;;; Disable special X-Ray handler for animals room during escape, as
+;;; this otherwise unused state header field is used to hold VARIA
+;;; area for the room
+org $84836A
+handle_special_xray:
+        bra .skip
+org $848398
+.skip:

@@ -2,11 +2,14 @@ import random, copy
 from rom.addresses import Addresses, MAX_OBJECTIVES
 from rom.rom import pc_to_snes
 from rom.map import ObjectiveMapIcon
+from rom.enemies_objectives_data import enemies_objectives_data
 from logic.helpers import Bosses
 from logic.smbool import SMBool
 from logic.logic import Logic
-from graph.location import locationsDict
-from utils.parameters import Knows
+from utils.parameters import Knows, Settings
+from graph.graph_utils import graphAreas, GraphUtils
+from graph.vanilla.map_tiles import objectives as map_icons
+from utils.utils import randGaussBounds
 import utils.log, logging
 
 LOG = utils.log.get('Objectives')
@@ -28,6 +31,9 @@ class Synonyms(object):
     ]
     alreadyUsed = []
     @staticmethod
+    def reset():
+        Synonyms.alreadyUsed = []
+    @staticmethod
     def getVerb(maxLen):
         possibleVerbs = [syn for syn in Synonyms.killSynonyms if len(syn) <= maxLen]
         assert len(possibleVerbs) > 0, "could not find short enough synonym"
@@ -39,14 +45,14 @@ class Synonyms(object):
 
 class Goal(object):
     def __init__(self, name, gtype, logicClearFunc, romClearFunc, romInProgressFunc=None,
-                 escapeAccessPoints=None, objCompletedFuncAPs=lambda ap: [ap],
+                 escapeAccessPoints=None, objCompletedFuncVisit=lambda ap: ([ap], []),
                  exclusion=None, items=None, text=None, introText=None, mapIcons=None,
                  available=True, expandableList=None, category=None, area=None,
                  conflictFunc=None):
         self.name = name
         self.available = available
         self.clearFunc = logicClearFunc
-        self.objCompletedFuncAPs = objCompletedFuncAPs
+        self.objCompletedFuncVisit = objCompletedFuncVisit
         self.symbol = "objectives_%s" % romClearFunc
         self.inProgressSymbol = None
         if romInProgressFunc is not None:
@@ -60,6 +66,7 @@ class Goal(object):
         #  - boss
         #  - miniboss
         #  - map
+        #  - enemies
         #  - other
         self.gtype = gtype
         # example for kill three g4
@@ -123,19 +130,21 @@ class Goal(object):
             else:
                 out += self.text
             outLen = len(out)
-        except AssertionError:
+        except AssertionError as e:
+            print(e)
             outLen = maxLen + 1
         assert outLen <= maxLen, "Goal '{}' text is too long: '{}'".format(self.name, out)
         out = out.rstrip()        
+        # as we can save the plando multiple time in the same instance we have to use new intro text each time
         if self.introText is not None:
-            self.introText = idxTxt + self.introText
+            self.curIntroText = idxTxt + self.introText
         else:
-            self.introText = out
+            self.curIntroText = out
         return out
 
     def getIntroText(self):
-        assert self.introText is not None
-        return self.introText
+        assert self.curIntroText is not None
+        return self.curIntroText
 
     def isLimit(self):
         return "type" in self.exclusion
@@ -153,7 +162,138 @@ def getMiniBossesEscapeAccessPoints(n):
     return (n, [Bosses.accessPoints[boss] for boss in Bosses.miniBosses()])
 
 def getAreaEscapeAccessPoints(area):
-    return (1, list({list(loc.AccessFrom.keys())[0] for loc in Logic.locations if loc.GraphArea == area}))
+    return (1, list({list(loc.AccessFrom.keys())[0] for loc in Logic.locations() if loc.GraphArea == area}))
+
+def getEnemiesMapIcons(enemy):
+    return [name for name in map_icons if name.startswith(enemy)]
+
+_crocViaIceHellRun = Settings.hellRunsTable['Ice']['Norfair Entrance -> Croc via Ice']
+
+enemiesLogic = {
+    "Space Pirates": [
+        {"Blue Brinstar Elevator Bottom": lambda sm: SMBool(True)},
+        {"Green Pirates Shaft Bottom Right": lambda sm: sm.canPassCrateriaGreenPirates()},
+        {"KraidRoomOut": lambda sm: sm.canPassCrateriaGreenPirates()},
+        {"Business Center": lambda sm: sm.wand(sm.traverse('BusinessCenterTopLeft'),
+                                               sm.canUsePowerBombs(),
+                                               sm.wor(sm.wand(sm.haveItem('SpeedBooster'),
+                                                              sm.canHellRun(**_crocViaIceHellRun)),
+                                                      sm.wand(sm.canHellRun('Ice', _crocViaIceHellRun["mult"]/3, 3),
+                                                              sm.canKillRedPirates())))},
+        {"Crocomire Speedway Bottom": lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['Ice']['Croc -> Bubble Mountain']),
+                                                         sm.canKillRedPirates())},
+        {"LN Entrance": lambda sm: sm.canKillWorstRoomPirates()},
+        {"Worst Room Top": lambda sm: sm.canKillWorstRoomPirates()},
+        {"Ridley Zone": lambda sm: sm.canPassNinjaPirates()},
+        {"Main Street Bottom": lambda sm: sm.wand(sm.canDoOuterMaridia(),
+                                                  sm.wor(sm.haveItem('Plasma'),
+                                                         sm.wand(sm.haveItem('Gravity'),
+                                                                 sm.wor(sm.haveItem('ScrewAttack'),
+                                                                        sm.canPseudoScrewPinkPirates(1)))))},
+        {"Toilet Top": lambda sm: sm.wand(Bosses.bossDead(sm, "Draygon"),
+                                          sm.canExitPlasmaRoom())}
+    ],
+    "Ki Hunters": [
+        {"Keyhunter Room Bottom": lambda sm: SMBool(True)},
+        {"Big Pink": lambda sm: sm.traverse("BigPinkTopRight")},
+        {"KraidRoomOut": lambda sm: SMBool(True)},
+        {"Firefleas": lambda sm: sm.canKillRedKiHunters(3)},
+        {"Three Muskateers Room Left": lambda sm: sm.canKillRedKiHunters(3)},
+        {"Wrecked Ship Main": lambda sm: Bosses.bossDead(sm, "Phantoon")}
+    ],
+    "Beetoms": [
+        {"Gauntlet Top": lambda sm: sm.canKillBeetoms()},
+        {'Etecoons Bottom': lambda sm: sm.canKillBeetoms()},
+        {'Red Tower Top Left': lambda sm: sm.canKillBeetoms()},
+        {'Warehouse Zeela Room Left': lambda sm: sm.wand(Bosses.bossDead(sm, "Kraid"),
+                                                         sm.canKillBeetoms())},
+        {
+            "Business Center": lambda sm: sm.wand(sm.canPassFrogSpeedwayLeftToRight(),
+                                                  sm.canKillBeetoms()),
+            "Bubble Mountain Bottom": lambda sm: sm.wand(sm.canPassFrogSpeedwayRightToLeft(),
+                                                         sm.canKillBeetoms())
+        }
+    ],
+    "Cacatacs": [
+        {"Noob Bridge Right": lambda sm: SMBool(True)},
+        {"Red Brinstar Elevator": lambda sm: SMBool(True)},
+        {"East Tunnel Right": lambda sm: SMBool(True)},
+        {"Crocomire Speedway Bottom": lambda sm: SMBool(True)},
+        {"Bubble Mountain Top": lambda sm: SMBool(True)},
+        {"Post Botwoon": lambda sm: sm.wand(sm.canReachCacatacAlleyFromBotowoon(),
+                                            sm.canPassCacatacAlleyEastToWest())}
+    ],
+    "Kagos": [
+        {
+            "Wrecked Ship Back": lambda sm: sm.canPassForgottenHighway(True),
+            "Crab Maze Left": lambda sm: sm.haveItem("Morph")
+        },
+        {"Lower Mushrooms Left": lambda sm: SMBool(True)},
+        {"Bubble Mountain Top": lambda sm: sm.wand(sm.haveItem("Morph"),
+                                                   sm.canAccessDoubleChamberItems())}
+    ],
+    "Yapping Maws": [
+        {"Landing Site": lambda sm: sm.wand(sm.canDoGauntletFromLandingSite(),
+                                            sm.haveItem("Super"))},
+        {"Red Tower Top Left": lambda sm: sm.wand(sm.canAccessXRayFromRedTower(),
+                                                  sm.haveItem("Super"))},
+        {"Red Brinstar Elevator": lambda sm: sm.wand(sm.traverse('RedTowerElevatorTopLeft'),
+                                                     sm.canUsePowerBombs(),
+                                                     sm.haveItem("Super"))},
+        {'Crocomire Speedway Bottom': lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Kronic Boost Room <-> Croc']),
+                                                         sm.haveItem("Super"))},
+        {"Toilet Top": lambda sm: sm.haveItem("Super")}
+    ]
+}
+
+def getEnemiesLogicFunc(nmyType):
+    nmyEntry = enemiesLogic[nmyType]
+    def f(sm, ap):
+        nonlocal nmyEntry, nmyType
+        ret = SMBool(True)
+        foundAreas = set() if Objectives.totalEnemies is not None else None
+        for apDict in nmyEntry:
+            nmy = None
+            for nmyApName, logicFunc in apDict.items():
+                if not any(apObj.Name == nmyApName for apObj in Objectives.accessibleAPs):
+                    continue
+                if nmy is None:
+                    nmy = SMBool(False)
+                if foundAreas is not None:
+                    nmyAp = Objectives.graph.accessPoints[nmyApName]
+                    foundAreas.add(nmyAp.GraphArea)
+                nmy = sm.wor(nmy, sm.wand(Objectives.canAccess(sm, ap, nmyApName), logicFunc(sm)))
+            if nmy is not None:
+                ret = sm.wand(ret, nmy)
+        # those area checks are here to handle being called from the tracker when the graph is not complete,
+        # which conflicts with the logic above to ignore inaccessible APs to properly handle minimizer seeds
+        if foundAreas is not None:
+            maxPossibleEnemies = sum(c for area, c in enemies_objectives_data[nmyType]["area_count"].items() if area in foundAreas)
+            total = Objectives.totalEnemies[nmyType]
+            if maxPossibleEnemies < total:
+                ret = SMBool(False)
+        return ret
+    return f
+
+def getEnemiesAccessPoints(nmyType):
+    allAPs = []
+    for apDict in enemiesLogic[nmyType]:
+        allAPs += list(apDict.keys())
+    return list(set(allAPs))
+
+def getEnemiesAccessibleAccessPoints(nmyType):
+    accessibleApNames = [ap.Name for ap in Objectives.accessibleAPs]
+    return [ap for ap in getEnemiesAccessPoints(nmyType) if ap in accessibleApNames]
+
+def getEnemiesEscapeAccessPoints(nmyType):
+    return (1, getEnemiesAccessPoints(nmyType))
+
+def getAreaAccessPoints(area):
+    return [ap for ap in Objectives.accessibleAPs if ap.GraphArea == area]
+def getAreaAccessPointsNames(area):
+    return [ap.Name for ap in getAreaAccessPoints(area)]
+def getAreaLocations(area):
+    return [loc.Name for loc in Objectives.accessibleLocations if loc.GraphArea == area]
 
 GTsettingsConflict = lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))
 
@@ -414,42 +554,49 @@ _goalsList = [
          text="Explore 100% map",
          introText="explore the entire map",
          conflictFunc=exploreSettingsConflict,
+         objCompletedFuncVisit=lambda ap: ([_ap.Name for _ap in Objectives.accessibleAPs], [loc.Name for loc in Objectives.accessibleLocations]),
          category="Map"),
     Goal("explore crateria", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "Crateria"),
          "crateria_explored", romInProgressFunc="crateria_explored_percent",
          conflictFunc=exploreSettingsConflict,
          text="Explore Crateria",
          category="Map",
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("Crateria"), getAreaLocations("Crateria")),
          area="Crateria"),
     Goal("explore green brinstar", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "GreenPinkBrinstar"),
          "green_brin_explored", romInProgressFunc="green_brin_explored_percent",
          text="Explore Green Brin",
          introText="explore green brinstar",
          category="Map",
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("GreenPinkBrinstar"), getAreaLocations("GreenPinkBrinstar")),
          area="GreenPinkBrinstar"),
     Goal("explore red brinstar", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "RedBrinstar"),
          "red_brin_explored", romInProgressFunc="red_brin_explored_percent",
          text="Explore Red Brin",
          introText="explore red brinstar",
          category="Map",
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("RedBrinstar"), getAreaLocations("RedBrinstar")),
          area="RedBrinstar"),
     Goal("explore wrecked ship", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "WreckedShip"),
          "ws_explored", romInProgressFunc="ws_explored_percent",
          text="Explore Wreck Ship",
          introText="explore wrecked ship",
          category="Map",
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("WreckedShip"), getAreaLocations("WreckedShip")),
          area="WreckedShip"),
     Goal("explore kraid's lair", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "Kraid"),
          "kraid_explored", romInProgressFunc="kraid_explored_percent",
          text="Explore Kraid Lair",
          introText="explore kraid's lair",
          category="Map",
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("Kraid"), getAreaLocations("Kraid")),
          area="Kraid"),
     Goal("explore upper norfair", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "Norfair"),
          "upper_norfair_explored", romInProgressFunc="upper_norfair_explored_percent",
          text="Explore Up Norfair",
          introText="explore upper norfair",
          category="Map",
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("Norfair"), getAreaLocations("Norfair")),
          area="Norfair"),
     Goal("explore croc's lair", "map", lambda sm, ap: sm.wand(Objectives.canExploreArea(sm, ap, "Crocomire"),
                                                               sm.wor(sm.haveItem("SpeedBooster"), sm.haveItem("SpaceJump"))), # don't explore Post-Croc Jump Room w/ Bombs...
@@ -457,6 +604,7 @@ _goalsList = [
          text="Explore Croc Lair",
          introText="explore croc's lair",
          category="Map",
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("Crocomire"), getAreaLocations("Crocomire")),
          area="Crocomire"),
     Goal("explore lower norfair", "map", lambda sm, ap: sm.wand(Objectives.canExploreArea(sm, ap, "LowerNorfair"),
                                                                 sm.canExploreAmphitheater()),
@@ -465,6 +613,7 @@ _goalsList = [
          introText="explore lower norfair",
          conflictFunc=exploreSettingsConflict,
          category="Map",
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("LowerNorfair"), getAreaLocations("LowerNorfair")),
          area="LowerNorfair"),
     Goal("explore west maridia", "map", lambda sm, ap: sm.wand(Objectives.canExploreArea(sm, ap, "WestMaridia"),
                                                                sm.canGoUpMtEverest()),
@@ -472,6 +621,7 @@ _goalsList = [
          text="Explore West Marid",
          introText="explore west maridia",
          category="Map",
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("WestMaridia"), getAreaLocations("WestMaridia")),
          area="WestMaridia"),
     Goal("explore east maridia", "map", lambda sm, ap: sm.wand(Objectives.canExploreArea(sm, ap, "EastMaridia"),
                                                                sm.canPassCacatacAlleyEastToWest()),
@@ -479,6 +629,7 @@ _goalsList = [
          text="Explore East Marid",
          introText="explore east maridia",
          category="Map",
+         objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("EastMaridia"), getAreaLocations("EastMaridia")),
          area="EastMaridia"),
     # memes
     Goal("tickle the red fish", "other",
@@ -486,7 +637,7 @@ _goalsList = [
          "fish_tickled",
          text="Tickle the Red Fish",
          escapeAccessPoints=(1, ["Red Fish Room Bottom"]),
-         objCompletedFuncAPs=lambda ap: ["Red Fish Room Bottom"],
+         objCompletedFuncVisit=lambda ap: (["Red Fish Room Bottom"], []),
          mapIcons=["RedFish"],
          category="Memes"),
     Goal("kill the orange geemer", "other",
@@ -494,7 +645,7 @@ _goalsList = [
                                 sm.wor(sm.haveItem('Wave'), sm.canUsePowerBombs())),
          "orange_geemer",
          escapeAccessPoints=(1, ["Bowling"]),
-         objCompletedFuncAPs=lambda ap: ["Bowling"],
+         objCompletedFuncVisit=lambda ap: (["Bowling"], []),
          text="{} Orange Geemer",
          mapIcons=["OrangeGeemer"],
          category="Memes"),
@@ -504,7 +655,7 @@ _goalsList = [
                                 sm.canAccessShaktoolFromPantsRoom()),
          "shak_dead",
          escapeAccessPoints=(1, ["Oasis Bottom"]),
-         objCompletedFuncAPs=lambda ap: ["Oasis Bottom"],
+         objCompletedFuncVisit=lambda ap: (["Oasis Bottom"], []),
          text="{} Shaktool",
          mapIcons=["Shaktool"],
          category="Memes"),
@@ -517,7 +668,7 @@ _goalsList = [
          text="Trigger Chozo bots      ",
          mapIcons=["BombTorizo", "GoldenTorizo", "WreckedShipChozo", "LowerNorfairChozo"],
          escapeAccessPoints=(3, ["Landing Site", "Screw Attack Bottom", "Bowling"]),
-         objCompletedFuncAPs=lambda ap: ["Landing Site", "Screw Attack Bottom", "Bowling"],
+         objCompletedFuncVisit=lambda ap: (["Landing Site", "Screw Attack Bottom", "Bowling"], []),
          conflictFunc=GTsettingsConflict),
     Goal("visit the animals", "other", lambda sm, ap: sm.wand(Objectives.canAccess(sm, ap, "Big Pink"), sm.haveItem("SpeedBooster"), # dachora
                                                               Objectives.canAccess(sm, ap, "Etecoons Bottom")), # Etecoons
@@ -526,7 +677,7 @@ _goalsList = [
          mapIcons=["Etecoons", "Dachora"],
          category="Memes",
          escapeAccessPoints=(2, ["Big Pink", "Etecoons Bottom"]),
-         objCompletedFuncAPs=lambda ap: ["Big Pink", "Etecoons Bottom"]),
+         objCompletedFuncVisit=lambda ap: (["Big Pink", "Etecoons Bottom"], [])),
     Goal("kill king cacatac", "other",
          lambda sm, ap: Objectives.canAccess(sm, ap, 'Bubble Mountain Top'),
          "king_cac_dead",
@@ -534,11 +685,64 @@ _goalsList = [
          mapIcons=["KingCacatac"],
          category="Memes",
          escapeAccessPoints=(1, ['Bubble Mountain Top']),
-         objCompletedFuncAPs=lambda ap: ['Bubble Mountain Top'])
+         objCompletedFuncVisit=lambda ap: (['Bubble Mountain Top'], [])),
+    # "kill all <enemy>" objectives
+    Goal("kill all space pirates", "enemies",
+         getEnemiesLogicFunc("Space Pirates"),
+         "kill_all_space_pirates", romInProgressFunc="kill_all_space_pirates_progress",
+         text="{} SpacePirates        ",
+         introText="kill all space pirates",
+         mapIcons=getEnemiesMapIcons("SpacePirates"),
+         category="Enemies",
+         escapeAccessPoints=getEnemiesEscapeAccessPoints("Space Pirates"),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessibleAccessPoints("Space Pirates"), [])),
+    Goal("kill all ki hunters", "enemies",
+         getEnemiesLogicFunc("Ki Hunters"),
+         "kill_all_ki_hunters", romInProgressFunc="kill_all_ki_hunters_progress",
+         text="{} Ki Hunters        ",
+         introText="kill all ki hunters",
+         mapIcons=getEnemiesMapIcons("KiHunters"),
+         category="Enemies",
+         escapeAccessPoints=getEnemiesEscapeAccessPoints("Ki Hunters"),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessibleAccessPoints("Ki Hunters"),[])),
+    Goal("kill all beetoms", "enemies",
+         getEnemiesLogicFunc("Beetoms"),
+         "kill_all_beetoms", romInProgressFunc="kill_all_beetoms_progress",
+         text="{} all Beetoms        ",
+         mapIcons=getEnemiesMapIcons("Beetoms"),
+         category="Enemies",
+         escapeAccessPoints=getEnemiesEscapeAccessPoints("Beetoms"),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessibleAccessPoints("Beetoms"), [])),
+    Goal("kill all cacatacs", "enemies",
+         getEnemiesLogicFunc("Cacatacs"),
+         "kill_all_cacatacs", romInProgressFunc="kill_all_cacatacs_progress",
+         text="{} all Cacatacs        ",
+         mapIcons=getEnemiesMapIcons("Cacatacs"),
+         category="Enemies",
+         escapeAccessPoints=getEnemiesEscapeAccessPoints("Cacatacs"),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessibleAccessPoints("Cacatacs"), [])),
+    Goal("kill all kagos", "enemies",
+         getEnemiesLogicFunc("Kagos"),
+         "kill_all_kagos", romInProgressFunc="kill_all_kagos_progress",
+         text="{} all Kagos      ",
+         mapIcons=getEnemiesMapIcons("Kagos"),
+         category="Enemies",
+         escapeAccessPoints=getEnemiesEscapeAccessPoints("Kagos"),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessibleAccessPoints("Kagos"), [])),
+    Goal("kill all yapping maws", "enemies",
+         getEnemiesLogicFunc("Yapping Maws"),
+         "kill_all_yapping_maws", romInProgressFunc="kill_all_yapping_maws_progress",
+         text="{} Yapping Maws        ",
+         introText="kill all yapping maws",
+         mapIcons=getEnemiesMapIcons("YappingMaws"),
+         category="Enemies",
+         escapeAccessPoints=getEnemiesEscapeAccessPoints("Yapping Maws"),
+         objCompletedFuncVisit=lambda ap: (getEnemiesAccessibleAccessPoints("Yapping Maws"), []))
 ]
 
-
 _goals = {goal.name:goal for goal in _goalsList}
+
+goalCategories = sorted(list({obj.category for obj in _goalsList if obj.category is not None}))
 
 def completeGoalData():
     # "nothing" is incompatible with everything
@@ -552,7 +756,7 @@ def completeGoalData():
     # remove clear area goals if disabled tourian, as escape can trigger as soon as an area is cleared,
     # even if ship is not currently reachable
     for goal in itemAreaGoals:
-        _goals[goal].exclusion['tourian'] = "Disabled"
+        _goals[goal].exclusion["canAutoClear"] = True
     # if we need 100% map, don't require "explore area", as it covers those
     mapAreaGoals = [goal.name for goal in areaGoals if goal.gtype == "map"]
     _goals["explore 100% map"].exclusion["list"] += mapAreaGoals[:]
@@ -568,8 +772,11 @@ class Objectives(object):
     totalItemsCount = 100
     goals = _goals
     graph = None
+    startAP = None
     tourianRequired = None
     hidden = False
+    accessibleAPs = []
+    totalEnemies = None
     # objectives are really needed when initiliazing rando, computing escape for disabled Tourian, and solver/tracker
     # we don't need them when placing items since the seed has to be completable 100% if generated, and objectives are
     # checked with 100% items during rando setup.
@@ -577,23 +784,28 @@ class Objectives(object):
     vanillaGoals = ["kill kraid", "kill phantoon", "kill draygon", "kill ridley"]
     scavHuntGoal = ["finish scavenger hunt"]
 
-    def __init__(self, tourianRequired=True, randoSettings=None):
-        if Objectives.tourianRequired is None:
+    def __init__(self, tourianRequired=None, randoSettings=None, reset=False):
+        if tourianRequired is not None:
             Objectives.tourianRequired = tourianRequired
         self.randoSettings = randoSettings
+        if reset:
+            self.resetGoals()
 
     @property
     def tourianRequired(self):
         assert Objectives.tourianRequired is not None
         return Objectives.tourianRequired
 
-    def resetGoals(self):
+    @staticmethod
+    def resetGoals():
         Objectives.activeGoals = []
         Objectives.nbActiveGoals = 0
+        for goal in Objectives.goals.values():
+            goal.completed = False
 
     def conflict(self, newGoal):
-        if newGoal.exclusion.get('tourian') == "Disabled" and self.tourianRequired == False:
-            LOG.debug("new goal %s conflicts with disabled Tourian" % newGoal.name)
+        if newGoal.exclusion.get('canAutoClear') == True and self.tourianRequired == False and not GraphUtils.isStandardStart(Objectives.startAP):
+            LOG.debug("rejecting new goal %s as it can auto clear with no access to ship" % newGoal.name)
             return True
         LOG.debug("check if new goal {} conflicts with existing active goals".format(newGoal.name))
         count = 0
@@ -666,13 +878,37 @@ class Objectives(object):
     def isGoalActive(goalName):
         return Objectives.goals[goalName] in Objectives.activeGoals
 
+    @staticmethod
+    def getNbRandomObjectives(nbAvailObj):
+        maxObj = min(Objectives.maxActiveGoals, nbAvailObj)
+        # make extreme values less likely
+        return 1 + randGaussBounds(maxObj - 1, slope=3.5)
+
+    @staticmethod
+    def getNbRandomRequiredObjectives():
+        # skewed towards more than half of the obj
+        maxObj = min(Objectives.nbActiveGoals, Objectives.maxRequiredGoals)
+        return min(1 + randGaussBounds(maxObj*1.25, slope=4.5), maxObj)
+
     # having graph as a global sucks but Objectives instances are all over the place,
     # goals must access it, and it doesn't change often
     @staticmethod
     def setGraph(graph, maxDiff):
+        assert Objectives.startAP is not None
+        startAP = Objectives.startAP
+        Objectives.accessibleAPs = [ap for ap in graph.getAccessibleAccessPoints(startAP) if ap.GraphArea != "Tourian"]
+        Objectives.accessibleLocations = [loc for loc in graph.getAccessibleLocations(Logic.locationsDict().values(), startAP) if loc.GraphArea != "Tourian"]
         Objectives.graph = graph
+        # crateria-less minimizer (solver/tracker)
+        escape = graph.accessPoints["Climb Bottom Left"]
+        Objectives.isCrateriaLess = not any(ap for ap in graph.accessPoints.values() if ap.GraphArea == "Crateria" and ap != escape and ap.ConnectedTo is not None)
+        LOG.debug(f"Objectives.isCrateriaLess = {Objectives.isCrateriaLess}")
+        if Objectives.isCrateriaLess:
+            Objectives.accessibleAPs = [ap for ap in Objectives.accessibleAPs if ap.GraphArea != "Crateria"]
+            Objectives.accessibleLocations = [loc for loc in Objectives.accessibleLocations if loc.GraphArea != "Crateria"]
+        LOG.debug(f"Objectives.accessibleLocations = {len(Objectives.accessibleLocations)}, {Objectives.accessibleLocations}")
         Objectives.maxDiff = maxDiff
-        for goalName, goal in Objectives.goals.items():
+        for goal in Objectives.goals.values():
             if goal.area is not None:
                 goal.escapeAccessPoints = getAreaEscapeAccessPoints(goal.area)
 
@@ -682,28 +918,50 @@ class Objectives(object):
 
     @staticmethod
     def canAccessLocation(sm, ap, locName):
-        loc = locationsDict[locName]
+        loc = Logic.locationsDict()[locName]
         availLocs = Objectives.graph.getAvailableLocations([loc], sm, Objectives.maxDiff, ap)
         return SMBool(loc in availLocs)
 
+    @staticmethod
+    def canReachArea(sm, rootApName, area):
+        graph, maxDiff = Objectives.graph, Objectives.maxDiff
+        availAPs = graph.getAvailableAccessPoints(graph.accessPoints[rootApName], sm, maxDiff)
+        return SMBool(any(ap.GraphArea == area for ap in availAPs))
+
     # XXX consider "explore map" equivalent to "access all locations and APs"
+    @staticmethod
+    def locPostAvailable(sm, loc):
+        if loc.PostAvailable is None:
+            return True
+        diff = loc.PostAvailable(sm)
+        return diff.bool == True and diff.difficulty < Objectives.maxDiff
 
     @staticmethod
     def canExploreArea(sm, rootApName, area):
         graph, maxDiff = Objectives.graph, Objectives.maxDiff
 
-        accessibleAPs = graph.getAccessibleAccessPoints(rootApName)
         availAPs = graph.getAvailableAccessPoints(graph.accessPoints[rootApName], sm, maxDiff)
-        areaAPs = [ap for ap in accessibleAPs if ap.GraphArea == area]
+        areaAPs = getAreaAccessPoints(area)
+
+        if not areaAPs:
+            LOG.debug(f"canExploreArea {area} no ap available")
+            return SMBool(False)
+
         for ap in areaAPs:
             if ap not in availAPs:
                 LOG.debug(f"canExploreArea {area} {ap} not available")
                 return SMBool(False)
 
-        accessibleLocs = graph.getAccessibleLocations(locationsDict.values(), rootApName)
+        accessibleLocs = graph.getAccessibleLocations(Logic.locationsDict().values(), rootApName)
         # in solver we don't want to recompute already visited locations difficulty, so copy them first
         areaLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea == area]
-        availLocs = graph.getAvailableLocations(areaLocs, sm, maxDiff, rootApName)
+        LOG.debug("canExploreArea {} all   locs: {}".format(area, sorted([loc.Name for loc in areaLocs])))
+        availLocs = [loc for loc in graph.getAvailableLocations(areaLocs, sm, maxDiff, rootApName) if Objectives.locPostAvailable(sm, loc)]
+        LOG.debug("canExploreArea {} avail locs: {}".format(area, sorted([loc.Name for loc in availLocs])))
+        if not areaLocs:
+            LOG.debug(f"canExploreArea {area} no loc available")
+            return SMBool(False)
+
         if len(availLocs) != len(areaLocs):
             if LOG.getEffectiveLevel() == logging.DEBUG:
                 missingLocs = [loc for loc in areaLocs if loc not in availLocs]
@@ -713,19 +971,26 @@ class Objectives(object):
         return SMBool(True)
 
     @staticmethod
+    def _getSkipExploreAreas():
+        skipAreas = ["Tourian", "Ceres"]
+        if Objectives.isCrateriaLess:
+            skipAreas.append("Crateria")
+        return skipAreas
+
+    @staticmethod
     def canExploreMap(sm, rootApName):
         graph, maxDiff = Objectives.graph, Objectives.maxDiff
-        accessibleAPs = graph.getAccessibleAccessPoints(rootApName)
-        allAPs = [ap for ap in accessibleAPs if ap.GraphArea != "Tourian" and ap.GraphArea != "Ceres"]
+        skipAreas = Objectives._getSkipExploreAreas()
+        allAPs = [ap for ap in Objectives.accessibleAPs if ap.GraphArea not in skipAreas]
         availAPs = graph.getAvailableAccessPoints(graph.accessPoints[rootApName], sm, maxDiff)
         for ap in allAPs:
             if ap not in availAPs:
                 LOG.debug(f"canExploreMap {ap} not available")
                 return SMBool(False)
 
-        accessibleLocs = graph.getAccessibleLocations(locationsDict.values(), rootApName)
-        allLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea != "Tourian"]
-        availLocs = graph.getAvailableLocations(allLocs, sm, maxDiff, rootApName)
+        accessibleLocs = graph.getAccessibleLocations(Logic.locationsDict().values(), rootApName)
+        allLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea not in skipAreas]
+        availLocs = [loc for loc in graph.getAvailableLocations(allLocs, sm, maxDiff, rootApName) if Objectives.locPostAvailable(sm, loc)]
         if len(availLocs) != len(allLocs):
             if LOG.getEffectiveLevel() == logging.DEBUG:
                 missingLocs = [loc for loc in allLocs if loc not in availLocs]
@@ -738,8 +1003,9 @@ class Objectives(object):
     def canExploreMapPercent(sm, rootApName, percent):
         graph, maxDiff = Objectives.graph, Objectives.maxDiff
         # questionable heuristic: consider "access x% items" equivalent to "can reach x% locations"
-        accessibleLocs = graph.getAccessibleLocations(locationsDict.values(), rootApName)
-        allLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea != "Tourian"]
+        accessibleLocs = graph.getAccessibleLocations(Logic.locationsDict().values(), rootApName)
+        skipAreas = Objectives._getSkipExploreAreas()
+        allLocs = [copy.copy(loc) for loc in accessibleLocs if loc.GraphArea not in skipAreas]
         availLocs = graph.getAvailableLocations(allLocs, sm, maxDiff, rootApName)
         pct = 100*float(len(availLocs)) / float(len(allLocs))
         return SMBool(pct >= percent)
@@ -814,18 +1080,19 @@ class Objectives(object):
             if area in goalsByArea:
                 goalsByArea[area].setClearFunc(func)
 
-    def setSolverMode(self, solver):
+    def setSolverMode(self, solver, romConf):
         self.setScavengerHuntFunc(solver.scavengerHuntComplete)
         # in rando we know the number of items after randomizing, so set the functions only for the solver
-        self.setItemPercentFuncs(allUpgradeTypes=solver.majorUpgrades)
+        self.setItemPercentFuncs(allUpgradeTypes=romConf.majorUpgrades)
 
         def getObjAreaFunc(area):
             def f(sm, ap):
                 nonlocal solver, area
-                visitedLocs = set([loc.Name for loc in solver.visitedLocations])
-                return SMBool(all(locName in visitedLocs for locName in solver.splitLocsByArea[area]))
+                visitedLocs = set([loc.Name for loc in solver.container.visitedLocations()])
+                allVisited = SMBool(all(locName in visitedLocs for locName in solver.romConf.splitLocsByArea[area]))
+                return sm.wand(Objectives.canReachArea(sm, ap, area), allVisited)
             return f
-        self.setAreaFuncs({area:getObjAreaFunc(area) for area in solver.splitLocsByArea})
+        self.setAreaFuncs({area:getObjAreaFunc(area) for area in graphAreas})
 
     def expandGoals(self):
         LOG.debug("Active goals:"+str(Objectives.activeGoals))
@@ -873,19 +1140,21 @@ class Objectives(object):
 
         return ret
 
-    def setGoalCompleted(self, goalName, completed):
+    @staticmethod
+    def setGoalCompleted(goalName, completed):
         for goal in Objectives.activeGoals:
             if goal.name == goalName:
                 goal.completed = completed
                 return
         assert False, "Can't set goal {} completion to {}, goal not active".format(goalName, completed)
 
-    def enoughGoalsCompleted(self):
+    @staticmethod
+    def enoughGoalsCompleted():
         nCompleted = len([goal for goal in Objectives.activeGoals if goal.completed])
         return nCompleted >= Objectives.nbRequiredGoals
 
     def getGoalFromCheckFunction(self, checkFunction):
-        for name, goal in Objectives.goals.items():
+        for goal in Objectives.goals.values():
             if goal.checkAddr == checkFunction:
                 return goal
         LOG.debug("Goal with check function {} not found".format(hex(checkFunction)))
@@ -900,7 +1169,13 @@ class Objectives(object):
     def getAddressesToRead():
         objectiveSize = 2
         bytesToRead = Objectives.maxActiveGoals * objectiveSize
-        otherAddrs = ['totalItems', 'itemsMask', 'beamsMask', 'objectives_n_objectives', 'objectives_n_objectives_required']
+        otherAddrs = [
+            'totalItems', 'itemsMask', 'beamsMask',
+            'objectives_n_objectives', 'objectives_n_objectives_required',
+            'objectives_space_pirates_type', 'objectives_ki_hunters_type',
+            'objectives_beetoms_type', 'objectives_cacatacs_type',
+            'objectives_kagos_type', 'objectives_yapping_maws_type'
+        ]
         ret = [Addresses.getOne('objectivesList')+i for i in range(0, bytesToRead+1)]
         for addr in otherAddrs:
             ret += Addresses.getWeb(addr)
@@ -960,19 +1235,24 @@ class Objectives(object):
             "nbRequiredGoals": Objectives.nbRequiredGoals
         }
 
-    def getTotalItemsCount(self):
-        return Objectives.totalItemsCount
-
-    def setState(self, state):
+    def setState(self, state, tourianRequired):
+        self.resetGoals()
+        rank = 1
         for goalName, completed in state["goals"].items():
-            self.addGoal(goalName, completed)
+            goal = Objectives.goals[goalName]
+            goal.completed = completed
+            goal.rank = rank
+            Objectives.activeGoals.append(goal)
+            rank += 1
         Objectives.nbActiveGoals = state["nbActiveGoals"]
         Objectives.nbRequiredGoals = state["nbRequiredGoals"]
+        Objectives.tourianRequired = tourianRequired
 
     def setTotalItemsCount(self, totalItemsCount):
         Objectives.totalItemsCount = totalItemsCount
 
-    def resetGoals(self):
+    @staticmethod
+    def resetCompletedGoals():
         for goal in Objectives.activeGoals:
             goal.completed = False
 
@@ -984,13 +1264,40 @@ class Objectives(object):
         return [goal.name for goal in Objectives.goals.values() if goal.available and goal.name not in excludeList]
 
     # call from rando
-    def setRandom(self, nbGoals, availableGoals):
+    def setRandom(self, nbGoals, availableGoals, distribute=False):
         LOG.debug(f"obj random, {len(availableGoals)} available goals: {str(availableGoals)}")
-        while Objectives.nbActiveGoals < nbGoals and availableGoals:
-            goalName = random.choice(availableGoals)
-            self.addGoal(goalName)
-            availableGoals.remove(goalName)
-            LOG.debug(f"obj random {Objectives.nbActiveGoals}/{nbGoals}")
+        def pickFromAll():
+            while Objectives.nbActiveGoals < nbGoals and availableGoals:
+                goalName = random.choice(availableGoals)
+                self.addGoal(goalName)
+                availableGoals.remove(goalName)
+                LOG.debug(f"obj random {Objectives.nbActiveGoals}/{nbGoals}")
+        def pickDistributed():
+            availableGoalsObj = [Objectives.goals[goalName] for goalName in availableGoals]
+            goalsByCategory = {cat:[obj.name for obj in availableGoalsObj if obj.category == cat] for cat in goalCategories}
+            catList = []
+            remainingGoals = sum(len(goals) for goals in goalsByCategory.values())
+            while Objectives.nbActiveGoals < nbGoals and remainingGoals > 0:
+                if not catList:
+                    catList = goalCategories[:]
+                    random.shuffle(catList)
+                    LOG.debug(f"new catList: {catList}")
+                category = None
+                while category is None and catList:
+                    category = catList.pop()
+                    objList = goalsByCategory[category]
+                    LOG.debug(f"goals for cat {category}: {objList}")
+                    if objList:
+                        goalName = random.choice(objList)
+                        self.addGoal(goalName)
+                        objList.remove(goalName)
+                        remainingGoals -= 1
+                        LOG.debug(f"obj random {Objectives.nbActiveGoals}/{nbGoals}")
+                        break
+        if distribute:
+            pickDistributed()
+        else:
+            pickFromAll()
 
     # call from solver
     def readGoals(self, romReader):
@@ -998,6 +1305,15 @@ class Objectives(object):
         # read objective quantities
         Objectives.nbActiveGoals = romReader.romFile.readByte(Addresses.getOne('objectives_n_objectives'))
         Objectives.nbRequiredGoals = romReader.romFile.readByte(Addresses.getOne('objectives_n_objectives_required'))
+        # read total enemies to help with logic functions
+        Objectives.totalEnemies = {
+            "Space Pirates": romReader.romFile.readByte(Addresses.getOne('objectives_space_pirates_type')),
+            "Ki Hunters": romReader.romFile.readByte(Addresses.getOne('objectives_ki_hunters_type')),
+            "Beetoms": romReader.romFile.readByte(Addresses.getOne('objectives_beetoms_type')),
+            "Cacatacs": romReader.romFile.readByte(Addresses.getOne('objectives_cacatacs_type')),
+            "Kagos": romReader.romFile.readByte(Addresses.getOne('objectives_kagos_type')),
+            "Yapping Maws": romReader.romFile.readByte(Addresses.getOne('objectives_yapping_maws_type'))
+        }
         # in previous releases this info wasn't present in ROM, freespace default to 0xff
         Objectives.previousReleaseFallback = Objectives.nbActiveGoals == 0xff
 
@@ -1101,6 +1417,8 @@ class Objectives(object):
         # write objectives text
         romFile.seek(Addresses.getOne('objectives_objs_txt'))
         addrs = []
+        # for plando reset already used synonyms to avoid an infinite loop when all short synonyms have been used
+        Synonyms.reset()
         for i, goal in enumerate(Objectives.activeGoals):
             addrs.append(romFile.tell())
             writeString(goal.getText())

@@ -128,15 +128,12 @@ if defined("VANILLA_ENDSCREEN")
 else
         ;; draw decimal icon
         lda #$205a
-        %tileOffset(28, 2)      ; value for VARIA end screen
-        sta $7E3000+!_tile_offset
+        sta $7E3000+tileOffset(28, 2)      ; value for VARIA end screen
         ;; draw percentage sign
         lda #$206A
-        %tileOffset(30, 1)      ; value for VARIA end screen
-        sta $7E3000+!_tile_offset
+        sta $7E3000+tileOffset(30, 1)      ; value for VARIA end screen
         lda #$207a
-        %tileOffset(30, 2)      ; value for VARIA end screen
-        sta $7E3000+!_tile_offset
+        sta $7E3000+tileOffset(30, 2)      ; value for VARIA end screen
 endif
         ;; draw digits
         LDA $12
@@ -164,15 +161,13 @@ draw_digit_end:
 if defined("VANILLA_ENDSCREEN")
         STA $7E339A,x
 else
-        %tileOffset(25, 1)
-        STA $7E3000+!_tile_offset,x
+        STA $7E3000+tileOffset(25, 1),x
 endif
         LDA $E743,y             ; tilemap values for decimal digits (bottom half)
 if defined("VANILLA_ENDSCREEN")
         STA $7E33DA,x
 else
-        %tileOffset(25, 2)      ; value for VARIA end screen
-        STA $7E3000+!_tile_offset,x
+        STA $7E3000+tileOffset(25, 2),x      ; value for VARIA end screen
 endif
         inx : inx
         ply

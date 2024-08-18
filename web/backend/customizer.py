@@ -113,6 +113,7 @@ class Customizer(object):
             self.session.customizer['minDegree'] = -15
             self.session.customizer['maxDegree'] = 15
             self.session.customizer['invert'] = "on"
+            self.session.customizer['grayscale'] = "off"
             self.session.customizer['globalShift'] = "on"
             self.session.customizer['customSpriteEnable'] = "off"
             self.session.customizer['customSprite'] = "samus"
@@ -131,6 +132,7 @@ class Customizer(object):
             self.session.customizer['fast_doors'] = "off"
             self.session.customizer['Infinite_Space_Jump'] = "off"
             self.session.customizer['refill_before_save'] = "off"
+            self.session.customizer['better_reserves'] = "off"
             self.session.customizer['widescreen'] = "off"
             self.session.customizer['AimAnyButton'] = "off"
             self.session.customizer['max_ammo_display'] = "off"
@@ -151,6 +153,7 @@ class Customizer(object):
             self.session.customizer['color_blind'] = "off"
             self.session.customizer['disable_screen_shake'] = "off"
             self.session.customizer['noflashing'] = "off"
+            self.session.customizer['disable_minimap_colors'] = "off"
 
             musics = self.loadMusics()
             for song, songId in musics["_list"]:
@@ -169,13 +172,13 @@ class Customizer(object):
         # check validity of all parameters
         switchs = ['itemsounds', 'spinjumprestart', 'rando_speed', 'elevators_speed', 'fast_doors',
                    'AimAnyButton', 'max_ammo_display', 'supermetroid_msu1', 'base',
-                   'Infinite_Space_Jump', 'refill_before_save',
+                   'Infinite_Space_Jump', 'refill_before_save', 'better_reserves',
                    'customSpriteEnable', 'customItemsEnable', 'noSpinAttack', 'customShipEnable', 'remove_itemsounds',
                    'remove_elevators_speed', 'remove_fast_doors', 'remove_Infinite_Space_Jump',
                    'remove_rando_speed', 'remove_spinjumprestart', 'gamepadMapping', 'widescreen',
                    'hell', 'lava_acid_physics', 'colorsRandomization', 'suitsPalettes', 'beamsPalettes',
                    'tilesPalettes', 'enemiesPalettes', 'bossesPalettes', 'invert',
-                   'color_blind', 'disable_screen_shake', 'noflashing', 'hard_mode']
+                   'color_blind', 'disable_screen_shake', 'noflashing', 'hard_mode', 'disable_minimap_colors']
         others = ['minDegree', 'maxDegree', 'hellrun_rate', 'etanks', 'logic']
         validateWebServiceParams(self.request, switchs, [], [], others, isJson=True)
         if self.vars.customSpriteEnable == 'on':
@@ -213,6 +216,7 @@ class Customizer(object):
         self.session.customizer['minDegree'] = self.vars.minDegree
         self.session.customizer['maxDegree'] = self.vars.maxDegree
         self.session.customizer['invert'] = self.vars.invert
+        self.session.customizer['grayscale'] = self.vars.grayscale
         self.session.customizer['globalShift'] = self.vars.globalShift
         self.session.customizer['customSpriteEnable'] = self.vars.customSpriteEnable
         self.session.customizer['customSprite'] = self.vars.customSprite
@@ -234,6 +238,7 @@ class Customizer(object):
         self.session.customizer['fast_doors'] = self.vars.fast_doors
         self.session.customizer['Infinite_Space_Jump'] = self.vars.Infinite_Space_Jump
         self.session.customizer['refill_before_save'] = self.vars.refill_before_save
+        self.session.customizer['better_reserves'] = self.vars.better_reserves
         self.session.customizer['widescreen'] = self.vars.widescreen
         self.session.customizer['AimAnyButton'] = self.vars.AimAnyButton
         self.session.customizer['max_ammo_display'] = self.vars.max_ammo_display
@@ -254,6 +259,7 @@ class Customizer(object):
         self.session.customizer['color_blind'] = self.vars.color_blind
         self.session.customizer['disable_screen_shake'] = self.vars.disable_screen_shake
         self.session.customizer['noflashing'] = self.vars.noflashing
+        self.session.customizer['disable_minimap_colors'] = self.vars.disable_minimap_colors
 
         if self.vars.music == 'Customize':
             musics = self.loadMusics()
@@ -290,6 +296,8 @@ class Customizer(object):
             params += ['-c', 'Infinite_Space_Jump']
         if self.vars.refill_before_save == 'on':
             params += ['-c', 'refill_before_save.ips']
+        if self.vars.better_reserves == 'on':
+            params += ['-c', 'better_reserves.ips']
         if self.vars.widescreen == 'on':
             params += ['-c', 'widescreen.ips']
         if self.vars.remove_itemsounds == 'on':
@@ -326,9 +334,13 @@ class Customizer(object):
             params += ['-c', 'disable_screen_shake.ips']
         if self.vars.noflashing == 'on':
             params += ['-c', 'noflashing.ips']
+        if self.vars.disable_minimap_colors == 'on':
+            params += ['-c', 'disable_minimap_colors.ips']
 
         if self.vars.colorsRandomization == 'on':
             params.append('--palette')
+            if self.vars.grayscale == 'on':
+                params.append('--grayscale')
             if self.vars.suitsPalettes == 'off':
                 params.append('--no_shift_suit_palettes')
             if self.vars.beamsPalettes == 'off':

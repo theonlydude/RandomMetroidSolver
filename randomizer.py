@@ -6,7 +6,7 @@ from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
 from graph.graph_utils import GraphUtils, getAccessPoint
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity, text2diff, appDir
-from rom.rom_patches import RomPatches
+from rom.rom_patches import RomPatches, getPatchSet, getPatchSetsFromPatcherSettings, getPatchDescriptions
 from rom.rompatcher import RomPatcher
 from rom.flavor import RomFlavor
 from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues, getPresetDir
@@ -77,6 +77,9 @@ if __name__ == "__main__":
     parser.add_argument('--areaLayoutBase',
                         help="use simple layout patch for area mode", action='store_true',
                         dest='areaLayoutBase', default=False)
+    parser.add_argument('--areaLayoutCustom',
+                        help="Customize area layout patches. Comma-separated values of patch IDs",
+                        nargs='?', dest='areaLayoutCustom', default=None)
     parser.add_argument('--escapeRando',
                         help="Randomize the escape sequence",
                         dest='escapeRando', nargs='?', const=True, default=False)
@@ -121,7 +124,7 @@ if __name__ == "__main__":
                                  'fast_doors.ips', 'elevators_speed.ips',
                                  'spinjumprestart.ips', 'rando_speed.ips', 'No_Music', 'AimAnyButton.ips',
                                  'max_ammo_display.ips', 'supermetroid_msu1.ips', 'Infinite_Space_Jump',
-                                 'refill_before_save.ips', 'relaxed_round_robin_cf.ips'])
+                                 'refill_before_save.ips', 'relaxed_round_robin_cf.ips', 'better_reserves.ips'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -191,6 +194,9 @@ if __name__ == "__main__":
     parser.add_argument('--nolayout',
                         help="do not include total randomizer layout patches",
                         dest='noLayout', action='store_true', default=False)
+    parser.add_argument('--layoutCustom',
+                        help="Customize anti-softlock layout patches. Comma-separated values of patch IDs",
+                        nargs='?', dest='layoutCustom', default=None)
     parser.add_argument('--gravityBehaviour',
                         help="varia/gravity suits behaviour",
                         dest='gravityBehaviour', nargs='?', default='Balanced', choices=gravityBehaviours+['random'])
@@ -205,6 +211,9 @@ if __name__ == "__main__":
     parser.add_argument('--novariatweaks',
                         help="do not include VARIA randomizer tweaks",
                         dest='noVariaTweaks', action='store_true', default=False)
+    parser.add_argument('--variaTweaksCustom',
+                        help="Customize VARIA tweaks patches. Comma-separated values of patch IDs",
+                        nargs='?', dest='variaTweaksCustom', default=None)
     parser.add_argument('--controls',
                         help="specify controls, comma-separated, in that order: Shoot,Jump,Dash,ItemSelect,ItemCancel,AngleUp,AngleDown. Possible values: A,B,X,Y,L,R,Select,None",
                         dest='controls')
@@ -244,6 +253,8 @@ if __name__ == "__main__":
                         dest='nbObjectivesRequired', nargs='?', default=None, type=int)
     parser.add_argument('--hiddenObjectives', help="don't reveal objectives until reaching a particular room depending on tourian setting", dest='hiddenObjectives',
                         nargs='?', const=True, default=False)
+    parser.add_argument('--distributeObjectives', help="Distribute random objectives evenly across categories", dest='distributeObjectives',
+                        nargs='?', const=True, default=False)
     parser.add_argument('--objectiveList', help="list to choose from when random",
                         dest='objectiveList', nargs='?', default=None)
     parser.add_argument('--tourian', help="Tourian mode",
@@ -281,6 +292,33 @@ if __name__ == "__main__":
             argDict[arg] = value
             forcedArgs[webArg if webArg is not None else arg] = webValue if webValue is not None else value
             optErrMsgs.append(msg)
+
+    def forceLayoutArgs(forcedLayout):
+        def mergeCustomLayout(arg, forced):
+            if arg is None:
+                return forced, forced
+            p = arg.split(',')
+            return sorted(list(set(p + forced))), sorted(list(set(forced) - set(p)))
+        def getForcedText(forced):
+            return ', '.join(getPatchDescriptions(forced, RomFlavor.flavor))
+        if forcedLayout['layout'] and (args.noLayout or args.layoutCustom is not None):
+            forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", webValue='on')
+            forced = forcedLayout['layout']
+            custom, actuallyForced = mergeCustomLayout(args.layoutCustom, forced)
+            if len(actuallyForced) > 0:
+                forceArg("layoutCustom", ','.join(custom), f"Forced layout patches: {getForcedText(actuallyForced)}", webValue=custom)
+        if args.areaRandomization != 'off' and forcedLayout['areaLayout'] and (args.areaLayoutBase or args.areaLayoutCustom is not None):
+            forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", webValue='on')
+            forced = forcedLayout['areaLayout']
+            custom, actuallyForced = mergeCustomLayout(args.areaLayoutCustom, forced)
+            if len(actuallyForced) > 0:
+                forceArg("areaLayoutCustom", ','.join(custom), f"Forced area layout patches: {getForcedText(actuallyForced)}", webValue=custom)
+        if forcedLayout['variaTweaks'] and (args.noVariaTweaks or args.variaTweaksCustom is not None):
+            forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", webValue='on')
+            forced = forcedLayout['variaTweaks']
+            custom, actuallyForced = mergeCustomLayout(args.variaTweaksCustom, forced)
+            if len(actuallyForced) > 0:
+                forceArg('variaTweaksCustom', ','.join(custom), f"Forced VARIA tweaks: {getForcedText(actuallyForced)}", webValue=custom)
 
     # if rando preset given, load it first
     if args.randoPreset is not None:
@@ -358,6 +396,7 @@ if __name__ == "__main__":
     else:
         minDifficulty = 0
 
+    # minimizer
     if areaRandomization == True and args.bosses == True and args.minimizerN is not None:
         if args.minimizerN == "random":
             minimizerN = random.randint(30, 60)
@@ -370,22 +409,26 @@ if __name__ == "__main__":
         minimizerN = None
     logger.debug(f"majorsSplit: {args.majorsSplit}")
 
+    # door color rando
     doorsColorsRandom = False
     if args.doorsColorsRando == 'random':
         doorsColorsRandom = True
         args.doorsColorsRando = bool(random.getrandbits(1))
     logger.debug("doorsColorsRando: {}".format(args.doorsColorsRando))
 
+    # boss rando
     bossesRandom = False
     if args.bosses == 'random':
         bossesRandom = True
         args.bosses = bool(random.getrandbits(1))
     logger.debug("bosses: {}".format(args.bosses))
 
+    # escape rando
     if args.escapeRando == 'random':
         args.escapeRando = bool(random.getrandbits(1))
     logger.debug("escapeRando: {}".format(args.escapeRando))
 
+    # settings constraints
     if args.suitsRestriction != False and minimizerN is not None:
         forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
 
@@ -429,10 +472,7 @@ if __name__ == "__main__":
     if not GraphUtils.isStandardStart(args.startLocation) and args.plandoRando is None:
         if args.majorsSplit in ['Major', "Chozo"]:
             forceArg('hud', True, "'VARIA HUD' forced to on", webValue='on')
-        forceArg('noVariaTweaks', False, "'VARIA tweaks' forced to on", webValue='on')
-        forceArg('noLayout', False, "'Anti-softlock layout patches' forced to on", webValue='on')
         forceArg('suitsRestriction', False, "'Suits restriction' forced to off", webValue='off')
-        forceArg('areaLayoutBase', False, "'Additional layout patches for easier navigation' forced to on", webValue='on')
         possibleStartAPs, reasons = GraphUtils.getPossibleStartAPs(areaRandomization, maxDifficulty, args.morphPlacement)
         if args.startLocation == 'random':
             if args.startLocationList is not None:
@@ -450,6 +490,9 @@ if __name__ == "__main__":
             optErrMsgs.append('Possible start locations with these settings: {}'.format(possibleStartAPs))
             dumpErrorMsgs(args.output, optErrMsgs)
             sys.exit(-1)
+        forcedLayout = GraphUtils.getForcedLayoutPatches(args.startLocation)
+        forceLayoutArgs(forcedLayout)
+
     ap = getAccessPoint(args.startLocation)
     if 'forcedEarlyMorph' in ap.Start and ap.Start['forcedEarlyMorph'] == True:
         forceArg('morphPlacement', 'early', "'Morph Placement' forced to early for custom start location")
@@ -473,6 +516,8 @@ if __name__ == "__main__":
             scavNumLocs = random.randint(4,16)
         restrictions["ScavengerParams"] = {'numLocs':scavNumLocs, 'vanillaItems':not args.scavRandomized}
     restrictions["EscapeTrigger"] = args.tourian == 'Disabled'
+
+    # determine output file name
     seedCode = 'X'
     if majorsSplitRandom == False:
         if restrictions['MajorMinor'] == 'Full':
@@ -504,28 +549,8 @@ if __name__ == "__main__":
     seedName = fileName
     if args.directory != '.':
         fileName = args.directory + '/' + fileName
-    if args.noLayout == True:
-        RomPatches.ActivePatches = RomPatches.TotalBase
-    else:
-        RomPatches.ActivePatches = RomPatches.Total
-    RomPatches.ActivePatches.remove(RomPatches.BlueBrinstarBlueDoor)
-    RomPatches.ActivePatches += GraphUtils.getGraphPatches(args.startLocation)
-    if gravityBehaviour != "Balanced":
-        RomPatches.ActivePatches.remove(RomPatches.NoGravityEnvProtection)
-    if gravityBehaviour == "Progressive":
-        RomPatches.ActivePatches.append(RomPatches.ProgressiveSuits)
-    if args.nerfedCharge == True:
-        RomPatches.ActivePatches.append(RomPatches.NerfedCharge)
-    if args.noVariaTweaks == False:
-        RomPatches.ActivePatches += RomPatches.VariaTweaks
-    if minimizerN is not None:
-        RomPatches.ActivePatches.append(RomPatches.NoGadoras)
-    if args.tourian == 'Fast':
-        RomPatches.ActivePatches += RomPatches.MinimizerTourian
-    elif args.tourian == 'Disabled':
-        RomPatches.ActivePatches.append(RomPatches.NoTourian)
-    if 'relaxed_round_robin_cf.ips' in args.patches:
-        RomPatches.ActivePatches.append(RomPatches.RoundRobinCF)
+
+    # settings processing
     missileQty = float(args.missileQty)
     superQty = float(args.superQty)
     powerBombQty = float(args.powerBombQty)
@@ -551,10 +576,6 @@ if __name__ == "__main__":
            'strictMinors' : args.strictMinors }
     logger.debug("quantities: {}".format(qty))
 
-    if energyQty == 'ultra sparse':
-        # add nerfed rainbow beam patch
-        RomPatches.ActivePatches.append(RomPatches.NerfedRainbowBeam)
-
     if len(args.superFun) > 0:
         superFun = []
         for fun in args.superFun:
@@ -566,6 +587,7 @@ if __name__ == "__main__":
         args.superFun = superFun
     logger.debug("superFun: {}".format(args.superFun))
 
+    # controls
     ctrlDict = None
     if args.controls:
         ctrlList = args.controls.split(',')
@@ -582,6 +604,7 @@ if __name__ == "__main__":
             else:
                 raise ValueError("Invalid button name : " + str(b))
 
+    # plando rando
     plandoSettings = None
     if args.plandoRando is not None:
         plandoRando = json.loads(args.plandoRando)
@@ -598,25 +621,20 @@ if __name__ == "__main__":
                                   restrictions, args.superFun, args.runtimeLimit_s,
                                   plandoSettings, minDifficulty)
 
+    # area rando
     dotFile = None
     if areaRandomization == True:
         if args.dot == True:
             dotFile = args.directory + '/' + seedName + '.dot'
-        RomPatches.ActivePatches += RomPatches.AreaBaseSet
-        if args.areaLayoutBase == False:
-            RomPatches.ActivePatches += RomPatches.AreaComfortSet
-    if args.doorsColorsRando == True:
-        RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
     graphSettings = GraphSettings(args.startLocation, areaRandomization, lightArea, args.bosses,
                                   args.escapeRando, minimizerN, dotFile,
                                   args.doorsColorsRando, args.allowGreyDoors, args.tourian,
                                   plandoRando["transitions"] if plandoSettings is not None else None)
 
-    if plandoSettings is None:
-        DoorsManager.setDoorsColor()
-
+    # objectives
     if plandoSettings is None:
         objectivesManager = Objectives(args.tourian != 'Disabled', randoSettings)
+        Objectives.startAP = args.startLocation
         addedObjectives = 0
         if args.majorsSplit == "Scavenger":
             objectivesManager.setScavengerHunt()
@@ -630,8 +648,8 @@ if __name__ == "__main__":
             if nbObjectives is not None:
                 availableObjectives = args.objectiveList.split(',') if args.objectiveList is not None else objectives
                 if nbObjectives == 0:
-                    nbObjectives = random.randint(1, min(Objectives.maxActiveGoals, len(availableObjectives)))
-                objectivesManager.setRandom(nbObjectives, availableObjectives)
+                    nbObjectives = Objectives.getNbRandomObjectives(len(availableObjectives))
+                objectivesManager.setRandom(nbObjectives, availableObjectives, distribute=args.distributeObjectives)
                 if Objectives.nbActiveGoals < nbObjectives:
                     optErrMsgs.append(f"Could not reach {nbObjectives} possible objectives: only {Objectives.nbActiveGoals} available")
             else:
@@ -640,12 +658,13 @@ if __name__ == "__main__":
                     args.objective = args.objective[0:maxActiveGoals]
                 for goal in args.objective:
                     objectivesManager.addGoal(goal)
-                # ignore this setting if objectives are not randomized
+                # ignore these settings if objectives are not randomized
                 args.hiddenObjectives = False
+                args.distributeObjectives = False
             if args.nbObjectivesRequired is not None:
                 nbReq = int(args.nbObjectivesRequired)
                 if nbReq == 0:
-                    nbReq = random.randint(1, min(Objectives.nbActiveGoals, Objectives.maxRequiredGoals))
+                    nbReq = Objectives.getNbRandomRequiredObjectives()
             else:
                 objectivesManager.expandGoals()
                 nbReq = Objectives.nbActiveGoals
@@ -669,6 +688,67 @@ if __name__ == "__main__":
         for goal in plandoRando["objectives"]:
             objectivesManager.addGoal(goal)
 
+    # choose on animal patch (only for vanilla flavor)
+    if args.animals == True:
+        if args.logic != "vanilla":
+            optErrMsgs.append("Ignored animals surprise because of non vanilla ROM flavor")
+        else:
+            animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
+                              'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
+                              'phantoonimals.ips', 'ridleyimals.ips']
+            if args.escapeRando == False:
+                args.patches.append(random.choice(animalsPatches))
+                args.patches.append("Escape_Animals_Change_Event")
+            else:
+                optErrMsgs.append("Ignored animals surprise because of escape randomization")
+
+    # generate patcher settings and extract patch sets to apply logic patches before randomization
+    # will be completed later by items, area connections, escape...
+    patcherSettings = {
+        "isPlando": False,
+        "majorsSplit": args.majorsSplit,
+        "startLocation": args.startLocation,
+        "optionalPatches": args.patches,
+        "layout": not args.noLayout,
+        "layoutCustom": None if args.layoutCustom is None else args.layoutCustom.split(','),
+        "suitsMode": gravityBehaviour,
+        "area": areaRandomization,
+        "boss": args.bosses,
+        "areaLayout": areaRandomization == True and not args.areaLayoutBase,
+        "areaLayoutCustom": None if args.areaLayoutCustom is None else args.areaLayoutCustom.split(','),
+        "variaTweaks": not args.noVariaTweaks,
+        "variaTweaksCustom": None if args.variaTweaksCustom is None else args.variaTweaksCustom.split(','),
+        "nerfedCharge": args.nerfedCharge,
+        "nerfedRainbowBeam": energyQty == 'ultra sparse',
+        "escapeAttr": None if args.escapeRando == False else True, # tmp value before actual attrs after randomization
+        "escapeRandoRemoveEnemies": not args.noRemoveEscapeEnemies,
+        "minimizerN": minimizerN,
+        "tourian": args.tourian,
+        "doorsColorsRando": args.doorsColorsRando,
+        "vanillaObjectives": objectivesManager.isVanilla(),
+        "ctrlDict": ctrlDict,
+        "moonWalk": args.moonWalk,
+        "seed": seed,
+        "randoSettings": randoSettings,
+        "displayedVersion": displayedVersion,
+        "revealMap": args.revealMap,
+        "hud": args.hud == True or args.majorsSplit == "FullWithHUD",
+        "round_robin_cf": 'relaxed_round_robin_cf.ips' in args.patches, # will be applied twice but keep it like this for retrocompat
+        "debug": args.debug
+    }
+    patchSets = [getPatchSet(patchSetName, RomFlavor.flavor) for patchSetName in getPatchSetsFromPatcherSettings(patcherSettings)]
+    for patchSet in [p for p in patchSets if 'logic' in p]:
+        RomPatches.ActivePatches += patchSet['logic']
+    # these are dynamic
+    RomPatches.ActivePatches += GraphUtils.getGraphPatches(args.startLocation)
+    # this one isn't a simple patch but a ROM option
+    if args.tourian == "Disabled":
+        RomPatches.ActivePatches.append(RomPatches.NoTourian)
+
+    # this operation needs logic patches
+    if plandoSettings is None:
+        DoorsManager.setDoorsColor()
+
     # print some parameters for jm's stats
     if args.jm == True or args.debug == True:
         print("logic:{}".format(args.logic))
@@ -681,17 +761,19 @@ if __name__ == "__main__":
         print("tourian:{}".format(args.tourian))
         print("objectives:{}".format([g.name for g in Objectives.activeGoals]))
         print("energyQty:{}".format(energyQty))
+        print("rom_patches: "+str(sorted(RomPatches.ActivePatches)))
 
     try:
         randoExec = RandoExec(seedName, args.vcr, randoSettings, graphSettings)
         (stuck, itemLocs, progItemLocs) = randoExec.randomize()
+        patcherSettings['itemLocs'], patcherSettings['progItemLocs'] = itemLocs, progItemLocs
         # if we couldn't find an area layout then the escape graph is not created either
         # and getDoorConnections will crash if random escape is activated.
         if not stuck or args.vcr == True:
-            doors = GraphUtils.getDoorConnections(randoExec.areaGraph,
-                                                  areaRandomization, args.bosses,
-                                                  args.escapeRando if not stuck else False)
-            escapeAttr = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
+            patcherSettings['doors'] = GraphUtils.getDoorConnections(randoExec.areaGraph,
+                                                                     areaRandomization, args.bosses,
+                                                                     args.escapeRando if not stuck else False)
+            patcherSettings['escapeAttr'] = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
     except Exception as e:
         import traceback
         traceback.print_exc(file=sys.stdout)
@@ -706,20 +788,6 @@ if __name__ == "__main__":
             sys.exit(-1)
 
     randoExec.postProcessItemLocs(itemLocs, args.hideItems)
-
-    # choose on animal patch (only for vanilla flavor)
-    if args.animals == True:
-        if args.logic != "vanilla":
-            optErrMsgs.append("Ignored animals surprise because of non vanilla ROM flavor")
-        else:
-            animalsPatches = ['animal_enemies.ips', 'animals.ips', 'draygonimals.ips', 'escapimals.ips',
-                              'gameend.ips', 'grey_door_animals.ips', 'low_timer.ips', 'metalimals.ips',
-                              'phantoonimals.ips', 'ridleyimals.ips']
-            if args.escapeRando == False:
-                args.patches.append(random.choice(animalsPatches))
-                args.patches.append("Escape_Animals_Change_Event")
-            else:
-                optErrMsgs.append("Ignored animals surprise because of escape randomization")
 
     # transform itemLocs in our usual dict(location, item), exclude minors, we'll get them with the solver
     locsItems = {}
@@ -751,40 +819,6 @@ if __name__ == "__main__":
             db.DB.dumpExtStatsItems(skillPreset, randoPreset, locsItems, extStatsFile)
 
     try:
-        if args.hud == True or args.majorsSplit == "FullWithHUD":
-            args.patches.append("varia_hud.ips")
-
-        patcherSettings = {
-            "isPlando": False,
-            "majorsSplit": args.majorsSplit,
-            "startLocation": args.startLocation,
-            "optionalPatches": args.patches,
-            "layout": not args.noLayout,
-            "suitsMode": gravityBehaviour,
-            "area": areaRandomization,
-            "boss": args.bosses,
-            "areaLayout": not args.areaLayoutBase,
-            "variaTweaks": not args.noVariaTweaks,
-            "nerfedCharge": args.nerfedCharge,
-            "nerfedRainbowBeam": energyQty == 'ultra sparse',
-            "escapeAttr": escapeAttr,
-            "escapeRandoRemoveEnemies": not args.noRemoveEscapeEnemies,
-            "minimizerN": minimizerN,
-            "tourian": args.tourian,
-            "doorsColorsRando": args.doorsColorsRando,
-            "vanillaObjectives": objectivesManager.isVanilla(),
-            "ctrlDict": ctrlDict,
-            "moonWalk": args.moonWalk,
-            "seed": seed,
-            "randoSettings": randoSettings,
-            "doors": doors,
-            "displayedVersion": displayedVersion,
-            "itemLocs": itemLocs,
-            "progItemLocs": progItemLocs,
-            "revealMap": args.revealMap,
-            "debug": args.debug
-        }
-
         # args.rom is not None: generate local rom named filename.sfc with args.rom as source
         # args.output is not None: generate local json named args.output
         if args.rom is not None:

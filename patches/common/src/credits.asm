@@ -734,6 +734,11 @@ script:
     dw !draw, !row*166
     dw !draw, !row*167
     dw !draw, !blank
+    dw !draw, !row*244 ;; DEBUG TOOLS
+    dw !draw, !blank
+    dw !draw, !row*245
+    dw !draw, !row*246
+    dw !draw, !blank
     dw !draw, !row*184 ;; SpriteSomething
     dw !draw, !blank
     dw !draw, !row*224
@@ -1035,8 +1040,8 @@ credits:
     !purple
     dw "          CONTRIBUTORS          " ;; 134
     !big
-    dw "    RAND 0   COUT   CHRISC      " ;; 135
-    dw "    rand }   cout   chrisc      " ;; 136
+    dw "     RAND 0   COUT   CASSC      " ;; 135
+    dw "     rand }   cout   cassc      " ;; 136
     dw "        DJLO   PRANKARD         " ;; 137
     dw "        djlo   prankard         " ;; 138
     !cyan
@@ -1184,8 +1189,15 @@ credits:
     !big
     dw "            MFREAK              " ;; 240
     dw "            mfreak              " ;; 241
+    ;; more stats
     dw " LAG TIME              00'00^00 " ;; 242
     dw " lag time              }} }} }} " ;; 243
+    ;; more credits
+    !yellow
+    dw "          DEBUG TOOLS           " ;; 244
+    !big
+    dw "         INSANEFIREBAT          " ;; 245
+    dw "         insanefirebat          " ;; 246
     dw $0000                              ;; End of credits tilemap
 
 warnpc $ceffff
@@ -1593,20 +1605,19 @@ draw_item_gfx:
         rts
 
 macro drawString(str_addr, x, y)
-        %ldx_tileOffset(<x>, <y>)
+        ldx.w #tileOffset(<x>, <y>)
         lda.w #<str_addr>
         jsr draw_string
 endmacro
 
 macro drawNumber(number, x, y)
-        %ldx_tileOffset(<x>, <y>)
+        ldx.w #tileOffset(<x>, <y>)
         lda <number>
         jsr draw_number
 endmacro
 
 macro drawChar(char, x, y)
-        %tileOffset(<x>, <y>)
-        lda <char> : sta !BG1_tilemap+!_tile_offset
+        lda <char> : sta !BG1_tilemap+tileOffset(<x>, <y>)
 endmacro
 
 draw_final_time:
@@ -1774,10 +1785,10 @@ gfx_transfer_table:
 ;;; if major: same with collected palette
 
 macro itemTiles(palette)
-        %dw_BGtile(!tile_idx, !palette_index_<palette>, 1, 0, 0)
-        %dw_BGtile(!tile_idx+1, !palette_index_<palette>, 1, 0, 0)
-        %dw_BGtile(!tile_idx+2, !palette_index_<palette>, 1, 0, 0)
-        %dw_BGtile(!tile_idx+3, !palette_index_<palette>, 1, 0, 0)
+        dw BGtile(!tile_idx, !palette_index_<palette>, 1, 0, 0)
+        dw BGtile(!tile_idx+1, !palette_index_<palette>, 1, 0, 0)
+        dw BGtile(!tile_idx+2, !palette_index_<palette>, 1, 0, 0)
+        dw BGtile(!tile_idx+3, !palette_index_<palette>, 1, 0, 0)
 endmacro
 
 macro majorTiles(palette)
@@ -1839,10 +1850,10 @@ item_tiles:
         %minorTiles()
 .PowerBomb:
         ;; PB is special, as the bottom right tile is the bottom left tile mirrored
-        %dw_BGtile(!tile_idx, !palette_index_CRE, 1, 0, 0)
-        %dw_BGtile(!tile_idx+1, !palette_index_CRE, 1, 0, 0)
-        %dw_BGtile(!tile_idx+2, !palette_index_CRE, 1, 0, 0)
-        %dw_BGtile(!tile_idx+2, !palette_index_CRE, 1, 1, 0)
+        dw BGtile(!tile_idx, !palette_index_CRE, 1, 0, 0)
+        dw BGtile(!tile_idx+1, !palette_index_CRE, 1, 0, 0)
+        dw BGtile(!tile_idx+2, !palette_index_CRE, 1, 0, 0)
+        dw BGtile(!tile_idx+2, !palette_index_CRE, 1, 1, 0)
         !tile_idx #= !tile_idx+3
 
 ;;; minors tables
@@ -1852,8 +1863,7 @@ item_tiles:
 
 macro itemTableEntry(category, item, x, y, collected, specific)
 %export(<category>_table_entry_<item>)
-%tileOffset(<x>, <y>)
-        dw item_tiles_<item>, !_tile_offset, <collected>, <specific>
+        dw item_tiles_<item>, tileOffset(<x>, <y>), <collected>, <specific>
 endmacro
 
 macro ammoTableEntry(item, x, y, collected, total)

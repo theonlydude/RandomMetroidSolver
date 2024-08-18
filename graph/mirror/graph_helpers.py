@@ -1,6 +1,7 @@
 from graph.vanilla.graph_helpers import HelpersGraph
 from logic.cache import Cache
 from rom.rom_patches import RomPatches
+from logic.smbool import SMBool
 
 # gates are reversed
 class HelpersGraphMirror(HelpersGraph):
@@ -11,7 +12,7 @@ class HelpersGraphMirror(HelpersGraph):
     def canPassRedTowerToMaridiaNode(self):
         sm = self.smbm
         return sm.wand(sm.haveItem('Morph'),
-                       sm.wor(RomPatches.has(RomPatches.AreaRandoGatesBase),
+                       sm.wor(RomPatches.has(RomPatches.CaterpillarGreenGateRemoved),
                               sm.canGreenGateGlitch()))
 
     @Cache.decorator
@@ -29,3 +30,11 @@ class HelpersGraphMirror(HelpersGraph):
     # (this is actually Right to Left in mirror)
     def canPassFrogSpeedwayLeftToRight(self):
         return super().canPassFrogSpeedwayRightToLeft()
+
+    @Cache.decorator
+    def canAccessMaridiaReserveFromTopWestSandHole(self):
+        v = super().canAccessItemsInWestSandHole()
+        if 'WestSandHoleMorphOnlyItemAccess' in v.knows:
+            # wiggling is not possible from right to left
+            return SMBool(False, 0)
+        return v

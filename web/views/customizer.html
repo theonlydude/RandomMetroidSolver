@@ -27,7 +27,6 @@ extend 'layout.html'
 <script type="text/javascript" src="{{=URL('static', 'js/chosen.jquery.min.js')}}"></script>
 <link rel="stylesheet" type="text/css" href={{=URL("static", "css/chosen.css")}} />
 {{ response.write(client_files['css'], escape=False) }}
-
 <title>Super Metroid VARIA Customizer</title>
 
 <style>
@@ -178,6 +177,9 @@ h1 {
 .sixty {
     width: 65%
 }
+.ninty {
+    width: 85%
+}
 .thirty {
     width: 30%
 }
@@ -201,8 +203,14 @@ h1 {
 </style>
 
 <script type="text/javascript">
+{{include 'solver_web/_randomizer_data.js'}}
+const seedParams = {{ response.write(seedParams or "null", escape=False); }};
 $(document).ready(function(){
    jQuery(window).on('resize', resizeElements);
+   if (seedParams) {
+       seedParams.readonly = true;
+       window.$randomizer.init(seedParams, true);
+   }
 });
 
 var guid = undefined;
@@ -420,7 +428,7 @@ function doSubmit() {
 
         var dataDict = {};
         dataDict["logic"] = logic;
-        var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "base", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "globalShift", "customSpriteEnable", "customItemsEnable", "noSpinAttack", "customShipEnable", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "hard_mode", "color_blind", "disable_screen_shake", "noflashing"];
+        var elems = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "Infinite_Space_Jump", "refill_before_save", "better_reserves", "widescreen", "AimAnyButton", "max_ammo_display", "supermetroid_msu1", "base", "colorsRandomization", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes", "grayscale", "globalShift", "customSpriteEnable", "customItemsEnable", "noSpinAttack", "customShipEnable", "remove_itemsounds", "remove_elevators_speed", "remove_fast_doors", "remove_Infinite_Space_Jump", "remove_rando_speed", "remove_spinjumprestart", "gamepadMapping", "lava_acid_physics", "hell", "hard_mode", "color_blind", "disable_screen_shake", "noflashing", "disable_minimap_colors"];
 
         for(var i=0; i<elems.length; i++) {
             var elem = document.getElementById(elems[i]);
@@ -833,7 +841,7 @@ if seedInfo != None:
 }}
 
 function greyOutPatches(isRace, isVARIA, isVanilla) {
-    var buttons = ["itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "Infinite_Space_Jump", "refill_before_save", "widescreen", "lava_acid_physics", "hell", "hellrun_rate", "etanks", "hard_mode"];
+    var buttons = ["itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "Infinite_Space_Jump", "refill_before_save", "better_reserves", "widescreen", "lava_acid_physics", "hell", "hellrun_rate", "etanks", "hard_mode"];
     for(var i=0; i<buttons.length; i++) {
         disableElement(buttons[i], isRace);
     }
@@ -1048,6 +1056,8 @@ window.onload = function(){
     // color checkboxes
     var colorRando = document.getElementById("colorsRandomization");
     colorRando.onchange = setColorRando;
+    var grayscale = document.getElementById("grayscale");
+    grayscale.onchange = onchangeGrayscale;
 
     var customSpriteEnable = document.getElementById("customSpriteEnable");
     customSpriteEnable.onchange = enableCustomSpriteDropdown;
@@ -1260,40 +1270,58 @@ function enableCustomShipDropdown() {
 }
 
 function setColorRando() {
-  var colorRando = document.getElementById("colorsRandomization");
-  var elements = ["globalShift", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes"];
-  var slider = $("#degree_slider_range");
+    var colorRando = document.getElementById("colorsRandomization");
+    var elements = ["globalShift", "grayscale", "suitsPalettes", "beamsPalettes", "tilesPalettes", "enemiesPalettes", "bossesPalettes"];
+    var slider = $("#degree_slider_range");
+    var grayscale = document.getElementById("grayscale");
 
-  if(colorRando.checked){
-    for(var i=0; i<elements.length; i++) {
-      var elemId = elements[i];
-      var switchBox = document.getElementById(elemId);
-      var text = document.getElementById(elemId+"Text");
-      var s = globalSwitchs[elemId];
-      switchBox.disabled = false;
-      text.className = "";
-      s.enable();
-      document.getElementById("textRight").className = "";
-      document.getElementById("textLeft").className = "floatleft";
-      document.getElementById("invert").disabled = false;
+    if(colorRando.checked){
+        colorRando.value = "on";
+        document.getElementById("textRight").className = "";
+        document.getElementById("textLeft").className = "floatleft";
+        if(! grayscale.checked) {
+            slider.slider("enable");
+            document.getElementById("invert").disabled = false;
+        }
+        for(var i=0; i<elements.length; i++) {
+            var elemId = elements[i];
+            var switchBox = document.getElementById(elemId);
+            var text = document.getElementById(elemId+"Text");
+            var s = globalSwitchs[elemId];
+            switchBox.disabled = false;
+            text.className = "";
+            s.enable();
+        }
+    } else {
+        colorRando.value = "off";
+        document.getElementById("textRight").className = "disabledText";
+        document.getElementById("textLeft").className = "floatleft disabledText";
+        slider.slider("disable");
+        document.getElementById("invert").disabled = true;
+        for(var i=0; i<elements.length; i++) {
+            var switchBox = document.getElementById(elements[i]);
+            var text = document.getElementById(elements[i]+"Text");
+            var s = globalSwitchs[elements[i]];
+            switchBox.disabled = true;
+            text.className = "disabledText";
+            s.disable();
+        }
     }
-    slider.slider("enable");
-    colorRando.value = "on";
-  } else {
-    for(var i=0; i<elements.length; i++) {
-      var switchBox = document.getElementById(elements[i]);
-      var text = document.getElementById(elements[i]+"Text");
-      var s = globalSwitchs[elements[i]];
-      switchBox.disabled = true;
-      text.className = "disabledText";
-      s.disable();
-      document.getElementById("textRight").className = "disabledText";
-      document.getElementById("textLeft").className = "floatleft disabledText";
-      document.getElementById("invert").disabled = true;
+}
+
+function onchangeGrayscale() {
+    var grayscale = document.getElementById("grayscale");
+    var slider = $("#degree_slider_range");
+    var invert = document.getElementById("invert")
+    if(grayscale.checked) {
+        grayscale.value = "on";
+        slider.slider("disable");
+        invert.disabled = true;
+    } else {
+        grayscale.value = "off";
+        slider.slider("enable");
+        invert.disabled = false;
     }
-    slider.slider("disable");
-    colorRando.value = "off";
-  }
 }
 
 var invertSlider = false;
@@ -1491,7 +1519,13 @@ function startTheTour(step=-1) {
     {
       element: "#colorsRandomizationStep",
       title: "Color randomization",
-      content: "<p>Randomize the colors of various graphical elements:<br/><img src=\"/solver/static/images/customizer/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"center_image half\"/></p><p>Use the slider to restrict the possible range of the colors shifting. The colors on the slider are the result colors for Samus, the yellow in the middle being Samus vanilla color:</p><img src=\"/solver/static/images/customizer/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"center_image threequarter\"/><p>You can invert the range by clicking on the invert button.</p><p>By default, the same shift is applied to all elements for color consistency. If you disable the setting, a different shift will be used for each category.</p>"
+      content: "<p>Randomize the colors of various graphical elements:<br/>\
+<img src=\"/solver/static/images/customizer/palettesRando.png\" alt=\"colors rando\" title=\"colors rando\" class=\"center_image half\"/></p>\
+<p>Use the slider to restrict the possible range of colors shifting. Shift is choosen in the colored parts of the slider. Colors on the slider are result colors for Samus, the yellow in the middle being Samus vanilla color:</p>\
+<img src=\"/solver/static/images/customizer/samus_degrees.png\" alt=\"samus degrees\" title=\"samus degrees\" class=\"center_image threequarter\"/>\
+<p>You can invert the range by clicking on the invert button, this let you choose a more precise color shift.</p>\
+<p>You can also choose the grayscale option to create a Frank Miller's Sin City experience.</p>\
+<p>By default, the same shift is applied to all elements for color consistency. If you disable the setting, a different shift will be used for each category.</p>"
     },
     {
       element: "#customSpriteStep",
@@ -1589,18 +1623,33 @@ spc javascript engine by <a href=\"https://github.com/cosinusoidally/snes_spc_js
 <p>This patch was developed by Adam.</p>"
     },
     {
+      element: "#better_reservesStep",
+      title: "Better Reserves",
+      content: "<p>This patch does a few things:<ul>\
+<li>Reserve tanks come filled up</li>\
+<li>Different color for HUD reserve indicator when full</li>\
+<li>Prevents heat damage and the loss of invincibility frames when auto reserves activate (no more getting hit twice!)</li>\
+<li>Makes reserve tanks not empty if Samus is fully healed when they are used in auto or manual mode.</li>\
+<li>Fix jank where deselecting and reselecting refill button during manual refill causes it to resume.</li>\
+<li>Can also press A during manual refill at any time to stop refilling.</li>\
+</ul></p>\
+<p>Patch developed by NoDever2</p>"
+    },
+    {
       element: "#color_blindStep",
-      title: "Color blind friendly colors for doors / Disable screen shake",
-      content: "<p>Color blind friendly colors for Missile, Super and Power Bomb doors.</p>\
-<p>This patch was developed by Colors and theonlydude.</p>\
-<p>Disable screen shake during escape and lava/acid rising earthquake.</p>\
-<p>This patch was developed by flo.</p>"
+      title: "Disable minimap colors / Color blind friendly colors for doors",
+      content: "<p>Disable the colored minimap if you encounter visual glitches on real SNES hardware.</p>\
+<p>This patch was developed by flo.</p>\
+<p>Color blind friendly colors for Missile, Super and Power Bomb doors.</p>\
+<p>This patch was developed by Colors and theonlydude.</p>"
     },
     {
       element: "#noflashingStep",
-      title: "Disable flashing",
+      title: "Disable flashing / Disable screen shake",
       content: "<p>Disable bosses, escape and power bomb flashing, Landing Site lightning, ...</p>\
-<p>This patch was developed by Kara.</p>"
+<p>This patch was developed by Kara.</p>\
+<p>Disable screen shake during escape and lava/acid rising earthquake.</p>\
+<p>This patch was developed by flo.</p>"
     },
     {
       element: "#hellStep",
@@ -1760,23 +1809,34 @@ def displayNumber(id, min, max, default, step="1"):
                 </tr>
               </table>
             </div>
-            <h4>Colors Randomization</h4>
+            <h4>Colors</h4>
             <p>
-              Randomize the colors of Samus, beams, levels, enemies and bosses.
+              Randomize colors of Samus, beams, levels, enemies and bosses.
             </p>
             <table class="full">
               <tr>
-                <td class="third">{{displayCheckbox("colorsRandomization")}}Colors Randomization</td>
-                <td class="full"><span id="textLeft" class="floatleft">-180</span><div id="degree_slider_range" class="sixty floatleft"></div><span id="textRight">180</span></td>
-                <td><button id="invert" type="button" onclick="invertFunc()">Invert</button></td>
+                <td class="full">{{displayCheckbox("colorsRandomization")}}<span id="colorsRandomizationText">Colors Randomization</span></td>
                 <td id="colorsRandomizationStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
+            </table>
+            <table class="full">
               <tr>
-                <td colspan="4">{{displayCheckbox("globalShift")}}<span id="globalShiftText">Use the same degree to randomize all the elements</span></td>
+                <td class="logic"></td>
+                <td><button id="invert" type="button" onclick="invertFunc()">Invert</button></td>
+                <td class="full"><span id="textLeft" class="floatleft">-180</span><div id="degree_slider_range" class="ninty floatleft"></div><span id="textRight">180</span></td>
+                <td class="quarter"></td>
+              </tr>
+            </table>
+            <table class="full">
+              <tr>
+                <td>{{displayCheckbox("grayscale")}}<span id="grayscaleText">Convert colors to grayscale</span></td>
+              </tr>
+              <tr>
+                <td>{{displayCheckbox("globalShift")}}<span id="globalShiftText">Use the same shift to randomize all elements</span></td>
               </tr>
             </table>
             <p>
-              Select the elements to colors randomize.
+              Select elements to colors randomize.
             </p>
               <table class="full">
                 <tr>
@@ -1997,6 +2057,13 @@ for name, values in musics["_dropdown"].items():
                   </td>
                   <td id="refill_before_saveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
+                <tr>
+                  <td colspan="2">
+                    {{displayCheckbox("better_reserves")}}
+                     <span id="better_reservesText">Better Reserves <img src="/solver/static/images/tracker/inventory/Reserve.png" class="width: 32px"/></span>
+                  </td>
+                  <td id="better_reservesStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
               </table>
 
               <table class="full">
@@ -2007,19 +2074,23 @@ for name, values in musics["_dropdown"].items():
                 <colgroup><col class="half" /><col class="half" /></colgroup>
                 <tr>
                   <td>
-                    {{displayCheckbox("color_blind")}}
-                    <span id="color_blindText">Color blind friendly colors for doors</span>
+                    {{displayCheckbox("disable_minimap_colors")}}
+                    <span id="disable_minimap_colorsText">Disable minimap colors</span>
                   </td>
                   <td>
-                    {{displayCheckbox("disable_screen_shake")}}
-                    <span id="disable_screen_shakeText">Disable screen shake during escape</span>
+                    {{displayCheckbox("color_blind")}}
+                    <span id="color_blindText">Color blind friendly colors for doors</span>
                   </td>
                   <td id="color_blindStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
                 <tr>
-                  <td colspan="2">
+                  <td>
                     {{displayCheckbox("noflashing")}}
                     <span id="noflashingText">Remove flashing</span>
+                  </td>
+                  <td>
+                    {{displayCheckbox("disable_screen_shake")}}
+                    <span id="disable_screen_shakeText">Disable screen shake during escape</span>
                   </td>
                   <td id="noflashingStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
@@ -2151,7 +2222,7 @@ for name, values in musics["_dropdown"].items():
                 </tr>
               </table>
           </div>
-          <div class="column" id="seedInfoVisibility">
+          <div class="column -readonly" id="seedInfoVisibility">
 {{
 if seedInfo != None:
   def setBold(param):
@@ -2250,12 +2321,24 @@ if seedInfo != None:
 {{    if seedParams["objectiveRandom"] == "true":}}
                 <td>random</td></tr>
               <tr {{=setBold("nbObjective")}}><td>Number of Objectives</td><td>{{=seedParams["nbObjective"]}}</td></tr>
-              <tr><td>Objectives pool</td><td>{{=seedParams["objectiveMultiSelect"]}}</td></tr>
-{{    else:}}
-                <td>{{=seedParams["objective"]}}</td></tr>
-{{        pass}}
+{{        pass }}
+              <tr>
+                <td colspan="2">
+                  <div class="false-half-td">
+                    <span>
+                    {{ if seedParams["objectiveRandom"] == "true": }}
+                    Objectives pool
+                    {{ else: }}
+                    Objectives
+                    {{ pass }}
+                    </span>
+                    <div id="objectivePortal" class="vue-app" style="min-width: 50%"></div>
+                  </div>
+                </td>
+              </tr>
               <tr {{=setBold("nbObjectivesRequired")}}><td>Number of required objectives</td><td>{{=seedParams["nbObjectivesRequired"]}}</td></tr>
               <tr {{=setBold("hiddenObjectives")}}><td>Hidden objectives</td><td>{{=seedParams["hiddenObjectives"]}}</td></tr>
+              <tr {{=setBold("distributeObjectives")}}><td>Distribute objectives</td><td>{{=seedParams["distributeObjectives"]}}</td></tr>
               <tr {{=setBold("tourian")}}><td>Tourian</td><td>{{=seedParams["tourian"]}}</td></tr>
 {{    if seedParams["tourian"] == "random":}}
               <tr><td>Tourian pool</td><td>{{=seedParams["tourianMultiSelect"]}}</td></tr>
@@ -2271,7 +2354,7 @@ if seedInfo != None:
               <tr><td>Area Randomization pool</td><td>{{=seedParams.get("areaRandomizationMultiSelect", "off, full")}}</td></tr>
 {{        pass}}
 
-              <tr {{=setBold("areaLayout")}}><td>Additional layout patches for easier navigation</td><td>{{=seedParams["areaLayout"]}}</td></tr>
+              <tr id="areaLayoutStep"><td>Area Randomization Patches</td><td><div class="vue-app"></div></td></tr>
               <tr {{=setBold("doorsColorsRando")}}><td>Doors Colors randomization</td><td>{{=seedParams["doorsColorsRando"]}}</td></tr>
               <tr {{=setBold("allowGreyDoors")}}><td>Allow some doors to be grey</td><td>{{=seedParams["allowGreyDoors"]}}</td></tr>
               <tr {{=setBold("bossRandomization")}}><td>Bosses randomization</td><td>{{=seedParams["bossRandomization"]}}</td></tr>
@@ -2292,8 +2375,8 @@ if seedInfo != None:
             <h4>Patches</h4>
             <table class="full">
               <colgroup><col class="half" /><col class="half" /></colgroup>
-              <tr {{=setBold("layoutPatches")}}><td>Anti-softlock layout patches</td><td>{{=seedParams["layoutPatches"]}}</td></tr>
-              <tr {{=setBold("variaTweaks")}}><td>VARIA tweaks</td><td>{{=seedParams["variaTweaks"]}}</td></tr>
+              <tr id="layoutPatchesStep"><td>Anti-softlock layout patches</td><td><div class="vue-app"></div></td></tr>
+              <tr id="variaTweaksStep"><td>VARIA tweaks</td><td><div class="vue-app"></div></td></tr>
               <tr {{=setBold("nerfedCharge")}}><td>Nerfed Charge Beam available from the start</td><td>{{=seedParams["nerfedCharge"]}}</td></tr>
               <tr {{=setBold("relaxed_round_robin_cf")}}><td>Relaxed Round Robin Crytal Flash</td><td>{{=seedParams["relaxed_round_robin_cf"]}}</td></tr>
               <tr {{=setBold("gravityBehaviour")}}><td>Suits properties</td><td>{{=seedParams["gravityBehaviour"]}}</td></tr>

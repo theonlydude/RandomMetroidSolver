@@ -50,6 +50,9 @@ if (hs.registerOverlay) {
 
 <style>
 {{include 'solver_web/varia.css'}}
+.image_picker_selector .thumbnail {
+    cursor: pointer;
+}
 .innertd {
     padding-left: 5px;
     padding-right: 5px;
@@ -95,7 +98,11 @@ if (hs.registerOverlay) {
     margin: auto;
 }
 .popover {
-    max-width: 40%;
+    max-width: 50%;
+}
+.popover > .arrow {
+    /* this is broken and causing all popovers to scroll unnecessarily */
+    display: none;
 }
 .highslide-dimming {
     background: black;
@@ -114,20 +121,12 @@ if (hs.registerOverlay) {
     cursor: pointer; /* Add a pointer on hover */
 }
 #loadingGIF {
-    position: absolute;
-    left: 5%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     z-index: 3;
     display:none;
-}
-@media (max-height: 800px) {
-    .loadingGIF {
-         top: 20%;
-    }
-}
-@media (min-height: 800px) {
-    .loadingGIF {
-         top: 40%;
-    }
 }
 .loadingTips {
     position: fixed;
@@ -295,9 +294,14 @@ if (hs.registerOverlay) {
     cursor: pointer;
     width: 2em;
 }
+.btn.btn-default[disabled] {
+    background: inherit;
+    opacity: 0.25;
+}
 </style>
 
 <script type="text/javascript">
+{{include 'solver_web/_randomizer_data.js'}}
 // https://stackoverflow.com/questions/16960690/chosen-harvesthq-resize-width-dynamically
 $(document).ready(function(){
    jQuery(window).on('resize', resizeChosen);
@@ -346,7 +350,7 @@ function randomizeTarget(evt, elemId) {
     }
 
     // recreate select with updated multiple
-    $('#'+elemId).data('picker').destroy();
+    $('#'+elemId).data('picker')?.destroy();
     var params = {show_label: true};
     $('#'+elemId).imagepicker(params);
 }
@@ -415,11 +419,12 @@ function randomize(evt, elemId) {
   }
 
   if (e.id === 'areaRandomization') {
-     if (isActive) {
-        $("#areaRandomizationMultiSelect").change();
-     } else {
-        e.onchange();
-     }
+    if (isActive) {
+      $("#areaRandomizationMultiSelect").change();
+      window.$randomizer.set('areaRandomization', 'random');
+    } else {
+      e.onchange();
+    }
   }
 }
 
@@ -444,28 +449,9 @@ function randomizeMinimizer(evt) {
   }
 }
 
-function get_unselected_objectives() {
-    return $("#objectiveMultiSelect").find('option').not(':selected').map(function () { return this.value; }).get();
-}
-
 function get_selected_objectives() {
-    return $("#objectiveMultiSelect").val();
-}
-function remove_objective_from_unselected(objective) {
-    if( ! removed_objectives.includes(objective)) {
-        console.log("        !! remove objective from unselected: "+objective);
-        $('#objectiveMultiSelect option[value="'+objective+'"]').remove();
-        removed_objectives.push(objective);
-    }
-}
-function add_objective_to_unselected(objective) {
-    // check if not already present
-    if(removed_objectives.includes(objective)) {
-        console.log("        !! add objective to unselected: "+objective);
-        $("#objectiveMultiSelect").append("<option value=\""+objective+"\">"+objective+"</option>");
-        var index = removed_objectives.indexOf(objective);
-        removed_objectives.splice(index, 1);
-    }
+    // return a copy of selected objectives
+    return $randomizer.state.objective.slice()
 }
 function is_limit_objective(objective) {
     return "type" in objectives_exclusions[objective];
@@ -497,9 +483,7 @@ function is_objective_of_type(objective, type) {
 function get_objectives_count(type, list) {
     var count = 0;
     for(var i=0; i<list.length; i++) {
-        console.log("        get_objectives_count: type: "+type+" check obj: "+list[i]);
         if(is_objective_of_type(list[i], type)) {
-            console.log("        get_objectives_count: type: "+type+" checked obj: "+list[i]+" is of same type");
             count++;
         }
     }
@@ -508,190 +492,9 @@ function get_objectives_count(type, list) {
 function is_clear_area_objective(objective) {
     return "tourian" in objectives_exclusions[objective];
 }
-function can_add_to_unselected(toAdd) {
-    // 1. check if toAdd is in an exclusion list of the selected objectives
-    // 2. if toAdd is a limit objective
-    //    check count objectives already selected and if toAdd limit is not reached
-    // 3. if toAdd is a count objective
-    //    check limit objectives already selected and if toAdd would reach theirs limit
-    // 4. if toAdd is a clear area objective
-    //    check if Tourian is not set to disabled and majors split is not set to scavenger
-
-    var selectedArray = get_selected_objectives();
-    var tourian = document.getElementById("tourian");
-    var majorsSplit = document.getElementById("majorsSplit");
-
-    // 1.
-    console.log("      test if "+toAdd+" is in the exclusion list of an already selected objective");
-    for(var i=0; i<selectedArray.length; i++) {
-        var objective = selectedArray[i];
-        var exclusion_list = objectives_exclusions[objective]["list"];
-        if(exclusion_list.includes(toAdd)) {
-            console.log("        can't add "+toAdd+" it's in the exclusion list of "+objective);
-            return false;
-        }
-    }
-
-    // 2.
-    if(is_limit_objective(toAdd)) {
-        console.log("      "+toAdd+" is a limit objective, test its limit");
-        var type = get_limit_objective_type(toAdd);
-        var count = get_objectives_count(type, selectedArray);
-        var limit = get_limit_objective_limit(toAdd);
-        if(count > limit) {
-            console.log("        can't add "+toAdd+" it's a limit objective with limit "+limit+" and there's already "+count+" objectives of type "+type+" selected");
-            return false;
-        } else {
-            console.log("        can add "+toAdd+" it's a limit objective with limit "+limit+" and there's only "+count+" objectives of type "+type+" selected");
-        }
-
-    // 3.
-    } else if(is_count_objective(toAdd)) {
-        var type = get_count_objective_type(toAdd);
-        var count = get_objectives_count(type, selectedArray);
-        console.log("      "+toAdd+" is a count objective of type "+type+", check limit objectives already selected");
-        for(var i=0; i<selectedArray.length; i++) {
-            var toTest = selectedArray[i];
-            console.log("        test selected objective: "+toTest);
-            if(is_limit_objective(toTest)) {
-                console.log("        selected objective: "+toTest+" is a limit objective");
-                if(get_limit_objective_type(toTest) == type) {
-                    var limit = get_limit_objective_limit(toTest);
-                    console.log("        selected objective: "+toTest+" is a limit objective of type: "+type+" with a limit: "+limit);
-                    if(count >= limit) {
-                        console.log("        selected objective: "+toTest+" limit is reached, can't add "+toAdd);
-                        return false;
-                    }
-                }
-            }
-        }
-    } else if(is_clear_area_objective(toAdd)) {
-        if(tourian.value == "Disabled") {
-            console.log("        can't add "+toAdd+" it's a clear area objective and tourian is Disabled");
-            return false;
-        }
-        if(majorsSplit.value == "Scavenger") {
-            console.log("        can't add "+toAdd+" it's a clear area objective and majors split is scav");
-            return false;
-        }
-    }
-
-    console.log("    we can add "+toAdd);
-    return true;
-}
-function must_remove_from_unselected(toRemove) {
-    // 1. check if toRemove is in the exclusion list of the selected objectives
-    // 2. if toRemove is a limit objective
-    //    check count objectives already selected and if toRemove limit is reached
-    // 3. if toRemove is a count objective
-    //    check limit objectives already selected and if toRemove reach theirs limit
-    // 4. if toRemove is a clear area objective
-    //    remove from list if Tourian is set to disabled or majors split is set to scavenger
-
-    var selectedArray = get_selected_objectives();
-    var tourian = document.getElementById("tourian");
-    var majorsSplit = document.getElementById("majorsSplit");
-
-    // 1.
-    console.log("      test if "+toRemove+" is in the exclusion list of an already selected objective");
-    for(var i=0; i<selectedArray.length; i++) {
-        var objective = selectedArray[i];
-        var exclusion_list = objectives_exclusions[objective]["list"];
-        if(exclusion_list.includes(toRemove)) {
-            console.log("        must remove "+toRemove+" it's in the exclusion list of "+objective);
-            return true;
-        }
-    }
-
-    // 2.
-    if(is_limit_objective(toRemove)) {
-        console.log("      "+toRemove+" is a limit objective, test its limit");
-        var type = get_limit_objective_type(toRemove);
-        var count = get_objectives_count(type, selectedArray);
-        var limit = get_limit_objective_limit(toRemove);
-        if(count > limit) {
-            console.log("        must remove "+toRemove+" it's a limit objective with limit "+limit+" and there's already "+count+" objectives of type "+type+" selected");
-            return true;
-        } else {
-            console.log("        can keep "+toRemove+" it's a limit objective with limit "+limit+" and there's already "+count+" objectives of type "+type+" selected");
-        }
-
-    // 3.
-    } else if(is_count_objective(toRemove)) {
-        var type = get_count_objective_type(toRemove);
-        var count = get_objectives_count(type, selectedArray);
-        console.log("      "+toRemove+" is a count objective of type "+type+", check limit objectives already selected");
-        for(var i=0; i<selectedArray.length; i++) {
-            var toTest = selectedArray[i];
-            console.log("        test selected objective: "+toTest);
-            if(is_limit_objective(toTest)) {
-                console.log("        selected objective: "+toTest+" is a limit objective");
-                if(get_limit_objective_type(toTest) == type) {
-                    var limit = get_limit_objective_limit(toTest);
-                    console.log("        selected objective: "+toTest+" is a limit objective of type: "+type+" with a limit: "+limit);
-                    if(count >= limit) {
-                        console.log("        selected objective: "+toTest+" limit is reached, must remove "+toRemove);
-                        return true;
-                    }
-                }
-            }
-        }
-    // 4.
-    } else if(is_clear_area_objective(toRemove)) {
-        if(tourian.value == "Disabled") {
-            console.log("        must remove "+toRemove+" it's a clear area objective and tourian is disabled");
-            return true;
-        }
-        if(majorsSplit.value == "Scavenger") {
-            console.log("        must remove "+toRemove+" it's a clear area objective and majors split is scav");
-            return true;
-        }
-    }
-
-    console.log("    we don't have to remove "+toRemove);
-    return false;
-}
-function sort_objectives_and_add_optgroups() {
-    var my_options = $("#objectiveMultiSelect option");
-    var selected = $("#objectiveMultiSelect").val();
-
-    my_options.sort(function(a, b) {
-        var index_a = objectives_sort.indexOf(a.value);
-        var index_b = objectives_sort.indexOf(b.value);
-        if (index_a > index_b) return 1;
-        if (index_a < index_b) return -1;
-        return 0
-    })
-
-    $("#objectiveMultiSelect").empty()
-
-    var current_group_name = undefined;
-    var current_group = undefined;
-    for(var i=0; i<my_options.length; i++) {
-        var option = my_options[i];
-        var option_group_name = objectives_categories[option.value];
-
-        if(current_group_name == undefined) {
-            current_group_name = option_group_name;
-            current_group = document.createElement("optgroup");
-            current_group.setAttribute("label", current_group_name);
-        } else if(current_group_name != option_group_name) {
-            $("#objectiveMultiSelect").append(current_group);
-
-            current_group_name = option_group_name;
-            current_group = document.createElement("optgroup");
-            current_group.setAttribute("label", current_group_name);
-        }
-
-        current_group.appendChild(option);
-    }
-    if(current_group != undefined) {
-        $("#objectiveMultiSelect").append(current_group);
-    }
-
-    $("#objectiveMultiSelect").val(selected);
-
-    $("#objectiveMultiSelect").trigger("chosen:updated");
+function setObjectives(objectives) {
+    // This will be undefined when loading most preset
+    $randomizer.set('objective', objectives || ['kill all G4']);
 }
 
 var objectives_exclusions = {{response.write(objectivesExclusions, escape=False)}};
@@ -699,58 +502,7 @@ var objectives_types = {{response.write(objectivesTypes, escape=False)}};
 var objectives_sort = {{response.write(objectivesSort, escape=False)}};
 var objectives_categories = {{response.write(objectivesCategories, escape=False)}};
 var removed_objectives = [];
-console.log("objectives_types: boss: "+objectives_types['boss']);
-console.log("objectives_types: miniboss: "+objectives_types['miniboss']);
 
-function objective_change(e, params, force) {
-    // if random is set do nothing
-    // force is used when the objective is changed to random and we need to unselect everything
-    if(isElemIdRandom("objective") && !force) {
-        return;
-    }
-
-    if(params.selected) {
-        console.log("* new objective selected: "+params.selected);
-        var unselected_objectives = get_unselected_objectives();
-        for(var j=0; j<unselected_objectives.length; j++) {
-            var toRemove = unselected_objectives[j];
-            console.log("  check to remove obj "+toRemove+" from unselected objectives");
-            if(must_remove_from_unselected(toRemove)) {
-                remove_objective_from_unselected(toRemove);
-            }
-        }
-    }
-    if(params.deselected) {
-        console.log("* new objective deselected: "+params.deselected);
-        var copy_removed_objectives = removed_objectives.slice();
-        for(var j=0; j<copy_removed_objectives.length; j++) {
-            var toAdd = copy_removed_objectives[j];
-            console.log("  check to add obj "+toAdd+" from removed objectives");
-            if(can_add_to_unselected(toAdd) || force) {
-                add_objective_to_unselected(toAdd);
-            }
-        }
-    }
-
-    sort_objectives_and_add_optgroups();
-}
-
-var max_objectives = 18;
-function setMaxObjective(isRandom) {
-    if(isRandom) {
-        // no limit
-        $("#objectiveMultiSelect").chosen("destroy");
-        $("#objectiveMultiSelect").chosen({max_selected_options: Infinity, width: '100%'})
-        $("#nbObjectiveVisiblity").show();
-        $("#hiddenObjectivesVisibility").show();
-    } else {
-        // limit to 18 objectives (17 in scav hunt)
-        $("#objectiveMultiSelect").chosen("destroy");
-        $("#objectiveMultiSelect").chosen({max_selected_options: max_objectives, width: '100%'})
-        $("#nbObjectiveVisiblity").hide();
-        $("#hiddenObjectivesVisibility").hide();
-    }
-}
 
 {{
 def writeObjectiveList(key):
@@ -768,87 +520,40 @@ var objectiveBackup = {
     false: {{ writeObjectiveList('objective') }},
 }
 var appIsReady = false;
-var takeBackup = false;
 
 function randomizeObjective(evt) {
     var isActive;
     var wasRandom = isElemRandom(evt.currentTarget)
-
-    // backup current value
-    if (takeBackup) {
-        objectiveBackup[wasRandom] = get_selected_objectives()
-    }
-
-    takeBackup = true;
     var selectedArray = get_selected_objectives();
+
+    window.$randomizer.objective.setRandom(!wasRandom)
     if(wasRandom) {
         evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
-        isActive = false;
-
-        setMaxObjective(false);
 
         // restore previous value
         var backup_values = objectiveBackup.false
-        if (backup_values.length === 0) {
-            backup_values = ['kill all g4']
+        if (backup_values.length === 0 || backup_values[0] === 'random') {
+            backup_values = ['kill all G4']
         }
-        $("#objectiveMultiSelect").val(backup_values).trigger("chosen:updated");
-        removed_objectives = [];
-
-        // handle exclusions for currently selected values
-        for(var i=0; i<selectedArray.length; i++) {
-            objective_change(null, {selected: selectedArray[i]});
-        }
+        setObjectives(backup_values);
     } else {
         evt.currentTarget.className += " active";
-        isActive = true;
-        setMaxObjective(true);
         var backup_values = objectiveBackup.true
 
-        // undo exclusions since random allows for all objectives
-        for(var i=0; i<selectedArray.length; i++) {
-            objective_change(null, {deselected: selectedArray[i]}, true);
+        function removeHundreds(array) {
+            return array.filter(s => s !== 'collect 100% items' && s !== "explore 100% map");
         }
 
-        var all_objectives = getAllObjectives();
-        if (backup_values.length === 0) {
+        var all_objectives = defaultMultiValues.objective.slice();
+        all_objectives = removeHundreds(all_objectives)
+        if (backup_values.length === 0 || backup_values[0] === 'random') {
             backup_values = all_objectives
         }
         if (backup_values.length >= all_objectives.length) {
-            backup_values = backup_values.filter(s => s !== 'collect 100% items' && s !== "explore 100% map");
+            backup_values = removeHundreds(backup_values)
         }
-        $("#objectiveMultiSelect").val(backup_values).trigger("chosen:updated");
+        setObjectives(backup_values);
     }
-
-    sort_objectives_and_add_optgroups();
-
-    disableElement("objective", isActive);
-}
-
-function getAllObjectives() {
-    // add all objectives for randomization, as we may have removed some of them from the dropdown list
-    var notSelectedArray = get_unselected_objectives();
-    var selectedArray = get_selected_objectives();
-    for(var i=0; i<defaultMultiValues["objective"].length; i++) {
-        var toAdd = defaultMultiValues["objective"][i];
-        // don't add 'collect 100% items' to the random list as it's a special objective
-        if(toAdd == "collect 100% items" || toAdd == "explore 100% map") {
-            continue;
-        }
-        if(!notSelectedArray.includes(toAdd) && !selectedArray.includes(toAdd)) {
-            $("#objectiveMultiSelect").append("<option value=\""+toAdd+"\">"+toAdd+"</option>");
-        }
-    }
-    var all_objectives = Array.from(defaultMultiValues["objective"]);
-    var index = all_objectives.indexOf("collect 100% items");
-    if(index > -1) {
-        all_objectives.splice(index, 1);
-    }
-    index = all_objectives.indexOf("explore 100% map");
-    if(index > -1) {
-        all_objectives.splice(index, 1);
-    }
-    return all_objectives
 }
 
 function disableElement(id, disable) {
@@ -904,45 +609,32 @@ function setRandom() {
 }}
 }
 
-function setObjective() {
-    // called once when page loads to load objective values into form
-    // always display objectives multi select
-    var select = document.getElementById("objective");
-    var multi = document.getElementById("objectiveMultiSelectDiv");
+function initializeState() {
+    /* called once when page loads to load values into vue client
+       currently handles:
+       - objective
+       - objectiveRandom
+       - tourian
+       - majorsSplit
+    */
+    const data = {{response.write(session.randomizer,escape=False)}}
+    $randomizer.init(data);
 
-    select.style.display = "none";
-    multi.style.display = "block";
-    setMaxObjective(isElemRandom(document.getElementById("objectiveRandom")));
-
-    // at start all objectives are displayed as selected even though they're not...
-    var objective_random = "{{response.write(session.randomizer.get("objectiveRandom"))}}" == "true"
-    var objective_number = "{{response.write(session.randomizer.get("nbObjective", 4))}}"
-    var objective_required = "{{response.write(session.randomizer.get("nbObjectivesRequired", "off"))}}"
-
-    var selected_objectives = objectiveBackup[objective_random]
-    if (objective_random) {
-        // handle exclusions for currently selected values
+    if (['0', 'random'].includes(data.objectiveRandom)) {
         document.getElementById('objectiveRandom').click()
-        for(var i=0; i<selected_objectives.length; i++) {
-            objective_change(null, {selected: selected_objectives[i]});
-        }
     }
 
-    if (['0', 'random'].includes(objective_number)) {
+    if (['0', 'random'].includes(data.nbObjective)) {
         document.getElementById('nbObjectiveRandom').click()
     } else {
-        document.getElementById('nbObjective').value = objective_number
+        document.getElementById('nbObjective').value = data.nbObjective
     }
 
-    if (['0', 'random'].includes(objective_required)) {
+    if (['0', 'random'].includes(data.nbObjectivesRequired)) {
         document.getElementById('nbObjectivesRequiredRandom').click()
     } else {
-        document.getElementById('nbObjectivesRequired').value = objective_required
+        document.getElementById('nbObjectivesRequired').value = data.nbObjectivesRequired
     }
-
-    $("#objectiveMultiSelect").val(selected_objectives).trigger("chosen:updated");
-    $("#objectiveMultiSelect").on('change', objective_change);
-    objective_change(undefined, {selected: {}})
 }
 
 function setComplexity() {
@@ -958,18 +650,18 @@ function setComplexity() {
 function changeComplexity(evt, name) {
   if(name == "simple") {
     var show = ["noPatchesVisibility"];
-    var hide = ["seedVisibility", "itemsQuantityVisibility", "minorsProportionVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility", "saveLoadRandoPresetVisibility"];
+    var hide = ["seedVisibility", "itemsQuantityVisibility", "minorsProportionVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "superFunVisibility", "patchesVisibility", "hideItemsVisibility", "raceModeVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility", "saveLoadRandoPresetVisibility", "areaLayoutStep"];
     showHide(show, hide);
   }
 
   else if(name == "medium") {
     var show = ["maxDiffVisibility", "patchesVisibility", "morphPlacementVisibility", "itemsQuantityVisibility", "nerfedChargeVisibility", "musicVisibility", "escapeRandoVisibility", "objectivesVisibility", "helperPatchesVisibility"];
-    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "minorsProportionVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "noPatchesVisibility", "saveLoadRandoPresetVisibility"];
+    var hide = ["seedVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "minorsProportionVisibility", "superFunVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "hideItemsVisibility", "raceModeVisibility", "miscVisibility", "noPatchesVisibility", "saveLoadRandoPresetVisibility", "areaLayoutStep"];
     showHide(show, hide);
   }
 
   else {
-    var show = ["seedVisibility", "itemsQuantityVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "minorsProportionVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility", "saveLoadRandoPresetVisibility"];
+    var show = ["seedVisibility", "itemsQuantityVisibility", "maxDiffVisibility", "progDiffVisibility", "suitsRestrictionVisibility", "morphPlacementVisibility", "minorsProportionVisibility", "superFunVisibility", "patchesVisibility", "mainPatchesVisibility", "gravityBehaviourVisibility", "hideItemsVisibility", "raceModeVisibility", "nerfedChargeVisibility", "miscVisibility", "musicVisibility", "escapeRandoVisibility", "helperPatchesVisibility", "objectivesVisibility", "saveLoadRandoPresetVisibility", "areaLayoutStep"];
     var hide = ["noPatchesVisibility"];
     showHide(show, hide);
   }
@@ -999,9 +691,9 @@ function showHide(show, hide) {
 function getRandomizerParameters(setDisabledToOff, trueJson) {
     var dataDict = {};
 
-    var elems = ["seed", "preset", "raceMode", "areaLayout", "removeEscapeEnemies", "layoutPatches", "variaTweaks", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "revealMap", "scavRandomized", "relaxed_round_robin_cf", "hiddenObjectives"];
-    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs", "objective"];
-    var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "tourian", "areaRandomization"];
+    var elems = ["seed", "preset", "raceMode", "removeEscapeEnemies", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "revealMap", "scavRandomized", "relaxed_round_robin_cf", "hiddenObjectives", "distributeObjectives", "better_reserves"];
+    var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
+    var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "tourian", "areaRandomization"];
     var imgPickers = ["logic"];
 
     for(var i=0; i<elems.length; i++) {
@@ -1258,12 +950,14 @@ function getSpecialValues(dataDict, trueJson) {
     // Note both objective and objectiveMultiSelect are passed via dataDict.objective
     // The backend decides to use this for one or the other
     if(trueJson) {
-        var values = $("#objectiveMultiSelect").val();
+        var values = get_selected_objectives();
     } else {
-        var values = $("#objectiveMultiSelect").val().join(",");
+        var values = get_selected_objectives().join(",");
     }
     dataDict["objective"] = values ? values : "nothing"
-
+    if (dataDict["objectiveRandom"]) {
+        dataDict["objectiveMultiSelect"] = values
+    }
     if (isElemIdRandom("nbObjective")) {
         dataDict["nbObjective"] = "random"
     } else {
@@ -1274,12 +968,25 @@ function getSpecialValues(dataDict, trueJson) {
     } else {
         dataDict["nbObjectivesRequired"] = document.getElementById("nbObjectivesRequired").value
     }
+
+    Object.keys(window.PATCHES).forEach(group_key => {
+        const custom_key = group_key + 'Custom'
+        // this is an inconsistency in variable name that should be fixed (if possible)
+        const backend_key = group_key === 'layout' ? 'layoutPatches' : group_key
+        dataDict[backend_key] = 'off'
+        dataDict[custom_key] = ''
+        if (window.$randomizer.isPatchGroupAllowed(group_key)) {
+            dataDict[custom_key] = window.$randomizer.state[custom_key] || []
+            dataDict[backend_key] = dataDict[custom_key].length > 0 ? 'on' : 'off'
+            if (!trueJson) {
+                dataDict[custom_key] = dataDict[custom_key].join(',')
+            }
+        }
+    })
 }
 
 function validateObjectives() {
-    //var objectives = document.getElementById("objectiveMultiSelect");
-    //console.log("objectiveMultiSelect: "+objectives.value);
-    var values = $("#objectiveMultiSelect").val();
+    var values = get_selected_objectives();
 
     if(isElemIdRandom("objective")) {
         // if objectives are randomized, check that there's at least one in the list
@@ -1289,8 +996,11 @@ function validateObjectives() {
         }
     } else {
         // if not randomized, check that there's max 18 objectives in the list (17 in scav hunt)
-        if(values.length > max_objectives) {
-            alert("You can have maximum 18 objectives (17 if major split is Scavenger Hunt)");
+        const max = $randomizer.objective.getMax();
+        const count = values.length;
+        const splits = document.getElementById('majorsSplit').value
+        if(values.length > max) {
+            alert(`You can only have ${max} objectives for ${splits} (${count} currently selected)`);
             return false
         }
     }
@@ -1309,7 +1019,7 @@ function doSubmit() {
             return false;
         }
 
-        if(! validateObjectives()) {
+        if(!validateObjectives()) {
             return false;
         }
 
@@ -1369,7 +1079,6 @@ var tips = [
     "With Boss randomization, the areas or rooms unlocked by the bosses stay unchanged. For example, you still have to kill Phantoon to activate Wrecked Ship.",
     "The aim buttons can be assigned to any button",
     "You can save your own button layout as well as moonwalk option in your skills preset to avoid doing the setup every seed",
-    "Using a non-standard or randomized start location will enable all anti-softlock patches and VARIA tweaks",
     "All starting locations come with their layout changes or doors opened, be sure to check them by clicking on '?' next to the option",
     "During randomized escape sequence, your hyper beam can destroy super/bomb/PB blocks, and open all gates",
     "During randomized escape sequence, if you 'forgot' to pick up a suit during your run and cannot escape, you can reload and exit Tourian at any time",
@@ -1393,7 +1102,8 @@ var tips = [
     "When randomizing objectives list, you can also decide to set a fixed number of objectives, or randomize it as well",
     "There is a distinction between 'possible objectives' (the objective list) and 'required objectives' (the number of objectives to complete)",
     "If you choose more than 9 objectives, only 9 will be required",
-    "To easily check if something is in logic, use the tracker in seedless mode, give yourself some equipment, and see what locations are available"
+    "To easily check if something is in logic, use the tracker in seedless mode, give yourself some equipment, and see what locations are available",
+    "Press Start+Select+L+R to quickly reload your last save"
 ];
 
 var myTimer = null;
@@ -1499,9 +1209,9 @@ window.onload = function(){
         var escapeRando = document.getElementById("escapeRando");
 
         if(is_on){
+            window.$randomizer.state.areaLayoutCustom = window.PATCHES.areaLayout.map(p => p.id)
             disableElement("areaLayout", false);
 
-            setSwitchToOn(patches);
             setSwitchToOn(escapeRando);
 
             // uncheck suits restrictions when late morph + area
@@ -1509,7 +1219,7 @@ window.onload = function(){
                 setSwitchToOff(suits);
             }
         } else {
-            setSwitchToOff(patches);
+            window.$randomizer.state.areaLayoutCustom = []
             setSwitchToOff(escapeRando);
             var minimizer = document.getElementById("minimizer");
             setSwitchToOff(minimizer);
@@ -1523,12 +1233,14 @@ window.onload = function(){
         var area = document.getElementById("areaRandomization");
         var is_on = ['light', 'full'].includes(area.value);
         triggerArea(is_on);
+        window.$randomizer.set('areaRandomization', area.value);
     };
 
     area.onchange()
 
     $('#areaRandomizationMultiSelect').change(e => {
         var values = $('#areaRandomizationMultiSelect').val();
+        window.$randomizer.set('areaRandomizationMultiSelect', values);
         var is_on = values.includes('full') || values.includes('light');
         triggerArea(is_on);
     })
@@ -1605,8 +1317,6 @@ window.onload = function(){
         var selected = startLocation.value; //startLocation.options[startLocation.selectedIndex].text;
         if(selected != "Ceres" && selected != "Landing Site"){
             var majorsSplit = document.getElementById("majorsSplit");
-            var variaTweaks = document.getElementById("variaTweaks");
-            var layoutPatches = document.getElementById("layoutPatches");
             var suitsRestriction = document.getElementById("suitsRestriction");
 
             if(majorsSplit.value == "Scavenger") {
@@ -1614,12 +1324,11 @@ window.onload = function(){
                 // changing a value in js doesn't call onchange, so explicitly call it
                 majorsSplit.onchange();
             }
-            setSwitchToOn(variaTweaks);
-            setSwitchToOn(layoutPatches);
+            window.$randomizer.setPatches('variaTweaks', 'all')
+            window.$randomizer.setPatches('layout', 'all')
             setSwitchToOff(suitsRestriction);
             if(selected == "Red Brinstar Elevator" || selected == "Golden Four") {
                 var areaRandomization = document.getElementById("areaRandomization");
-                var areaLayout = document.getElementById("areaLayout");
                 var areaRandom = document.getElementById('areaRandomizationRandom');
                 if (isElemRandom(areaRandom)) {
                     const multiselect = $("#areaRandomizationMultiSelect")
@@ -1633,7 +1342,7 @@ window.onload = function(){
                     $("#areaRandomization").val('full')
                     $("#areaRandomization").change()
                 }
-                setSwitchToOn(areaLayout);
+                window.$randomizer.setPatches('areaLayout', 'all')
             }
         }
     }
@@ -1691,12 +1400,13 @@ window.onload = function(){
 
     var tourian = document.getElementById("tourian");
     tourian.onchange = function() {
-        // update available objectives
-        objective_change(undefined, {selected: {}, deselected: {}})
+        $randomizer.set('tourian', tourian.value)
     }
+    tourian.onchange();
 
     var majorsSplit = document.getElementById("majorsSplit");
     majorsSplit.onchange = function() {
+        $randomizer.set('majorsSplit', majorsSplit.value);
         var scavengerParams = document.getElementById("scavengerParams");
         if(majorsSplit.value == "Scavenger") {
             scavengerParams.style.display = "block";
@@ -1714,21 +1424,9 @@ window.onload = function(){
             }
             var hud = document.getElementById("hud");
             setSwitchToOn(hud);
-
-            // update maximum number of allowed custom objectives
-            max_objectives = 17;
         } else {
             scavengerParams.style.display = "none";
-
-            // update maximum number of allowed custom objectives
-            max_objectives = 18;
         }
-        // tell chosen about new maximum
-        if(!isElemRandom(document.getElementById("objectiveRandom"))) {
-            setMaxObjective(false);
-        }
-        // update available objectives
-        objective_change(undefined, {selected: {}, deselected: {}})
     }
     majorsSplit.onchange();
 
@@ -1747,9 +1445,9 @@ window.onload = function(){
 
     setRandom();
 
-    setObjective();
+    initializeState();
+
     // in case we're in nothing objectives
-    sort_objectives_and_add_optgroups();
 
     $("#preset").chosen({ width: '100%' });
     $("#randoPreset").chosen({ width: '100%' });
@@ -1876,7 +1574,7 @@ function loadRandoPresetLocalCallbak(e) {
 function loadRandoPresetOK(data) {
     // instead of reloading the page which remove the sm ROM, update all fields manually
     for(var key in data) {
-        if(key == "objective" || key == "objectiveMultiSelect" || key == "randoPreset") {
+        if(key == "objective" || key == "objectiveMultiSelect" || key == "randoPreset" || key == "logicMultiSelect") {
             continue;
         }
         value = data[key];
@@ -1885,6 +1583,7 @@ function loadRandoPresetOK(data) {
         var elem = document.getElementById(key);
         if(elem == null) {
             // in case there's unknown parameter in the json file
+            // TODO distributeObjective
             console.log("error loading elem: "+key);
             continue;
         }
@@ -1929,23 +1628,7 @@ function loadRandoPresetOK(data) {
         }
     }
 
-    // objectives is special
-    var objectiveRandom = document.getElementById("objectiveRandom");
-    // the json creator saves objective random as a boolean. For now this hack will do
-    if(String(data["objectiveRandom"]) == "true") {
-        if(! isElemRandom(objectiveRandom)) {
-            randomizeObjective({currentTarget: objectiveRandom});
-        }
-        if("objectiveMultiSelect" in data) {
-            $("#objectiveMultiSelect").val(data["objectiveMultiSelect"]).trigger("chosen:updated");
-        }
-    } else {
-        if(isElemRandom(objectiveRandom)) {
-            randomizeObjective({currentTarget: objectiveRandom});
-        }
-        $("#objectiveMultiSelect").val(data["objective"]).trigger("chosen:updated");
-    }
-    objective_change(null, { deselected: true, selected: true });
+    window.$randomizer.init(data)
     $("select").data('picker').sync_picker_with_select(); // syncs the logic image picker
 }
 
@@ -2043,7 +1726,7 @@ Click on the dice button to randomly set this parameter.</p>"
     {
       element: "#nbObjectivesRequiredStep",
       title: "Number of required objectives",
-      content: "<p>Number of objectives to complete from the objectives list. When 'off' (default), it will try to match the size of the complete objective list, with a maximum of 9 objectives required.</p>\
+      content: "<p>Number of objectives to complete from the objectives list. When set to 'all' (default), it will try to match the size of the complete objective list, with a maximum of 9 objectives required.</p>\
 <p>Click on the dice button to randomly set this parameter.</p>",
     },
     {
@@ -2056,6 +1739,11 @@ Click on the dice button to randomly set this parameter.</p>"
       element: "#hiddenObjectivesStep",
       title: "Hidden Objectives",
       content: "<p>When objectives are randomized, the objective list is hidden in game until you reach the <a href=\"https://metroid.fandom.com/wiki/Golden_Statues\" target=\"_blank\">Golden Statues</a> (or equivalent, depending on Tourian setting).<br>Mostly interesting with area randomization or custom start location settings.</p>",
+    },
+    {
+      element: "#distributeObjectivesStep",
+      title: "Distributed Objectives",
+      content: "<p>When objectives are randomized, distribute random objectives evenly across categories.</p>",
     },
     {
       element: "#objectiveStep",
@@ -2089,7 +1777,7 @@ Click on the dice button to randomly set this parameter.</p>"
 <li>Collect 75% items: collect 75% of available items</li>\
 <li>Collect 100% items: collect 100% of available items</li>\
 <li>Collect all upgrades: collect all available suit upgrades (all items but energy/ammo)</li>\
-<li>Clear 'area': collect all available items <b>of the current major split</b> in 'area'. Forces 'VARIA HUD' on to see how many are left in each area. <b>Incompatible with Scavenger Hunt and Disabled Tourian.</b></li>\
+<li>Clear 'area': collect all available items <b>of the current major split</b> in 'area'. Forces 'VARIA HUD' on to see how many are left in each area. <b>Incompatible with Scavenger Hunt and, if start location is not standard, Disabled Tourian.</b></li>\
 </ul></p>\
 <p><b>Map:</b><ul>\
 <li>Explore 25% map: explore 25% of available map tiles</li>\
@@ -2098,6 +1786,14 @@ Click on the dice button to randomly set this parameter.</p>"
 <li>Explore 100% map: explore 100% of available map tiles</li>\
 <li>Explore 'area': explore all map tiles in 'area'.</li>\
 </ul>Forces 'Reveal Map' on to see how many are left in each area.</p>\
+<p><b>Enemies:</b><ul>\
+<li>Kill all Space Pirates of all types (<a href=\"https://wiki.supermetroid.run/Green_Space_Pirate_(standing)\" target=\"_blank\">green</a>, <a href=\"https://wiki.supermetroid.run/Pink_Space_Pirate_(standing)\" target=\"_blank\">pink</a>, <a href=\"https://wiki.supermetroid.run/Yellow_Space_Pirate_(standing)\" target=\"_blank\">yellow</a> ...)</li>\
+<li>Kill all Ki Hunters of all types (<a href=\"https://wiki.supermetroid.run/Kihunter_(green)\" target=\"_blank\">green</a>, <a href=\"https://wiki.supermetroid.run/Kihunter_(yellow)\" target=\"_blank\">yellow</a>, <a href=\"https://wiki.supermetroid.run/Kihunter_(red)\" target=\"_blank\">red</a>)</li>\
+<li>Kill all <a href=\"https://wiki.supermetroid.run/Beetom\" target=\"_blank\">Beetoms</a></li>\
+<li>Kill all <a href=\"https://wiki.supermetroid.run/Cacatac\" target=\"_blank\">Cacatacs</a></li>\
+<li>Kill all <a href=\"https://wiki.supermetroid.run/Kago\" target=\"_blank\">Kagos</a></li>\
+<li>Kill all <a href=\"https://wiki.supermetroid.run/Yapping_Maw\" target=\"_blank\">Yapping Maws</a></li>\
+</ul></p>\
 <p><b>Memes:</b><ul>\
 <li>Tickle the Red Fish: use grapple on the <a href=\"https://wiki.supermetroid.run/Red_Fish_Room\" target=\"_blank\">Red Fish</a></li>\
 <li>Kill the orange Geemer: kill the orange Geemer that follows you on the little bridge before <a href=\"https://wiki.supermetroid.run/Bowling_Alley\">Bowling Alley</a></li>\
@@ -2205,10 +1901,10 @@ Click on the dice button to randomly set this parameter.</p>"
 <td><img src=\"/solver/static/images/help/aqueduct_start.png\" alt=\"Aqueduct\" title=\"Aqueduct\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/aqueduct_save_blue.png\" alt=\"Aqueduct Save door\" title=\"Aqueduct Save door\" class=\"full\"/></td><td></td>\
 </tr>\
 <tr>\
-<td><a href=\"https://wiki.supermetroid.run/Red_Tower_Elevator_Room\" target=\"_blank\">Red Brinstar Elevator</a></td><td><a href=\"https://wiki.supermetroid.run/Hellway\" target=\"_blank\">Hellway</a> blue door</td><td></td>\
+<td><a href=\"https://wiki.supermetroid.run/Red_Tower_Elevator_Room\" target=\"_blank\">Red Brinstar Elevator</a></td><td><a href=\"https://wiki.supermetroid.run/Hellway\" target=\"_blank\">Hellway</a> blue door</td><td><a href=\"https://wiki.supermetroid.run/Alpha_Power_Bomb_Room\" target=\"_blank\">Alpha Power Bomb</a> blue door</td>\
 </tr>\
 <tr>\
-<td><img src=\"/solver/static/images/help/red_bt_elevator_start.png\" alt=\"Red Brinstar Elevator\" title=\"Red Brinstar Elevator\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/hellway_blue_door.png\" alt=\"Hellway blue door\" title=\"Hellway blue door\" class=\"full\"/></td><td></td>\
+<td><img src=\"/solver/static/images/help/red_bt_elevator_start.png\" alt=\"Red Brinstar Elevator\" title=\"Red Brinstar Elevator\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/hellway_blue_door.png\" alt=\"Hellway blue door\" title=\"Hellway blue door\" class=\"full\"/></td><td><img src=\"/solver/static/images/help/alpha_pb_blue_door.png\" alt=\"Alpha Power Bomb blue door\" title=\"Alpha Power Bomb blue door\" class=\"full\"/></td>\
 </tr>\
 <tr>\
 <td><a href=\"https://wiki.supermetroid.run/Statues_Hallway\" target=\"_blank\">Golden Four</a></td><td></td><td></td>\
@@ -2269,7 +1965,7 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
 <li><b>early</b> (default): Morph will be placed as soon as possible</li>\
 <li><b>normal</b>: Morph will be placed randomly</li>\
 <li><b>late</b>: Prevents Morph to be placed in the first available locations of the game. Best suited when used along area randomization, to find Morph in peculiar places.<br/>\
-<b>Warning: </b>In Chozo Majors Split, or when using a non-standard or randomized start location, <b>late</b> will be replace by <b>normal</b></li></ul></p>\
+<b>Warning: </b>In Chozo Majors Split, or when using a non-standard or randomized start location, <b>late</b> will be replaced by <b>normal</b></li></ul></p>\
 <p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
@@ -2328,24 +2024,11 @@ This mode can be use as an introduction before doing full Area Randomization or 
 <hr />\
 <h3>Area Randomization Details</h3>\
 <a href=\"/solver/static/images/common/area_map_20200112.png\" class=\"highslide\" onclick=\"return hs.expand(this, {wrapperClassName: 'borderless', dimmingOpacity: 0.75, align: 'center'})\"><div class=\"parent-center\"><img id=\"areathumb\" src=\"/solver/static/images/help/area_map_thumbnail.png\" alt=\"Area Map\" title=\"Click to enlarge\" class=\"half child-center\"/></div></a>\
-<p>It is recommended to use the <a href=\"/solver/solver_web/tracker\" target=\"_blank\">Area Tracker</a> to find your way more easily.</p>\
 <p>All portals can be linked to one another, even if it means following an incompatible transition (Left-Left, Up-Right, ...).</p>\
+<p>To find your way more easily, you can use in-game map area tracking (see Patches section help for more details), or the <a href=\"/solver/solver_web/tracker\" target=\"_blank\">Area Tracker</a> to have the exact transitions.</p>\
 <p>By default, the escape sequence will spawn you outside a random map station, and you have to find your way to the ship. See Escape Randomization section (in medium/advanced tab) for more information.</p>\
-<p> All portal doors has been turn to blinking blue doors. You can go through all portals and back, even those where you can't do that in vanilla, so some layout tweaks have been made:\
-<table class=\"full\">\
-<tr>\
-<td class=\"knowsUsed\"><p class=\"top\">Remove <a href=\"https://wiki.supermetroid.run/Red_Tower_Elevator_Room\" target=\"_blank\">Maridia red fish exit</a> green gate:</td>\
-<td class=\"knowsUsed\"><p class=\"top\">Remove <a href=\"https://wiki.supermetroid.run/East_Tunnel\" target=\"_blank\">Maridia tube exit</a> green gate:</td>\
-<td class=\"knowsUsed\"><p class=\"top\">Remove <a href=\"https://wiki.supermetroid.run/Single_Chamber\" target=\"_blank\">Lower Norfair exit</a> crumble blocks:</td>\
-</tr>\
-<tr>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/fish_gate.png\" alt=\"fish_gate.png\" title=\"fish_gate.png\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/tube_gate.png\" alt=\"tube_gate.png\" title=\"tube_gate.png\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/ln_gate.png\" alt=\"ln_gate.png\" title=\"ln_gate.png\" class=\"full\"/></td>\
-</tr>\
-</table>\
-</p>\
-<p>In order to have usable save stations in all areas, some have been added or modified:\
+<p> All portal doors has been turn to blinking blue doors.</p>\
+<p>In order to have usable save stations in all areas, some have been added or modified:</p>\
 <table class=\"full\">\
 <tr>\
 <td class=\"knowsUsed\"><p class=\"top\">New save station at <a href=\"https://wiki.supermetroid.run/Main_Street\" target=\"_blank\">Main Street</a>:</td>\
@@ -2374,51 +2057,16 @@ To have a self contained <a href=\"https://metroid.fandom.com/wiki/Maridia\" tar
 </tr>\
 </table>\
 </p>\
-<p>Even with all layout modifications, it is still possible to softlock in some occurrences. To avoid softlocking your save file, an automatic rolling backup save system is enabled. See doors colors randomization option help for more details.</p>\
+<p>Even with all layout modifications, it is still possible to softlock in some occurrences. To avoid softlocking your save file, an automatic rolling backup save system is enabled. See Patches section help for more details.</p>\
 Click on the dice button to randomly set this parameter.",
       placement: "auto left"
     },
     {
       element: "#areaLayoutStep",
       title: "Areas randomization additional layout modifications",
-      content: "Some layout tweaks to make your life easier in areas randomizer:\
-<table class=\"full\">\
-<tr>\
-<td class=\"quarter\"><p class=\"top\">Remove <a href=\"https://wiki.supermetroid.run/Crab_Tunnel\" target=\"_blank\">Crab</a> green gate in <a href=\"https://metroid.fandom.com/wiki/Maridia\" target=\"_blank\">Marida</a>:</p></td>\
-<td class=\"quarter\"><p class=\"top\">Remove blue gate in <a href=\"https://wiki.supermetroid.run/Green_Hill_Zone\" target=\"_blank\">Green Hill Zone</a>:</p></td>\
-<td class=\"quarter\"><p class=\"top\">Easier wall jump in <a href=\"https://wiki.supermetroid.run/Green_Hill_Zone\" target=\"_blank\">Green Hill Zone</a> to access transition door:</p></td>\
-</tr>\
-<tr>\
-<td class=\"quarter\"><img src=\"/solver/static/images/help/crab_gate.png\" alt=\"crab_gate\" title=\"crab_gate\" class=\"full\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/help/greenhill_gate.png\" alt=\"greenhill_gate\" title=\"greenhill_gate\" class=\"full\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/help/greenhill_walljump.png\" alt=\"greenhill_walljump\" title=\"greenhill_walljump\" class=\"full\"/></td>\
-</tr>\
-<tr>\
-<td class=\"quarter\"><p class=\"top\">Access <a href=\"https://wiki.supermetroid.run/Red_Tower_Elevator_Room\" target=\"_blank\">Maridia red fish exit</a>:</p></td>\
-<td class=\"quarter\"><p class=\"top\">Access <a href=\"https://wiki.supermetroid.run/East_Tunnel\" target=\"_blank\">Maridia tube exit</a>:</p></td>\
-<td class=\"quarter\"><p class=\"top\">Access <a href=\"https://wiki.supermetroid.run/Single_Chamber\" target=\"_blank\">Lower Norfair exit</a>:</p></td>\
-</tr>\
-<tr>\
-<td class=\"quarter\"><img src=\"/solver/static/images/help/fish_access.png\" alt=\"fish_access\" title=\"fish_access\" class=\"full\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/help/tube_access.png\" alt=\"tube_access\" title=\"tube_access\" class=\"full\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/help/ln_access.png\" alt=\"ln_access\" title=\"ln_access\" class=\"full\"/></td>\
-</tr>\
-<td class=\"quarter\" colspan=\"3\"><p class=\"top\"><a href=\"https://wiki.supermetroid.run/Sponge_Bath\" target=\"_blank\">Sponge Bath</a> door is set to blue to avoid softlocking and two new platforms are added to traverse <a href=\"https://wiki.supermetroid.run/East_Ocean\" target=\"_blank\">Forgotten Highway</a> both ways with only High-Jump boots  <img src=\"/solver/static/images/tracker/inventory/HiJump.png\" class=\"width: 32px\"/> and Level 1 underwater movement in preset:</p></td>\
-<tr>\
-</tr>\
-<tr>\
-<td class=\"quarter\"><img src=\"/solver/static/images/help/sponge_bath_blue_door.png\" alt=\"sponge_bath_blue_door\" title=\"sponge_bath_blue_door\" class=\"full\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/help/forgotten_all_the_way.png\" alt=\"forgotten_all_the_way\" title=\"forgotten_all_the_way\" class=\"full\"/></td>\
-</tr>\
-<td class=\"quarter\" colspan=\"3\"><p class=\"top\"><a href=\"https://wiki.supermetroid.run/Aqueduct\" target=\"_blank\">Aqueduct</a> left entrance Power Bomb  <img src=\"/solver/static/images/tracker/inventory/PowerBomb.png\" class=\"width: 32px\"/> blocks are changed to Bomb  <img src=\"/solver/static/images/tracker/inventory/Bomb.png\" class=\"width: 32px\"/> blocks to allow traversing both ways with the same item set:</p></td>\
-<tr>\
-</tr>\
-<tr>\
-<td class=\"quarter\"><img src=\"/solver/static/images/help/aqueduct_bomb_blocks.png\" alt=\"aqueduct_bomb_blocks\" title=\"aqueduct_bomb_blocks\" class=\"full\"/></td>\
-</tr>\
-</table>\
-<p>Using Area randomization and a non-standard or randomized start location will force this setting on.</p>",
-      placement: "auto left"
+      content: "<p>These patches minimize soft-locks and increase the variation of the area randomizer. Some additional cosmetic changes may not be shown. These patches are only available when full or light area randomization is enabled. </p><div id='tourPortal' data-tag-name='patch-selector' data-patch_group='areaLayout'></div>",
+      onShown: () => window.updateTourPortal(),
+      placement: "auto right",
     },
     {
       element: "#doorsColorsRandoStep",
@@ -2438,16 +2086,13 @@ Missile doors can no longer be opened with a Super Missile <img src=\"/solver/st
 For Plasma/Spazer doors, when you have both beams collected and one equipped you can open both door types.<br/>\
 Colored doors to save stations / refills / map stations are excluded from randomization.<br/>\
 Colored doors to save / refill stations are forced to blue.<br/>\
-Blue doors with a colored door on the other side will blink in the matching color (you can disable it by disabling 'Anti-softlock layout patches').<br/>\
 The fill algorithm will be more trolly about ammo/beam if you use slower progression speed.</p>\
-<p>In this mode there are seven distinct door keys, and sometimes (especially with non standard starting location or area rando), if you go through a blue door you can end up locked on the other side if you don't have or find the item required to come back. If you save in that situation, your save file will be hardlocked. To avoid this, a rolling backup save system is enabled. When you save at a different save station than the last time, a backup of your previous save is done, using an empty save, or an older backup of the same game. You can identify backups in the load menu, as they will have the same slot letter as the original save :</p>\
-<img src=\"/solver/static/images/help/backup_saves.png\" alt=\"backup_saves.png\" title=\"Backup Saves menu example\" class=\"third center_img\"/>\
-<p>As soon as you load a backup save from the menu, it becomes its own slot. In the example above, if you load your most recent backup (with 0:06 time), it will become 'Samus C'. When playing this new slot C game, when you save, it won't be able to backup, since other slots are taken by the original A slot and an older backup of the A slot. So if you hardlock a save file, be sure to clear it for it to be reused as a backup afterwards.</p>\
+<p>In this mode there are seven distinct door keys, and sometimes (especially with non standard starting location or area rando), if you go through a blue door you can end up locked on the other side if you don't have or find the item required to come back. If you save in that situation, your save file will be hardlocked. To avoid this, a rolling backup save system is enabled. See Patches section help for more defails.</p>\
 <p>Click on the dice button to randomly set this parameter.</p>\
 Beams doors patch by Mettyk25jigsaw.<br/>\
 Beams doors gfx by prankard.<br/>\
 CRE gfx fix by Sirkura.<br/>\
-Rolling backup and Missile doors patches by Flo.",
+Missile doors patchby Flo.",
       placement: "auto left"
     },
     {
@@ -2486,7 +2131,7 @@ Click on the dice button to randomly set the number of locations (between 30 and
     {
       element: "#escapeRandoStep",
       title: "Escape sequence randomization",
-      content: "<p>When leaving <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a>, get teleported to the exit of a random <a href=\"https://metroid.fandom.com/wiki/Map_Station\" target=\"_blank\">Map station</a> (between <a href=\"https://metroid.fandom.com/wiki/Brinstar\" target=\"_blank\">Brinstar</a>/<a href=\"https://metroid.fandom.com/wiki/Maridia\" target=\"_blank\">Maridia</a>/<a href=\"https://metroid.fandom.com/wiki/Norfair\" target=\"_blank\">Norfair</a>/<a href=\"https://metroid.fandom.com/wiki/Wrecked_Ship\" target=\"_blank\">Wrecked Ship</a>).<br/>You then have to find your way to the <a href=\"https://metroid.fandom.com/wiki/Samus's_Gunship\" target=\"_blank\">ship</a> in the remaining time. Allotted time depends on area layout, but not on skill settings and is pretty generous.</p>\
+      content: "<p>When leaving <a href=\"https://metroid.fandom.com/wiki/Tourian\" target=\"_blank\">Tourian</a>, get teleported to the exit of a random <a href=\"https://metroid.fandom.com/wiki/Map_Station\" target=\"_blank\">Map station</a> (between <a href=\"https://metroid.fandom.com/wiki/Brinstar\" target=\"_blank\">Brinstar</a>/<a href=\"https://metroid.fandom.com/wiki/Maridia\" target=\"_blank\">Maridia</a>/<a href=\"https://metroid.fandom.com/wiki/Norfair\" target=\"_blank\">Norfair</a>/<a href=\"https://metroid.fandom.com/wiki/Wrecked_Ship\" target=\"_blank\">Wrecked Ship</a>).<br/>You then have to find your way to the <a href=\"https://metroid.fandom.com/wiki/Samus's_Gunship\" target=\"_blank\">ship</a> in the remaining time. Allotted time depends on area layout and skill settings and should generally be comfortable.</p>\
 During the escape sequence:\
 <ul>\
 <li>All doors are opened</li>\
@@ -2549,11 +2194,24 @@ Click on the dice button to randomly set this parameter.",
       title: "Default Patches",
       content: "Patches always applied:\
 <ul>\
+<li>Press Start+Select+L+R to quickly reload your last save</li>\
 <li>Allows the aim buttons to be assigned to any button (by Kejardon)</li>\
 <li>Max Ammo Display (by Personitis)</li>\
 <li>Play music with <a href=\"https://www.zeldix.net/t1607-msu1-getting-started-guide\" target=\"_blank\">MSU1 chip</a> on <a href=\"https://www.retrorgb.com/fxpakpro.html\" target=\"_blank\">SD2SNES/FXPak</a> and compatible emulators (by DarkShock)</li>\
 <li>Disable <a href=\"https://wiki.supermetroid.run/Golden_Torizo_Code\" target=\"_blank\">GT Code</a> and <a href=\"https://wiki.supermetroid.run/Weapon_Techniques#Glitched_Beams\" target=\"_blank\">gliched beams</a>, also fixes to some vanilla bugs</li>\
-<li>When doors are colored on one side and blue on the other, the blue side blinks to indicate the color of the other side</li>\
+<li>When your save point is different from the last one, an automatic backup is done in an available spot: a cleared or unlocked save file. A file is locked when you start/load a game from it, or when you lock it manually. Files can be locked/unlocked in the load menu by pressing left, right, X or Y.</li>\
+<table>\
+<tr>\
+<td class=\"knowsUsed\"><p class=\"top\">Load menu with file A and C locked:</td>\
+<td class=\"knowsUsed\"><p class=\"top\">When saving, file copy is notified:</td>\
+<td class=\"knowsUsed\"><p class=\"top\">Unlock files with left, right, X or Y in the load menu if no more slots available:</td>\
+</tr>\
+<tr>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/backup_locks.png\" alt=\"backup_locks.png\" title=\"backup_locks.png\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/backup_copy.png\" alt=\"backup_copy.png\" title=\"backup_copy.png\" class=\"full\"/></td>\
+<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/backup_no_slots.png\" alt=\"no_slots.png\" title=\"no_slots.png\" class=\"full\"/></td>\
+</tr>\
+</table>\
 <li>Change in-game font for HUD and pause menu with <a href=\"https://damieng.com/typography/zx-origins/zx-eurostile/\" target=\"_blank\">ZX Eurostile by damieng</a></li>\
 <li>Display collected items percentage and RTA time in pause inventory menu :</li>\
 <img src=\"/solver/static/images/help/inventory.png\" alt=\"inventory.png\" title=\"Inventory menu\" class=\"third center_img\"/>\
@@ -2573,69 +2231,16 @@ Click on the dice button to randomly set this parameter.",
     {
       element: "#layoutPatchesStep",
       title: "Anti-softlock Layout patches",
-      content: "Include the anti-softlock layout patches. Disable at your own softlocking risk!<br/>\
-Disabling it will also disable blinking blue doors with a color door on the other side (see Doors Colors Randomization).\
-<table class=\"full\">\
-<tr>\
-<td class=\"knowsUsed\"><p class=\"top\">Disable respawning blocks at <a href=\"https://wiki.supermetroid.run/Dachora_Room\" target=\"_blank\">Dachora Pit</a>:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Escape from below <a href=\"https://wiki.supermetroid.run/Early_Supers_Room\" target=\"_blank\">early Super bridge</a> without Bombs:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Escape from below <a href=\"https://wiki.supermetroid.run/Early_Supers_Room\" target=\"_blank\">early Super bridge</a>:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks before <a href=\"https://wiki.supermetroid.run/Hi_Jump_Energy_Tank_Room\" target=\"_blank\">Hi-Jump:</p></td>\
-</tr>\
-<tr>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/dachora.png\" alt=\"dachora\" title=\"dachora\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/early_super.png\" alt=\"early_super\" title=\"early_super\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/early_super_bis.png\" alt=\"early_super_bis\" title=\"early_super_bis\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/high_jump.png\" alt=\"high_jump\" title=\"high_jump\" class=\"full\"/></td>\
-</tr>\
-<tr>\
-<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks at <a href=\"https://wiki.supermetroid.run/The_Moat\" target=\"_blank\">Moat</a>:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\"><a href=\"https://wiki.supermetroid.run/Cathedral_Entrance\" target=\"_blank\">First heated Norfair room</a> without High-Jump:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Always be able to get back up from bottom <a href=\"https://wiki.supermetroid.run/Red_Tower\" target=\"_blank\">Red Tower</a>:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks before <a href=\"https://wiki.supermetroid.run/Below_Spazer\" target=\"_blank\">Spazer</a>:</p></td>\
-</tr>\
-<tr>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/moat.png\" alt=\"moat\" title=\"moat\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/cathedral.png\" alt=\"cathedral\" title=\"cathedral\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/red_tower.png\" alt=\"red_tower\" title=\"red_tower\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/spazer_block.png\" alt=\"spazer_block\" title=\"spazer_block\" class=\"full\"/></td>\
-</tr>\
-<tr>\
-<td class=\"knowsUsed\"><p class=\"top\">Remove grey door at <a href=\"https://wiki.supermetroid.run/Brinstar_Pre-Map_Room\" target=\"_blank\">Brinstar map station</a>:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\"><a href=\"https://wiki.supermetroid.run/Big_Pink\" target=\"_blank\">Spore Spawn save station</a> is always available:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks before <a href=\"https://wiki.supermetroid.run/Warehouse_Kihunter_Room\" target=\"_blank\">Kraid save</a>:</p></td>\
-<td class=\"knowsUsed\"><p class=\"top\">Replace bomb blocks with shot blocks at <a href=\"https://wiki.supermetroid.run/Pink_Brinstar_Power_Bomb_Room\" target=\"_blank\">Pink Brinstar Power Bomb Room</a>:</p></td>\
-</tr>\
-<tr>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/bt_map.png\" alt=\"bt_map\" title=\"bt_map\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/spore_save.png\" alt=\"spore_save\" title=\"spore_save\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/kraid_save.png\" alt=\"kraid_save\" title=\"kraid_save\" class=\"full\"/></td>\
-<td class=\"knowsUsed\"><img src=\"/solver/static/images/help/mission_impossible.png\" alt=\"mission_impossible\" title=\"mission_impossible\" class=\"full\"/></td>\
-</tr>\
-</table>\
-<p>Using a non-standard or randomized start location will force this setting on.</p>\
-<p>Patches developed by Total & Flo.</p>",
-      placement: "auto left"
+      content: "Include the anti-softlock layout patches. Disable at your own softlocking risk!<br/><div id='tourPortal' data-tag-name='patch-selector' data-patch_group='layout'></div>",
+      onShown: () => window.updateTourPortal(),
+      placement: "auto right",
     },
     {
       element: "#variaTweaksStep",
       title: "VARIA Tweaks",
-      content: "<p>Include minor tweaks for the game to behave 'as it should' in a randomizer context:</p>\
-<table class=\"full\">\
-<tr>\
-<td class=\"quarter\"><p class=\"top\"><a href=\"https://metroid.fandom.com/wiki/Torizo#Crateria\" target=\"_blank\">Bomb Torizo</a> fight is triggered when picking up the item he's holding, not by having Bomb <img src=\"/solver/static/images/tracker/inventory/Bomb.png\" class=\"width: 32px\"/>:</p></td>\
-<td class=\"quarter\"><p class=\"top\">Access item at <a href=\"https://wiki.supermetroid.run/Wrecked_Ship_Energy_Tank_Room\" target=\"_blank\">Wrecked Ship Etank location</a> without killing <a href=\"https://metroid.fandom.com/wiki/Phantoon\" target=\"_blank\">Phantoon</a> (via <a href=\"https://wiki.supermetroid.run/Forgotten_Highway_Kago_Room\" target=\"_blank\">Forgotten Highway</a>):</p></td>\
-<td class=\"quarter\"><p class=\"top\">Activate <a href=\"https://wiki.supermetroid.run/Acid_Statue_Room\" target=\"_blank\">Lower Norfair Chozo</a> (left of entrance) without Space Jump <img src=\"/solver/static/images/tracker/inventory/SpaceJump.png\" class=\"width: 32px\"/>:</p></td>\
-</tr>\
-<tr>\
-<td class=\"quarter\"><img src=\"/solver/static/images/help/bomb_torizo.png\" alt=\"bomb_torizo\" title=\"bomb_torizo\" class=\"full\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/help/ws_etank.png\" alt=\"ws_etank\" title=\"ws_etank\" class=\"full\"/></td>\
-<td class=\"quarter\"><img src=\"/solver/static/images/help/ln_chozo.png\" alt=\"ln_chozo\" title=\"ln_chozo\" class=\"full\"/></td>\
-</tr>\
-</table>\
-<p>Using a non-standard or randomized start location will force this setting on.</p>\
-<p>Patch developed by Flo.</p>",
-      placement: "auto left"
+      content: "<p>Include minor tweaks for the game to behave 'as it should' in a randomizer context:</p><div id='tourPortal' data-tag-name='patch-selector' data-patch_group='variaTweaks'></div>",
+      onShown: () => window.updateTourPortal(),
+      placement: "auto right",
     },
     {
       element: "#nerfedChargeStep",
@@ -2754,6 +2359,20 @@ This patch is automatically enabled when using Full Countdown item split, or Maj
       placement: "auto left"
     },
     {
+      element: "#better_reservesStep",
+      title: "Better Reserves",
+      content: "<p>This patch does a few things:<ul>\
+<li>Reserve tanks come filled up</li>\
+<li>Different color for HUD reserve indicator when full</li>\
+<li>Prevents heat damage and the loss of invincibility frames when auto reserves activate (no more getting hit twice!)</li>\
+<li>Makes reserve tanks not empty if Samus is fully healed when they are used in auto or manual mode.</li>\
+<li>Fix jank where deselecting and reselecting refill button during manual refill causes it to resume.</li>\
+<li>Can also press A during manual refill at any time to stop refilling.</li>\
+</ul></p>\
+<p>Patch developed by NoDever2</p>",
+      placement: "auto left"
+    },
+    {
       element: "#animalsStep",
       title: "Animals surprise",
       content: "<p>Replace saving the animals in the escape sequence by a random surprise.<br/>\
@@ -2838,14 +2457,6 @@ def displaySelect(id, values, default, replace=True):
 
 {{
 def displayMultiSelect(id, selectedValues, default, multipleValues, replace=True):
-  # values for objective are stored differently
-  if id == "objective":
-    if session.randomizer.get("objectiveRandom") == 'true':
-      selectedValues = session.randomizer["objectiveMultiSelect"]
-    else:
-      selectedValues = session.randomizer["objective"] or ["kill all g4"]
-      pass
-    pass
   displaySelect(id, multipleValues, default, replace)
 
   response.write("<div id=\"{}MultiSelectDiv\" style=\"display:none\">".format(id), escape=False)
@@ -2950,8 +2561,9 @@ def displayNumber(id, min, max, default, step="1"):
               </tr>
               <tr>
                 <td class="small"><div class="random"><button id="logicRandom" type="button" onclick="randomizeTarget(event, 'logic')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="logicText">Flavor:</span></td>
-                <td>
+                <td colspan="2" class="full">
+                  <div class="flex-row">
+                    <span id="logicText">Flavor:</span>
                     <div class="border">
                       <select class="filldropdown" id="logic" name="logic">
 {{
@@ -2962,14 +2574,17 @@ def displayNumber(id, min, max, default, step="1"):
                         </optgroup>
                       </select>
                     </div>
+                  </div>
                 </td>
                 <td id="logicStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
               <tr>
                 <td class="small"></td>
-                <td>Settings Preset:</td>
-                <td>
-                  <select class="chzn-select" id="randoPreset" name="randoPreset" onchange="loadRandoPreset()">
+                <td colspan="2" class="full">
+                  <div class="flex-row">
+                    <span>Settings Preset:</span>
+                    <div class="preset-select-div">
+                      <select class="chzn-select" id="randoPreset" name="randoPreset" onchange="loadRandoPreset()">
 {{
   for categorie, presets in randoPresetsCategories.items():
     response.write('<optgroup label="{} presets">'.format(categorie), escape=False)
@@ -2982,7 +2597,9 @@ def displayNumber(id, min, max, default, step="1"):
       pass
     pass
 }}
-                </select>
+                      </select>
+                    </div>
+                  </div>
                 </td>
                 <td id="randoPresetStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
@@ -3023,45 +2640,6 @@ def displayNumber(id, min, max, default, step="1"):
                 <td><span id="tourianText">Endgame behaviour with Tourian:</span></td>
                 <td>{{displayMultiSelect("tourian", currentMultiValues["tourian"], "Vanilla", defaultMultiValues["tourian"])}}</td>
                 <td id="tourianStep"><button type="button" onclick="startTheTour(event)">?</button></td>
-              </tr>
-            <table class="full" id="objectivesVisibility">
-              <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
-              <tr id="nbObjectivesRequiredVisiblity">
-                <td class="small"><div class="random"><button id="nbObjectivesRequiredRandom" type="button" onclick="randomize(event, 'nbObjectivesRequired')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="nbObjectivesRequiredText">Number of required objectives:</span></td>
-                <td>
-                  <select class="full" id="nbObjectivesRequired" name="nbObjectivesRequired" style="display: block;" value="{{response.write(session.randomizer.get('nbObjectivesRequired', 'off'))}}">
-                    <option selected="selected" value="off">off</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                  </select>
-                </td>
-
-                <td id="nbObjectivesRequiredStep"><button type="button" onclick="startTheTour(event)">?</button></td>
-              </tr>
-              <tr id="nbObjectiveVisiblity">
-                <td class="small"><div class="random"><button id="nbObjectiveRandom" type="button" onclick="randomize(event, 'nbObjective')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="nbObjectiveText">Number of possible objectives:</span></td>
-                <td>{{displayNumber("nbObjective", "1", "18", "4", "1")}}</td>
-                <td id="nbObjectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
-              </tr>
-              <tr id="hiddenObjectivesVisibility">
-                <td class="small"></td>
-                <td colspan="2">{{displayCheckbox("hiddenObjectives")}}<span id="hiddenObjectivesText">Hidden Objectives</span></td>
-                <td id="hiddenObjectivesStep"><button type="button" onclick="startTheTour(event)">?</button></td>
-              </tr>
-              <tr>
-                <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
-                <td><span id="objectiveText">Objectives to access Tourian:</span></td>
-                <td>{{displayMultiSelect("objective", "objective is special!", "", defaultMultiValues["objective"])}}</td>
-                <td id="objectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
             </table>
             <table class="full">
@@ -3129,6 +2707,80 @@ def displayNumber(id, min, max, default, step="1"):
                 <td id="hideItemsStep"><button type="button" onclick="startTheTour(event)">?</button></td>
               </tr>
             </table>
+            <div id="objectivesVisibility">
+              <h4>Objectives to Access Tourian</h4>
+              <table class="full">
+                <colgroup><col class="small"/><col class="half" /><col class="half" /><col class="small"/></colgroup>
+                <tr id="nbObjectivesRequiredVisiblity">
+                  <td class="small"><div class="random"><button id="nbObjectivesRequiredRandom" type="button" onclick="randomize(event, 'nbObjectivesRequired')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td><span id="nbObjectivesRequiredText">Number of required objectives:</span></td>
+                  <td>
+                    <select class="full" id="nbObjectivesRequired" name="nbObjectivesRequired" style="display: block;" value="{{response.write(session.randomizer.get('nbObjectivesRequired', 'off'))}}">
+                      <option selected="selected" value="off">all</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                      <option value="6">6</option>
+                      <option value="7">7</option>
+                      <option value="8">8</option>
+                      <option value="9">9</option>
+                    </select>
+                  </td>
+                  <td id="nbObjectivesRequiredStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+                <tr id="nbObjectiveVisiblity">
+                  <td class="small"><div class="random"><button id="nbObjectiveRandom" type="button" onclick="randomize(event, 'nbObjective')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td><span id="nbObjectiveText">Number of possible objectives:</span></td>
+                  <td>{{displayNumber("nbObjective", "1", "18", "4", "1")}}</td>
+                  <td id="nbObjectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+                <tr id="hiddenObjectivesVisibility">
+                  <td class="small"></td>
+                  <td>
+                    <div class="flex-row gap-2">
+                      {{displayCheckbox("hiddenObjectives")}}
+                      <div class="flex-grow">
+                        <span id="hiddenObjectivesText">Hidden Objectives</span>
+                      </div>
+                      <div id="hiddenObjectivesStep">
+                        <button type="button" onclick="startTheTour(event)">?</button>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="flex-row gap-2">
+                      {{displayCheckbox("distributeObjectives")}}
+                      <div class="flex-grow">
+                        <span id="distributeObjectivesText">
+                          Distribute random objectives evenly across categories
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <div id="distributeObjectivesStep">
+                        <button type="button" onclick="startTheTour(event)">?</button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="small"><div class="random"><button id="objectiveRandom" type="button" onclick="randomizeObjective(event)" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>
+                  <td colspan="2">
+                    <div class="false-half-td">
+                      <div id="objectiveText">
+                        Objectives to access Tourian:
+                      </div>
+                      <div style="min-width: 50%;">
+                        <div id="objectivePortal" class="vue-app" />
+                      </div>
+                    </div>
+                  </td>
+                  <td id="objectiveStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+              </table>
+            </div>
             <div id="itemsQuantityVisibility">
               <h4>Ammunition and Energy</h4>
               <h5>Quantity of Ammunition and Energy available</h5>
@@ -3188,15 +2840,32 @@ def displayNumber(id, min, max, default, step="1"):
                 <td class="half">
                   <div class="areaRandoDiv">
                     <span id="areaRandomizationText">Area Randomization:</span>
+                  </div>
+                </td>
+                <td class="half">
                     <div>
                       {{displayMultiSelect("areaRandomization", currentMultiValues["areaRandomization"], "off", defaultMultiValues["areaRandomization"])}}
                     </div>
                   </div>
                 </td>
-                <td><button type="button" onclick="startTheTour('areaRandomizationStep')">?</button></td>
-                <td class="half" id="areaLayoutStep">{{displayCheckbox("areaLayout", False)}}<span id="areaLayoutText">Additional layout patches for easier navigation</span></td>
-                <td></td>
-                <td><button type="button" onclick="startTheTour(event)">?</button></td>
+                <td class="small">
+                  <button type="button" onclick="startTheTour('areaRandomizationStep')">?</button>
+                </td>
+              </tr>
+              <tr id="areaLayoutStep">
+                <td class="small"></td>
+                <td colspan="2" class="full">
+                  <div class="flex-row">
+                    <div class="flex-row__text">
+                      <span id="areaLayout"></span>
+                      <span id="areaLayoutText">Area Randomization Patches</span>
+                    </div>
+                    <div class="vue-app"></div>
+                  </div>
+                </td>
+                <td class="small">
+                  <button type="button" onclick="startTheTour('areaLayoutStep')">?</button>
+                </td>
               </tr>
             </table>
 
@@ -3275,11 +2944,29 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr><td colspan="2"><h5 class="center"><b>Randomizer adaptations (logic impact)</b></h5></td><td></td></tr>
               </table>
               <table class="full" id="mainPatchesVisibility">
-                <tr>
-                  <td id="layoutPatchesStep" class="half">{{displayCheckbox("layoutPatches", True)}} Anti-softlock layout patches</td>
-                  <td><button type="button" onclick="startTheTour(event)">?</button></td>
-                  <td id="variaTweaksStep" class="half">{{displayCheckbox("variaTweaks", True)}} VARIA tweaks</td>
-                  <td><button type="button" onclick="startTheTour(event)">?</button></td>
+                <tr id="layoutPatchesStep">
+                  <td colspan="2" class="full">
+                    <div class="flex-row">
+                      <div class="flex-row__text">
+                        <span id="layoutPatches"></span><!-- TODO remove these dummy elements? -->
+                        Anti-softlock layout patches
+                      </div>
+                      <div class="vue-app"></div>
+                    </div>
+                  </td>
+                  <td><button type="button" onclick="startTheTour('layoutPatchesStep')">?</button></td>
+                </tr>
+                <tr id="variaTweaksStep">
+                  <td colspan="2" class="full">
+                    <div class="flex-row">
+                      <div class="flex-row__text">
+                        <span id="variaTweaks"></span><!-- TODO remove these dummy elements? -->
+                        VARIA tweaks
+                      </div>
+                      <div class="vue-app"></div>
+                    </div>
+                  </td>
+                  <td><button type="button" onclick="startTheTour('variaTweaksStep')">?</button></td>
                 </tr>
               </table>
               <table class="full" id="nerfedChargeVisibility">
@@ -3366,6 +3053,14 @@ def displayNumber(id, min, max, default, step="1"):
                      Reveal the whole map on start
                   </td>
                   <td><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+                <tr>
+                  <td id="better_reservesStep" class="half">
+                    {{displayCheckbox("better_reserves")}}
+                     Better Reserves <img src="/solver/static/images/tracker/inventory/Reserve.png" class="width: 32px"/>
+                  </td>
+                  <td><button type="button" onclick="startTheTour(event)">?</button></td>
+                  <td class="half"></td><td></td>
                 </tr>
               </table>
               <table class="full">

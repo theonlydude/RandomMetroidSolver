@@ -15,10 +15,8 @@ incsrc "constants.asm"
 
 !BG1_tilemap = $7E3800
 !decimal_point = $0C4A
-%BGtile($150, 2, 0, 0, 0)
-!percent #= !_tile
-%BGtile($160, 2, 0, 0, 0)
-!digit_0 #= !_tile
+!percent #= BGtile($150, 2, 0, 0, 0)
+!digit_0 #= BGtile($160, 2, 0, 0, 0)
 
 !semicolon = $08A3
 
@@ -84,7 +82,7 @@ display_RTA_time:
         lda !timer1 : sta !stats_timer
         lda !timer2 : sta !stats_timer+2
         jsl base_update_igt
-        %ldx_tileOffset(21, 7)
+        ldx.w #tileOffset(21, 7)
         ;; don't display leading 0s for hours
         lda !igt_hours : cmp.w #10 : bmi .sub10
         jsr draw_two_digits
@@ -108,13 +106,11 @@ display_RTA_time:
 display_percent:
         phx
         LDX #$0000
-        %tileOffset(7, 7)
-        LDA #!decimal_point : STA !BG1_tilemap+!_tile_offset
-        %tileOffset(9, 7)
-        LDA #!percent : STA !BG1_tilemap+!_tile_offset
+        LDA #!decimal_point : STA !BG1_tilemap+tileOffset(7, 7)
+        LDA #!percent : STA !BG1_tilemap+tileOffset(9, 7)
         ;; don't draw leading 0s for hundreds and tenths
 .hundred:
-        %ldx_tileOffset(4, 7)
+        ldx.w #tileOffset(4, 7)
         LDA $12 : beq .tenth
         JSR draw_digit_menu
 .tenth:
@@ -128,7 +124,7 @@ display_percent:
 .units:
         inx : inx
         LDA $16 : JSR draw_digit_menu
-        %ldx_tileOffset(8, 7)
+        ldx.w #tileOffset(8, 7)
         LDA $18 : JSR draw_digit_menu
         plx
         rts
@@ -162,9 +158,9 @@ warnpc $82ffff
 ;;; ['items' box] in inventory menu
 org $B6E980+4
         dw $3941,$3942,$3943
-        %dw_BGtile($151, 3, 0, 0, 0)
-        %dw_BGtile($152, 3, 0, 0, 0)
-        %dw_BGtile($153, 3, 0, 0, 0)
+        dw BGtile($151, 3, 0, 0, 0)
+        dw BGtile($152, 3, 0, 0, 0)
+        dw BGtile($153, 3, 0, 0, 0)
         dw $7943,$3942,$3942,$7941
 org $B6E9C0+4
         dw $3940,$2801,$2801,$2801,$2801,$2801,$2801,$2801,$2801,$7940
@@ -181,24 +177,24 @@ org $B6EA00+40
 
 ;;; redraw reserve arrow since tile indices are changed in map patch
 org $B6E902
-        %dw_BGtile($14a, 7, 1, 0, 0)
+        dw BGtile($14a, 7, 1, 0, 0)
 org $B6E942
-        %dw_BGtile($15a, 7, 1, 0, 0)
+        dw BGtile($15a, 7, 1, 0, 0)
 org $B6E982
-        %dw_BGtile($15a, 7, 0, 0, 0)
+        dw BGtile($15a, 7, 0, 0, 0)
 org $B6E9C2
-        %dw_BGtile($15a, 7, 0, 0, 0)
+        dw BGtile($15a, 7, 0, 0, 0)
 org $B6EA02
-        %dw_BGtile($15a, 7, 0, 0, 0)
+        dw BGtile($15a, 7, 0, 0, 0)
 org $B6EA42
-        %dw_BGtile($15a, 7, 0, 0, 0)
+        dw BGtile($15a, 7, 0, 0, 0)
 org $B6EA82
-        %dw_BGtile($15a, 7, 0, 0, 0)
+        dw BGtile($15a, 7, 0, 0, 0)
 org $B6EAC2
-        %dw_BGtile($15a, 7, 0, 0, 0)
+        dw BGtile($15a, 7, 0, 0, 0)
 org $B6EB02
-        %dw_BGtile($16a, 7, 0, 0, 0)
-        %dw_BGtile($16b, 7, 1, 0, 0)
+        dw BGtile($16a, 7, 0, 0, 0)
+        dw BGtile($16b, 7, 1, 0, 0)
 
 ;;; move equipment boxes on the right down one tile
 org $B6EA68
@@ -234,17 +230,17 @@ org $B6EDE8
 
 ;;; fix reserve digit tile IDs
 org $828fb7
-        %dw_BGtile($160, 2, 0, 0, 0)
+        dw BGtile($160, 2, 0, 0, 0)
 org $828fc2
-        %dw_BGtile($160, 2, 0, 0, 0)
+        dw BGtile($160, 2, 0, 0, 0)
 org $828fcc
-        %dw_BGtile($160, 2, 0, 0, 0)
+        dw BGtile($160, 2, 0, 0, 0)
 org $82b3bc
-        %dw_BGtile($160, 2, 0, 0, 0)
+        dw BGtile($160, 2, 0, 0, 0)
 org $82b3c7
-        %dw_BGtile($160, 2, 0, 0, 0)
+        dw BGtile($160, 2, 0, 0, 0)
 org $82b3d1
-        %dw_BGtile($160, 2, 0, 0, 0)
+        dw BGtile($160, 2, 0, 0, 0)
 
 ;;; fix RAM tilemap offsets for equipment we moved
 org $82C076

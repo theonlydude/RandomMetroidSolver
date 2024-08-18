@@ -99,6 +99,7 @@ class PresetLoader(object):
         if 'Controller' not in self.params:
             self.params['Controller'] = {}
         self.params['score'] = self.computeScore()
+        Settings.skillScore = self.params['score']
 
     def load(self):
         # update the parameters in the parameters classes: Knows, Settings
@@ -261,6 +262,9 @@ class PresetLoaderDict(PresetLoader):
 def getDefaultMultiValues():
     from graph.graph_utils import GraphUtils
     from utils.objectives import Objectives
+    from logic.logic import Logic
+    # assume vanilla logic for default multi values
+    Logic.factory('vanilla')
     defaultMultiValues = {
         'startLocation': GraphUtils.getStartAccessPointNames(),
         'majorsSplit': ['Full', 'FullWithHUD', 'Major', 'Chozo', 'Scavenger'],
@@ -287,6 +291,11 @@ def convertParam(randoParams, param, inverse=False):
         return "random"
     raise Exception("invalid value for parameter {}".format(param))
 
+def to_comma_string(value):
+    if isinstance(value, list):
+        return ','.join(value)
+    return value
+
 def loadRandoPreset(randoPreset, args):
     # load the rando preset json file and add the parameters inside it to the args parser
     with open(randoPreset) as randoPresetFile:
@@ -307,6 +316,11 @@ def loadRandoPreset(randoPreset, args):
         args.animals = True
     if randoParams.get("variaTweaks", "on") == "off":
         args.noVariaTweaks = True
+    variaTweaksCustom = randoParams.get("variaTweaksCustom")
+    if variaTweaksCustom is None or len(variaTweaksCustom) == 0:
+        args.variaTweaksCustom = None
+    else:
+        args.variaTweaksCustom = to_comma_string(variaTweaksCustom)
     if randoParams.get("maxDifficulty", "infinity") != "infinity":
         args.maxDifficulty = randoParams["maxDifficulty"]
     if randoParams.get("suitsRestriction", "off") != "off":
@@ -327,6 +341,11 @@ def loadRandoPreset(randoPreset, args):
 
     if randoParams.get("layoutPatches", "on") == "off":
         args.noLayout = True
+    layoutCustom = randoParams.get("layoutCustom")
+    if layoutCustom is None or len(layoutCustom) == 0:
+        args.layoutCustom = None
+    else:
+        args.layoutCustom = to_comma_string(layoutCustom)
     if "gravityBehaviour" in randoParams:
         args.gravityBehaviour = randoParams["gravityBehaviour"]
     if randoParams.get("nerfedCharge", "off") == "on":
@@ -340,6 +359,11 @@ def loadRandoPreset(randoPreset, args):
         args.areaRandomization == "full"
     if args.areaRandomization != "off":
         args.areaLayoutBase = convertParam(randoParams, "areaLayout", inverse=True)
+    areaLayoutCustom = randoParams.get("areaLayoutCustom")
+    if areaLayoutCustom is None or len(areaLayoutCustom) == 0:
+        args.areaLayoutCustom = None
+    else:
+        args.areaLayoutCustom = to_comma_string(areaLayoutCustom)
     args.escapeRando = convertParam(randoParams, "escapeRando")
     if args.escapeRando == True:
         args.noRemoveEscapeEnemies = convertParam(randoParams, "removeEscapeEnemies", inverse=True)
@@ -364,7 +388,7 @@ def loadRandoPreset(randoPreset, args):
         else:
             args.superFun.append("SuitsRandom")
 
-    ipsPatches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "refill_before_save", "relaxed_round_robin_cf"]
+    ipsPatches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "refill_before_save", "relaxed_round_robin_cf", "better_reserves"]
     for patch in ipsPatches:
         if randoParams.get(patch, "off") == "on":
             args.patches.append(patch + '.ips')
@@ -431,6 +455,7 @@ def loadRandoPreset(randoPreset, args):
         else:
             args.nbObjectivesRequired = randoParams["nbObjectivesRequired"]
     args.hiddenObjectives = convertParam(randoParams, "hiddenObjectives")
+    args.distributeObjectives = convertParam(randoParams, "distributeObjectives")
 
     if "tourian" in randoParams:
         args.tourian = randoParams["tourian"]
@@ -486,11 +511,13 @@ def getRandomizerDefaultParameters():
     defaultParams['objectiveMultiSelect'] = defaultMultiValues['objective']
     defaultParams['nbObjectivesRequired'] = "off"
     defaultParams['hiddenObjectives'] = "off"
+    defaultParams['distributeObjectives'] = "off"
     defaultParams['tourian'] = "Vanilla"
     defaultParams['tourianMultiSelect'] = defaultMultiValues['tourian']
     defaultParams['areaRandomization'] = "off"
     defaultParams['areaRandomizationMultiSelect'] = defaultMultiValues['areaRandomization']
     defaultParams['areaLayout'] = "off"
+    defaultParams['areaLayoutCustom'] = []
     defaultParams['doorsColorsRando'] = "off"
     defaultParams['allowGreyDoors'] = "off"
     defaultParams['escapeRando'] = "off"
@@ -502,7 +529,9 @@ def getRandomizerDefaultParameters():
     defaultParams['funMovement'] = "off"
     defaultParams['funSuits'] = "off"
     defaultParams['layoutPatches'] = "on"
+    defaultParams['layoutCustom'] = []
     defaultParams['variaTweaks'] = "on"
+    defaultParams['variaTweaksCustom'] = []
     defaultParams['gravityBehaviour'] = "Balanced"
     defaultParams['gravityBehaviourMultiSelect'] = defaultMultiValues['gravityBehaviour']
     defaultParams['nerfedCharge'] = "off"
@@ -560,3 +589,7 @@ def dumpErrorMsg(outFileName, msg):
     if outFileName is not None:
         with open(outFileName, 'w') as jsonFile:
             json.dump({"errorMsg": msg}, jsonFile)
+
+def transition2isolver(transition):
+    transition = str(transition)
+    return transition[0].lower() + removeChars(transition[1:], " ,()-")

@@ -600,6 +600,17 @@ org map_data_Maridia+$43c  ; (30, 16)
 org map_data_Maridia+$43e  ; (31, 16)
      dw $541d  ; BGtile[i=$1d p=$5 HX]
 
+;;; tiles for room "[Pants Room West half]"
+
+org map_data_Maridia+$476  ; (27, 17)
+     dw $5405  ; BGtile[i=$05 p=$5 HX]
+
+org map_data_Maridia+$436  ; (27, 16)
+     dw $5419  ; BGtile[i=$19 p=$5 HX]
+
+org map_data_Maridia+$3f6  ; (27, 15)
+     dw $141a  ; BGtile[i=$1a p=$5 X]
+
 ;;; tiles for graph area RedBrinstar
 
 ;;; tiles for room "[Glass Tunnel Save Room]"

@@ -28,6 +28,7 @@ incsrc "event_list.asm"
 
 incsrc "sym/objectives.asm"
 incsrc "sym/seed_display.asm"
+incsrc "sym/map.asm"
 
 !hudposition = $0006
 !digit_0 = $0C10               ; new font in modified HUD gfx included in map patch
@@ -35,7 +36,7 @@ incsrc "sym/seed_display.asm"
 ;;; area/item counter or next scav display
 !previous = $7fff3c		; hi: area/00, lo: remaining items/next scav loc
 ;;; RAM for current index in scav list order in scavenger
-!scav_idx = $7ed86a		; saved to SRAM automatically
+!scav_idx = $7ed8f4		; saved to SRAM automatically
 !scav_tmp  = $7fff40		; temp RAM used for a lot of stuff in scavenger
 !hud_special = $7fff42		; temp RAM used to draw temporary stuff in the HUD (prompt, notification)
 !hud_special_timer = $7fff44	; and associated timer
@@ -61,15 +62,19 @@ incsrc "sym/seed_display.asm"
 ;;; hijack the start of health handling in the HUD to draw area or
 ;;; remaining items if necessary
 org $809B8B
+hijack:
+.health_draw:
 	JSR draw_info
 
 ;;; hijack load room state, to init remaining items counter
-org $82def7
-	jml load_state
+org $82df02
+.load_room_state:
+	jsl load_state : nop : nop
 
 ;;; yet another item pickup hijack, different from the ones in endingtotals and bomb_torizo
 ;;; this one is used to count remaining items in current area, and handle scavenger hunt
 org $848899
+.item_pickup:
 	jml item_pickup
 org $84889D
 item_resume_pickup:
@@ -178,7 +183,7 @@ org $809B99
 	BRA ++
 	+
 	CMP $14 : BCC +
-	LDA #$2831
+	LDA.w map_etank_tile
 	BRA ++
 	+
 	LDA #$3430
@@ -345,14 +350,13 @@ draw_info:
 	;; Draw current area name and remaining items in it
 .draw_area:
 	;; determine current graph area
-	ldx $07bb
-	sep #$20
-	lda $8f0010,x
+        %a8()
+	lda !VARIA_area_id
 	;; check if we must draw it
 	cmp !previous
 	beq .items
 	sta !previous
-	rep #$20
+        %a16()
 	;; get text address
 	and #$00ff
 	asl : asl : asl : asl
@@ -378,12 +382,10 @@ draw_info:
 	lda !n_items : jsr draw_number
 	bra .end
 .draw_chozo:
-%BGtile($78, 2, 0, 0, 0)
-	lda.w #!_tile : sta !split_locs_hud ; pink 'Z'
+	lda.w #BGtile($78, 3, 0, 0, 0) : sta !split_locs_hud ; gray 'Z'
 	bra .draw_items
 .draw_major:
-%BGtile($66, 2, 0, 0, 0)
-	lda.w #!_tile : sta !split_locs_hud ; pink 'M'
+	lda.w #BGtile($66, 3, 0, 0, 0) : sta !split_locs_hud ; gray 'M'
 .draw_items:
 	lda !n_items : jsr draw_one
 
@@ -532,9 +534,9 @@ load_state:
 	sta !scav_tmp
 	jsr compute_n_items
 	;; hijacked code
-	LDX $07BB
-	LDA $0003,x
-	jml $82DEFD		; resume routine
+        LDX $E7A7,y
+        LDA $0001,x
+        rtl
 
 ;;; return
 ;;; - carry set if in scav mode, clear if not
@@ -679,14 +681,14 @@ compute_n_items:
 	phy
 	;; go through loc id list for current area, counting collected items
 	;; determine current graph area
-	ldx $07bb : lda $8f0010,x : and #$00ff
+	lda !VARIA_room_data : and #$00ff
         jsl objectives_count_items_in_area
 	;; here, $16 contain collected items, and Y number of items
         lda $16 : bne .collected_event
         tya : bra .store        ; no items collected; skip substraction
 .collected_event:
 	;; at least an item collected, trigger appropriate event : current graph area idx+area_clear_start_event_base
-	ldx $07bb : lda $8f0010,x : and #$00ff
+	lda !VARIA_room_data : and #$00ff
 	clc : adc.w #!area_clear_start_event_base
 	jsl !mark_event
 .rem:
@@ -699,7 +701,7 @@ compute_n_items:
         sta !n_items
 	bne .ret
 	;; 0 items left, trigger appropriate event : current graph area idx+area_clear_event_base
-	ldx $07bb : lda $8f0010,x : and #$00ff
+	lda !VARIA_room_data : and #$00ff
 	clc : adc.w #!area_clear_event_base
 	jsl !mark_event
 .ret:

@@ -7,11 +7,11 @@ ORG !Freespace_MapDecoration
 
 ;Pointer to deco tilegroups for each area
 MapDecoration_AreaPointer:
-;; 	DW MapDecoration_NoDecoration, MapDecoration_NoDecoration, MapDecoration_NoDecoration, MapDecoration_NoDecoration
-;; 	DW MapDecoration_NoDecoration, MapDecoration_NoDecoration, MapDecoration_NoDecoration, MapDecoration_NoDecoration
+	DW MapDecoration_NoDecoration, MapDecoration_NoDecoration, MapDecoration_NoDecoration, MapDecoration_NoDecoration
+	DW MapDecoration_NoDecoration, MapDecoration_NoDecoration, MapDecoration_NoDecoration, MapDecoration_NoDecoration
 
 ;; ;Tilegroup: draw no deco tiles
-;; MapDecoration_NoDecoration:
+MapDecoration_NoDecoration:
         DW $0000
 
 

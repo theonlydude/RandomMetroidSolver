@@ -12,11 +12,14 @@ from rom.romreader import RomReader
 
 doorPlms = plmRed + plmGreen + plmYellow + plmGrey
 
+logger = utils.log.get('LevelData')
+
 class Ship(object):
     # plm sleep instruction
     sleepInstr = 0x812F
 
     def __init__(self, name, rom, enemy, center):
+        self.log = logger
         self.name = name
         self.rom = rom
         self.enemy = enemy
@@ -60,7 +63,7 @@ class Ship(object):
                 continue
             # we found it
             instrListAddrs.append(code[i+1] + (code[i+2] << 8))
-            print("instr list addr found: {} ({} {})".format(hex(instrListAddrs[-1]), hex(code[i+1]), hex(code[i+2])))
+            self.log.debug("instr list addr found: {} ({} {})".format(hex(instrListAddrs[-1]), hex(code[i+1]), hex(code[i+2])))
 
         if not instrListAddrs:
             raise Exception("at {} ship has custom ASM for its init".format(hex(self.enemy.initAi)))
@@ -78,19 +81,19 @@ class Ship(object):
             # first word is frame delay
             frameDelay = self.rom.readWord()
             if frameDelay >= 0x8000:
-                print("at {} not a frame delay: {}".format(hex(addr), hex(frameDelay)))
+                self.log.debug("at {} not a frame delay: {}".format(hex(addr), hex(frameDelay)))
                 continue
 
             # second word is spritemap pointer
             spritemapAddr = self.rom.readWord()
             if spritemapAddr < 0x8000:
-                print("at {} not a spritemap pointer: {}".format(hex(addr+2), hex(spritemapAddr)))
+                self.log.debug("at {} not a spritemap pointer: {}".format(hex(addr+2), hex(spritemapAddr)))
                 continue
 
             # third word is sleep
             sleep = self.rom.readWord()
             if sleep != Ship.sleepInstr:
-                print("at {} not a sleep instruction: {}".format(hex(addr+4), hex(sleep)))
+                self.log.debug("at {} not a sleep instruction: {}".format(hex(addr+4), hex(sleep)))
                 continue
 
             # found
@@ -105,8 +108,9 @@ class Ship(object):
 
 class Spritemap(object):
     def __init__(self, rom, dataAddr, center=None):
+        self.log = logger
         self.rom = rom
-        print("load spritemap at {}".format(hex(dataAddr)))
+        self.log.debug("load spritemap at {}".format(hex(dataAddr)))
         self.dataAddr = dataAddr
         self.center = center
         self.load()
@@ -116,7 +120,7 @@ class Spritemap(object):
         self.oamCount = self.rom.readWord()
         if self.oamCount > 0x100:
             raise Exception("at {} spritemap oam count is too high: {}".format(hex(self.dataAddr), hex(self.oamCount)))
-        print("load spritemap at {} with {} OAMs".format(hex(self.dataAddr), self.oamCount))
+        self.log.debug("load spritemap at {} with {} OAMs".format(hex(self.dataAddr), self.oamCount))
         self.oams = []
         for i in range(self.oamCount):
             curAddr = 2+ self.dataAddr + i * OAM.size
@@ -127,7 +131,7 @@ class Spritemap(object):
         self.boundingRect = self.getBoundingRect()
 
     def write(self):
-        print("write spritemap ${:06x}".format(self.dataAddr))
+        self.log.debug("write spritemap ${:06x}".format(self.dataAddr))
         self.rom.seek(snes_to_pc(self.dataAddr))
         self.rom.writeWord(self.oamCount)
         for oam in self.oams:
@@ -155,8 +159,9 @@ class Spritemap(object):
 
 class Tilemap(object):
     def __init__(self, rom, dataAddr, size, rowSize):
+        self.log = logger
         self.rom = rom
-        print("load tilemap at {}".format(hex(dataAddr)))
+        self.log.debug("load tilemap at {}".format(hex(dataAddr)))
         self.dataAddr = dataAddr
 
         # (width, height) in bytes of the complete tilemap of the boss.
@@ -187,7 +192,7 @@ class Tilemap(object):
             baseAddr = pc_to_snes(self.rom.tell())
             if self.tileCount[cur] > 0x100:
                 raise Exception("at {} tilemap tile count is too high: {}".format(hex(self.dataAddr), hex(self.tileCount)))
-            print("load tilemap at {} with {} tiles".format(hex(baseAddr), self.tileCount[cur]))
+            self.log.debug("load tilemap at {} with {} tiles".format(hex(baseAddr), self.tileCount[cur]))
             self.tiles.append([])
             for i in range(self.tileCount[cur]):
                 tile = self.rom.readWord()
@@ -195,7 +200,7 @@ class Tilemap(object):
             cur += 1
 
     def write(self):
-        print("write tilemap ${:06x}".format(self.dataAddr))
+        self.log.debug("write tilemap ${:06x}".format(self.dataAddr))
         self.rom.seek(snes_to_pc(self.dataAddr))
         self.rom.writeWord(0xFFFE)
         for i in range(len(self.destAddr)):
@@ -240,6 +245,7 @@ class Tilemap(object):
 
 class BoundingRect(object):
     def __init__(self, initial=None):
+        self.log = logger
         if initial is None:
             # top left corner, y=0 is top, x=0 is left
             self.x1 = sys.maxsize
@@ -272,9 +278,9 @@ class BoundingRect(object):
         return x > self.x1 and x < self.x2 and y > self.y1 and y < self.y2
 
     def debug(self):
-        print("bounding rect:")
-        print("{:3} {:3}           ".format(self.x1, self.y1))
-        print("           {:3} {:3}".format(self.x2, self.y2))
+        self.log.debug("bounding rect:")
+        self.log.debug("{:3} {:3}           ".format(self.x1, self.y1))
+        self.log.debug("           {:3} {:3}".format(self.x2, self.y2))
 
     def width(self):
         return (self.x2 - self.x1)//16
@@ -344,6 +350,7 @@ class OAM(object):
     size = 5
 
     def __init__(self, rom, dataAddr, center=None):
+        self.log = logger
         self.rom = rom
         self.dataAddr = dataAddr
         # (x, y) position in the displayed screen
@@ -417,10 +424,11 @@ class OAM(object):
         return "dw ${:04x} : db ${:02x} : dw ${:04x}".format(w1, b, w2)
 
     def debug(self):
-        print("OAM at {} size: {} x: {:3} y: {:3} Xflip: {} Yflip: {} priority: {} palette: {} tile: {:3} raw: {}".format(self.dataAddr, self.size, self.realX, self.realY, self.xFlip, self.yFlip, self.priority, self.palette, self.tile, self.raw))
+        self.log.debug("OAM at {} size: {} x: {:3} y: {:3} Xflip: {} Yflip: {} priority: {} palette: {} tile: {:3} raw: {}".format(self.dataAddr, self.size, self.realX, self.realY, self.xFlip, self.yFlip, self.priority, self.palette, self.tile, self.raw))
 
 class EnemyHeader(object):
     def __init__(self, rom, dataAddr):
+        self.log = logger
         self.rom = rom
         self.dataAddr = dataAddr
         self.load()
@@ -462,42 +470,43 @@ class EnemyHeader(object):
         self.enemyName = self.rom.readWord()
 
     def debug(self):
-        print("")
-        print("enemy: {}".format(hex(self.enemyId)))
+        self.log.debug("")
+        self.log.debug("enemy: {}".format(hex(self.enemyId)))
         for key, value in self.__dict__.items():
             if key == 'rom':
                 continue
-            print("{}: {}".format(key, hex(value)))
+            self.log.debug("{}: {}".format(key, hex(value)))
 
 class Transform(Enum):
     Mirror = 0
 
 class Room(object):
     def __init__(self, rom, dataAddr):
+        self.log = logger
         self.rom = rom
         self.dataAddr = dataAddr
         self.load()
 
     def load(self):
-        print("* load room header")
+        self.log.debug("* load room header")
         self.loadHeader()
-        print("* load state headers")
+        self.log.debug("* load state headers")
         self.loadStateHeaders()
-        print("* load states")
+        self.log.debug("* load states")
         self.loadStates()
-        print("* load enemies")
+        self.log.debug("* load enemies")
         self.loadEnemies()
-        print("* load PLMs")
+        self.log.debug("* load PLMs")
         self.loadPLMs()
-        print("* load VARIA area")
+        self.log.debug("* load VARIA area")
         self.loadVariaArea()
-        print("* load layouts")
+        self.log.debug("* load layouts")
         self.loadLayout()
-        print("* load scrolls")
+        self.log.debug("* load scrolls")
         self.loadScrolls()
-        print("* load doors")
+        self.log.debug("* load doors")
         self.loadDoors()
-        print("")
+        self.log.debug("")
 
     def loadHeader(self):
         self.rom.seek(snes_to_pc(self.dataAddr))
@@ -512,24 +521,24 @@ class Room(object):
         self.specialGfxBitflag = self.rom.readByte()
         # LoROM address
         self.doorsPtr = 0x8F0000 + self.rom.readWord()
-        print("room: {}".format(hex(self.dataAddr)))
+        self.log.debug("room: {}".format(hex(self.dataAddr)))
 
     def loadStateHeaders(self):
         self.roomStateHeaders = []
         roomStateHeader = RoomStateHeader(self.rom, pc_to_snes(self.rom.tell()))
-        print("state header: {} type: {}".format(hex(roomStateHeader.dataAddr), hex(roomStateHeader.headerType)))
+        self.log.debug("state header: {} type: {}".format(hex(roomStateHeader.dataAddr), hex(roomStateHeader.headerType)))
         assert roomStateHeader.headerType != 0, "state type is 0"
         self.roomStateHeaders.append(roomStateHeader)
         while roomStateHeader.headerType != StateType.Standard:
             roomStateHeader = RoomStateHeader(self.rom, pc_to_snes(self.rom.tell()))
             assert roomStateHeader.headerType != 0, "state type is 0"
-            print("state header: {} type: {}".format(hex(roomStateHeader.dataAddr), hex(roomStateHeader.headerType)))
+            self.log.debug("state header: {} type: {}".format(hex(roomStateHeader.dataAddr), hex(roomStateHeader.headerType)))
             self.roomStateHeaders.append(roomStateHeader)
 
     def loadStates(self):
         self.roomStates = {}
         for roomStateHeader in self.roomStateHeaders:
-            print("state: {}".format(hex(roomStateHeader.roomStatePtr)))
+            self.log.debug("state: {}".format(hex(roomStateHeader.roomStatePtr)))
             roomState = RoomState(self.rom, roomStateHeader.roomStatePtr)
             self.roomStates[roomStateHeader.roomStatePtr] = roomState
             # choose one of the standard state as the state we're going to use
@@ -560,7 +569,7 @@ class Room(object):
                     self.enemyHeaders[enemy.enemyId] = EnemyHeader(self.rom, 0xA00000+enemyId)
 
         for setPtr, enemies in self.enemies.items():
-            print("enemies in set {}: {}".format(hex(setPtr), [hex(enemy.enemyId) for enemy in enemies]))
+            self.log.debug("enemies in set {}: {}".format(hex(setPtr), [hex(enemy.enemyId) for enemy in enemies]))
 
     def loadPLMs(self):
         # loop on room state then on plm set
@@ -572,7 +581,6 @@ class Room(object):
 
             self.plms[state.plmSetPtr] = []
 
-            plmSize = 6
             self.rom.seek(snes_to_pc(state.plmSetPtr))
             plmId = 0
             for i in range(40):
@@ -582,7 +590,7 @@ class Room(object):
                 self.plms[state.plmSetPtr].append(PLM.factory(self.rom, plmId))
 
         for setPtr, plms in self.plms.items():
-            print("plms in set {}: {}".format(hex(setPtr), [hex(plm.plmId) for plm in plms]))
+            self.log.debug("plms in set {}: {}".format(hex(setPtr), [hex(plm.plmId) for plm in plms]))
 
     def loadVariaArea(self):
         for roomStateHeader in self.roomStateHeaders:
@@ -595,8 +603,8 @@ class Room(object):
         for state in self.roomStates.values():
             if state.levelDataPtr in self.levelData:
                 continue
-            print("level data set: {}".format(hex(state.levelDataPtr)))
-            self.levelData[state.levelDataPtr] = LevelData(self.rom, state.levelDataPtr, (self.width, self.height))
+            self.log.debug("level data set: {}".format(hex(state.levelDataPtr)))
+            self.levelData[state.levelDataPtr] = LevelData(self.rom, state.levelDataPtr, (self.width, self.height), self.plms)
 
     def loadScrolls(self):
         self.scrolls = {}
@@ -606,7 +614,7 @@ class Room(object):
             self.scrolls[state.scrollSetPtr] = Scroll(self.rom, state.scrollSetPtr, (self.width, self.height))
 
         for setPtr, scroll in self.scrolls.items():
-            print("scrolls in set {}: {}".format(hex(setPtr), scroll.screens))
+            self.log.debug("scrolls in set {}: {}".format(hex(setPtr), scroll.screens))
 
     def loadDoors(self):
         # load all ROM doors to get these pointing to the room
@@ -623,24 +631,24 @@ class Room(object):
 
         self.doors = doors[self.dataAddr & 0xffff]
 
-        print("doors: {}".format([hex(door.doorId) for door in self.doors]))
+        self.log.debug("doors: {}".format([hex(door.doorId) for door in self.doors]))
 
     def write(self):
-        print("* write room header")
+        self.log.debug("* write room header")
         self.writeHeader()
-        print("* write state headers")
+        self.log.debug("* write state headers")
         self.writeStateHeaders()
-        print("* write states")
+        self.log.debug("* write states")
         self.writeStates()
-        print("* write enemies")
+        self.log.debug("* write enemies")
         self.writeEnemies()
-        print("* write PLMs")
+        self.log.debug("* write PLMs")
         self.writePLMs()
-        print("* write layouts")
+        self.log.debug("* write layouts")
         self.writeLayout()
-        print("* write scrolls")
+        self.log.debug("* write scrolls")
         self.writeScrolls()
-        print("* write doors")
+        self.log.debug("* write doors")
         self.writeDoors()
 
     def writeHeader(self):
@@ -666,7 +674,7 @@ class Room(object):
             state.write()
 
     def writeEnemies(self):
-        for enemySetPtr, enemies in self.enemies.items():
+        for enemies in self.enemies.values():
             for enemy in enemies:
                 enemy.write()
 
@@ -691,7 +699,7 @@ class Room(object):
 
     def transform(self, transformation):
         if transformation == Transform.Mirror:
-            print("* transform room: {}".format(transformation))
+            self.log.debug("* transform room: {}".format(transformation))
 
             # enemies
             for enemySetPtr, enemies in self.enemies.items():
@@ -719,7 +727,7 @@ class Room(object):
         else:
             raise Exception("{} not implemented".format(transformation))
 
-        print("")
+        self.log.debug("")
 
 class StateType:
     Standard = 0xE5E6
@@ -776,6 +784,7 @@ class RoomStateHeader(object):
 
 class RoomState(object):
     def __init__(self, rom, dataAddr):
+        self.log = logger
         self.rom = rom
         self.dataAddr = dataAddr
         self.load()
@@ -818,6 +827,7 @@ class RoomState(object):
 
 class EnemyInstance(object):
     def __init__(self, rom, enemyId, dataAddr):
+        self.log = logger
         self.rom = rom
         self.enemyId = enemyId
         self.dataAddr = dataAddr
@@ -850,7 +860,7 @@ class EnemyInstance(object):
         width = size[0] * 256
         height = size[1] * 256
         if transformation == Transform.Mirror:
-            print("enemy {}: old x: {} new x: {}".format(hex(self.enemyId), hex(self.Xpos), hex(width - self.Xpos)))
+            self.log.debug("enemy {}: old x: {} new x: {}".format(hex(self.enemyId), hex(self.Xpos), hex(width - self.Xpos)))
             self.Xpos = width - self.Xpos
 
 class PLM(object):
@@ -864,6 +874,7 @@ class PLM(object):
             return PLM(rom, plmId)
 
     def __init__(self, rom, plmId):
+        self.log = logger
         self.rom = rom
         self.plmId = plmId
         self.load()
@@ -1037,6 +1048,7 @@ class Orientation(IntEnum):
 
 class Door(object):
     def __init__(self, rom, doorId):
+        self.log = logger
         self.rom = rom
         self.doorId = doorId
         self.dataAddr = 0x830000 + self.doorId
@@ -1138,6 +1150,7 @@ class Door(object):
 
 class Scroll(object):
     def __init__(self, rom, dataAddr, size):
+        self.log = logger
         self.rom = rom
         self.dataAddr = dataAddr
         # (screens X, screens Y)
@@ -1168,12 +1181,13 @@ class Scroll(object):
             self.screens = transScreens
 
 class LevelData(object):
-    def __init__(self, rom, dataAddr, size):
-        self.log = utils.log.get('LevelData')
+    def __init__(self, rom, dataAddr, size, plms=None):
+        self.log = logger
         self.rom = rom
         self.dataAddr = dataAddr
         # [width, height] in screens
         self.size = size
+        self.plms = plms
         self.screenCount = 0
 
         self.layer1 = []
@@ -1193,15 +1207,15 @@ class LevelData(object):
         return [w & 0x00FF, (w & 0xFF00) >> 8]
 
     def debug(self):
-        print("compressedSize: {}".format(self.compressedSize))
-        print("decompressedSize: {}".format(self.decompressedSize))
-        print("screenCount: {}".format(self.screenCount))
-        print("layer1Size: {}".format(self.layer1Size))
-        print("btsSize: {}".format(self.btsSize))
-        print("layer2Size: {}".format(self.layer2Size))
-        print("len layer1: {}".format(len(self.layer1)))
-        print("len bts: {}".format(len(self.bts)))
-        print("len layer2: {}".format(len(self.layer2)))
+        self.log.debug("compressedSize: {}".format(self.compressedSize))
+        self.log.debug("decompressedSize: {}".format(self.decompressedSize))
+        self.log.debug("screenCount: {}".format(self.screenCount))
+        self.log.debug("layer1Size: {}".format(self.layer1Size))
+        self.log.debug("btsSize: {}".format(self.btsSize))
+        self.log.debug("layer2Size: {}".format(self.layer2Size))
+        self.log.debug("len layer1: {}".format(len(self.layer1)))
+        self.log.debug("len bts: {}".format(len(self.bts)))
+        self.log.debug("len layer2: {}".format(len(self.layer2)))
 
     def displayLayoutTile(self, t, displayBts=True):
         tile = t & 0x3FF
@@ -1218,10 +1232,10 @@ class LevelData(object):
         # a screen is 16x16 tiles
         base = x * 16 + y * self.size[0] * 256
         nextRow = self.size[0] * 16
-        print("layer1:")
+        self.log.debug("layer1:")
         for i in range(16):
             rowBase = base + i * nextRow
-            print(["{}/{:3}".format(self.displayLayoutTile(t), b) for (t, b) in zip(self.layer1[rowBase:rowBase+16], self.bts[rowBase:rowBase+16])])
+            self.log.debug(["{}/{:3}".format(self.displayLayoutTile(t), b) for (t, b) in zip(self.layer1[rowBase:rowBase+16], self.bts[rowBase:rowBase+16])])
 
     def displayBts(self, b):
         if b >= 0x80:
@@ -1241,20 +1255,20 @@ class LevelData(object):
         # display only boundingRect of screen (x,y), display only bts
         base = x * 16 + y * self.size[0] * 256
         nextRow = self.size[0] * 16
-        print("subscreen: (bts value|hFlip|vFlip|type)")
-        print("subscreen: (layout tile|hFlip|vFlip)")
+        self.log.debug("subscreen: (bts value|hFlip|vFlip|type)")
+        self.log.debug("subscreen: (layout tile|hFlip|vFlip)")
         for i in range(16):
             rowBase = base + i * nextRow
-            print(" ".join(["{}|{:1}".format(self.displayBts(b), hex((t >> 12) & 0xF)[2:]) if boundingRect.isInside(j, i) else "    .   " for j, (t, b) in enumerate(zip(self.layer1[rowBase:rowBase+16], self.bts[rowBase:rowBase+16]))]))
-            print(" ".join([self.displayLayoutTile(t, displayBts=False) if boundingRect.isInside(j, i) else "    .   " for j, t in enumerate(self.layer1[rowBase:rowBase+16])]))
+            self.log.debug(" ".join(["{}|{:1}".format(self.displayBts(b), hex((t >> 12) & 0xF)[2:]) if boundingRect.isInside(j, i) else "    .   " for j, (t, b) in enumerate(zip(self.layer1[rowBase:rowBase+16], self.bts[rowBase:rowBase+16]))]))
+            self.log.debug(" ".join([self.displayLayoutTile(t, displayBts=False) if boundingRect.isInside(j, i) else "    .   " for j, t in enumerate(self.layer1[rowBase:rowBase+16])]))
 
     def load(self):
         data = Compressor().decompress(self.rom, snes_to_pc(self.dataAddr))
         self.compressedSize = data[0]
-        print("compressed data size: {}".format(self.compressedSize))
+        self.log.debug("compressed data size: {}".format(self.compressedSize))
         self.rawData = data[1]
         self.decompressedSize = len(self.rawData)
-        print("uncompressed data size: {}".format(self.decompressedSize))
+        self.log.debug("uncompressed data size: {}".format(self.decompressedSize))
 
         self.layer1Size = self._concatBytes(self.rawData[0], self.rawData[1])
         self.btsSize = int(self.layer1Size / 2)
@@ -1264,12 +1278,12 @@ class LevelData(object):
             self.layer2Size = 0
         self.screenCount = int(self.btsSize / 256)
 
-        print("size layer1: {} bts: {} layer2: {}".format(self.layer1Size, self.btsSize, self.layer2Size))
+        self.log.debug("size layer1: {} bts: {} layer2: {}".format(self.layer1Size, self.btsSize, self.layer2Size))
 
         if self.layer1Size + self.btsSize + self.layer2Size + 2 != self.decompressedSize:
-            print("WARNING: wrong decompressed data size")
+            self.log.warning("wrong decompressed data size")
             if self.decompressedSize == self.layer1Size + self.btsSize + self.layer2Size + 2 - 1:
-                print("add missing byte in layer2 data")
+                self.log.debug("add missing byte in layer2 data")
                 self.rawData.append(0x3)
 
         # validate that raw data is ok
@@ -1292,27 +1306,27 @@ class LevelData(object):
             btsCounter += 1
             layer2Counter += 2
 
-        print("len layer1: {} bts: {} layer2: {}".format(len(self.layer1), len(self.bts), len(self.layer2)))
+        self.log.debug("len layer1: {} bts: {} layer2: {}".format(len(self.layer1), len(self.bts), len(self.layer2)))
 
     def unload(self):
         # rebuild raw data
         rawData = []
         rawData += self._unconcatWord(self.layer1Size)
         # transform back from word to byte
-        print("layer1 size: {}".format(self.layer1Size))
-        print("len(layer1): {}".format(len(self.layer1)))
+        self.log.debug("layer1 size: {}".format(self.layer1Size))
+        self.log.debug("len(layer1): {}".format(len(self.layer1)))
 
         for word in self.layer1:
             rawData += self._unconcatWord(word)
 
-        print("len rawData with layer1: {}".format(len(rawData)))
+        self.log.debug("len rawData with layer1: {}".format(len(rawData)))
 
         rawData += self.bts
 
         for word in self.layer2:
             rawData += self._unconcatWord(word)
 
-        print("len rawData: {}".format(len(rawData)))
+        self.log.debug("len rawData: {}".format(len(rawData)))
         return rawData
 
     def write(self, vanillaSize=None):
@@ -1321,12 +1335,12 @@ class LevelData(object):
 
         # rebuild raw data
         rawData = self.unload()
-        print("rawData len: {}".format(len(rawData)))
+        self.log.debug("rawData len: {}".format(len(rawData)))
 
         # recompress data
         compressedData = Compressor(profile='Slow').compress(rawData)
         recompressedDataSize = len(compressedData)
-        print("compressedData len: {} (old: {}, vanilla: {})".format(recompressedDataSize, self.compressedSize, vanillaSize))
+        self.log.debug("compressedData len: {} (old: {}, vanilla: {})".format(recompressedDataSize, self.compressedSize, vanillaSize))
         assert recompressedDataSize <= vanillaSize
         # write compress data
         self.rom.seek(snes_to_pc(self.dataAddr))
@@ -1345,7 +1359,7 @@ class LevelData(object):
         nextRow = self.size[0] * 16
 
         boundingRect.debug()
-        print("copy: start: {} width: {} height: {}".format(start, width, height))
+        self.log.debug("copy: start: {} width: {} height: {}".format(start, width, height))
 
         for i in range(height):
             rowBase = base + i * nextRow
@@ -1376,7 +1390,7 @@ class LevelData(object):
         nextRow = self.size[0] * 16
 
         boundingRect.debug()
-        print("paste: start: {} width: {} height: {}".format(start, width, height))
+        self.log.debug("paste: start: {} width: {} height: {}".format(start, width, height))
 
         for i in range(height):
             rowBase = base + i * nextRow
@@ -1397,7 +1411,7 @@ class LevelData(object):
         nextRow = self.size[0] * 16
 
         boundingRect.debug()
-        print("empty: start: {} width: {} height: {}".format(start, width, height))
+        self.log.debug("empty: start: {} width: {} height: {}".format(start, width, height))
 
         for i in range(height):
             rowBase = base + i * nextRow
@@ -1541,3 +1555,35 @@ class LevelData(object):
             self.bts = transBts
             if self.layer2Size != 0:
                 self.layer2 = transLayer2
+
+        self.updateScrollBts(transformation)
+
+    def updateScrollBts(self, transformation):
+        if self.plms is not None:
+            scrollPlmId = 0xb703
+            # look for scroll plms to update bts around them
+            for plmSet, plms in self.plms.items():
+                for plm in plms:
+                    if plm.plmId == scrollPlmId:
+                        if transformation == Transform.Mirror:
+                            screen = (plm.Xpos // 16, plm.Ypos // 16)
+                            x = plm.Xpos % 16
+                            y = plm.Ypos % 16
+
+                            # look for scroll bts on the right of the plm, only in same screen
+                            for i in range(1, 16 - x - 1):
+                                addr = self.getTileAddr(screen, x+i, y)
+                                # bts x pos has been mirrored, so it's from 01 to ff and we want it from ff to 01
+                                if self.bts[addr] == i:
+                                    self.log.debug("*** update bts of the right {}".format(i))
+                                    self.bts[addr] = 0x100 - i
+                                else:
+                                    break
+
+                            for i in range(1, x + 1):
+                                addr = self.getTileAddr(screen, x-i, y)
+                                if self.bts[addr] == 0x100 - i:
+                                    self.log.debug("*** update bts of the left -{}".format(i))
+                                    self.bts[addr] = i
+                                else:
+                                    break

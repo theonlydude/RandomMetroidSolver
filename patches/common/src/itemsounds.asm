@@ -23,6 +23,11 @@ lorom
 !Flip = $2F			;Sound when you spin underwater
 !Save = $2E			;Clip when you save the game
 !Hurt = $35			;Samus hurt sound
+!ChargedPowerBeam = $17
+!UnchargedWaveBeam = $0D
+!UnchargedSpazerBeam = $0F
+!UnchargedPlasmaBeam = $13
+!SpaceJump = $3E
 
 ;--------------------------------SPECIALFX VALUES--------------------------------
 
@@ -92,8 +97,8 @@ org $84E14F			;Bombs
 	DW SPECIALFX
 	DB !Bomb
 org $84E17D			;Charge Beam
-	DW SPECIALFX
-	DB !Laser
+	DW SOUNDFX
+	DB !ChargedPowerBeam
 org $84E1AB			;Ice Beam
 	DW MISCFX
 	DB !Freeze
@@ -104,11 +109,11 @@ org $84E207			;Speed Booster
 	DW MISCFX
 	DB !Spark
 org $84E235			;Wave Beam
-	DW SPECIALFX
-	DB !Laser
+	DW SOUNDFX
+	DB !UnchargedWaveBeam
 org $84E263			;Spazer Beam
-	DW SPECIALFX
-	DB !Laser
+	DW SOUNDFX
+	DB !UnchargedSpazerBeam
 org $84E291			;Spring Ball
 	DW MISCFX
 	DB !Land
@@ -122,14 +127,14 @@ org $84E32D			;X-ray
 	DW SOUNDFX
 	DB !Click
 org $84E35A			;Plasma Beam
-	DW SPECIALFX
-	DB !Laser
+	DW SOUNDFX
+	DB !UnchargedPlasmaBeam
 org $84E388			;Grapple Beam
 	DW SOUNDFX
 	DB !Click
 org $84E3B5			;Space Jump
 	DW SOUNDFX
-	DB !Helmet	
+	DB !SpaceJump
 org $84E3E3			;Screw Attack
 	DW SPECIALFX
 	DB !Screw	
@@ -155,8 +160,8 @@ org $84E53F			;Chozo Bombs
 	DW SPECIALFX
 	DB !Bomb
 org $84E57A			;Chozo Charge Beam
-	DW SPECIALFX
-	DB !Laser
+	DW SOUNDFX
+	DB !ChargedPowerBeam
 org $84E5B5			;Chozo Ice Beam
 	DW MISCFX
 	DB !Freeze
@@ -167,11 +172,11 @@ org $84E62B			;Chozo Speed Booster
 	DW MISCFX
 	DB !Spark
 org $84E66F			;Chozo Wave Beam
-	DW SPECIALFX
-	DB !Laser
+	DW SOUNDFX
+	DB !UnchargedWaveBeam
 org $84E6AA			;Chozo Spazer Beam
-	DW SPECIALFX
-	DB !Laser
+	DW SOUNDFX
+	DB !UnchargedSpazerBeam
 org $84E6E5			;Chozo Spring Ball
 	DW MISCFX
 	DB !Land
@@ -185,14 +190,14 @@ org $84E7A4			;Chozo X-ray
 	DW SOUNDFX
 	DB !Click	
 org $84E7DE			;Chozo Plasma Beam
-	DW SPECIALFX
-	DB !Laser
+	DW SOUNDFX
+	DB !UnchargedPlasmaBeam
 org $84E819			;Chozo Grapple Beam
 	DW SOUNDFX
 	DB !Click
 org $84E853			;Chozo Space Jump
 	DW SOUNDFX
-	DB !Helmet
+	DB !SpaceJump
 org $84E88E			;Chozo Screw Attack
 	DW SPECIALFX
 	DB !Screw
@@ -218,8 +223,8 @@ org $84EA22			;Scenery Bombs
 	DW SPECIALFX
 	DB !Bomb
 org $84EA63			;Scenery Charge Beam
-	DW SPECIALFX
-	DB !Laser
+	DW SOUNDFX
+	DB !ChargedPowerBeam
 org $84EAA4			;Scenery Ice Beam
 	DW MISCFX
 	DB !Freeze
@@ -230,11 +235,11 @@ org $84EB26			;Scenery Speed Booster
 	DW MISCFX
 	DB !Spark
 org $84EB67			;Scenery Wave Beam
-	DW SPECIALFX
-	DB !Laser
+	DW SOUNDFX
+	DB !UnchargedWaveBeam
 org $84EBA8			;Scenery Spazer Beam
-	DW SPECIALFX
-	DB !Laser
+	DW SOUNDFX
+	DB !UnchargedSpazerBeam
 org $84EBE9			;Scenery Spring Ball
 	DW MISCFX
 	DB !Land
@@ -248,14 +253,14 @@ org $84ECBA			;Scenery X-ray
 	DW SOUNDFX
 	DB !Click	
 org $84ECFA			;Scenery Plasma Beam
-	DW SPECIALFX
-	DB !Laser
+	DW SOUNDFX
+	DB !UnchargedPlasmaBeam
 org $84ED3B			;Scenery Grapple Beam
 	DW SOUNDFX
 	DB !Click
 org $84ED7B			;Scenery Space Jump
 	DW SOUNDFX
-	DB !Helmet
+	DB !SpaceJump
 org $84EDBC			;Scenery Screw Attack
 	DW SPECIALFX
 	DB !Screw

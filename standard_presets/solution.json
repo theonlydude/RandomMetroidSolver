@@ -383,6 +383,34 @@
       "WestSandHoleSuitlessWallJumps": [
           true,
           100
+      ],
+      "TubeClip": [
+          true,
+          10
+      ],
+      "TubeGravityJump": [
+          true,
+          25
+      ],
+      "BomblessWateringHoleAccess": [
+          true,
+          25
+      ],
+      "WestSandHoleMorphOnlyItemAccess": [
+          true,
+          25
+      ],
+      "IceEscapeWithoutIce": [
+          true,
+          100
+      ],
+      "RJumpSuitlessSpringAccess": [
+          true,
+          100
+      ],
+      "SpaceJumpSuitlessSpringEscape": [
+          true,
+          100
       ]
   },
   "Settings": {

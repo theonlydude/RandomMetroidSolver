@@ -254,7 +254,7 @@ class Knows:
                             'title': 'Skip the Zebetites with a shinespark',
                             'href': 'https://www.youtube.com/watch?v=jEAgdWQ9kLQ',
                             'rooms': ['Mother Brain Room']}
-    # maridia WJs
+    # maridia jumps
     HiJumpMamaTurtle = SMBool(False, 0, ['HiJumpMamaTurtle'])
     desc['HiJumpMamaTurtle'] = {'display': 'Mama Turtle E-Tank with High-Jump+Speed',
                                 'title': 'Access Mama Turtle E-Tank with High-Jump and Speed Booster (and Morph or X-Ray to turn around without moving)',
@@ -273,11 +273,23 @@ class Knows:
                                 'href': 'https://youtu.be/F3xAJem6VlA',
                                 'rooms': ['West Sand Hole', 'Spring Ball Room', 'Crab Hole']}
 
+    WestSandHoleMorphOnlyItemAccess = SMBool(False, 0, ['WestSandHoleMorphOnlyItemAccess'])
+    desc['WestSandHoleMorphOnlyItemAccess'] = {'display': 'West Sand Hole Items with Morph',
+                                               'title': 'Once at the top of West Sand Hole, collect items without Spring Ball or Bombs/Power Bombs by performing some wiggling (turn-around cancel with angle) and tricky Alcatraz-like wall jumps. <b>Note:</b> in Mirrortroid flavor, the wiggling to access the Reserve location is not possible, thus will not be required.',
+                                               'href': 'https://youtu.be/wQ5EpUyVwfc',
+                                               'rooms': ['West Sand Hole']}
+
     MtEverestGravJump = SMBool(False, 0, ['MtEverestGravJump'])
     desc['MtEverestGravJump'] = {'display': 'Mount Everest Gravity Jump',
                                 'title': 'Access Mount Everest top door by doing a crouch+gravity jump in the last couple frames possible',
                                 'href': 'https://www.youtube.com/watch?v=sZLEzdTgJbI',
                                 'rooms': ['Mt. Everest']}
+
+    BomblessWateringHoleAccess = SMBool(False, 0, ['BomblessWateringHoleAccess'])
+    desc['BomblessWateringHoleAccess'] = {'display': 'Access Watering Hole with Gravity and Morph',
+                                          'title': 'Wait for the Owtch to go under the sand, then do a quick run and jump into morph in the hole',
+                                          'href': 'https://youtu.be/tVjCBi8kKWo',
+                                          'rooms': ['Northwest Maridia Bug Room']}
 
     # underwater grav-less
     GravLessLevel1 = SMBool(True, hardcore, ['GravLessLevel1'])
@@ -369,9 +381,21 @@ class Knows:
 
     RedTowerClimb = SMBool(True, harder, ['RedTowerClimb'])
     desc['RedTowerClimb'] = {'display': 'Red Tower Climb',
-                             'title': 'Climb Red Tower without Ice or Space-Jump',
+                             'title': 'Climb Red Tower without Ice Beam',
                              'href': 'https://www.youtube.com/watch?v=g3goe6PZ4o0',
                              'rooms': ['Red Tower']}
+
+    TubeClip = SMBool(False, 0, ['TubeClip'])
+    desc['TubeClip'] = {'display': 'Clip into the Tube with Morph',
+                        'title': 'Clip through the Maridia tube with unmorphing and wiggling. Mostly useful in area rando.',
+                        'href': 'https://youtu.be/npM3EpE-wUg',
+                        'rooms': ['Glass Tunnel']}
+
+    TubeGravityJump = SMBool(False, 0, ['TubeGravityJump'])
+    desc['TubeGravityJump'] = {'display': 'Tube exit Gravity jump',
+                               'title': 'Exit through the already broken tube with no items by gravity jumping from an adjacent room. Adjust direction just as you enter the tube room. Mostly useful in area rando.',
+                               'href': 'https://youtu.be/kZ0-SDYcNrc',
+                               'rooms': ['Glass Tunnel']}
 
     RonPopeilScrew = SMBool(False, 0, ['RonPopeilScrew'])
     desc['RonPopeilScrew'] = {'display': 'Bomb-less Ron Popeil Missiles',
@@ -415,6 +439,12 @@ class Knows:
                          'title': 'Freeze the platforms and exit Ice Beam area without bombs',
                          'href': 'https://www.youtube.com/watch?v=lFJPqu8qk54',
                          'rooms': ['Ice Beam Acid Room']}
+
+    IceEscapeWithoutIce = SMBool(False, 0, ['IceEscapeWithoutIce'])
+    desc['IceEscapeWithoutIce'] = {'display': 'Ice Escape without Ice',
+                                   'title': 'Ice escape without freezing the platforms',
+                                   'href': 'https://vimeo.com/548250376',
+                                   'rooms': ['Ice Beam Acid Room']}
 
     WallJumpCathedralExit = SMBool(True, easy, ['WallJumpCathedralExit'])
     desc['WallJumpCathedralExit'] = {'display': 'Wall Jump to exit Cathedral',
@@ -468,8 +498,7 @@ class Knows:
     desc['FrogSpeedwayWithoutSpeed'] = {'display': 'Frog speedway without speed',
                                         'title': 'Traverse frog speedway from right to left, without Speed Booster, but with Wave and either Spazer or Plasma',
                                         'href': 'https://puu.sh/CvsCT/7757bb4f62.mp4',
-                                        'rooms': ['Frog Speedway'],
-                                        'logics': ['vanilla']}
+                                        'rooms': ['Frog Speedway']}
 
     LavaDive = SMBool(True, harder, ['LavaDive'])
     desc['LavaDive'] = {'display': 'Lava Dive',
@@ -657,6 +686,18 @@ class Knows:
                                 'href': 'https://snipaclip.com/watch/HomelyImpartialVampireFloof',
                                 'rooms': ['Pants Room']}
 
+    RJumpSuitlessSpringAccess = SMBool(False, 0, ['RJumpSuitlessSpringAccess'])
+    desc['RJumpSuitlessSpringAccess'] = {'display': 'Suitless Spring Ball item access with R-Jump',
+                                         'title': 'Use X-Ray to force a stand, clip into the ground slightly, hold Angle Up or Down before jumping, jump, release Angle Up/Down (can be done the frame before jump is pressed), and then Morph. Inputs can be buffered with a pause.',
+                                         'href': 'https://wiki.supermetroid.run/Spring_Ball_Room#Suitless_Collection',
+                                         'rooms': ['Spring Ball Room']}
+
+    SpaceJumpSuitlessSpringEscape = SMBool(False, 0, ['SpaceJumpSuitlessSpringEscape'])
+    desc['SpaceJumpSuitlessSpringEscape'] = {'display': 'Escape Spring Ball item suitless with Space Jump',
+                                             'title': 'Mid-air morph after escaping water line with Space Jump. Look for the water being between the metal and green tiles.',
+                                             'href': 'https://www.youtube.com/watch?v=ONTQlyJbB2g',
+                                             'rooms': ['Spring Ball Room']}
+
     CrystalFlashClip = SMBool(False, 0, ['CrystalFlashClip'])
     desc['CrystalFlashClip'] = {'display': 'Crystal Flash Clip',
                                'title': 'Use a Crystal Flash to clip through crumble blocks to get to Botwoon or Shaktool, using Gravity and Bombs',
@@ -739,7 +780,7 @@ class Knows:
              'title': 'Crateria'},
             {'knows': ['CeilingDBoost', 'BillyMays', 'EarlyKraid',
                        'SporeSpawnBackDoor', 'ReverseGateGlitch', 'ReverseGateGlitchHiJumpLess', 'WaveGateGlitchMirror',
-                       'RedTowerClimb', 'XrayDboost', 'XrayIce',
+                       'RedTowerClimb', 'XrayDboost', 'XrayIce', 'TubeClip', 'TubeGravityJump',
                        'RonPopeilScrew', 'Moondance'],
              'title': 'Brinstar'}
         ],
@@ -757,7 +798,7 @@ class Knows:
              'title': 'Clips'},
             {'knows': ['KillPlasmaPiratesWithCharge', 'KillPlasmaPiratesWithSpark'],
              'title': 'Plasma Room'},
-            {'knows': ['HiJumpMamaTurtle', 'MaridiaWallJumps', 'MtEverestGravJump', 'MamaTurtleWallJumpBombBoost'],
+            {'knows': ['HiJumpMamaTurtle', 'MaridiaWallJumps', 'MtEverestGravJump', 'BomblessWateringHoleAccess', 'WestSandHoleMorphOnlyItemAccess', 'MamaTurtleWallJumpBombBoost'],
              'title': 'Jumps'}
         ],
         'Maridia 2/2': [
@@ -770,11 +811,11 @@ class Knows:
             {'knows': ['WestSandHoleSuitlessWallJumps', 'DoubleSpringBallJump', 'TediousMountEverest',
                        'BotwoonToDraygonWithIce', 'SuitlessCrystalFlashClip',
                        'CacAlleyUWJ', 'EastSandHallSpringBallJump', 'WestSandHallInsaneBombJump',
-                       'SuitlessPuyoClip'],
+                       'SuitlessPuyoClip', 'RJumpSuitlessSpringAccess', 'SpaceJumpSuitlessSpringEscape'],
              'title': 'Obscure suitless stuff'}
         ],
         'Upper Norfair': [
-            {'knows': ['WallJumpCathedralExit', 'IceEscape', 'FrogSpeedwayWithoutSpeed', 'NovaBoost'],
+            {'knows': ['WallJumpCathedralExit', 'FrogSpeedwayWithoutSpeed', 'IceEscape', 'IceEscapeWithoutIce', 'NovaBoost'],
               'title': 'Main Upper Norfair'},
             {'knows': ['BubbleMountainWallJump', 'NorfairReserveDBoost', 'DoubleChamberWallJump'],
              'title': 'Bubble Mountain'},
@@ -1197,8 +1238,13 @@ class Settings:
         # Varia (2) is considered "standard" dmg reduction.
         # this is to take into account the impact of health drops
         # relative to how hard the boss hits
-        'dmgReductionDifficultyFactor' : 1.5
+        'dmgReductionDifficultyFactor' : 1.5,
+        # for escape rando time based on skill score
+        "escapeRandoTimeComputeParams" : (0.002486073, 0.898552128)
     }
+
+    # arbitrary. to update on preset load
+    skillScore = 200
 
 def isButton(button):
     return button[0:len('__')] != '__'

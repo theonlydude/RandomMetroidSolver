@@ -142,7 +142,7 @@ function drawSkillChart(skillBarData) {
     const lower = 100 + skillBarData["standards"]["newbie"] * mult;
     const upper = 100 + skillBarData["standards"]["samus"] * mult;
 
-    let previousStdScore = lower;
+    let previousStdScore = Math.min(lower, score);
     let previousPreset = 'newbie';
     let stop = false;
     const presets = ['casual', 'regular', 'veteran', 'expert', 'master', 'samus'];

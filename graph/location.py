@@ -11,7 +11,7 @@ class Location:
         'restricted', )
 
     solver_slots = (
-        'itemName', 'comeBack', 'areaWeight' )
+        'itemName', 'comeBack', 'areaWeight', 'mayNotComeback' )
 
     __slots__ = graph_slots + rando_slots + solver_slots
 
@@ -31,6 +31,7 @@ class Location:
         self.itemType = itemType
         self.comeBack = comeBack
         self.areaWeight = areaWeight
+        self.mayNotComeback = False
 
     def isMajor(self):
         return self._isMajor
@@ -58,19 +59,30 @@ class Location:
         self._isBoss = 'Boss' in _class
         self._isScavenger = 'Scavenger' in _class
 
-    def evalPostAvailable(self, smbm):
+    def evalPostAvailable(self, smbm, mode):
         if self.difficulty.bool == True and self.PostAvailable is not None:
-            smbm.addItem(self.itemName)
-            postAvailable = self.PostAvailable(smbm)
-            smbm.removeItem(self.itemName)
+            if mode == 'solver':
+                smbm.addItem(self.itemName)
+                postAvailable = self.PostAvailable(smbm)
+                smbm.removeItem(self.itemName)
 
-            self.difficulty = self.difficulty & postAvailable
-            if self.locDifficulty is not None:
-                self.locDifficulty = self.locDifficulty & postAvailable
+                self.difficulty = self.difficulty & postAvailable
+                # rando solver doesn't have locDifficulty, only regular solver/tracker has it
+                if self.locDifficulty is not None:
+                    self.locDifficulty = self.locDifficulty & postAvailable
+            else:
+                # in tracker mode we don't add the item of the location to compute post available,
+                # if post available is true then display the loc as available in the tracker,
+                # if post available if false then display the loc as maybe available in the tracker
+                postAvailable = self.PostAvailable(smbm)
+                self.mayNotComeback = not postAvailable.bool
+                if postAvailable:
+                    self.difficulty = self.difficulty & postAvailable
+                    self.locDifficulty = self.locDifficulty & postAvailable
 
     def evalComeBack(self, smbm, areaGraph, ap):
         if self.difficulty.bool == True:
-            # check if we can come back to given ap from the location,
+            # check if we can come back to given ap from the location access point,
             # don't add the item at the location as we're not supposed to know it beforehand
             self.comeBack = areaGraph.canAccess(smbm, self.accessPoint, ap, infinity)
 
@@ -302,7 +314,7 @@ define_location(
 define_location(
     Area="Brinstar",
     GraphArea="RedBrinstar",
-    SolveArea="Red Brinstar",
+    SolveArea="Red Brinstar Middle",
     Name="X-Ray Scope",
     Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
@@ -317,7 +329,7 @@ define_location(
 define_location(
     Area="Brinstar",
     GraphArea="RedBrinstar",
-    SolveArea="Red Brinstar",
+    SolveArea="Red Brinstar Bottom",
     Name="Spazer",
     Class=["Major", "Chozo", "Scavenger"],
     CanHidden=False,
@@ -716,7 +728,7 @@ define_location(
     Name="Spore Spawn",
     Class=["Boss"],
     CanHidden=False,
-    Address=0xB055B055,
+    Address=0xB055B05A,
     Id=None,
     Visibility="Hidden",
     Room='Spore Spawn Room',
@@ -730,7 +742,7 @@ define_location(
     Name="Botwoon",
     Class=["Boss"],
     CanHidden=False,
-    Address=0xB055B055,
+    Address=0xB055B05B,
     Id=None,
     Visibility="Hidden",
     Room="Botwoon's Room",
@@ -744,7 +756,7 @@ define_location(
     Name="Crocomire",
     Class=["Boss"],
     CanHidden=False,
-    Address=0xB055B055,
+    Address=0xB055B05C,
     Id=None,
     Visibility="Hidden",
     Room="Crocomire's Room",
@@ -758,7 +770,7 @@ define_location(
     Name="Golden Torizo",
     Class=["Boss"],
     CanHidden=False,
-    Address=0xB055B055,
+    Address=0xB055B05D,
     Id=None,
     Visibility="Hidden",
     Room="Golden Torizo's Room",
@@ -821,7 +833,7 @@ define_location(
 define_location(
     Area="Crateria",
     GraphArea="Crateria",
-    SolveArea="Crateria Landing Site",
+    SolveArea="Crateria Moat",
     Name="Missile (Crateria moat)",
     Class=["Minor"],
     CanHidden=False,

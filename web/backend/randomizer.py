@@ -1,4 +1,5 @@
 import sys, os, urllib, tempfile, random, subprocess, base64, json, uuid, lzma
+import functools, traceback
 from datetime import datetime
 
 from web.backend.utils import loadPresetsList, loadRandoPresetsList, displayNames, get_client_files
@@ -6,11 +7,20 @@ from web.backend.utils import validateWebServiceParams, getCustomMapping, localI
 from utils.utils import getRandomizerDefaultParameters, getDefaultMultiValues, PresetLoader, getPresetDir, getPythonExec
 from graph.graph_utils import GraphUtils
 from utils.db import DB
-from logic.logic import Logic
 from utils.objectives import Objectives
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
 from gluon.html import OPTGROUP
+
+def simple_view(f):
+    @functools.wraps(f)
+    def wrapped(self):
+        try:
+            return f(self)
+        except Exception as error:
+            err = ''.join(traceback.format_exception(None, error, error.__traceback__))
+            return f"<pre>{err}</pre>"
+    return wrapped
 
 class Randomizer(object):
     def __init__(self, session, request, response, cache):
@@ -18,10 +28,44 @@ class Randomizer(object):
         self.request = request
         self.response = response
         self.cache = cache
-        # required for GraphUtils access to access points
-        Logic.factory('vanilla')
 
         self.vars = self.request.vars
+
+    @simple_view
+    def randomizerData(self):
+        types = Objectives.getObjectivesTypes()
+        categories = Objectives.getObjectivesCategories()
+        exclusions = Objectives.getExclusions()
+        objective_by_id = {}
+        for id in Objectives.getObjectivesSort():
+            o_exclusions = exclusions.get(id, {})
+            objective = objective_by_id[id] = {
+                'id': id,
+                'category': categories.get(id, '').lower(),
+            }
+
+            # on the front end we're using objective.name.startsWith('clear ')
+            # remove this?
+            if o_exclusions.get('canAutoClear'):
+                objective['canAutoClear'] = True
+
+            if o_exclusions.get('limit') is not None:
+                # o_exclusions also has 'type' but it's always objective['category']
+                objective['category_limit'] = o_exclusions['limit']
+            if o_exclusions.get('list'):
+                objective['exclusions'] = o_exclusions['list']
+            otype = objective['category'].replace('bosses', 'boss')
+            if objective['id'] in types.get(otype, []):
+                objective['is_count'] = True
+        # These don't actually appear in the dropdown
+        objective_by_id.pop('nothing')
+        objective_by_id.pop('finish scavenger hunt')
+        out = dict(
+            objective_by_id=objective_by_id,
+        )
+        if self.request.extension == 'html':
+            return f'<pre>{json.dumps(out, indent=2)}</pre>'
+        return json.dumps(out)
 
     def run(self):
         self.initRandomizerSession()
@@ -89,7 +133,7 @@ class Randomizer(object):
             "Tournament": ["Season_Races", "SMRAT2021", "VARIA_Weekly", "SGL23Online", "Torneio_SGPT3_stage1", "Torneio_SGPT3_stage2"]
         }
 
-        startAPs = GraphUtils.getStartAccessPointNamesCategory()
+        startAPs = GraphUtils.getStartAccessPointNamesCategory('vanilla')
         startAPs = [OPTGROUP(_label="Standard", *startAPs["regular"]),
                     OPTGROUP(_label="Custom", *startAPs["custom"]),
                     OPTGROUP(_label="Custom (Area rando only)", *startAPs["area"])]
@@ -99,7 +143,7 @@ class Randomizer(object):
         defaultMultiValues = getDefaultMultiValues()
 
         # objectives self exclusions
-        objectivesExclusions = Objectives.getExclusions()
+        objectivesExclusions = json.dumps(Objectives.getExclusions())
         objectivesTypes = Objectives.getObjectivesTypes()
         objectivesSort = Objectives.getObjectivesSort()
         objectivesCategories = Objectives.getObjectivesCategories()
@@ -210,12 +254,12 @@ class Randomizer(object):
                    'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
                    'Infinite_Space_Jump', 'refill_before_save', 'hud', "revealMap", "scavRandomized",
-                   'relaxed_round_robin_cf', 'hiddenObjectives']
+                   'relaxed_round_robin_cf', 'hiddenObjectives', 'distributeObjectives', 'better_reserves']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
                   'areaRandomization', 'logic']
-        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective', 'nbObjectivesRequired']
+        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective', 'nbObjectivesRequired', 'areaLayoutCustom', 'variaTweaksCustom', 'layoutCustom']
         errors = validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
 
         # randomize
@@ -332,6 +376,10 @@ class Randomizer(object):
             os.remove(jsonRandoPreset)
 
             locsItems["status"] = "OK"
+            # Sending these are useful for debugging the front end
+            # locsItems["params"] = params
+            # locsItems["presetFile"] = self.vars.paramsFileTarget
+            # locsItems["randoPresetDict"] = randoPresetDict
             return json.dumps(locsItems)
         else:
             # extract error from json
@@ -394,12 +442,12 @@ class Randomizer(object):
                    'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
                    'rando_speed', 'animals', 'No_Music', 'random_music',
                    'Infinite_Space_Jump', 'refill_before_save', 'hud', 'revealMap', "scavRandomized",
-                   'relaxed_round_robin_cf', 'hiddenObjectives']
+                   'relaxed_round_robin_cf', 'hiddenObjectives', 'distributeObjectives', 'better_reserves']
         quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
                   'areaRandomization', 'logic']
-        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective', 'nbObjectivesRequired']
+        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective', 'nbObjectivesRequired', 'areaLayoutCustom', 'variaTweaksCustom', 'layoutCustom']
         validateWebServiceParams(self.request, switchs, quantities, multis, others)
 
         if self.session.randomizer is None:
@@ -435,6 +483,7 @@ class Randomizer(object):
         self.session.randomizer['variaTweaks'] = self.vars.variaTweaks
         self.session.randomizer['nerfedCharge'] = self.vars.nerfedCharge
         self.session.randomizer['relaxed_round_robin_cf'] = self.vars.relaxed_round_robin_cf
+        self.session.randomizer['better_reserves'] = self.vars.better_reserves
         self.session.randomizer['itemsounds'] = self.vars.itemsounds
         self.session.randomizer['elevators_speed'] = self.vars.elevators_speed
         self.session.randomizer['fast_doors'] = self.vars.fast_doors
@@ -452,6 +501,7 @@ class Randomizer(object):
         self.session.randomizer['tourian'] = self.vars.tourian
         self.session.randomizer['nbObjectivesRequired'] = self.vars.nbObjectivesRequired
         self.session.randomizer['hiddenObjectives'] = self.vars.hiddenObjectives
+        self.session.randomizer['distributeObjectives'] = self.vars.distributeObjectives
 
         # objective is a special multi select
         self.session.randomizer['objectiveRandom'] = self.vars.objectiveRandom
@@ -466,6 +516,11 @@ class Randomizer(object):
             if self.vars[multi] == 'random':
                 self.session.randomizer[multi+"MultiSelect"] = self.vars[multi+"MultiSelect"].split(',')
 
+        for group in ['layout', 'areaLayout', 'variaTweaks']:
+            key = group + 'Custom'
+            value = getattr(self.vars, key)
+            if value:
+                self.session.randomizer[key] = value.split(',')
         # to create a new rando preset, uncomment next lines
         #with open('rando_presets/new.json', 'w') as jsonFile:
         #    json.dump(self.session.randomizer, jsonFile)

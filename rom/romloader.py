@@ -1,11 +1,12 @@
 import os, json
 
-from rom.rom_patches import RomPatches
+from rom.rom_patches import RomPatches, definitions as patches_definitions
 from rom.rom import RealROM, FakeROM
 from rom.romreader import RomReader
 from utils.doorsmanager import DoorsManager
 from graph.graph_utils import getAccessPoint
 from collections import defaultdict
+from rom.flavor import RomFlavor
 
 class RomLoader(object):
     @staticmethod
@@ -39,96 +40,34 @@ class RomLoader(object):
 
     def loadPatches(self):
         RomPatches.ActivePatches = []
-        isArea = False
         isBoss = False
         isEscape = False
-
-        # check total base (blue bt and red tower blue door)
-        if self.hasPatch("startCeres") or self.hasPatch("startLS"):
-            RomPatches.ActivePatches += [RomPatches.BlueBrinstarBlueDoor,
-                                         RomPatches.RedTowerBlueDoors]
-
-        if self.hasPatch("newGame"):
-            RomPatches.ActivePatches.append(RomPatches.RedTowerBlueDoors)
-
-        # check total soft lock protection
-        if self.hasPatch("layout"):
-            RomPatches.ActivePatches += RomPatches.TotalLayout
-
-        # check total casual (blue brinstar missile swap)
-        if self.hasPatch("casual"):
-            RomPatches.ActivePatches.append(RomPatches.BlueBrinstarMissile)
-
-        # check gravity heat protection
-        if self.hasPatch("gravityNoHeatProtection"):
-            RomPatches.ActivePatches.append(RomPatches.NoGravityEnvProtection)
-
-        if self.hasPatch("progressiveSuits"):
-            RomPatches.ActivePatches.append(RomPatches.ProgressiveSuits)
-        if self.hasPatch("nerfedCharge"):
-            RomPatches.ActivePatches.append(RomPatches.NerfedCharge)
-        if self.hasPatch('nerfedRainbowBeam'):
-            RomPatches.ActivePatches.append(RomPatches.NerfedRainbowBeam)
-
-        # check varia tweaks
-        if self.hasPatch("variaTweaks"):
-            RomPatches.ActivePatches += RomPatches.VariaTweaks
-
-        # check area
-        if self.hasPatch("area"):
-            RomPatches.ActivePatches += [RomPatches.SingleChamberNoCrumble,
-                                         RomPatches.AreaRandoGatesBase,
-                                         RomPatches.AreaRandoBlueDoors,
-                                         RomPatches.CrocBlueDoors,
-                                         RomPatches.CrabShaftBlueDoor,
-                                         RomPatches.MaridiaSandWarp,
-                                         RomPatches.AreaRandoMoreBlueDoors]
-            isArea = True
-
-        # check area layout
-        if self.hasPatch("areaLayout"):
-            RomPatches.ActivePatches.append(RomPatches.AreaRandoGatesOther)
-        if self.hasPatch("traverseWreckedShip"):
-            RomPatches.ActivePatches += [RomPatches.EastOceanPlatforms, RomPatches.SpongeBathBlueDoor]
-        if self.hasPatch("aqueductBombBlocks"):
-            RomPatches.ActivePatches.append(RomPatches.AqueductBombBlocks)
-
+        # check patches with logic impact
+        patchList = list(patches_definitions['common'].keys()) + list(patches_definitions[RomFlavor.flavor].keys())
+        for patchName in patchList:
+            patchDef = patches_definitions['common'].get(patchName, patches_definitions[RomFlavor.flavor].get(patchName))
+            if 'logic' in patchDef and self.hasPatch(patchName):
+                RomPatches.ActivePatches += patchDef['logic']
+        # check area rando
+        isArea = self.hasPatch("area")
         # check boss rando
         isBoss = self.isBoss()
-
         # check escape rando
         isEscape = self.hasPatch("areaEscape")
-
-        # minimizer
-        if self.hasPatch("minimizer_bosses"):
-            RomPatches.ActivePatches.append(RomPatches.NoGadoras)
-        if self.hasPatch("open_zebetites"):
-            RomPatches.ActivePatches.append(RomPatches.OpenZebetites)
-
-        # red doors
-        if self.hasPatch('red_doors'):
-            RomPatches.ActivePatches.append(RomPatches.RedDoorsMissileOnly)
-
         # Tourian
         tourian = 'Vanilla'
-        if self.hasPatch("minimizer_tourian"):
-            RomPatches.ActivePatches.append(RomPatches.TourianSpeedup)
+        if self.hasPatch("fast_tourian"):
             tourian = 'Fast'
         if self.isEscapeTrigger():
             RomPatches.ActivePatches.append(RomPatches.NoTourian)
             tourian = 'Disabled'
-
         # objectives
         hasObjectives = self.hasPatch('objectives')
 
-        # Round robin CF
-        if self.hasPatch('round_robin_cf'):
-            RomPatches.ActivePatches.append(RomPatches.RoundRobinCF)
-
         return (isArea, isBoss, isEscape, hasObjectives, tourian)
 
-    def getPatches(self):
-        return self.romReader.getPatches()
+    def getPatchIds(self):
+        return self.romReader.getPatchIds()
 
     def getRawPatches(self):
         # used in interactive solver
@@ -256,8 +195,6 @@ class RomLoaderJson(RomLoaderDict):
     def __init__(self, jsonFileName, magic=None):
         with open(jsonFileName) as jsonFile:
             tmpDictROM = json.load(jsonFile)
-            dictROM = {}
             # in json keys are strings
-            for address in tmpDictROM:
-                dictROM[int(address)] = tmpDictROM[address]
+            dictROM = {int(address): data for address, data in tmpDictROM.items()}
             super(RomLoaderJson, self).__init__(dictROM, magic)

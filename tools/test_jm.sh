@@ -165,7 +165,7 @@ function generate_rando_presets {
     "logic": "$(random "random" ${logic})",
     $(generate_multi_select "logic" "vanilla" "mirror")
     "preset": "${PRESET}",
-    "startLocation": "$(random "random" ${startLocation})",
+    "startLocation": "$(random "random" "${startLocation}")",
     $(generate_multi_select "startLocation" "Ceres" "Landing_Site" "Gauntlet_Top" "Green_Brinstar_Elevator" "Big_Pink" "Etecoons_Supers" "Wrecked_Ship_Main" "Firefleas_Top" "Business_Center" "Bubble_Mountain" "Mama_Turtle" "Watering_Hole" "Aqueduct" "Red_Brinstar_Elevator" "Golden_Four")
     "majorsSplit": "$(random "random" ${majorsSplit})",
     $(generate_multi_select "majorsSplit" 'Full' 'Major' 'Chozo' 'FullWithHUD' 'Scavenger')
@@ -188,10 +188,10 @@ function generate_rando_presets {
     "energyQty": "$(random "random" ${energyQty})",
     $(generate_multi_select "energyQty" 'ultra_sparse' 'sparse' 'medium' 'vanilla')
     "objective": "$(random "random" ${objective})",
-    $(generate_multi_select "objective" "kill_kraid" "kill_phantoon" "kill_draygon" "kill_ridley" "kill_one_G4" "kill_two_G4" "kill_three_G4" "kill_all_G4" "kill_spore_spawn" "kill_botwoon" "kill_crocomire" "kill_golden_torizo" "kill_one_miniboss" "kill_two_minibosses" "kill_three_minibosses" "kill_all_mini_bosses" "nothing" "collect_25%_items" "collect_50%_items" "collect_75%_items" "collect_100%_items" "collect_all_upgrades" "clear_crateria" "clear_green_brinstar" "clear_red_brinstar" "clear_wrecked_ship" "clear_kraid's_lair" "clear_upper_norfair" "clear_croc's_lair" "clear_lower_norfair" "clear_west_maridia" "clear_east_maridia" "tickle_the_red_fish" "kill_the_orange_geemer" "kill_shaktool" "activate_chozo_robots" "visit_the_animals" "kill_king_cacatac" "explore_25%_map" "explore_50%_map" "explore_75%_map" "explore_100%_map" "explore_crateria" "explore_green_brinstar" "explore_red_brinstar" "explore_wrecked_ship" "explore_kraid's_lair" "explore_upper_norfair" "explore_croc's_lair" "explore_lower_norfair" "explore_west_maridia" "explore_east_maridia")
+    $(generate_multi_select "objective" "kill_kraid" "kill_phantoon" "kill_draygon" "kill_ridley" "kill_one_G4" "kill_two_G4" "kill_three_G4" "kill_all_G4" "kill_spore_spawn" "kill_botwoon" "kill_crocomire" "kill_golden_torizo" "kill_one_miniboss" "kill_two_minibosses" "kill_three_minibosses" "kill_all_mini_bosses" "nothing" "collect_25%_items" "collect_50%_items" "collect_75%_items" "collect_100%_items" "collect_all_upgrades" "clear_crateria" "clear_green_brinstar" "clear_red_brinstar" "clear_wrecked_ship" "clear_kraid's_lair" "clear_upper_norfair" "clear_croc's_lair" "clear_lower_norfair" "clear_west_maridia" "clear_east_maridia" "tickle_the_red_fish" "kill_the_orange_geemer" "kill_shaktool" "activate_chozo_robots" "visit_the_animals" "kill_king_cacatac" "explore_25%_map" "explore_50%_map" "explore_75%_map" "explore_100%_map" "explore_crateria" "explore_green_brinstar" "explore_red_brinstar" "explore_wrecked_ship" "explore_kraid's_lair" "explore_upper_norfair" "explore_croc's_lair" "explore_lower_norfair" "explore_west_maridia" "explore_east_maridia" "kill_all_space_pirates" "kill_all_ki_hunters" "kill_all_beetoms" "kill_all_cacatacs" "kill_all_kagos" "kill_all_yapping_maws")
     "areaRandomization": "$(random "random" ${areaRandomization})",
     "nbObjectivesRequired": "$(random "0" ${nbObjectivesRequired})",
-    "hiddenObjectives": "$(random_switch ${hiddenObjectives})",
+    "distributeObjectives": "$(random_switch ${distributeObjectives})",
     "areaLayout": "$(random_switch ${areaLayout})",
     "doorsColorsRando": "$(random_switch ${doorsColorsRando})",
     "allowGreyDoors": "$(random_switch ${allowGreyDoors})",
@@ -411,93 +411,6 @@ while true; do
 done
 
 echo "DONE"
-date >> ${LOG}
-
-echo ""
-echo "Logic"
-for LOGIC in "vanilla" "mirror"; do
-    TOTAL=$(grep ";${LOGIC};" ${CSV}  | wc -l)
-    ERROR=$(grep ";${LOGIC};" ${CSV} | grep -E '^error' | wc -l)
-    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
-    printf "%-24s" "${LOGIC}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
-done
-echo ""
-echo "Start AP"
-for AP in "Ceres" "Landing Site" "Gauntlet Top" "Green Brinstar Elevator" "Big Pink" "Etecoons Supers" "Wrecked Ship Main" "Business Center" "Bubble Mountain" "Watering Hole" "Red Brinstar Elevator" "Golden Four" "Aqueduct" "Mama Turtle" "Firefleas Top"; do
-    TOTAL=$(grep ";${AP};" ${CSV}  | wc -l)
-    ERROR=$(grep ";${AP};" ${CSV} | grep -E '^error' | wc -l)
-    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
-    printf "%-24s" "${AP}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
-done
-echo ""
-echo "Prog speed"
-for PROGSPEED in "speedrun" "slowest" "slow" "medium" "fast" "fastest" "VARIAble"; do
-    TOTAL=$(grep ";${PROGSPEED};" ${CSV}  | wc -l)
-    ERROR=$(grep ";${PROGSPEED};" ${CSV} | grep -E '^error' | wc -l)
-    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
-    printf "%-24s" "${PROGSPEED}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
-done
-echo ""
-echo "Majors split"
-for MAJORSPLIT in "Major" "Full" "Chozo" "FullWithHUD" "Scavenger"; do
-    TOTAL=$(grep ";${MAJORSPLIT};" ${CSV}  | wc -l)
-    ERROR=$(grep ";${MAJORSPLIT};" ${CSV} | grep -E '^error' | wc -l)
-    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
-    printf "%-24s" "${MAJORSPLIT}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
-done
-echo ""
-echo "Morph placement"
-for MORPH in "early" "normal" "late"; do
-    TOTAL=$(grep ";${MORPH};" ${CSV}  | wc -l)
-    ERROR=$(grep ";${MORPH};" ${CSV} | grep -E '^error' | wc -l)
-    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
-    printf "%-24s" "${MORPH}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
-done
-echo ""
-echo "Objectives"
-for OBJ in "kill kraid" "kill phantoon" "kill draygon" "kill ridley" "kill one G4" "kill two G4" "kill three G4" "kill all G4" "kill spore spawn" "kill botwoon" "kill crocomire" "kill golden torizo" "kill one miniboss" "kill two minibosses" "kill three minibosses" "kill all mini bosses" "collect 25% items" "collect 50% items" "collect 75% items" "collect 100% items" "collect all upgrades" "clear crateria" "clear green brinstar" "clear red brinstar" "clear wrecked ship" "clear kraid's lair" "clear upper norfair" "clear croc's lair" "clear lower norfair" "clear west maridia" "clear east maridia" "tickle the red fish" "kill the orange geemer" "kill shaktool" "activate chozo robots" "visit the animals" "kill king cacatac" "explore 25% map" "explore 50% map" "explore 75% map" "explore 100% map" "explore crateria" "explore green brinstar" "explore red brinstar" "explore wrecked ship" "explore kraid's lair" "explore upper norfair" "explore croc's lair" "explore lower norfair" "explore west maridia" "explore east maridia"; do
-    TOTAL=$(grep "${OBJ}" ${CSV}  | wc -l)
-    ERROR=$(grep "${OBJ}" ${CSV} | grep -E '^error' | wc -l)
-    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
-    printf "%-24s" "${OBJ}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
-done
-echo ""
-echo "Skill preset"
-for PRESET in "regular" "newbie" "master"; do
-    TOTAL=$(grep "${PRESET}" ${CSV}  | wc -l)
-    ERROR=$(grep "${PRESET}" ${CSV} | grep -E '^error' | wc -l)
-    [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
-    printf "%-24s" "${PRESET}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
-done
-
-echo ""
-echo "Parameters combinations failure"
-for PROGSPEED in "speedrun" "slowest" "slow" "medium" "fast" "fastest" "VARIAble"; do
-    for MAJORSPLIT in "Major" "Full" "Chozo" "FullWithHUD" "Scavenger"; do
-        TOTAL=$(grep ";${MAJORSPLIT};" ${CSV} | grep ";${PROGSPEED};" | wc -l)
-        ERROR=$(grep ";${MAJORSPLIT};" ${CSV} | grep ";${PROGSPEED};" | grep -E '^error' | wc -l)
-        if [ ${TOTAL} -ne 0 -a ${ERROR} -ne 0 ]; then
-            PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
-            printf "%-24s" "${PROGSPEED}:${MAJORSPLIT}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
-        fi
-    done
-done
-
-
-TOTAL_COUNT=$(wc -l ${CSV} | awk '{print $1}')
-echo "total: ${TOTAL_COUNT}"
-ERRORS_COUNT=$(grep -E "^error" ${CSV} | wc -l)
-echo "errors: ${ERRORS_COUNT}/${TOTAL_COUNT}"
-grep DIAG ${LOG} | sed -e 's+\*++g' -e 's+Super Fun : Could not remove any suit++' | sort | uniq -c
-
-echo "errors detail:"
-if [ ${COMPARE} -eq 0 ]; then
-    # speedrun seeds are non deterministic, so filter them out in compare mode.
-    grep -E "NOK|mismatch|Can't solve" ${CSV} | grep -v ';speedrun;'
-else
-    grep -E "NOK|Can't solve" ${CSV}
-fi
-grep Traceback ${LOG}
 
 function getTime {
     # speedrun seeds are non deterministics, filter them out.
@@ -515,27 +428,120 @@ function getTime {
     grep -v SOLVER ${CSV} | grep -v -E "^error${SPEEDRUN}" | grep ${GREP_V} '^[0-9]*;;;' | cut -d ';' -f ${COLUMN} | sed -e 's+0:++g' | awk -F';' '{sum+=$1;} END{print sum}'
 }
 
-if [ ${COMPARE} -eq 0 ]; then
-    RANDOTIME_BEFORE=$(getTime 3)
-    RANDOTIME_AFTER=$(getTime 4)
-    SOLVERTIME_BEFORE=$(getTime 5)
-    SOLVERTIME_AFTER=$(getTime 6)
-    RANDO_PERCENT=$(echo "scale=4; (${RANDOTIME_AFTER} - ${RANDOTIME_BEFORE}) / ${RANDOTIME_BEFORE} * 100" | bc -l)
-    SOLVER_PERCENT=$(echo "scale=4; (${SOLVERTIME_AFTER} - ${SOLVERTIME_BEFORE}) / ${SOLVERTIME_BEFORE} * 100" | bc -l)
-    echo "Speed increase/decrease:"
-    echo "rando:  ${RANDO_PERCENT}%"
-    echo "solver: ${SOLVER_PERCENT}%"
-else
-    # display average randomizer and solver time
-    RANDOTIME=$(getTime 4 "keep")
-    SOLVERTIME=$(getTime 6 "keep")
-    OK_SEEDS=$(grep -v SOLVER ${CSV} | grep -v -E "^error" | grep '^[0-9]*;;;' | wc -l)
-    AVG_RANDO=$(echo "scale=2; ${RANDOTIME}/${OK_SEEDS}" | bc -l)
-    AVG_SOLVER=$(echo "scale=2; ${SOLVERTIME}/${OK_SEEDS}" | bc -l)
 
-    echo "Avg times:"
-    echo "rando: ${AVG_RANDO}"
-    echo "solver: ${AVG_SOLVER}"
-fi
+function display_results {
+    echo ""
+    echo "Logic"
+    for LOGIC in "vanilla" "mirror"; do
+        TOTAL=$(grep ";${LOGIC};" ${CSV}  | wc -l)
+        ERROR=$(grep ";${LOGIC};" ${CSV} | grep -E '^error' | wc -l)
+        [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
+        printf "%-24s" "${LOGIC}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+    done
+    echo ""
+    echo "Start AP"
+    for AP in "Ceres" "Landing Site" "Gauntlet Top" "Green Brinstar Elevator" "Big Pink" "Etecoons Supers" "Wrecked Ship Main" "Business Center" "Bubble Mountain" "Watering Hole" "Red Brinstar Elevator" "Golden Four" "Aqueduct" "Mama Turtle" "Firefleas Top"; do
+        TOTAL=$(grep ";${AP};" ${CSV}  | wc -l)
+        ERROR=$(grep ";${AP};" ${CSV} | grep -E '^error' | wc -l)
+        [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
+        printf "%-24s" "${AP}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+    done
+    echo ""
+    echo "Prog speed"
+    for PROGSPEED in "speedrun" "slowest" "slow" "medium" "fast" "fastest" "VARIAble"; do
+        TOTAL=$(grep ";${PROGSPEED};" ${CSV}  | wc -l)
+        ERROR=$(grep ";${PROGSPEED};" ${CSV} | grep -E '^error' | wc -l)
+        [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
+        printf "%-24s" "${PROGSPEED}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+    done
+    echo ""
+    echo "Majors split"
+    for MAJORSPLIT in "Major" "Full" "Chozo" "FullWithHUD" "Scavenger"; do
+        TOTAL=$(grep ";${MAJORSPLIT};" ${CSV}  | wc -l)
+        ERROR=$(grep ";${MAJORSPLIT};" ${CSV} | grep -E '^error' | wc -l)
+        [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
+        printf "%-24s" "${MAJORSPLIT}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+    done
+    echo ""
+    echo "Morph placement"
+    for MORPH in "early" "normal" "late"; do
+        TOTAL=$(grep ";${MORPH};" ${CSV}  | wc -l)
+        ERROR=$(grep ";${MORPH};" ${CSV} | grep -E '^error' | wc -l)
+        [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
+        printf "%-24s" "${MORPH}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+    done
+    echo ""
+    echo "Objectives"
+    for OBJ in "kill kraid" "kill phantoon" "kill draygon" "kill ridley" "kill one G4" "kill two G4" "kill three G4" "kill all G4" "kill spore spawn" "kill botwoon" "kill crocomire" "kill golden torizo" "kill one miniboss" "kill two minibosses" "kill three minibosses" "kill all mini bosses" "collect 25% items" "collect 50% items" "collect 75% items" "collect 100% items" "collect all upgrades" "clear crateria" "clear green brinstar" "clear red brinstar" "clear wrecked ship" "clear kraid's lair" "clear upper norfair" "clear croc's lair" "clear lower norfair" "clear west maridia" "clear east maridia" "tickle the red fish" "kill the orange geemer" "kill shaktool" "activate chozo robots" "visit the animals" "kill king cacatac" "explore 25% map" "explore 50% map" "explore 75% map" "explore 100% map" "explore crateria" "explore green brinstar" "explore red brinstar" "explore wrecked ship" "explore kraid's lair" "explore upper norfair" "explore croc's lair" "explore lower norfair" "explore west maridia" "explore east maridia" "kill all space pirates" "kill all ki hunters" "kill all beetoms" "kill all cacatacs" "kill all kagos" "kill all yapping maws"; do
+        TOTAL=$(grep "${OBJ}" ${CSV}  | wc -l)
+        ERROR=$(grep "${OBJ}" ${CSV} | grep -E '^error' | wc -l)
+        [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
+        printf "%-24s" "${OBJ}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+    done
+    echo ""
+    echo "Skill preset"
+    for PRESET in "regular" "newbie" "master"; do
+        TOTAL=$(grep "${PRESET}" ${CSV}  | wc -l)
+        ERROR=$(grep "${PRESET}" ${CSV} | grep -E '^error' | wc -l)
+        [ ${TOTAL} -ne 0 ] && PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc) || PERCENT='n/a'
+        printf "%-24s" "${PRESET}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+    done
+
+    echo ""
+    echo "Parameters combinations failure"
+    for PROGSPEED in "speedrun" "slowest" "slow" "medium" "fast" "fastest" "VARIAble"; do
+        for MAJORSPLIT in "Major" "Full" "Chozo" "FullWithHUD" "Scavenger"; do
+            TOTAL=$(grep ";${MAJORSPLIT};" ${CSV} | grep ";${PROGSPEED};" | wc -l)
+            ERROR=$(grep ";${MAJORSPLIT};" ${CSV} | grep ";${PROGSPEED};" | grep -E '^error' | wc -l)
+            if [ ${TOTAL} -ne 0 -a ${ERROR} -ne 0 ]; then
+                PERCENT=$(echo "${ERROR}*100/${TOTAL}" | bc)
+                printf "%-24s" "${PROGSPEED}:${MAJORSPLIT}"; echo "error ${ERROR}/${TOTAL} = ${PERCENT}%"
+            fi
+        done
+    done
+
+
+    TOTAL_COUNT=$(wc -l ${CSV} | awk '{print $1}')
+    echo "total: ${TOTAL_COUNT}"
+    ERRORS_COUNT=$(grep -E "^error" ${CSV} | wc -l)
+    echo "errors: ${ERRORS_COUNT}/${TOTAL_COUNT}"
+    grep DIAG ${LOG} | sed -e 's+\*++g' -e 's+Super Fun : Could not remove any suit++' | sort | uniq -c
+
+    echo "errors detail:"
+    if [ ${COMPARE} -eq 0 ]; then
+        # speedrun seeds are non deterministic, so filter them out in compare mode.
+        grep -E "NOK|mismatch|Can't solve" ${CSV} | grep -v ';speedrun;'
+    else
+        grep -E "NOK|Can't solve" ${CSV}
+    fi
+    grep Traceback ${LOG}
+
+    if [ ${COMPARE} -eq 0 ]; then
+        RANDOTIME_BEFORE=$(getTime 3)
+        RANDOTIME_AFTER=$(getTime 4)
+        SOLVERTIME_BEFORE=$(getTime 5)
+        SOLVERTIME_AFTER=$(getTime 6)
+        RANDO_PERCENT=$(echo "scale=4; (${RANDOTIME_AFTER} - ${RANDOTIME_BEFORE}) / ${RANDOTIME_BEFORE} * 100" | bc -l)
+        SOLVER_PERCENT=$(echo "scale=4; (${SOLVERTIME_AFTER} - ${SOLVERTIME_BEFORE}) / ${SOLVERTIME_BEFORE} * 100" | bc -l)
+        echo "Speed increase/decrease:"
+        echo "rando:  ${RANDO_PERCENT}%"
+        echo "solver: ${SOLVER_PERCENT}%"
+    else
+        # display average randomizer and solver time
+        RANDOTIME=$(getTime 4 "keep")
+        SOLVERTIME=$(getTime 6 "keep")
+        OK_SEEDS=$(grep -v SOLVER ${CSV} | grep -v -E "^error" | grep '^[0-9]*;;;' | wc -l)
+        AVG_RANDO=$(echo "scale=2; ${RANDOTIME}/${OK_SEEDS}" | bc -l)
+        AVG_SOLVER=$(echo "scale=2; ${SOLVERTIME}/${OK_SEEDS}" | bc -l)
+
+        echo "Avg times:"
+        echo "rando: ${AVG_RANDO}"
+        echo "solver: ${AVG_SOLVER}"
+    fi
+}
+
+display_results | tee -a ${LOG}
+
+date >> ${LOG}
 
 rm -rf ${TEMP_DIR}

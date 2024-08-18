@@ -70,6 +70,110 @@
   <h2>Change Log</h2>
   <ul>
     <li>
+      <h4>2024/08/18</h4>
+<p>Hello @everyone,</p>
+<p>We've released a new version of the VARIA Randomizer, Solver, Tracker, Plandomizer and Customizer (http://varia.run/).</p>
+<p>Nothing groundbreaking this time, but a large set of improvements and fixes, that warranted a release.</p>
+<p><b>NOTE:</b> if you're on real console and experience visual glitches in the HUD, disable minimap colors using the available patch in the Customizer (Accessibility section)</p>
+
+<h3>New stuff :</h3>
+
+<h4>Rando</h4>
+<ul>
+    <li>objectives: added "kill all xxx" objectives where xxx is an enemy type</li>
+    <li>objectives: added option to distribute random objectives evenly across categories</li>
+    <li>start: Red Tower starting location now opens alpha PB room door</li>
+    <li>escape: reduce allotted time depending on preset skill score</li>
+    <li>escape: lower room shaking during first half of escape timer</li>
+</ul>
+<h4>Logic</h4>
+<ul>
+    <li>generalize reserve tank hell run restriction to hard rooms
+    <li>no longer require bombs/PB to access Ice Beam and West Ocean bottom missiles
+    <li>add snail clip to get out of aqueduct without bombs
+    <li>new techniques :
+      <ul>
+        <li>clip through closed Maridia tube with morph (veteran+)</li>
+        <li>grav jump out of opened Maridia tube (veteran+)</li>
+        <li>Watering hole with Gravity+Morph (veteran+)</li>
+        <li>West Sand Hole items with Morph (veteran+)</li>
+        <li>Ice Escape without Ice (expert+)</li>
+        <li>suitless R-Jump to Spring Ball (master)</li>
+        <li>suitless Spring Ball escape with Space Jump (master)</li>
+      </ul>
+    </li>
+</ul>
+<h4>Layout</h4>
+<ul>
+    <li>add ability to individually select layout patches and VARIA tweaks</li>
+    <li>no longer force all layout patches/VARIA tweaks for custom start location (only the necessary ones)</li>
+    <li>anti-softlock: change climb supers exit block to shot block</li>
+    <li>area layout: change crab hole to be able to traverse it both ways</li>
+</ul>
+<h4>Solver</h4>
+<ul>
+    <li>display spoiler log with colors from map areas</li>
+    <li>better objectives display in spoiler log</li>
+</ul>
+<h4>Tracker</h4>
+<ul>
+    <li>great performance/reactivity improvement</li>
+    <li>show potential no comeback locations with '?' overlay</li>
+    <li>highlight accessible zones with in-game map colors</li>
+</ul>
+<h4>ROM</h4>
+<ul>
+    <li>added instant reset to last save using Start+Select+L+R</li>
+    <li>revamped backup save system (now enabled in all seeds) :
+      <ul>
+        <li>show backup info when saving</li>
+        <li>ability to lock/unlock saves in load menu. Examples:
+          <ul>
+            <li>your current save is in a softlock situation: unlock it before loading a backup save to allow it to be overwritten</li>
+            <li>you don't want to lose a specific backup save: you can lock it to avoid having it overwritten</li>
+          </ul>
+      </ul>
+    </li>
+    <li>show area colors in minimap</li>
+    <li>add Better Reserve comfort patch by @Nodever2</li>
+    <li>change Fast Doors patch to the one used in practice hack and map rando</li>
+    <li>map: added boss letters for portals in boss rando</li>
+    <li>map: when map revealed is enabled show unexplored portals in gray</li>
+    <li>map: only show actually explorable rooms (removed map rooms in escape rando, absent areas in minimizer)</li>
+    <li>tweaked collected items sound effects in no fanfare patch</li>
+</ul>
+<h4>Web</h4>
+<ul>
+    <li>revamped GUI for objectives selection</li>
+    <li>new GUI for layout patches/VARIA tweaks selection</li>
+</ul>
+<h4>Customizer</h4>
+<ul>
+    <li>add grayscale mode: select affected elements like palette rando</li>
+    <li>lots of new custom sprites and music tracks!</li>
+</ul>
+<h3>Bugfixes</h3>
+<ul>
+    <li>fixed a lot of issues with in-game map :
+      <ul>
+        <li>removed garbage tiles that could sometimes appear</li>
+        <li>some area portals sometimes did not show</li>
+        <li>Samus cursor no longer shows in the wrong area when unpausing</li>
+        <li>fixed Nothing items that sometimes weren't "collected" resulting in item dot staying on the map</li>
+        <li>fixed issue with map tile counting that could prevent 100% map/explore area objectives to be completable</li>
+        <li>made visible hidden tile in Green Brinstar Firefleas</li>
+        <li>do not count explored empty tiles (X-Ray climbing, etc.)</li>
+        <li>fixed door icon colors when color blind mode is enabled</li>
+       </ul>
+     </li>
+    <li>tweaked randomization for objectives to use gaussian and avoid the "complete 3 objectives out of these 15" effect</li>
+    <li>solver: no longer rush MB and end with too high difficulty</li>
+    <li>tracker: fixed issues in difficulty computation</li>
+    <li>plando: fix issues with patches saving/re-apply</li>
+</ul>
+
+    </li>
+    <li>
       <h4>2023/07/17</h4>
       <p>Here is a mini-release with several bugfixes from the recent one, and a graphical change based on user feedback.</p>
       <p>The most visible change is a font adjustment. Vanilla font has been brought back for item collection message boxes. The custom font, used for HUD and pause menu, has been replaced with another that is closer to vanilla in style, and we added lowercase letters.</p>

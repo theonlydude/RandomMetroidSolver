@@ -48,7 +48,8 @@ class OutWeb(Out):
             'Reserve': 26,
             'Missile': 27,
             'Super': 28,
-            'PowerBomb': 29
+            'PowerBomb': 29,
+            'MotherBrain': 30,
         }
         self.key = lambda item: self.order[item[item.find('-')+1:]] if '-' in item else self.order[item]
 

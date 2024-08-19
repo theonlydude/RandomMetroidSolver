@@ -7,6 +7,7 @@ from utils.parameters import easy, medium, hard, harder, hardcore, mania
 from utils.utils import getPresetDir, getPythonExec
 from utils.db import DB
 from utils.colors import areaColors, RGB_24_to_html
+from utils.version import displayedVersion
 from solver.conf import SolverConf
 
 from gluon.validators import IS_ALPHANUMERIC, IS_LENGTH, IS_MATCH
@@ -61,10 +62,10 @@ class Solver(object):
                 else:
                     try:
                         (ok, result) = self.computeDifficulty(jsonRomFileName, preset)
-                        if not ok:
+                        if ok:
+                            self.session.solver['result'] = result
+                        else:
                             self.session.flash = result
-                            redirect(URL(r=self.request, f='solver'))
-                        self.session.solver['result'] = result
                     except Exception as e:
                         print("Error loading the ROM file, exception: {}".format(e))
                         self.session.flash = "Error loading the ROM file"
@@ -443,7 +444,7 @@ class Solver(object):
             with open(jsonFileName) as jsonFile:
                 result = json.load(jsonFile)
         else:
-            result = "Solver: something wrong happened while solving the ROM"
+            result = "Please use a seed from current version {}".format(displayedVersion)
 
         db.addSolverResult(id, ret, duration, result)
         db.close()

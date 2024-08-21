@@ -135,9 +135,15 @@ if __name__ == "__main__":
                 i += 1
             else:
                 raise ValueError("Invalid button name : " + str(b))
+    incompatible = []
     colorBlind = 'color_blind.ips' in args.patches
+    wide = 'widescreen.ips' in args.patches
     if colorBlind:
         args.patches.append('colorblind_palettes.ips')
+    if wide:
+        # widescreen patch comes with its own fast doors/elevators
+        incompatible += ['fast_doors.ips', 'elevators_speed.ips']
+    args.patches =  ['remove_' + p for p in incompatible] + [p for p in args.patches if p not in incompatible]
     try:
 
         if args.rom is not None:

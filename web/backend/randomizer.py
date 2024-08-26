@@ -46,8 +46,8 @@ class Randomizer(object):
 
             # on the front end we're using objective.name.startsWith('clear ')
             # remove this?
-            if o_exclusions.get('tourian') == 'Disabled':
-                objective['disable_tourian'] = True
+            if o_exclusions.get('canAutoClear'):
+                objective['canAutoClear'] = True
 
             if o_exclusions.get('limit') is not None:
                 # o_exclusions also has 'type' but it's always objective['category']
@@ -100,6 +100,7 @@ class Randomizer(object):
             "objectives_true_completion": "100% items and map completion, kill all bosses/minibosses, do all the memes",
             "objectives_bingo": "Complete 5 out of 10 random objectives and rush to the ship",
             "objectives_blind_bingo": "objectives_bingo with area randomization and hidden objectives",
+            "objectives_rampage": "Kill everything!",
             "quite_random": "randomizes a few significant settings to have various seeds",
             "scavenger_hard":"Pretty hostile Scavenger mode",
             "scavenger_random":"Randomize everything within Scavenger mode",
@@ -125,7 +126,7 @@ class Randomizer(object):
             "Area": ["way_of_chozo", "where_am_i", "where_is_morph"],
             "Doors": ["doors_long", "doors_short"],
             "Minimizer": ["minimizer", "minimizer_hardcore", "minimizer_maximizer"],
-            "Objectives": ["objectives_all_bosses", "objectives_memes", "objectives_clear_areas", "objectives_explore_areas", "objectives_true_completion", "objectives_bingo", "objectives_blind_bingo", "objectives_short", "objectives_long", "objectives_robots_notweaks"],
+            "Objectives": ["objectives_all_bosses", "objectives_memes", "objectives_clear_areas", "objectives_explore_areas", "objectives_true_completion", "objectives_bingo", "objectives_blind_bingo", "objectives_short", "objectives_long", "objectives_rampage", "objectives_robots_notweaks"],
             "Hud": ["hud", "hud_start"],
             "Scavenger": ["scavenger_random", "scavenger_speedrun", "scavenger_vanilla_but_not", "scavenger_visit"],
             "Hard": ["hardway2hell", "highway2hell", "stupid_hard", "objectives_hard_heat", "objectives_hard_water", "hud_hard", "scavenger_hard"],

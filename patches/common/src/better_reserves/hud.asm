@@ -19,9 +19,9 @@ org $809B4E
 ; First things first, check if reserves are Full, Empty, or neither.
 ; The way this works is that we are storing a value in $14 with palette bits set that will later be XOR'ed with the reserve tilemap
 ; tiles loaded from ROM. We are doing this to manipulate the tiles' palette bits on load.
-	LDA $09C0 : DEC : BNE BRANCH_NOT_AUTO_RESERVES ;small optimization of vanilla code
+	LDA $09C0 : CMP.w #1         ; keep vanilla code here to stay compatible with multitroid hijack
+        BNE BRANCH_NOT_AUTO_RESERVES
 HandleAutoReserveTilemap:
-        lda #not_full_tiles : sta $16
 	LDA $09D6 : BNE .NotEmpty
 	stz $14 : BRA + ; Reserves are empty, display blue icon (don't modify any bits)
 
@@ -30,8 +30,7 @@ HandleAutoReserveTilemap:
 	LDA #$1000 : sta $14 : BRA + ; Reserves are not empty nor full, display yellow icon.
 
 .Full:
-        lda #full_tiles : sta $16
-	stz $14 ; Reserves are full, display pink icon (VARIA: use special tiles and don't modify palette bits)
+        lda #$2000 : sta $14    ; use special value to load full tiles and not modify palette (VARIA)
 +       tdc : TAY : TAX
 .write:
 	JSL WriteTilemap
@@ -60,6 +59,14 @@ macro nextRowX()
 endmacro
 
 WriteTilemap:
+        lda $14 : cmp #$2000 : bne .not_full
+        ;; full special case
+        stz $14
+        lda #full_tiles : sta $16
+        bra +
+.not_full:
+        lda #not_full_tiles : sta $16
++
 ;print "freespace usage start: ", pc ; DEBUG
 	; Y is index into reserve tilemap in ROM to transfer
 	; X is index into reserve tilemap destination in RAM

@@ -7,6 +7,7 @@ from graph.graph_utils import GraphUtils
 from utils.utils import removeChars, getPresetDir, getPythonExec
 from utils.doorsmanager import DoorsManager
 from utils.db import DB
+from utils.version import displayedVersion
 from solver.interactiveSolver import InteractiveSolver
 from logic.logic import Logic
 
@@ -233,6 +234,8 @@ class WS_common_init(WS):
         try:
             solver = InteractiveSolver(self.logic)
             state = solver.initialize(mode, romData, romFileName, presetFileName, fill, extraSettings)
+        except KeyError as e:
+            raiseHttp(400, "Please use a seed from current version {}".format(displayedVersion), True)
         except Exception as e:
             msg = "Something wrong happened during isolver init: {}".format(e)
             print(msg)

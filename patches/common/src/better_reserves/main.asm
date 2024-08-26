@@ -110,7 +110,7 @@ MainReserveRoutine:
 
 ;decrement reserve health
 	DEC !SamusReserveHealthRam
-
+        beq .retend
 .retcont
 	CLC : RTS
 .retend

@@ -104,29 +104,3 @@ add_etanks_and_save:
 	rts
 
 warnpc $a1f4ff
-
-;;; patch pit and climb room states
-org $8fe652
-;;; pit room: in vanilla, checks for morph+missiles collection
-morph_missile_check:
-    ;; check that zebes is awake instead: works with both standard
-    ;; start with wake_zebes.ips, and non standard start with wake
-    ;; zebes forced from the start.
-    lda #$0000 : jsl $808233
-    bcc .not_awake
-    bra .awake
-org $8fe65f
-.awake:
-org $8fe666
-.not_awake:
-
-;;; Enemies gray doors set zebes awake when unlocking.
-;;; Disable that, as the event is set in blue brin by
-;;; wake_zebes patch (or right away if random start),
-;;; and we don't want it to be set if we encounter
-;;; Climb flashing portal door (enemy door set at 0)
-org $84BE0B
-skip_wake_zebes:
-	bra .skip
-org $84BE12
-.skip:

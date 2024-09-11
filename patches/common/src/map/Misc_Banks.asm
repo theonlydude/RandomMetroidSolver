@@ -18,11 +18,6 @@ ORG $80A153 : JSL RevertAreaNumber
 %freespaceStart(!FreespaceBank80_VRAM)
 NMI_MinimapHijack:
 	LDA !Update_Minimap_VRAM_Flag : BEQ .end	;check if update minimap flag is set
-        ;; if BG1/BG2 column or line update (increases NMI runtime), skip minimap to trigger it next frame
-        lda $0962 : bne .end ; BG1 column
-        lda $0970 : bne .end ; BG1 row
-        lda $097e : bne .end ; BG2 column
-        lda $098c : bne .end ; BG2 row
         ;; actually update gfx
 	PHP : SEP #$30
 ;row 0 tiles to VRAM

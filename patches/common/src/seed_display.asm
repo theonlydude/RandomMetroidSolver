@@ -175,4 +175,4 @@ print "InfoStr : ", pc
     db 0
 
 print "82 end : ", pc
-%freespaceEnd($82fb6f)
+%freespaceEnd($82fb6d)

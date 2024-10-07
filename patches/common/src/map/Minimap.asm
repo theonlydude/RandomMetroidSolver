@@ -95,7 +95,7 @@ UpdateActiveMapWithExplored:
         ;; if special slope tile, explore tile above
         ply : plx
         dey #4                  ; up one row
-        LDA $07F7,y : jsr UpdateActiveMapWithExplored
+        sep #$20 : LDA $07F7,y : jsr UpdateActiveMapWithExplored
         bra .end
 ++
         ply : plx

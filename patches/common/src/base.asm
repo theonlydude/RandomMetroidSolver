@@ -1379,5 +1379,22 @@ warnpc $85afff
 org $84836A
 handle_special_xray:
         bra .skip
+.item_check:
+        ;; reuse this space to fix the vanilla "is it an item PLM?" check
+        ;; return carry set if PLM is an item
+        cmp.w #vanilla_item_plms_start : bcc +    ; vanilla check
+        cmp.w #non_item_plm_start : bcc +
+        rts
++
+        clc
+        rts
+warnpc $848398
 org $848398
 .skip:
+
+org $84df89
+vanilla_item_plms_start:        
+
+;;; NOTE: This has to be changed it we actually add new items PLMs
+org $84f000
+non_item_plm_start:

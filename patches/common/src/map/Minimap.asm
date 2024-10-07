@@ -82,15 +82,25 @@ UpdateMinimapTileset:
 ;;; A = explored bits of samus current position
 ;;; Y = byte offset in current area map
 UpdateActiveMapWithExplored:
-	BIT $AC04,x : BNE ++		;check if tilebit has been set already
+	BIT $AC04,x : BNE .end		;check if tilebit has been set already
+        phx : phy
 	ORA $AC04,x : STA $07F7,y	;save bit
 	STX $20 : REP #$30
 	JSL LoadSourceMapData		;[$00] = long pointer to current area map data
 	TYA : ASL #3 : CLC : ADC $20 : ASL : TAX : TAY	;offset of maptile
 	LDA [$00],y : STA !RAM_ActiveMap,x				;save origin tile to RAM minimap
         and #$03FF : cmp.w #!EmptyTile : beq ++ ; don't count empty tiles you could reach with X-Ray climb etc.
-        lda !VARIA_area_id : jsl update_area_tilecount
-++ : RTS
+        pha : lda !VARIA_area_id : jsl update_area_tilecount : pla
+        cmp.w #!SpecialSlopeTile : bne ++
+        ;; if special slope tile, explore tile above
+        ply : plx
+        dey #4                  ; up one row
+        LDA $07F7,y : jsr UpdateActiveMapWithExplored
+        bra .end
+++
+        ply : plx
+.end:
+        RTS
 
 ApplyTileGFXtoRAM:
 	PHB : PEA $7E00 : PLB : PLB						;bank $7E

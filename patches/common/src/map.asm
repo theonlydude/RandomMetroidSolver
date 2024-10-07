@@ -62,6 +62,8 @@ math pri off
 	!EmptyTile = $1F
 ;Tile in HUD graphic used to cover up the minimap during a bossfight (vanilla: $1F)
 	!BossfightMinimapCovertile = $1F
+;When this tile is traversed, explore tile above Samus (mask h/v flip away)
+        !SpecialSlopeTile = $11
 
 
 ;Set position for setup ASM. Similar to $C90A (set collected map for current area) seen in tourian entrance room (setup ASM)

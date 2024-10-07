@@ -1373,19 +1373,24 @@ tilemap_backup_not_needed:
 
 warnpc $85afff
 
+org $848328
+        jsr handle_special_xray_item_check
+
 ;;; Disable special X-Ray handler for animals room during escape, as
 ;;; this otherwise unused state header field is used to hold VARIA
 ;;; area for the room
 org $84836A
 handle_special_xray:
         bra .skip
+ ;;; reuse this space to fix the vanilla "is it an item PLM?" check
+ ;;; return carry set if PLM is an item
 .item_check:
-        ;; reuse this space to fix the vanilla "is it an item PLM?" check
-        ;; return carry set if PLM is an item
         cmp.w #vanilla_item_plms_start : bcc +    ; vanilla check
-        cmp.w #non_item_plm_start : bcc +
-        rts
+        cmp.w #non_item_plm_start : bcs ++
+        sec
 +
+        rts
+++
         clc
         rts
 warnpc $848398
@@ -1395,6 +1400,6 @@ org $848398
 org $84df89
 vanilla_item_plms_start:        
 
-;;; NOTE: This has to be changed it we actually add new items PLMs
-org $84f000
+;;; NOTE: This has to be changed if we actually add new items PLMs
+org $84f000                     ; our first PLM starts a little after this limit
 non_item_plm_start:

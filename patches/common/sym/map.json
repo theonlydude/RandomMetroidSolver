@@ -1,6 +1,6 @@
 {
     "ItemTileCheckList": 9029632,
-    "area_tiles": 9480961,
+    "area_tiles": 9480988,
     "doors_mapicons_by_area": 8764602,
     "freespace_alloc_end_1": 9029632,
     "freespace_alloc_end_2": 9030432,
@@ -24,5 +24,5 @@
     "mapicons_tables_limit": 8769279,
     "objectives_mapicons_by_area": 8764626,
     "portals_mapicons_by_area": 8764614,
-    "total_tiles": 9480973
+    "total_tiles": 9481000
 }

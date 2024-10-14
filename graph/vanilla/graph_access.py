@@ -117,8 +117,16 @@ accessPoints = [
     AccessPoint('Big Pink', 'GreenPinkBrinstar', 'Pink Brinstar', {
         'Green Hill Zone Top Right': Cache.ldeco(lambda sm: sm.wand(sm.haveItem('Morph'),
                                                                     sm.traverse('BigPinkBottomRight'))),
-        'Green Brinstar Elevator': lambda sm: sm.canPassDachoraRoom()
+        'Green Brinstar Elevator': lambda sm: sm.canPassDachoraRoom(),
+#        'SporeSpawnFrontDoorOut': lambda sm: sm.traverse()
     }, internal=True, start={'spawn': 0x0100, 'layout': ['spospo_save'], 'solveArea': "Pink Brinstar"}),
+    # AccessPoint('SporeSpawnFrontDoorOut', 'GreenPinkBrinstar', 'Pink Brinstar', { # FIXME solve area?
+    #     'Big Pink': lambda sm: SMBool(True)
+    # }, roomInfo = {'RoomPtr':0x, "area": 0x1 },
+    #    exitInfo = {'DoorPtr':0x, 'direction': 0x, "cap": (0x, 0x), "bitFlag": 0x0,
+    #                "screen": (0x, 0x), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+    #    entryInfo = {'SamusX':0x, 'SamusY':0x},
+    #    dotOrientation = 'w'),
     AccessPoint('Green Hill Zone Top Right', 'GreenPinkBrinstar', 'Brinstar Hills', {
         'Noob Bridge Right': lambda sm: SMBool(True),
         'Big Pink': Cache.ldeco(lambda sm: sm.haveItem('Morph'))
@@ -213,14 +221,32 @@ accessPoints = [
        entryInfo = {'SamusX':0x49f, 'SamusY':0xb8},
        traverse=lambda sm: sm.canOpenEyeDoors(),
        dotOrientation = 's'),
-    AccessPoint('PhantoonRoomIn', 'WreckedShip', 'Phantoon Boss', {},
-       boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside,
+    AccessPoint('PhantoonRoomIn', 'WreckedShip', 'Phantoon Boss', {
+        'PhantoonBackDoorIn': lambda sm: SMBool(True)
+    }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside,
+       traverse = lambda sm: Bosses.bossDead(sm, 'Phantoon'),
        roomInfo = {'RoomPtr':0xcd13, "area": 0x3},
        exitInfo = {'DoorPtr':0xa2c4, 'direction': 0x5, "cap": (0x4e, 0x6), "bitFlag": 0x0,
                    "screen": (0x4, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe1fe,
                    "exitAsm": "door_transition_boss_exit_fix"},
        entryInfo = {'SamusX':0x2e, 'SamusY':0xb8},
        dotOrientation = 's'),
+    AccessPoint('PhantoonBackDoorIn', 'WreckedShip', 'Phantoon Boss', {
+        'PhantoonRoomIn': lambda sm: SMBool(True)
+    }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside | BossAccessPointFlags.Backdoor,
+       roomInfo = {'RoomPtr':0xcd13, "area": 0x3},
+       exitInfo = {'DoorPtrSym':'corridor_phantoon_door_phantoon_back_door',
+                   'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
+       entryInfo = {'SamusX':0xcf, 'SamusY':0xb0},
+       dotOrientation = 'w'),
+    AccessPoint('PhantoonBackDoorOut', 'WreckedShip', 'Phantoon Boss', {}, # placeholder for transitions, does not exist in game
+       boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Backdoor,
+       roomInfo = {'RoomPtr':0xffff, "area": 0x3},
+       exitInfo = {'DoorPtr':0xffff,
+                   'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
+       entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}),
     AccessPoint('Basement Left', 'WreckedShip', 'WreckedShip Main', {
         'Wrecked Ship Main': lambda sm: SMBool(True)
     }, roomInfo = {'RoomPtr':0xcc6f, "area": 0x3},
@@ -343,13 +369,31 @@ accessPoints = [
        traverse=Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                sm.canOpenEyeDoors())),
        dotOrientation = 'e'),
-    AccessPoint('RidleyRoomIn', 'LowerNorfair', 'Ridley Boss', {},
-       boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside,
+    AccessPoint('RidleyRoomIn', 'LowerNorfair', 'Ridley Boss', {
+        'RidleyBackDoorIn': lambda sm: Bosses.bossDead(sm, 'Ridley')
+    }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside,
+       traverse = lambda sm: Bosses.bossDead(sm, 'Ridley'),
        roomInfo = {'RoomPtr':0xb32e, "area": 0x2},
        exitInfo = {'DoorPtr':0x98be, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
        entryInfo = {'SamusX':0xbf, 'SamusY':0x198}, # on Ridley's platform. entry screen has to be changed (see getDoorConnections)
        dotOrientation = 'e'),
+    AccessPoint('RidleyBackDoorIn', 'LowerNorfair', 'Ridley Boss', {
+        'RidleyRoomIn': lambda sm: SMBool(True)
+    }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside | BossAccessPointFlags.Backdoor,
+       roomInfo = {'RoomPtr':0xb698, "area": 0x2},
+       exitInfo = {'DoorPtrSym':'corridor_ridley_door_ridley_tank_back_door',
+                   'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
+       entryInfo = {'SamusX':0x38, 'SamusY':0xa8},
+       dotOrientation = 'w'),
+    AccessPoint('RidleyBackDoorOut', 'LowerNorfair', 'Ridley Boss', {}, # placeholder for transitions, does not exist in game
+       boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Backdoor,
+       roomInfo = {'RoomPtr':0xffff, "area": 0x2},
+       exitInfo = {'DoorPtr':0xffff,
+                   'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
+       entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}),
     ### Kraid
     AccessPoint('Warehouse Zeela Room Left', 'Kraid', 'Kraid', {
         'KraidRoomOut': lambda sm: sm.canPassBombPassages()
@@ -371,14 +415,32 @@ accessPoints = [
        entryInfo = {'SamusX':0x1cd, 'SamusY':0x188, 'song':0x12},
        traverse=lambda sm: sm.canOpenEyeDoors(),
        dotOrientation = 'e'),
-    AccessPoint('KraidRoomIn', 'Kraid', 'Kraid Boss', {},
-       boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside,
+    AccessPoint('KraidRoomIn', 'Kraid', 'Kraid Boss', {
+        'KraidBackDoorIn': lambda sm: Bosses.bossDead(sm, 'Kraid')
+    }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside,
+       traverse = lambda sm: Bosses.bossDead(sm, 'Kraid'),
        roomInfo = {'RoomPtr':0xa59f, "area": 0x1},
        exitInfo = {'DoorPtr':0x91ce, 'direction': 0x5, "cap": (0x1e, 0x16), "bitFlag": 0x0,
                    "screen": (0x1, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0,
                    "exitAsm": "door_transition_kraid_exit_fix"},
        entryInfo = {'SamusX':0x34, 'SamusY':0x188},
        dotOrientation = 'e'),
+    AccessPoint('KraidBackDoorIn', 'Kraid', 'Kraid Boss', {
+        'KraidRoomIn': lambda sm: SMBool(True)
+    }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside | BossAccessPointFlags.Backdoor,
+       roomInfo = {'RoomPtr':0xa6e2, "area": 0x1},
+       exitInfo = {'DoorPtrSym':'corridor_kraid_door_varia_suit_back_door',
+                   'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
+       entryInfo = {'SamusX':0xd3, 'SamusY':0x88},
+       dotOrientation = 'w'),
+    AccessPoint('KraidBackDoorOut', 'Kraid', 'Kraid Boss', {}, # placeholder for transitions, does not exist in game
+       boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Backdoor,
+       roomInfo = {'RoomPtr':0xffff, "area": 0x1},
+       exitInfo = {'DoorPtr':0xffff,
+                   'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
+       entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}),
     ### Norfair
     AccessPoint('Warehouse Entrance Left', 'Norfair', 'Norfair Entrance', {
         'Warehouse Entrance Right': lambda sm: sm.canAccessKraidsLair(),
@@ -737,8 +799,24 @@ accessPoints = [
        entryInfo = {'SamusX':0x1c8, 'SamusY':0x88},
        dotOrientation = 'e'),
     AccessPoint('Draygon Room Bottom', 'EastMaridia', 'Draygon Boss', {
-       'DraygonRoomIn': Cache.ldeco(lambda sm: sm.wand(Bosses.bossDead(sm, 'Draygon'), sm.canExitDraygon()))
+        'DraygonRoomIn': Cache.ldeco(lambda sm: sm.wand(Bosses.bossDead(sm, 'Draygon'), sm.canExitDraygon())),
+        'DraygonBackDoorIn': lambda sm: Bosses.bossDead(sm, 'Draygon')
     }, internal = True),
+    AccessPoint('DraygonBackDoorIn', 'EastMaridia', 'Draygon Boss', {
+        'Draygon Room Bottom': lambda sm: SMBool(True)
+    }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside | BossAccessPointFlags.Backdoor,
+       roomInfo = {'RoomPtr':0xd9aa, "area": 0x4},
+       exitInfo = {'DoorPtrSym':'corridor_draygon_door_space_jump_back_door', 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
+       entryInfo = {'SamusX':0x34, 'SamusY':0x88},
+       dotOrientation = 'w'),
+    AccessPoint('DraygonBackDoorOut', 'EastMaridia', 'Draygon Boss', {}, # placeholder for transitions, does not exist in game
+       boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Backdoor,
+       roomInfo = {'RoomPtr':0xffff, "area": 0x4},
+       exitInfo = {'DoorPtr':0xffff,
+                   'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
+       entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}),
     ### Red Brinstar. Main nodes: Red Tower Top Left, East Tunnel Right
     AccessPoint('Red Tower Top Left', 'RedBrinstar', 'Red Brinstar Middle', {
         # go up

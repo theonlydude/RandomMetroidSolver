@@ -5,7 +5,7 @@ from graph.graph_utils import GraphUtils, vanillaTransitions, vanillaBossesTrans
 from logic.logic import Logic
 from logic.smbool import SMBool
 from logic.helpers import Bosses
-from graph.graph import AccessGraphRando as AccessGraph
+from graph.graph import BossAccessPointFlags, AccessGraphRando as AccessGraph
 from graph.graph_utils import graphAreas, getAccessPoint
 from utils.objectives import Objectives
 from rando.ItemLocContainer import getItemLocStr
@@ -58,7 +58,7 @@ class GraphBuilder(object):
                 if not self.bossRando:
                     transitions += vanillaBossesTransitions
                 else:
-                    transitions += GraphUtils.createBossesTransitions()
+                    transitions += GraphUtils.createBossesTransitions(BossAccessPointFlags.G4, False)
                 if not self.areaRando:
                     transitions += vanillaTransitions
                 else:

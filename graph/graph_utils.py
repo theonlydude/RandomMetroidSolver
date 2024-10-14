@@ -64,19 +64,19 @@ vanillaMiniBossesTransitions = [
     ('BotwoonFrontDoorOut', 'BotwoonFrontDoorIn')
 ]
 
-# vanillaBossesTransitionsBack = [
-#     ('KraidBackDoorOut', 'KraidBackDoorIn'),
-#     ('PhantoonBackDoorOut', 'PhantoonBackDoorIn'),
-#     ('DraygonBackDoorOut', 'DraygonBackDoorIn'),
-#     ('RidleyBackDoorOut', 'RidleyBackDoorIn')
-# ]
+vanillaBossesTransitionsBack = [
+    ('KraidBackDoorOut', 'KraidBackDoorIn'),
+    ('PhantoonBackDoorOut', 'PhantoonBackDoorIn'),
+    ('DraygonBackDoorOut', 'DraygonBackDoorIn'),
+    ('RidleyBackDoorOut', 'RidleyBackDoorIn')
+]
 
-# vanillaMiniBossesTransitionsBack = [
-#     ('SporeSpawnBackDoorOut', 'SporeSpawnBackDoorIn'),
-#     ('CrocomireBackDoorOut', 'CrocomireBackDoorIn'),
-#     ('GoldenTorizoBackDoorOut', 'GoldenTorizoBackDoorIn'),
-#     ('BotwoonBackDoorOut', 'BotwoonBackDoorIn')
-# ]
+vanillaMiniBossesTransitionsBack = [
+    ('SporeSpawnBackDoorOut', 'SporeSpawnBackDoorIn'),
+    ('CrocomireBackDoorOut', 'CrocomireBackDoorIn'),
+    ('GoldenTorizoBackDoorOut', 'GoldenTorizoBackDoorIn'),
+    ('BotwoonBackDoorOut', 'BotwoonBackDoorIn')
+]
 
 # vanilla escape transition in first position
 vanillaEscapeTransitions = [
@@ -186,7 +186,7 @@ class GraphUtils:
             'variaTweaks': ap.Start.get('variaTweaks', [])
         }
 
-    def _createBossesTransitions(vanillaTransitions, back):
+    def _createBossesTransitions(vanillaTransitions):
         transitions = vanillaTransitions
         def isVanilla():
             for t in vanillaTransitions:
@@ -208,7 +208,6 @@ class GraphUtils:
 
     def _addBackDoorTransitions(transitions):
         apList = Logic.accessPoints()
-        
         pass
 
     def createBossesTransitions(transitionFlags, split):
@@ -216,16 +215,16 @@ class GraphUtils:
             vanillaTransitions = []
             if transitionFlags & BossAccessPointFlags.G4:
                 vanillaTransitions += vanillaBossesTransitions
-            if transitionFlags & BossAccessPointFlags.Minibosses:
+            if transitionFlags & BossAccessPointFlags.MiniBoss:
                 vanillaTransitions += vanillaMiniBossesTransitions
             transitions = GraphUtils._createBossesTransitions(vanillaTransitions)
         else:
             transitions = []
             if transitionFlags & BossAccessPointFlags.G4:
                 transitions += GraphUtils._createBossesTransitions(vanillaBossesTransitions)
-            if transitionFlags & BossAccessPointFlags.Minibosses:
+            if transitionFlags & BossAccessPointFlags.MiniBoss:
                 transitions += GraphUtils._createBossesTransitions(vanillaMiniBossesTransitions)
-        if transitionFlags & BossAccessPointFlags.Minibosses:
+        if transitionFlags & BossAccessPointFlags.MiniBoss:
             GraphUtils._addBackDoorTransitions(transitions)
         return transitions
 

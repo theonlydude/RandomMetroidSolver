@@ -118,15 +118,38 @@ accessPoints = [
         'Green Hill Zone Top Right': Cache.ldeco(lambda sm: sm.wand(sm.haveItem('Morph'),
                                                                     sm.traverse('BigPinkBottomRight'))),
         'Green Brinstar Elevator': lambda sm: sm.canPassDachoraRoom(),
-#        'SporeSpawnFrontDoorOut': lambda sm: sm.traverse()
+        'SporeSpawnFrontDoorOut': lambda sm: sm.traverse('BigPinkTopRight'),
+        'SporeSpawnBackDoorOut': lambda sm: sm.wand(sm.knowsSporeSpawnBackDoor(),
+                                                    sm.haveItem('Super'),
+                                                    sm.canPassBombPassages())
     }, internal=True, start={'spawn': 0x0100, 'layout': ['spospo_save'], 'solveArea': "Pink Brinstar"}),
-    # AccessPoint('SporeSpawnFrontDoorOut', 'GreenPinkBrinstar', 'Pink Brinstar', { # FIXME solve area?
-    #     'Big Pink': lambda sm: SMBool(True)
-    # }, roomInfo = {'RoomPtr':0x, "area": 0x1 },
-    #    exitInfo = {'DoorPtr':0x, 'direction': 0x, "cap": (0x, 0x), "bitFlag": 0x0,
-    #                "screen": (0x, 0x), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
-    #    entryInfo = {'SamusX':0x, 'SamusY':0x},
-    #    dotOrientation = 'w'),
+    AccessPoint('SporeSpawnFrontDoorOut', 'GreenPinkBrinstar', 'Pink Brinstar', { # FIXME solve area?
+        'Big Pink': lambda sm: SMBool(True)
+    }, roomInfo = {'RoomPtr':0x9d9c, "area": 0x1 },
+       exitInfo = {'DoorPtr':0x8e3e, 'direction': 0x7, "cap": (0x6, 0x2e), "bitFlag": 0x0,
+                   "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0x382, 'SamusY':0x78},
+       dotOrientation = 'n'),
+    AccessPoint('SporeSpawnFrontDoorIn', 'GreenPinkBrinstar', 'Pink Brinstar', { # FIXME solve area?
+        'SporeSpawnBackDoorIn': lambda sm: Bosses.bossDead(sm, "SporeSpawn")
+    }, roomInfo = {'RoomPtr':0x9dc7, "area": 0x1 },
+       exitInfo = {'DoorPtr':0x8e56, 'direction': 0x6, "cap": (0x36, 0x3), "bitFlag": 0x0,
+                   "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0x45, 'SamusY':0x2c8},
+       dotOrientation = 's'),
+    AccessPoint('SporeSpawnBackDoorIn', 'GreenPinkBrinstar', 'Pink Brinstar', {}, # FIXME solve area?
+       roomInfo = {'RoomPtr':0xa0a4, "area": 0x1 },
+       exitInfo = {'DoorPtr':0x8d1e, 'direction': 0x5, "cap": (0x2e, 0x6), "bitFlag": 0x0,
+                   "screen": (0x2, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0x35, 'SamusY':0x888},
+       dotOrientation = 'e'),
+    AccessPoint('SporeSpawnBackDoorOut', 'GreenPinkBrinstar', 'Pink Brinstar', { # FIXME solve area?
+        'Big Pink': lambda sm: sm.wand(sm.haveItem('Super'), sm.canPassBombPassages())
+    }, roomInfo = {'RoomPtr':0x9b5b, "area": 0x1 },
+       exitInfo = {'DoorPtr':0x8f76, 'direction': 0x4, "cap": (0x1, 0x86), "bitFlag": 0x0,
+                   "screen": (0x0, 0x8), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0x2d3, 'SamusY':0x88},
+       dotOrientation = 'w'),
     AccessPoint('Green Hill Zone Top Right', 'GreenPinkBrinstar', 'Brinstar Hills', {
         'Noob Bridge Right': lambda sm: SMBool(True),
         'Big Pink': Cache.ldeco(lambda sm: sm.haveItem('Morph'))
@@ -711,9 +734,8 @@ accessPoints = [
                                                            # same requirements as aq items: spark from bottom or snail clip
                                                            sm.wand(RomPatches.has(RomPatches.AqueductBombBlocks),
                                                                    sm.canAccessAqueductItemsFromBottom()))),
-        'Post Botwoon': Cache.ldeco(lambda sm: sm.wand(sm.canJumpUnderwater(),
-                                                       sm.canPassBotwoonHallway(),
-                                                       sm.haveItem('Botwoon'))),
+        'BotwoonFrontDoorOut': Cache.ldeco(lambda sm: sm.wand(sm.canJumpUnderwater(),
+                                                              sm.canPassBotwoonHallway()),
         'Left Sandpit': lambda sm: sm.canAccessSandPits(),
         'Right Sandpit': lambda sm: sm.canAccessSandPits(),
         'Aqueduct': lambda sm: sm.canAccessAqueductItemsFromBottom()
@@ -725,11 +747,37 @@ accessPoints = [
                 'save':"Save_Aqueduct", 'needsPreRando':True,
                 'areaLayout': ['aqueduct_bomb_blocks'],
                 'doors': [0x96]}),
+    AccessPoint('BotwoonFrontDoorOut', 'EastMaridia', 'Maridia Pink Top', { # FIXME solve area?
+        'Aqueduct Bottom': lambda sm: sm.canPassBotwoonHallway()
+    }, roomInfo = {'RoomPtr':0xd617, "area": 0x4 },
+       exitInfo = {'DoorPtr':0xa774, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0x3cf, 'SamusY':0x88},
+       dotOrientation = 'n'),
+    AccessPoint('BotwoonFrontDoorIn', 'EastMaridia', 'Maridia Pink Top', { # FIXME solve area?
+        'BotwoonBackDoorIn': lambda sm: Bosses.bossDead(sm, "Botwoon")
+    }, roomInfo = {'RoomPtr':0xd95e, "area": 0x4 },
+       exitInfo = {'DoorPtr':0xa90c, 'direction': 0x5, "cap": (0x3e, 0x6), "bitFlag": 0x0,
+                   "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0x30, 'SamusY':0xb8},
+       dotOrientation = 's'),
+    AccessPoint('BotwoonBackDoorIn', 'EastMaridia', 'Maridia Pink Top', { # FIXME solve area?
+        'BotwoonFrontDoorIn': lambda sm: Bosses.bossDead(sm, "Botwoon")
+    }, roomInfo = {'RoomPtr':0xd95e, "area": 0x4 },
+       exitInfo = {'DoorPtr':0xa918, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0x1d3, 'SamusY':0x88},
+       dotOrientation = 'e'),
+    AccessPoint('BotwoonBackDoorOut', 'EastMaridia', 'Maridia Pink Top', { # FIXME solve area?
+        'Aqueduct Bottom': lambda sm: SMBool(True), # go down sandpits
+        'Post Botwoon': lambda sm: sm.canTraverseBotwoonETankRoom()
+    }, roomInfo = {'RoomPtr':0xd7e4, "area": 0x4 },
+       exitInfo = {'DoorPtr':0xa84c, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
+                   "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0x30, 'SamusY':0x88},
+       dotOrientation = 'w'),
     AccessPoint('Post Botwoon', 'EastMaridia', 'Maridia Pink Top', {
-        'Aqueduct Bottom': Cache.ldeco(lambda sm: sm.wor(sm.wand(sm.canJumpUnderwater(), # can't access the sand pits from the right side of the room
-                                                                 sm.haveItem('Morph')),
-                                                         sm.wand(sm.haveItem('Gravity'),
-                                                                 sm.haveItem('SpeedBooster')))),
+        'BotwoonBackDoorOut': lambda sm: sm.canTraverseBotwoonETankRoom(),
         'Colosseum Top Right': lambda sm: sm.canBotwoonExitToColosseum(),
         'Toilet Top': Cache.ldeco(lambda sm: sm.wand(sm.canReachCacatacAlleyFromBotowoon(),
                                                      sm.canPassCacatacAlleyEastToWest()))

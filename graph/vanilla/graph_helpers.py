@@ -677,12 +677,21 @@ class HelpersGraph(Helpers):
                       sm.canCrystalFlashClip())
 
     @Cache.decorator
-    def canDefeatBotwoon(self):
+    def enoughStuffBotwoon(self):
         sm = self.smbm
-        hallway = sm.canPassBotwoonHallway()
-        cfClip = 'CrystalFlashClip' in hallway.knows or 'SuitlessCrystalFlashClip' in hallway.knows
-        return sm.wand(hallway,
-                       sm.enoughStuffBotwoon(cfClip))
+        cfClip = False
+        if self.isVanillaBotwoon():
+            hallway = sm.canPassBotwoonHallway()
+            cfClip = 'CrystalFlashClip' in hallway.knows or 'SuitlessCrystalFlashClip' in hallway.knows
+        return super().enoughStuffBotwoon(cfClip)
+
+    @Cache.decorator
+    def canTraverseBotwoonETankRoom(self):
+        sm = self.smbm
+        return sm.wor(sm.wand(sm.canJumpUnderwater(),
+                              sm.haveItem('Morph')),
+                      sm.wand(sm.haveItem('Gravity'),
+                              sm.haveItem('SpeedBooster')))
 
     # the sandpits from aqueduct
     @Cache.decorator
@@ -800,8 +809,16 @@ class HelpersGraph(Helpers):
         return getAccessPoint('DraygonRoomOut').ConnectedTo
 
     @Cache.decorator
+    def getBotwoonConnection(self):
+        return getAccessPoint('BotwoonFrontDoorOut').ConnectedTo
+
+    @Cache.decorator
     def isVanillaDraygon(self):
         return SMBool(self.getDraygonConnection() == 'DraygonRoomIn')
+
+    @Cache.decorator
+    def isVanillaBotwoon(self):
+        return SMBool(self.getBotwoonConnection() == 'BotwoonFrontDoorIn')
 
     @Cache.decorator
     def canUseCrocRoomToChargeSpeed(self):

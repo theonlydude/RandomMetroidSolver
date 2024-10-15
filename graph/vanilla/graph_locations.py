@@ -434,7 +434,7 @@ loc.PostAvailable = (
 
 loc = locationsDict["Energy Tank, Botwoon"]
 loc.AccessFrom = {
-    'Post Botwoon': lambda sm: sm.canJumpUnderwater()
+    'BotwoonBackDoorOut': lambda sm: sm.canJumpUnderwater()
 }
 loc.Available = (
     lambda sm: sm.haveItem('Morph')
@@ -471,21 +471,23 @@ loc.Available = (
 
 loc = locationsDict["Spore Spawn"]
 loc.AccessFrom = {
-    'Big Pink': lambda sm: SMBool(True)
+    'SporeSpawnFrontDoorIn': lambda sm: SMBool(True)
 }
 loc.Available = (
-    lambda sm: sm.wand(sm.traverse('BigPinkTopRight'),
-                       sm.enoughStuffSporeSpawn())
+    lambda sm: sm.enoughStuffSporeSpawn()
 )
 
 
 loc = locationsDict["Botwoon"]
 loc.AccessFrom = {
-    'Aqueduct Bottom': lambda sm: sm.canJumpUnderwater()
+    'BotwoonFrontDoorIn': lambda sm: SMBool(True),
+    'BotwoonBackDoorIn': lambda sm: sm.wand(sm.haveItem('Wave'),
+                                            sm.canFireChargedShots(),
+                                            sm.wor(sm.have('Gravity'),
+                                                   sm.knowsGravLessLevel1()))
 }
 loc.Available = (
-    # includes botwoon hallway conditions
-    lambda sm: sm.canDefeatBotwoon()
+    lambda sm: sm.enoughStuffBotwoon()
 )
 
 
@@ -627,19 +629,10 @@ loc.Available = (
 
 loc = locationsDict["Super Missile (pink Brinstar)"]
 loc.AccessFrom = {
-    'Big Pink': lambda sm: SMBool(True)
+    'SporeSpawnBackDoorIn': lambda sm: SMBool(True)
 }
 loc.Available = (
-    lambda sm: sm.wor(sm.wand(sm.traverse('BigPinkTopRight'),
-                              sm.haveItem('SporeSpawn')),
-                      # back way into spore spawn
-                      sm.wand(sm.knowsSporeSpawnBackDoor(),
-                              sm.canOpenGreenDoors(),
-                              sm.canPassBombPassages()))
-)
-loc.PostAvailable = (
-    lambda sm: sm.wand(sm.canOpenGreenDoors(),
-                       sm.canPassBombPassages())
+    lambda sm: SMBool(True)
 )
 
 

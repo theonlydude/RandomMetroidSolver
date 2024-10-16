@@ -903,7 +903,8 @@ accessPoints = [
        dotOrientation = 'n'),
     AccessPoint('East Tunnel Right', 'RedBrinstar', 'Red Brinstar Bottom', {
         'East Tunnel Top Right': lambda sm: SMBool(True), # handled by room traverse function
-        'Glass Tunnel Top': Cache.ldeco(lambda sm: sm.wand(sm.canUsePowerBombs(),
+        'Glass Tunnel Top': Cache.ldeco(lambda sm: sm.wand(sm.wor(RomPatches.has(RomPatches.MaridiaTubeOpened),
+                                                                  sm.canUsePowerBombs())
                                                            sm.wor(sm.haveItem('Gravity'),
                                                                   sm.haveItem('HiJump'),
                                                                   sm.knowsTubeGravityJump()))),
@@ -927,11 +928,7 @@ accessPoints = [
                                                            sm.canUsePowerBombs(),
                                                            sm.wand(sm.haveItem('Morph'),
                                                                    sm.knowsTubeClip())))
-    }, traverse=Cache.ldeco(lambda sm: sm.wand(sm.wor(sm.haveItem('Gravity'),
-                                                      sm.haveItem('HiJump')),
-                                               sm.wor(RomPatches.has(RomPatches.MaridiaTubeOpened),
-                                                      sm.canUsePowerBombs()))),
-       roomInfo = {'RoomPtr':0xcefb, "area": 0x4},
+    }, roomInfo = {'RoomPtr':0xcefb, "area": 0x4},
        exitInfo = {'DoorPtr':0xa330, 'direction': 0x7, "cap": (0x16, 0x7d), "bitFlag": 0x0,
                    "screen": (0x1, 0x7), "distanceToSpawn": 0x200, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x81, 'SamusY':0x78},

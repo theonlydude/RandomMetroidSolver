@@ -395,8 +395,8 @@ class HelpersGraph(Helpers):
                               sm.haveItem('Ice'),
                               sm.wand(sm.haveItem('HiJump'),
                                       sm.knowsGetAroundWallJump()),
-                              sm.wand(sm.canUseSpringBall(),
-                                      sm.knowsSpringBallJumpFromWall())))
+                              sm.canSpringBallJumpFromWall(),
+                              sm.knowsWorstRoomWallJump()))
 
     @Cache.decorator
     def canEnterNorfairReserveAreaFromBubbleMoutainTop(self):
@@ -463,7 +463,7 @@ class HelpersGraph(Helpers):
                                              sm.wand(sm.haveItem('Charge'), sm.haveItem('Plasma')))), # require firepower if suitless for ice strat
                               sm.wand(sm.knowsGetAroundWallJump(), sm.haveItem('HiJump')),
                               sm.knowsWorstRoomWallJump(),
-                              sm.wand(sm.knowsSpringBallJumpFromWall(), sm.canUseSpringBall())))
+                              sm.canSpringBallJumpFromWall()))
 
     # checks mix of super missiles/health if heat proof. if not heat proof, just require an additional CF
     def canGoThroughLowerNorfairEnemy(self, nmyHealth, nbNmy, nmyHitDmg, supDmg=300.0):
@@ -1005,8 +1005,9 @@ class HelpersGraph(Helpers):
                               sm.wand(sm.haveItem('HiJump'),
                                       sm.knowsGetAroundWallJump()),
                               sm.canShortCharge(),
-                              sm.wand(sm.canSpringBallJump(),
-                                      sm.knowsSpringBallJumpFromWall())))
+                              sm.canSpringBallJumpFromWall(),
+                              sm.knowsWorstRoomWallJump()))
+
     @Cache.decorator
     def canAccessMamaTurtleFromMainStreet(self):
         sm = self.smbm

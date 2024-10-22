@@ -189,10 +189,16 @@ class Knows:
 
     GetAroundWallJump = SMBool(True, hard, ['GetAroundWallJump'])
     desc['GetAroundWallJump'] = {'display': 'Get around Wall-Jump',
-                                 'title': 'Tricky Wall-Jumps where you have to get around the platform you want to Wall-Jump on using Hi-Jump boots',
+                                 'title': 'Tricky Wall-Jumps where you have to get around the platform (3 tiles wide) you want to Wall-Jump on using Hi-Jump boots',
                                  'href': 'https://www.youtube.com/watch?v=2GPx-6ARSIw&t=137s',
                                  'rooms': ['The Worst Room In The Game',
                                            'Bubble Mountain', 'Plasma Room']}
+
+    WorstRoomWallJump = SMBool(False, 0, ['WorstRoomWallJump'])
+    desc['WorstRoomWallJump'] = {'display': 'Insane Wall Jump',
+                                  'title': 'Get around Wall-Jump, but without Hi-Jump',
+                                  'href': 'https://videos.maprando.com/video/999',
+                                  'rooms': ['The Worst Room In The Game', 'Plasma Room', 'Bubble Mountain', "Golden Torizo's Room"]}
 
     # bosses
     DraygonGrappleKill = SMBool(True, medium, ['DraygonGrappleKill'])
@@ -518,12 +524,6 @@ class Knows:
                                   'href': 'https://www.youtube.com/watch?v=AYK7LREbLI8',
                                   'rooms': ['The Worst Room In The Game']}
 
-    WorstRoomWallJump = SMBool(False, 0, ['WorstRoomWallJump'])
-    desc['WorstRoomWallJump'] = {'display': 'Worst Room insane wall jump',
-                                  'title': 'Do the frame+pixel perfect wall jump to get out Worst Room without Hi-Jump',
-                                  'href': 'https://clips.twitch.tv/FuriousHeartlessArugulaStrawBeary',
-                                  'rooms': ['The Worst Room In The Game']}
-
     ScrewAttackExit = SMBool(True, medium, ['ScrewAttackExit'])
     desc['ScrewAttackExit'] = {'display': 'Screw Attack Exit',
                                'title': 'Gain momentum with Hi-Jump and Speed Booster from Golden Torizo Energy Recharge room, then Wall Jump in Screw Attack room, destroying the ceiling with Screw Attack.',
@@ -771,7 +771,7 @@ class Knows:
             {'knows': ['WallJump', 'ShineSpark', 'MidAirMorph', 'CrouchJump', 'UnequipItem'],
              'title': 'Basics'},
             {'knows': ['Mockball', 'SimpleShortCharge', 'InfiniteBombJump', 'GreenGateGlitch',
-                       'GravityJump', 'GetAroundWallJump',
+                       'GravityJump', 'GetAroundWallJump', 'WorstRoomWallJump',
                        'SpringBallJump', 'SpringBallJumpFromWall', 'ShortCharge'],
              'title': 'Used across the game'}
         ],
@@ -827,7 +827,7 @@ class Knows:
               'title': 'Access'},
             {'knows': ['ScrewAttackExit', 'ScrewAttackExitWithoutScrew'],
               'title': 'Screw Attack'},
-            {'knows': ['WorstRoomIceCharge', 'WorstRoomWallJump'],
+            {'knows': ['WorstRoomIceCharge'],
               'title': 'Worst Room In The Game'},
             {'knows': [ 'FirefleasWalljump', 'DodgeLowerNorfairEnemies'],
              'title': 'Other'}

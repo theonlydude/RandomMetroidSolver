@@ -219,7 +219,7 @@ loc.PostAvailable = (
 
 loc = locationsDict["Grapple Beam"]
 loc.AccessFrom = {
-    'Crocomire Room Top': lambda sm: SMBool(True)
+    'CrocomireBackDoorOut': lambda sm: SMBool(True)
 }
 loc.Available = (
     lambda sm: sm.wand(sm.haveItem('Crocomire'),
@@ -879,7 +879,7 @@ loc.Available = (
 
 loc = locationsDict["Power Bomb (Crocomire)"]
 loc.AccessFrom = {
-    'Crocomire Room Top': lambda sm: SMBool(True)
+    'CrocomireBackDoorOut': lambda sm: SMBool(True)
 }
 loc.Available = (
     lambda sm: sm.wand(sm.traverse('PostCrocomireUpperLeft'),
@@ -898,7 +898,7 @@ loc.Available = (
 
 loc = locationsDict["Missile (below Crocomire)"]
 loc.AccessFrom = {
-    'Crocomire Room Top': lambda sm: SMBool(True)
+    'CrocomireBackDoorOut': lambda sm: SMBool(True)
 }
 loc.Available = (
     lambda sm: sm.wand(sm.traverse('PostCrocomireShaftRight'), sm.haveItem('Crocomire'), sm.haveItem('Morph'))
@@ -907,7 +907,7 @@ loc.Available = (
 
 loc = locationsDict["Missile (Grapple Beam)"]
 loc.AccessFrom = {
-    'Crocomire Room Top': lambda sm: SMBool(True)
+    'CrocomireBackDoorOut': lambda sm: SMBool(True)
 }
 loc.Available = (
     lambda sm: sm.wand(sm.haveItem('Crocomire'),

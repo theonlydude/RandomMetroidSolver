@@ -1,3 +1,5 @@
+import copy
+
 from graph.graph import AccessPoint, BossAccessPointFlags
 from utils.parameters import Settings
 from rom.rom_patches import RomPatches
@@ -125,19 +127,22 @@ accessPoints = [
     }, internal=True, start={'spawn': 0x0100, 'layout': ['spospo_save'], 'solveArea': "Pink Brinstar"}),
     AccessPoint('SporeSpawnFrontDoorOut', 'GreenPinkBrinstar', 'Pink Brinstar', { # FIXME solve area?
         'Big Pink': lambda sm: SMBool(True)
-    }, roomInfo = {'RoomPtr':0x9d9c, "area": 0x1 },
+    }, boss = BossAccessPointFlags.MiniBoss,
+       roomInfo = {'RoomPtr':0x9d9c, "area": 0x1 },
        exitInfo = {'DoorPtr':0x8e3e, 'direction': 0x7, "cap": (0x6, 0x2e), "bitFlag": 0x0,
                    "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x382, 'SamusY':0x78},
        dotOrientation = 'n'),
     AccessPoint('SporeSpawnFrontDoorIn', 'GreenPinkBrinstar', 'Pink Brinstar', { # FIXME solve area?
         'SporeSpawnBackDoorIn': lambda sm: Bosses.bossDead(sm, "SporeSpawn")
-    }, roomInfo = {'RoomPtr':0x9dc7, "area": 0x1 },
+    }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Inside,
+       roomInfo = {'RoomPtr':0x9dc7, "area": 0x1 },
        exitInfo = {'DoorPtr':0x8e56, 'direction': 0x6, "cap": (0x36, 0x3), "bitFlag": 0x0,
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x45, 'SamusY':0x2c8},
        dotOrientation = 's'),
     AccessPoint('SporeSpawnBackDoorIn', 'GreenPinkBrinstar', 'Pink Brinstar', {}, # FIXME solve area?
+       boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor | BossAccessPointFlags.Inside,
        roomInfo = {'RoomPtr':0xa0a4, "area": 0x1 },
        exitInfo = {'DoorPtr':0x8d1e, 'direction': 0x5, "cap": (0x2e, 0x6), "bitFlag": 0x0,
                    "screen": (0x2, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -145,7 +150,8 @@ accessPoints = [
        dotOrientation = 'e'),
     AccessPoint('SporeSpawnBackDoorOut', 'GreenPinkBrinstar', 'Pink Brinstar', { # FIXME solve area?
         'Big Pink': lambda sm: sm.wand(sm.haveItem('Super'), sm.canPassBombPassages())
-    }, roomInfo = {'RoomPtr':0x9b5b, "area": 0x1 },
+    }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor,
+       roomInfo = {'RoomPtr':0x9b5b, "area": 0x1 },
        exitInfo = {'DoorPtr':0x8f76, 'direction': 0x4, "cap": (0x1, 0x86), "bitFlag": 0x0,
                    "screen": (0x0, 0x8), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x2d3, 'SamusY':0x88},
@@ -308,13 +314,58 @@ accessPoints = [
         'LN Entrance': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                       sm.canPassBombPassages())),
         'Screw Attack Bottom': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
-                                                              sm.enoughStuffGT()))
+                                                              sm.enoughStuffGT())),
+        'GoldenTorizoFrontDoorOut': lambda sm: SMBool(True)
     }, internal=True),
+    # GoldenTorizoFrontDoorOut is logically the same as "LN Above GT" but keep prevous AP for compatibility
+    AccessPoint('GoldenTorizoFrontDoorOut', 'LowerNorfair', 'Lower Norfair Screw Attack', { # FIXME solve area?
+        'LN Above GT': lambda sm: SMBool(True)
+    }, boss = BossAccessPointFlags.MiniBoss,
+       roomInfo = {'RoomPtr':0xb1e5, "area": 0x2 },
+       exitInfo = {'DoorPtr':0x983a, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xc089},
+       entryInfo = {'SamusX':0x2d2, 'SamusY':0x288},
+       dotOrientation = 'w'),
+    AccessPoint('GoldenTorizoFrontDoorIn', 'LowerNorfair', 'Lower Norfair Screw Attack', { # FIXME solve area?
+        'GoldenTorizoBackDoorIn': lambda sm: Bosses.bossDead(sm, 'GoldenTorizo')
+    }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Inside,
+       roomInfo = {'RoomPtr':0xb283, "area": 0x2 },
+       exitInfo = {'DoorPtr':0x9876, 'direction': 0x5, "cap": (0x2e, 0x26), "bitFlag": 0x0,
+                   "screen": (0x2, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbf9e},
+       entryInfo = {'SamusX':0x30, 'SamusY':0x88},
+       dotOrientation = 'e'),
+    AccessPoint('GoldenTorizoBackDoorIn', 'LowerNorfair', 'Lower Norfair Screw Attack', { # FIXME solve area?
+        'GoldenTorizoFrontDoorIn': Cache.ldeco(lambda sm: sm.wand(Bosses.bossDead(sm, 'GoldenTorizo'),
+                                                                  RomPatches.has(RomPatches.GoldenTorizoNoCrumble),
+                                                                  sm.wor(sm.canFly(),
+                                                                         sm.wand(sm.haveItem('HiJump'),
+                                                                                 sm.wor(sm.haveItem('SpeedBooster'),
+                                                                                        sm.knowsGetAroundWallJump(),
+                                                                                        sm.canSpringBallJump())),
+                                                                         sm.canSimpleShortCharge(),
+                                                                         sm.canSpringBallJumpFromWall(),
+                                                                         sm.knowsWorstRoomWallJump())))
+    }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor | BossAccessPointFlags.Inside,
+       roomInfo = {'RoomPtr':0xb283, "area": 0x2 },
+       exitInfo = {'DoorPtr':0x9882, 'direction': 0x4, "cap": (0x1, 0x26), "bitFlag": 0x0,
+                   "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0x1cd, 'SamusY':0x188},
+       dotOrientation = 'w'),
+    # GoldenTorizoFrontDoorOut is logically the same as "Screw Attack Bottom" but keep prevous AP for compatibility
+    AccessPoint('GoldenTorizoBackDoorOut', 'LowerNorfair', 'Lower Norfair Screw Attack', { # FIXME solve area?
+        'Screw Attack Bottom': lambda sm: SMBool(True)
+    }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor,
+       roomInfo = {'RoomPtr':0xb6c1, "area": 0x2 },
+       exitInfo = {'DoorPtr':0x9a86, 'direction': 0x5, "cap": (0x1e, 0x16), "bitFlag": 0x0,
+                   "screen": (0x1, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0x31, 'SamusY':0x298},
+       dotOrientation = 'e'),
     AccessPoint('Screw Attack Bottom', 'LowerNorfair', 'Lower Norfair Screw Attack', {
         'LN Entrance': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                       sm.canExitScrewAttackArea(),
                                                       sm.haveItem('Super'),
-                                                      sm.canUsePowerBombs()))
+                                                      sm.canUsePowerBombs())),
+        'GoldenTorizoBackDoorOut': lambda sm: SMBool(True)
     }, internal=True),
     AccessPoint('Worst Room Top', 'LowerNorfair', 'Lower Norfair Before Amphitheater', {
         'Firefleas': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
@@ -604,13 +655,27 @@ accessPoints = [
        dotOrientation = 'ne'),
     ### Croc
     AccessPoint('Crocomire Room Top', 'Crocomire', 'Crocomire', {
-    }, traverse=Cache.ldeco(lambda sm: sm.wor(RomPatches.has(RomPatches.CrocBlueDoors), sm.enoughStuffCroc())),
+    }, traverse=Cache.ldeco(lambda sm: sm.wor(RomPatches.has(RomPatches.CrocBlueDoors), sm.bossDead(sm, 'Crocomire'))),
        roomInfo = {'RoomPtr':0xa98d, "area": 0x2, 'songs':[0xa9bd]},
        exitInfo = {'DoorPtr':0x93ea, 'direction': 0x7, "cap": (0xc6, 0x2d), "bitFlag": 0x0,
                    "screen": (0xc, 0x2), "distanceToSpawn": 0x1c0, "doorAsmPtr": 0x0000,
                    "exitAsm": "door_transition_boss_exit_fix"},
        entryInfo = {'SamusX':0x383, 'SamusY':0x98, 'song': 0x15},
        dotOrientation = 'se'),
+    AccessPoint('CrocomireBackDoorIn', 'Crocomire', 'Crocomire', {},
+       boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor | BossAccessPointFlags.Inside,
+       roomInfo = {'RoomPtr':0xa98d, "area": 0x2 },
+       exitInfo = {'DoorPtr':0x93de, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
+                   "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+       entryInfo = {'SamusX':0x2f, 'SamusY':0x88},
+       dotOrientation = 'e'),
+    AccessPoint('CrocomireBackDoorOut', 'Crocomire', 'Crocomire', {
+    }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor,
+       roomInfo = {'RoomPtr':0xaa82, "area": 0x2 },
+       exitInfo = {'DoorPtr':0x9432, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbfda},
+       entryInfo = {'SamusX':0x1d1, 'SamusY':0x88},
+       dotOrientation = 'w'),
     ### West Maridia
     AccessPoint('Main Street Bottom', 'WestMaridia', 'Maridia Green', {
         'Red Fish Room Bottom': lambda sm: sm.canGoUpMtEverest(),
@@ -735,7 +800,7 @@ accessPoints = [
                                                            sm.wand(RomPatches.has(RomPatches.AqueductBombBlocks),
                                                                    sm.canAccessAqueductItemsFromBottom()))),
         'BotwoonFrontDoorOut': Cache.ldeco(lambda sm: sm.wand(sm.canJumpUnderwater(),
-                                                              sm.canPassBotwoonHallway()),
+                                                              sm.canPassBotwoonHallway())),
         'Left Sandpit': lambda sm: sm.canAccessSandPits(),
         'Right Sandpit': lambda sm: sm.canAccessSandPits(),
         'Aqueduct': lambda sm: sm.canAccessAqueductItemsFromBottom()
@@ -753,21 +818,21 @@ accessPoints = [
        exitInfo = {'DoorPtr':0xa774, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x3cf, 'SamusY':0x88},
-       dotOrientation = 'n'),
+       dotOrientation = 'w'),
     AccessPoint('BotwoonFrontDoorIn', 'EastMaridia', 'Maridia Pink Top', { # FIXME solve area?
         'BotwoonBackDoorIn': lambda sm: Bosses.bossDead(sm, "Botwoon")
     }, roomInfo = {'RoomPtr':0xd95e, "area": 0x4 },
        exitInfo = {'DoorPtr':0xa90c, 'direction': 0x5, "cap": (0x3e, 0x6), "bitFlag": 0x0,
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x30, 'SamusY':0xb8},
-       dotOrientation = 's'),
+       dotOrientation = 'e'),
     AccessPoint('BotwoonBackDoorIn', 'EastMaridia', 'Maridia Pink Top', { # FIXME solve area?
         'BotwoonFrontDoorIn': lambda sm: Bosses.bossDead(sm, "Botwoon")
     }, roomInfo = {'RoomPtr':0xd95e, "area": 0x4 },
        exitInfo = {'DoorPtr':0xa918, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x1d3, 'SamusY':0x88},
-       dotOrientation = 'e'),
+       dotOrientation = 'w'),
     AccessPoint('BotwoonBackDoorOut', 'EastMaridia', 'Maridia Pink Top', { # FIXME solve area?
         'Aqueduct Bottom': lambda sm: SMBool(True), # go down sandpits
         'Post Botwoon': lambda sm: sm.canTraverseBotwoonETankRoom()
@@ -775,7 +840,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0xa84c, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
                    "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x30, 'SamusY':0x88},
-       dotOrientation = 'w'),
+       dotOrientation = 'e'),
     AccessPoint('Post Botwoon', 'EastMaridia', 'Maridia Pink Top', {
         'BotwoonBackDoorOut': lambda sm: sm.canTraverseBotwoonETankRoom(),
         'Colosseum Top Right': lambda sm: sm.canBotwoonExitToColosseum(),
@@ -904,7 +969,7 @@ accessPoints = [
     AccessPoint('East Tunnel Right', 'RedBrinstar', 'Red Brinstar Bottom', {
         'East Tunnel Top Right': lambda sm: SMBool(True), # handled by room traverse function
         'Glass Tunnel Top': Cache.ldeco(lambda sm: sm.wand(sm.wor(RomPatches.has(RomPatches.MaridiaTubeOpened),
-                                                                  sm.canUsePowerBombs())
+                                                                  sm.canUsePowerBombs()),
                                                            sm.wor(sm.haveItem('Gravity'),
                                                                   sm.haveItem('HiJump'),
                                                                   sm.knowsTubeGravityJump()))),
@@ -954,5 +1019,20 @@ accessPoints = [
        escape = True,
        dotOrientation = 'ne')
 ]
+
+# this is needed for Crocomire (boss AP/area AP collision)
+def addBossAlias(apName, bossApName, bossApFlags): # FIXME solve area?
+    ap = next(accessPoint for accessPoint in accessPoints if accessPoint.Name == apName)
+    bossAp = copy.copy(ap)
+    bossAp.Name = bossApName
+    bossAp.Boss = bossApFlags
+    bossAp.intraTransitions = { apName: lambda sm: SMBool(True) }
+    bossAp.transitions = { apName: lambda sm: SMBool(True) }
+    ap.intraTransitions[bossApName] = lambda sm: SMBool(True)
+    ap.transitions[bossApName] = lambda sm: SMBool(True)
+    accessPoints.append(bossAp)
+
+addBossAlias('Crocomire Speedway Bottom', 'CrocomireFrontDoorOut', BossAccessPointFlags.MiniBoss)
+addBossAlias('Crocomire Room Top', 'CrocomireFrontDoorIn', BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Inside)
 
 accessPointsDict = {ap.Name:ap for ap in accessPoints}

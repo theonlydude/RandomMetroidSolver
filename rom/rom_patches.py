@@ -49,7 +49,7 @@ class RomPatches:
     MamaTurtleBlueDoor        = 52
     # ws start
     WsEtankBlueDoor           = 53
-    ## Area rando patches
+    ## Area/boss rando patches
     # remove crumble block for reverse lower norfair door access
     SingleChamberNoCrumble    = 101
     # remove green gate for reverse maridia access
@@ -74,6 +74,8 @@ class RomPatches:
     GreenHillsGateRemoved      = 112
     # remove green gate for reverse maridia access
     EastTunnelGreenGateRemoved = 113
+    # turn crumble blocks into shot blocks in GT room to climb back up
+    GoldenTorizoNoCrumble      = 114
 
     ## Minimizer Patches
     NoGadoras                 = 200
@@ -197,7 +199,8 @@ _layoutIPS = [
     # layout patches
     'dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
     'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips', 'climb_supers.ips',
-    'brinstar_map_room.ips', 'kraid_save.ips', 'mission_impossible.ips'
+    'brinstar_map_room.ips', 'kraid_save.ips', 'mission_impossible.ips',
+    'no_crumble_gt.ips', 'no_crumble_spospo.ips'
 ]
 
 _area = [
@@ -573,6 +576,18 @@ definitions = {
             'ips': ['area_layout_crab_hole_lvl.ips', 'area_layout_crab_hole_plms_enemies.ips'],
             'plms': [],
             'logic': [RomPatches.CrabHoleClimb]
+        },
+        'no_crumble_gt': {
+            'address': 0x2460ad, 'value': 0xde,
+            'desc': 'Turn crumble blocks in Golden Torizo Room into shot blocks to traverse it both ways',
+            'ips': ['no_crumble_gt.ips'],
+            'logic': [RomPatches.GoldenTorizoNoCrumble]
+        },
+        'no_crumble_spospo': {
+            'address': 0x228be6, 'value': 0xc6,
+            'desc': 'Remove crumble blocks at the top of Spore Spawn Super Room',
+            'ips': ['no_crumble_spospo.ips'],
+            'logic': []
         }
     },
     'mirror': {

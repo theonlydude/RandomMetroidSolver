@@ -277,6 +277,7 @@ def getDefaultMultiValues():
         'objective': Objectives.getAllGoals(exclude=True),
         'tourian': ['Vanilla', 'Fast', 'Disabled'],
         'logic': ['vanilla', 'mirror'],
+        'bossesRandomization': ["Off", "G4", "Minibosses", "All_Mixed", "All_Split" ]
     }
     return defaultMultiValues
 
@@ -356,7 +357,7 @@ def loadRandoPreset(randoPreset, args):
     args.areaRandomization = randoParams["areaRandomization"]
     if args.areaRandomization == "on":
         # DEPRECATED previously areaRandomization was on/off, now it's off, full, or light
-        args.areaRandomization == "full"
+        args.areaRandomization = "full"
     if args.areaRandomization != "off":
         args.areaLayoutBase = convertParam(randoParams, "areaLayout", inverse=True)
     areaLayoutCustom = randoParams.get("areaLayoutCustom")
@@ -370,7 +371,7 @@ def loadRandoPreset(randoPreset, args):
 
     args.doorsColorsRando = convertParam(randoParams, "doorsColorsRando")
     args.allowGreyDoors = convertParam(randoParams, "allowGreyDoors")
-    args.bosses = convertParam(randoParams, "bossRandomization")
+    args.bossesRandomization = convertParam(randoParams, "bossesRandomization")
 
     if randoParams.get("funCombat", "off") != "off":
         if randoParams["funCombat"] == "on":
@@ -464,7 +465,7 @@ def loadRandoPreset(randoPreset, args):
         args.minimizerN = randoParams["minimizerQty"]
 
     defaultMultiValues = getDefaultMultiValues()
-    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "areaRandomization", "logic"]
+    multiElems = ["majorsSplit", "startLocation", "energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "objective", "areaRandomization", "logic", "bossesRandomization"]
     for multiElem in multiElems:
         if multiElem+'MultiSelect' in randoParams:
             setattr(args, multiElem+'List', ','.join(randoParams[multiElem+'MultiSelect']))
@@ -522,7 +523,8 @@ def getRandomizerDefaultParameters():
     defaultParams['allowGreyDoors'] = "off"
     defaultParams['escapeRando'] = "off"
     defaultParams['removeEscapeEnemies'] = "off"
-    defaultParams['bossRandomization'] = "off"
+    defaultParams['bossesRandomization'] = "off"
+    defaultParams['bossesRandomizationMultiSelect'] = defaultMultiValues['bossesRandomization']
     defaultParams['minimizer'] = "off"
     defaultParams['minimizerQty'] = "45"
     defaultParams['funCombat'] = "off"

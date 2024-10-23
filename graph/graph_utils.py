@@ -210,7 +210,8 @@ class GraphUtils:
         apList = Logic.accessPoints()
         pass
 
-    def createBossesTransitions(transitionFlags, split):
+    def createBossesTransitions(transitionFlags):
+        split = transitionFlags & BossAccessPointFlags.Split
         if not split:
             vanillaTransitions = []
             if transitionFlags & BossAccessPointFlags.G4:

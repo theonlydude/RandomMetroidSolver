@@ -655,15 +655,17 @@ accessPoints = [
        dotOrientation = 'ne'),
     ### Croc
     AccessPoint('Crocomire Room Top', 'Crocomire', 'Crocomire', {
-    }, traverse=Cache.ldeco(lambda sm: sm.wor(RomPatches.has(RomPatches.CrocBlueDoors), sm.bossDead(sm, 'Crocomire'))),
+        'CrocomireBackDoorIn': lambda sm: Bosses.bossDead(sm, 'Crocomire')
+    }, traverse=Cache.ldeco(lambda sm: sm.wor(RomPatches.has(RomPatches.CrocBlueDoors), Bosses.bossDead(sm, 'Crocomire'))),
        roomInfo = {'RoomPtr':0xa98d, "area": 0x2, 'songs':[0xa9bd]},
        exitInfo = {'DoorPtr':0x93ea, 'direction': 0x7, "cap": (0xc6, 0x2d), "bitFlag": 0x0,
                    "screen": (0xc, 0x2), "distanceToSpawn": 0x1c0, "doorAsmPtr": 0x0000,
                    "exitAsm": "door_transition_boss_exit_fix"},
        entryInfo = {'SamusX':0x383, 'SamusY':0x98, 'song': 0x15},
        dotOrientation = 'se'),
-    AccessPoint('CrocomireBackDoorIn', 'Crocomire', 'Crocomire', {},
-       boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor | BossAccessPointFlags.Inside,
+    AccessPoint('CrocomireBackDoorIn', 'Crocomire', 'Crocomire', {
+        'CrocomireFrontDoorIn': lambda sm: Bosses.bossDead(sm, 'Crocomire')
+    }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor | BossAccessPointFlags.Inside,
        roomInfo = {'RoomPtr':0xa98d, "area": 0x2 },
        exitInfo = {'DoorPtr':0x93de, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
                    "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -1021,7 +1023,7 @@ accessPoints = [
 ]
 
 # this is needed for Crocomire (boss AP/area AP collision)
-def addBossAlias(apName, bossApName, bossApFlags): # FIXME solve area?
+def addBossAlias(apName, bossApName, bossApFlags):
     ap = next(accessPoint for accessPoint in accessPoints if accessPoint.Name == apName)
     bossAp = copy.copy(ap)
     bossAp.Name = bossApName

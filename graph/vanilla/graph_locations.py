@@ -483,7 +483,7 @@ loc.AccessFrom = {
     'BotwoonFrontDoorIn': lambda sm: SMBool(True),
     'BotwoonBackDoorIn': lambda sm: sm.wand(sm.haveItem('Wave'),
                                             sm.canFireChargedShots(),
-                                            sm.wor(sm.have('Gravity'),
+                                            sm.wor(sm.haveItem('Gravity'),
                                                    sm.knowsGravLessLevel1()))
 }
 loc.Available = (

@@ -19,6 +19,7 @@ class BossAccessPointFlags(IntFlag):
     MiniBoss = auto()
     Inside = auto()
     Backdoor = auto()
+    Split = auto() # this is not a transition flag, but rather a randomization mode
 
 class AccessPoint(object):
     # name : AccessPoint name
@@ -183,7 +184,7 @@ class AccessGraph(object):
             for src, dst in self.InterAreaTransitions:
                 if src.Name in drawn:
                     continue
-                f.write('%s:%s -> %s:%s [taillabel="%s",headlabel="%s",color=%s];\n' % (src.GraphArea, src.DotOrientation, dst.GraphArea, dst.DotOrientation, src.Name, dst.Name, colors[i]))
+                f.write('%s:%s -> %s:%s [taillabel="%s",headlabel="%s",color=%s];\n' % (src.GraphArea, src.DotOrientation, dst.GraphArea, dst.DotOrientation, src.Name, dst.Name, colors[i % len(colors)]))
                 drawn += [src.Name,dst.Name]
                 i += 1
             f.write("}\n")

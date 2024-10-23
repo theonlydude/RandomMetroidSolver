@@ -5,6 +5,7 @@ import argparse, os.path, json, sys, shutil, random
 from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
 from graph.graph_utils import GraphUtils, getAccessPoint
+from graph.graph import BossAccessPointFlags
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity, text2diff, appDir
 from rom.rom_patches import RomPatches, getPatchSet, getPatchSetsFromPatcherSettings, getPatchDescriptions
 from rom.rompatcher import RomPatcher
@@ -31,8 +32,17 @@ gravityBehaviours = defaultMultiValues['gravityBehaviour']
 objectives = defaultMultiValues['objective']
 tourians = defaultMultiValues['tourian']
 areaRandomizations = defaultMultiValues['areaRandomization']
+bossesRandomizations = defaultMultiValues['bossesRandomization']
 startLocations = defaultMultiValues['startLocation']
 logics = defaultMultiValues['logic']
+
+bossRandoFlags = {
+    "Off": 0,
+    "G4": BossAccessPointFlags.G4,
+    "Minibosses": BossAccessPointFlags.MiniBoss,
+    "All_Mixed": BossAccessPointFlags.G4 | BossAccessPointFlags.MiniBoss,
+    "All_Split": BossAccessPointFlags.G4 | BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Split
+}
 
 def randomMulti(args, param, defaultMultiValues):
     value = args[param]
@@ -71,7 +81,7 @@ if __name__ == "__main__":
                         help="generate dot file with area graph",
                         action='store_true',dest='dot', default=False)
     parser.add_argument('--areaRandomization', help="area mode",
-                        dest='areaRandomization', nargs='?', const=True, choices=["random"]+areaRandomizations, default='off')
+                        dest='areaRandomization', nargs='?', const="full", choices=["random"]+areaRandomizations, default='off')
     parser.add_argument('--areaRandomizationList', help="list to choose from when random",
                         dest='areaRandomizationList', nargs='?', default=None)
     parser.add_argument('--areaLayoutBase',
@@ -80,14 +90,17 @@ if __name__ == "__main__":
     parser.add_argument('--areaLayoutCustom',
                         help="Customize area layout patches. Comma-separated values of patch IDs",
                         nargs='?', dest='areaLayoutCustom', default=None)
+    parser.add_argument('--bossesRandomization', help="Randomize bosses/minibosses",
+                        dest='bossesRandomization', nargs='?', const="G4", default="Off",
+                        choices=["random"]+bossesRandomizations)
+    parser.add_argument('--bossesRandomizationList', help="list to choose from when random",
+                        dest='bossesRandomizationList', nargs='?', default=None)
     parser.add_argument('--escapeRando',
                         help="Randomize the escape sequence",
                         dest='escapeRando', nargs='?', const=True, default=False)
     parser.add_argument('--noRemoveEscapeEnemies',
                         help="Do not remove enemies during escape sequence", action='store_true',
                         dest='noRemoveEscapeEnemies', default=False)
-    parser.add_argument('--bosses', help="randomize bosses",
-                        dest='bosses', nargs='?', const=True, default=False)
     parser.add_argument('--minimizer', help="minimizer mode: area and boss mixed together. arg is number of non boss locations",
                         dest='minimizerN', nargs='?', const=35, default=None,
                         choices=[str(i) for i in range(30,101)]+["random"])
@@ -359,8 +372,10 @@ if __name__ == "__main__":
     (_, gravityBehaviour) = randomMulti(args.__dict__, "gravityBehaviour", gravityBehaviours)
     (_, args.tourian) = randomMulti(args.__dict__, "tourian", tourians)
     (areaRandom, args.areaRandomization) = randomMulti(args.__dict__, "areaRandomization", areaRandomizations)
+    (bossesRandom, args.bossesRandomization) = randomMulti(args.__dict__, "bossesRandomization", bossesRandomizations)
     (logicRandom, args.logic) = randomMulti(args.__dict__, "logic", logics)
-    areaRandomization = args.areaRandomization in ['light', 'full']
+    areaRandomization = args.areaRandomization != "off"
+    bossesRandomization = args.bossesRandomization != "Off"
     lightArea = args.areaRandomization == 'light'
 
     # logic can be set in rando preset
@@ -397,7 +412,7 @@ if __name__ == "__main__":
         minDifficulty = 0
 
     # minimizer
-    if areaRandomization == True and args.bosses == True and args.minimizerN is not None:
+    if areaRandomization == True and bossesRandomization == True and args.minimizerN is not None:
         if args.minimizerN == "random":
             minimizerN = random.randint(30, 60)
             logger.debug("minimizerN: {}".format(minimizerN))
@@ -417,11 +432,7 @@ if __name__ == "__main__":
     logger.debug("doorsColorsRando: {}".format(args.doorsColorsRando))
 
     # boss rando
-    bossesRandom = False
-    if args.bosses == 'random':
-        bossesRandom = True
-        args.bosses = bool(random.getrandbits(1))
-    logger.debug("bosses: {}".format(args.bosses))
+    logger.debug("bosses: {}".format(bossesRandomization))
 
     # escape rando
     if args.escapeRando == 'random':
@@ -528,7 +539,7 @@ if __name__ == "__main__":
             seedCode = 'MX'
         elif restrictions['MajorMinor'] == 'Scavenger':
             seedCode = 'SX'
-    if args.bosses == True and bossesRandom == False:
+    if bossesRandomization == True and bossesRandom == False:
         seedCode = 'B'+seedCode
     if args.doorsColorsRando == True and doorsColorsRandom == False:
         seedCode = 'D'+seedCode
@@ -623,10 +634,11 @@ if __name__ == "__main__":
 
     # area rando
     dotFile = None
-    if areaRandomization == True:
+    if areaRandomization == True or bossesRandomization == True:
         if args.dot == True:
             dotFile = args.directory + '/' + seedName + '.dot'
-    graphSettings = GraphSettings(args.startLocation, areaRandomization, lightArea, args.bosses,
+    bossFlags = bossRandoFlags[args.bossesRandomization]
+    graphSettings = GraphSettings(args.startLocation, areaRandomization, lightArea, bossFlags,
                                   args.escapeRando, minimizerN, dotFile,
                                   args.doorsColorsRando, args.allowGreyDoors, args.tourian,
                                   plandoRando["transitions"] if plandoSettings is not None else None)
@@ -713,7 +725,7 @@ if __name__ == "__main__":
         "layoutCustom": None if args.layoutCustom is None else args.layoutCustom.split(','),
         "suitsMode": gravityBehaviour,
         "area": areaRandomization,
-        "boss": args.bosses,
+        "boss": bossesRandomization,
         "areaLayout": areaRandomization == True and not args.areaLayoutBase,
         "areaLayoutCustom": None if args.areaLayoutCustom is None else args.areaLayoutCustom.split(','),
         "variaTweaks": not args.noVariaTweaks,
@@ -771,7 +783,7 @@ if __name__ == "__main__":
         # and getDoorConnections will crash if random escape is activated.
         if not stuck or args.vcr == True:
             patcherSettings['doors'] = GraphUtils.getDoorConnections(randoExec.areaGraph,
-                                                                     areaRandomization, args.bosses,
+                                                                     areaRandomization, bossFlags,
                                                                      args.escapeRando if not stuck else False)
             patcherSettings['escapeAttr'] = randoExec.areaGraph.EscapeAttributes if args.escapeRando else None
     except Exception as e:

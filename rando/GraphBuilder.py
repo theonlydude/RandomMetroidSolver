@@ -1,7 +1,7 @@
 
 import utils.log, random, copy
 
-from graph.graph_utils import GraphUtils, vanillaTransitions, vanillaBossesTransitions, escapeSource, escapeTargets
+from graph.graph_utils import GraphUtils, vanillaTransitions, vanillaBossesTransitions, vanillaMiniBossesTransitions, vanillaMiniBossesTransitionsBack, escapeSource, escapeTargets
 from logic.logic import Logic
 from logic.smbool import SMBool
 from logic.helpers import Bosses
@@ -55,14 +55,15 @@ class GraphBuilder(object):
                             forcedAreas = forcedAreas.union(objForced)
                 transitions = GraphUtils.createMinimizerTransitions(self.graphSettings.startAP, self.minimizerN, sorted(list(forcedAreas)))
             else:
-                if not self.bossRando:
-                    transitions += vanillaBossesTransitions
-                else:
-                    transitions += GraphUtils.createBossesTransitions(BossAccessPointFlags.G4, False)
                 if not self.areaRando:
                     transitions += vanillaTransitions
                 else:
                     transitions += GraphUtils.createAreaTransitions(self.graphSettings.lightAreaRando)
+                # boss rando after area rando is important because of Croc area transition that can turn into a boss transition
+                if not self.bossRando:
+                    transitions += vanillaBossesTransitions + vanillaMiniBossesTransitions + vanillaMiniBossesTransitionsBack
+                else:
+                    transitions += GraphUtils.createBossesTransitions(self.bossRando)
         ret = AccessGraph(Logic.accessPoints(), transitions, self.graphSettings.dotFile)
         Objectives.setGraph(ret, maxDiff)
         return ret

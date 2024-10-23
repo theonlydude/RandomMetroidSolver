@@ -255,7 +255,8 @@ class RandoSetup(object):
         self.log.debug("checkPool. forbidden=" + str(forbidden) + ", self.forbiddenItems=" + str(self.forbiddenItems))
         if not self.graphSettings.isMinimizer() and not self.settings.isPlandoRando() and len(self.allLocations) > len(self.locations):
             # invalid graph with looped areas
-            msg = "not all areas are connected, but minimizer param is off / not a plando rando"
+            missingLocs = [loc.Name for loc in self.allLocations if loc not in self.locations]
+            msg = "not all areas are connected, but minimizer param is off / not a plando rando. Missing locations: " + str(missingLocs)
             self.log.debug("checkPool: {}".format(msg))
             self.errorMsgs.append(msg)
             return False

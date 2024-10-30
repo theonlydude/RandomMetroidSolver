@@ -81,6 +81,7 @@ class GraphBuilder(object):
                     transitions.append((crocAreaConnection, crocBossConnection))
         ret = AccessGraph(Logic.accessPoints(), transitions, self.graphSettings.dotFile)
         Objectives.setGraph(ret, maxDiff)
+        ret.printGraph()
         return ret
 
     # fills in escape transitions if escape rando is enabled

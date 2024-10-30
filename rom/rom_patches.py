@@ -585,6 +585,7 @@ definitions = {
             'plms': [],
             'logic': [RomPatches.CrabHoleClimb]
         },
+        #miniboss rando patches
         'boss_mini': {
             'address': 0x2460ad, 'value': 0xde,
             'desc': 'Turn crumble blocks in Golden Torizo Room into shot blocks, remove crumble blocks at the top of Spore Spawn Super Room',
@@ -626,7 +627,7 @@ definitions = {
         'dead_end_GoldenTorizo': {
             'desc': "Seal door at the end of Golden Torizo Room",
             'ips': ["DeadEnd[GoldenTorizo]"]
-        },
+        }
     },
     'mirror': {
         'logic': {

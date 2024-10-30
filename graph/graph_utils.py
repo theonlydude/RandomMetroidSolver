@@ -243,13 +243,14 @@ class GraphUtils:
                 vanillaTransitions += vanillaMiniBossesTransitions
             transitions = GraphUtils._createBossesTransitions(vanillaTransitions)
         else:
-            transitions = []
-            if transitionFlags & BossAccessPointFlags.G4:
-                transitions += GraphUtils._createBossesTransitions(vanillaBossesTransitions)
-            if transitionFlags & BossAccessPointFlags.MiniBoss:
-                transitions += GraphUtils._createBossesTransitions(vanillaMiniBossesTransitions)
+            assert transitionFlags & BossAccessPointFlags.G4 and transitionFlags & BossAccessPointFlags.MiniBoss
+            transitions = GraphUtils._createBossesTransitions(vanillaBossesTransitions) + GraphUtils._createBossesTransitions(vanillaMiniBossesTransitions)
         if transitionFlags & BossAccessPointFlags.MiniBoss:
             GraphUtils._addBackDoorTransitions(transitions)
+        else:
+            transitions += vanillaMiniBossesTransitions + vanillaMiniBossesTransitionsBack
+        if not (transitionFlags & BossAccessPointFlags.G4):
+            transitions += vanillaBossesTransitions
         return transitions
 
     def createAreaTransitions(lightAreaRando=False):
@@ -572,13 +573,17 @@ class GraphUtils:
             flags |= 0x40
         return flags
 
-    def getDoorConnections(graph, areas=True, bosses=False,
+    def getDoorConnections(graph, areas=True, bossFlags=0,
                            escape=True, escapeAnimals=True):
         transitions = []
         if areas:
             transitions += vanillaTransitions
-        if bosses:
+        if bossFlags & BossAccessPointFlags.G4:
             transitions += vanillaBossesTransitions
+        if bossFlags & BossAccessPointFlags.MiniBoss:
+            transitions += vanillaMiniBossesTransitions + vanillaMiniBossesTransitionsBack
+        if bossFlags & BossAccessPointFlags.G4 and bossFlags & BossAccessPointFlags.MiniBoss and not (bossFlags & BossAccessPointFlags.Split):
+            transitions += vanillaBossesTransitionsBack
         if escape:
             transitions += vanillaEscapeTransitions
             if escapeAnimals:
@@ -592,10 +597,10 @@ class GraphUtils:
         for src, dst in graph.InterAreaTransitions:
             if not (escape and src.Escape and dst.Escape):
                 # area only
-                if not bosses and src.Boss:
+                if not bossFlags and src.Boss:
                     continue
                 # boss only
-                if not areas and not (src.Boss or dst.Boss):
+                if not areas and not (src.Boss & bossFlags or dst.Boss & bossFlags):
                     continue
                 # no random escape
                 if not escape and src.Escape:
@@ -606,7 +611,7 @@ class GraphUtils:
             # remove duplicates (loop transitions)
             if any(c['ID'] == conn['ID'] for c in connections):
                 continue
-#            print(conn['ID'])
+            GraphUtils.log.debug("Processing door connection %s" % conn['ID'])
             # where to write
             conn['DoorPtr'] = src.ExitInfo['DoorPtr']
             if 'DoorPtrSym' in src.ExitInfo:

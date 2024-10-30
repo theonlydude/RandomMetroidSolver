@@ -64,6 +64,20 @@ class GraphBuilder(object):
                     transitions += vanillaBossesTransitions + vanillaMiniBossesTransitions + vanillaMiniBossesTransitionsBack
                 else:
                     transitions += GraphUtils.createBossesTransitions(self.bossRando)
+                # special case of Croc: we have to juggle with transitions because it is both an area and a boss transition
+                if self.areaRando and not self.bossRando:
+                    transitions.remove(('CrocomireFrontDoorOut', 'CrocomireFrontDoorIn'))
+                if self.bossRando & BossAccessPointFlags.MiniBoss:
+                    def getTransitionAndConnection(apName):
+                        nonlocal transitions
+                        tr = next((src, dst) for src, dst in transitions if src == apName or dst == apName)
+                        conn = tr[1] if tr[0] == apName else tr[0]
+                        return tr, conn
+                    crocAreaTransition, crocAreaConnection = getTransitionAndConnection('Crocomire Room Top')
+                    crocBossTransition, crocBossConnection = getTransitionAndConnection('CrocomireFrontDoorOut')
+                    transitions.remove(crocAreaTransition)
+                    transitions.remove(crocBossTransition)
+                    transitions.append((crocAreaConnection, crocBossConnection))
         ret = AccessGraph(Logic.accessPoints(), transitions, self.graphSettings.dotFile)
         Objectives.setGraph(ret, maxDiff)
         return ret

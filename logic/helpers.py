@@ -848,10 +848,10 @@ class Bosses:
         "Phantoon": "PhantoonRoomIn",
         "Draygon": "Draygon Room Bottom",
         "Ridley": "RidleyRoomIn",
-        "SporeSpawn": "Big Pink",
+        "SporeSpawn": "SporeSpawnFrontDoorIn",
         "Crocomire": "Crocomire Room Top",
-        "Botwoon": "Aqueduct Bottom",
-        "GoldenTorizo": "Screw Attack Bottom"
+        "Botwoon": "BotwoonFrontDoorIn",
+        "GoldenTorizo": "GoldenTorizoFrontDoorIn"
     }
 
     @staticmethod

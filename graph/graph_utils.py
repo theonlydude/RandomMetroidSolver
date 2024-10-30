@@ -1,6 +1,7 @@
-import copy
-import random
+import copy, random, re
+
 from logic.logic import Logic
+from logic.helpers import Bosses
 from utils.parameters import Knows
 from graph.graph import BossAccessPointFlags
 import utils.log
@@ -206,9 +207,29 @@ class GraphUtils:
                 transitions.append((src,dst))
         return transitions
 
+    def getBossProperties(bossApName):
+        m = re.match('(\w+)(Room|FrontDoor|BackDoor)(In|Out)', bossApName)
+        if m is None:
+            return None, None
+        bossName, door, inside = m.group(1), m.group(2), m.group(3)
+        bossFlags = 0
+        if bossName in Bosses.Golden4():
+            bossFlags |= BossAccessPointFlags.G4
+        elif bossName in Bosses.miniBosses():
+            bossFlags |= BossAccessPointFlags.MiniBoss
+        if door == "BackDoor":
+            bossFlags |= BossAccessPointFlags.Backdoor
+        if inside == "In":
+            bossFlags |= BossAccessPointFlags.Inside
+        return bossName, bossFlags
+
     def _addBackDoorTransitions(transitions):
-        apList = Logic.accessPoints()
-        pass
+        for outside, inside in transitions:
+            outBossName, outBossFlags = GraphUtils._getBossProperties(outside)
+            inBossName, inBossFlags = GraphUtils._getBossProperties(inside)
+            assert not (outBossFlags & BossAccessPointFlags.Inside) and (inBossFlags & BossAccessPointFlags.Inside), "Invalid boss transition %s <-> %s" % (outside, inside)
+            if outBossFlags & BossAccessPointFlags.MiniBoss:
+                transitions.append(f"{inBossName}BackDoorIn", f"{outBossName}BackDoorOut")
 
     def createBossesTransitions(transitionFlags):
         split = transitionFlags & BossAccessPointFlags.Split
@@ -306,7 +327,11 @@ class GraphUtils:
         GraphUtils.log.debug("availAreas: {}".format(availAreas))
         GraphUtils.log.debug("forcedAreas: {}".format(forcedAreas))
         GraphUtils.log.debug("areas: {}".format(areas))
-        inBossFlags = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside
+        # FIXME? this is broken due to minibosses transitions...or is
+        # it a feature to include all minibosses as random corridors
+        # in minimizers to make them more chaotic? at least take
+        # objectives into consideration to force add minibosses
+        inBossFlags = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside 
         inBossCheck = lambda ap: ap.Boss & inBossFlags == inBossFlags
         nLocs = 0
         transitions = []
@@ -568,7 +593,7 @@ class GraphUtils:
                 if not bosses and src.Boss:
                     continue
                 # boss only
-                if not areas and not src.Boss:
+                if not areas and not (src.Boss or dst.Boss):
                     continue
                 # no random escape
                 if not escape and src.Escape:

@@ -3,7 +3,7 @@ import copy, random, re
 from logic.logic import Logic
 from logic.helpers import Bosses
 from utils.parameters import Knows
-from graph.graph import BossAccessPointFlags
+from graph.flags import BossAccessPointFlags
 import utils.log
 
 # order expected by ROM patches
@@ -224,12 +224,14 @@ class GraphUtils:
         return bossName, bossFlags
 
     def _addBackDoorTransitions(transitions):
+        newTransitions = []
         for outside, inside in transitions:
-            outBossName, outBossFlags = GraphUtils._getBossProperties(outside)
-            inBossName, inBossFlags = GraphUtils._getBossProperties(inside)
+            outBossName, outBossFlags = GraphUtils.getBossProperties(outside)
+            inBossName, inBossFlags = GraphUtils.getBossProperties(inside)
             assert not (outBossFlags & BossAccessPointFlags.Inside) and (inBossFlags & BossAccessPointFlags.Inside), "Invalid boss transition %s <-> %s" % (outside, inside)
             if outBossFlags & BossAccessPointFlags.MiniBoss:
-                transitions.append(f"{inBossName}BackDoorIn", f"{outBossName}BackDoorOut")
+                newTransitions.append((f"{inBossName}BackDoorIn", f"{outBossName}BackDoorOut"))
+        transitions += newTransitions
 
     def createBossesTransitions(transitionFlags):
         split = transitionFlags & BossAccessPointFlags.Split

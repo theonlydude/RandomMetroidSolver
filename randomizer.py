@@ -5,7 +5,7 @@ import argparse, os.path, json, sys, shutil, random
 from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
 from graph.graph_utils import GraphUtils, getAccessPoint
-from graph.graph import BossAccessPointFlags
+from graph.flags import BossAccessPointFlags
 from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity, text2diff, appDir
 from rom.rom_patches import RomPatches, getPatchSet, getPatchSetsFromPatcherSettings, getPatchDescriptions
 from rom.rompatcher import RomPatcher
@@ -725,7 +725,7 @@ if __name__ == "__main__":
         "layoutCustom": None if args.layoutCustom is None else args.layoutCustom.split(','),
         "suitsMode": gravityBehaviour,
         "area": areaRandomization,
-        "boss": bossesRandomization,
+        "boss": bossFlags,
         "areaLayout": areaRandomization == True and not args.areaLayoutBase,
         "areaLayoutCustom": None if args.areaLayoutCustom is None else args.areaLayoutCustom.split(','),
         "variaTweaks": not args.noVariaTweaks,

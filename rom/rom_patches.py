@@ -1,5 +1,6 @@
 from logic.smbool import SMBool
 from rom.rom import snes_to_pc
+from graph.flags import BossAccessPointFlags
 
 # global logic identifiers for ROM patches presence
 # use RomPatches.has(RomPatches.SomePatch) in logic functions to check for presence
@@ -76,6 +77,8 @@ class RomPatches:
     EastTunnelGreenGateRemoved = 113
     # turn crumble blocks into shot blocks in GT room to climb back up
     GoldenTorizoNoCrumble      = 114
+    # turn crumble blocks into shot blocks in room after spospo to climb back up
+    SporeSpawnNoCrumble        = 115
 
     ## Minimizer Patches
     NoGadoras                 = 200
@@ -200,7 +203,8 @@ _layoutIPS = [
     'dachora.ips', 'early_super_bridge.ips', 'high_jump.ips', 'moat.ips', 'spospo_save.ips',
     'nova_boost_platform.ips', 'red_tower.ips', 'spazer.ips', 'climb_supers.ips',
     'brinstar_map_room.ips', 'kraid_save.ips', 'mission_impossible.ips',
-    'no_crumble_gt.ips', 'no_crumble_spospo.ips'
+    'no_crumble_gt.ips', 'no_crumble_spospo.ips',
+    'corridor_kraid.ips', 'corridor_phantoon.ips', 'corridor_draygon.ips', 'corridor_ridley.ips'
 ]
 
 _area = [
@@ -304,11 +308,15 @@ definitions = {
             'ips': _area,
             'logic': RomPatches.AreaBaseSet,
             'plms': ["WS_Save_Blinking_Door"]
-        },
+        },        
         'boss': {
-            'desc': "Bosses randomization",
+            'desc': "Bosses randomization base patches",
+            'ips': ['door_transition.ips'],
+            'plms': []
+        },
+        'boss_g4': {
+            'desc': "G4 Bosses randomization patches",
             'ips': [
-                'door_transition.ips',
                 'Phantoon_Eye_Door',
                 "WS_Main_Open_Grey",
                 "WS_Save_Active"
@@ -577,18 +585,48 @@ definitions = {
             'plms': [],
             'logic': [RomPatches.CrabHoleClimb]
         },
-        'no_crumble_gt': {
+        'boss_mini': {
             'address': 0x2460ad, 'value': 0xde,
-            'desc': 'Turn crumble blocks in Golden Torizo Room into shot blocks to traverse it both ways',
-            'ips': ['no_crumble_gt.ips'],
-            'logic': [RomPatches.GoldenTorizoNoCrumble]
+            'desc': 'Turn crumble blocks in Golden Torizo Room into shot blocks, remove crumble blocks at the top of Spore Spawn Super Room',
+            'ips': ['no_crumble_gt.ips', 'no_crumble_spospo.ips'],
+            'logic': [RomPatches.GoldenTorizoNoCrumble, RomPatches.SporeSpawnNoCrumble]
         },
-        'no_crumble_spospo': {
-            'address': 0x228be6, 'value': 0xc6,
-            'desc': 'Remove crumble blocks at the top of Spore Spawn Super Room',
-            'ips': ['no_crumble_spospo.ips'],
-            'logic': []
-        }
+        'corridor_Kraid': {
+            'address': 0x23636f, 'value': 0x57,
+            'desc': "Add a door behind Varia Suit location",
+            'ips': ['corridor_kraid.ips', 'corridor_kraid_door.ips']
+        },
+        'corridor_Phantoon': {
+            'address': 0x22659f, 'value': 0xd6,
+            'desc': "Add a 2nd door in Phantoon's room",
+            'ips': ['corridor_phantoon.ips', 'corridor_phantoon_door.ips']
+        },
+        'corridor_Draygon': {
+            'address': 0x26993c, 'value': 0x1a,
+            'desc': "Add a door behind Space Jump location, and move its Chozo out of the way",
+            'ips': ['corridor_draygon.ips', 'corridor_draygon_door.ips', 'corridor_draygon_plm.ips']
+        },
+        'corridor_Ridley': {
+            'address': 0x24c316, 'value': 0xcf,
+            'desc': "Add a door behind Ridley Energy Tank location",
+            'ips': ['corridor_ridley.ips', 'corridor_ridley_door.ips']
+        },
+        'dead_end_SporeSpawn': {
+            'desc': "Seal door at the end of Spore Spawn Super Room",
+            'plms': ["DeadEnd[SporeSpawn]"]
+        },
+        'dead_end_Botwoon': {
+            'desc': "Seal door at the end of Botwoon's Room",
+            'plms': ["DeadEnd[Botwoon]"]
+        },
+        'dead_end_Crocomire': {
+            'desc': "Seal door at the end of Crocomire's Room",
+            'plms': ["DeadEnd[Crocomire]"]
+        },
+        'dead_end_GoldenTorizo': {
+            'desc': "Seal door at the end of Golden Torizo Room",
+            'ips': ["DeadEnd[GoldenTorizo]"]
+        },
     },
     'mirror': {
         'logic': {
@@ -715,14 +753,21 @@ def getPatchSetsFromPatcherSettings(patcherSettings):
         "nerfedCharge",
         "nerfedRainbowBeam",
         "area",
-        "boss",
         "doorsColorsRando",
         "hud",
         "revealMap",
         "round_robin_cf",
         "debug"
-    ] 
+    ]
     patchSets += [k for k in boolSettings if patcherSettings.get(k) == True]
+    # boss/miniboss rando patches
+    bossFlags = patcherSettings.get("boss")
+    if bossFlags:
+        patchSets.append("boss")
+        if bossFlags & BossAccessPointFlags.G4:
+            patchSets.append("boss_g4")
+        if bossFlags & BossAccessPointFlags.MiniBoss:
+            patchSets.append("boss_mini")
     # patcher settings flags matching patch set group names
     for grp, patchList in groups.items():
         if patcherSettings[grp] == True:

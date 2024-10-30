@@ -5,7 +5,8 @@ from graph.graph_utils import GraphUtils, vanillaTransitions, vanillaBossesTrans
 from logic.logic import Logic
 from logic.smbool import SMBool
 from logic.helpers import Bosses
-from graph.graph import BossAccessPointFlags, AccessGraphRando as AccessGraph
+from graph.graph import AccessGraphRando as AccessGraph
+from graph.flags import BossAccessPointFlags
 from graph.graph_utils import graphAreas, getAccessPoint
 from utils.objectives import Objectives
 from rando.ItemLocContainer import getItemLocStr

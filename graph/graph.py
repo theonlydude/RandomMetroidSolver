@@ -1,10 +1,10 @@
 import copy, logging
 from operator import attrgetter
-from enum import IntFlag, auto
 import utils.log
 from logic.smbool import SMBool, smboolFalse
 from utils.parameters import infinity
 from logic.helpers import Bosses
+from graph.flags import BossAccessPointFlags
 
 class Path(object):
     __slots__ = ( 'path', 'pdiff', 'distance' )
@@ -13,13 +13,6 @@ class Path(object):
         self.path = path
         self.pdiff = pdiff
         self.distance = distance
-
-class BossAccessPointFlags(IntFlag):
-    G4 = auto()
-    MiniBoss = auto()
-    Inside = auto()
-    Backdoor = auto()
-    Split = auto() # this is not a transition flag, but rather a randomization mode
 
 class AccessPoint(object):
     # name : AccessPoint name

@@ -168,6 +168,9 @@ patches = {
     'Indicator[GreenHillZoneTopRight]': {
         0x78746: [0xff, 0xff, 0x01, 0x26, 0x30, 0x00]
     },
+    'DeadEnd[GoldenTorizoBackDoorIn]': {
+        0x78E3E: [0x03, 0xb7, 0x04, 0x0c, 0xd1, 0x90]
+    },
     # custom load points for non standard start APs
     "Save_G4": {
         # load point entry
@@ -572,5 +575,23 @@ additional_PLMs = {
         'plm_bytes_list': [
             [0xff, 0xff, 0x01, 0x06, 0x9a, 0x00]
         ]
-    }
+    },
+    'DeadEnd[SporeSpawnBackDoorIn]': {
+        'room': 0x9b5b,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x86, 0x63, 0x90]
+        ]
+    },
+    'DeadEnd[CrocomireBackDoorIn]': {
+        'room': 0xa98d,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x90]
+        ]
+    },
+    'DeadEnd[BotwoonBackDoorIn]': {
+        'room': 0xd95e,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x1e, 0x06, 0x63, 0x90]
+        ]
+    },
 }

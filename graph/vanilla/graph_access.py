@@ -1,6 +1,7 @@
 import copy
 
-from graph.graph import AccessPoint, BossAccessPointFlags
+from graph.graph import AccessPoint
+from graph.flags import BossAccessPointFlags
 from utils.parameters import Settings
 from rom.rom_patches import RomPatches
 from logic.smbool import SMBool
@@ -141,9 +142,10 @@ accessPoints = [
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x45, 'SamusY':0x2c8},
        dotOrientation = 's'),
-    AccessPoint('SporeSpawnBackDoorIn', 'GreenPinkBrinstar', 'Pink Brinstar', {}, # FIXME solve area?
-       boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor | BossAccessPointFlags.Inside,
-       roomInfo = {'RoomPtr':0xa0a4, "area": 0x1 },
+    AccessPoint('SporeSpawnBackDoorIn', 'GreenPinkBrinstar', 'Pink Brinstar', { # FIXME solve area?
+        'SporeSpawnFrontDoorIn': lambda sm: sm.wand(RomPatches.has(RomPatches.SporeSpawnNoCrumble), Bosses.bossDead(sm, "SporeSpawn"))
+    }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor | BossAccessPointFlags.Inside,
+       roomInfo = {'RoomPtr':0x9b5b, "area": 0x1 },
        exitInfo = {'DoorPtr':0x8d1e, 'direction': 0x5, "cap": (0x2e, 0x6), "bitFlag": 0x0,
                    "screen": (0x2, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x35, 'SamusY':0x888},
@@ -151,7 +153,7 @@ accessPoints = [
     AccessPoint('SporeSpawnBackDoorOut', 'GreenPinkBrinstar', 'Pink Brinstar', { # FIXME solve area?
         'Big Pink': lambda sm: sm.wand(sm.haveItem('Super'), sm.canPassBombPassages())
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor,
-       roomInfo = {'RoomPtr':0x9b5b, "area": 0x1 },
+       roomInfo = {'RoomPtr':0xa0a4, "area": 0x1 },
        exitInfo = {'DoorPtr':0x8f76, 'direction': 0x4, "cap": (0x1, 0x86), "bitFlag": 0x0,
                    "screen": (0x0, 0x8), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x2d3, 'SamusY':0x88},

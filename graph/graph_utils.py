@@ -582,6 +582,9 @@ class GraphUtils:
             transitions += vanillaBossesTransitions
         if bossFlags & BossAccessPointFlags.MiniBoss:
             transitions += vanillaMiniBossesTransitions + vanillaMiniBossesTransitionsBack
+            if not areas:
+                # because of croc nodes are both area and boss, this makes things awkward
+                transitions.append(('Crocomire Speedway Bottom', 'Crocomire Room Top'))
         if bossFlags & BossAccessPointFlags.G4 and bossFlags & BossAccessPointFlags.MiniBoss and not (bossFlags & BossAccessPointFlags.Split):
             transitions += vanillaBossesTransitionsBack
         if escape:

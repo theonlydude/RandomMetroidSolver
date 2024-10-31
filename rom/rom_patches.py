@@ -589,7 +589,7 @@ definitions = {
         'boss_mini': {
             'address': 0x2460ad, 'value': 0xde,
             'desc': 'Turn crumble blocks in Golden Torizo Room into shot blocks, remove crumble blocks at the top of Spore Spawn Super Room',
-            'ips': ['no_crumble_gt.ips', 'no_crumble_spospo.ips'],
+            'ips': ['no_crumble_gt.ips', 'no_crumble_spospo.ips', 'backdoor_bosses.ips'],
             'logic': [RomPatches.GoldenTorizoNoCrumble, RomPatches.SporeSpawnNoCrumble]
         },
         'corridor_Kraid': {

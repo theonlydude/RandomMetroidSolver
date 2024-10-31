@@ -25,6 +25,7 @@ class GraphBuilder(object):
     # builds everything but escape transitions
     def createGraph(self, maxDiff):
         transitions = self.graphSettings.plandoRandoTransitions
+        accessPoints = Logic.accessPointsDict()
         if transitions is None:
             transitions = []
             if self.minimizerN is not None:
@@ -79,6 +80,7 @@ class GraphBuilder(object):
                     transitions.remove(crocAreaTransition)
                     transitions.remove(crocBossTransition)
                     transitions.append((crocAreaConnection, crocBossConnection))
+                    accessPoints[crocAreaConnection].Boss = BossAccessPointFlags.MiniBoss
         ret = AccessGraph(Logic.accessPoints(), transitions, self.graphSettings.dotFile)
         Objectives.setGraph(ret, maxDiff)
         ret.printGraph()

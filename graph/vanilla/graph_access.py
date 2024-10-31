@@ -670,7 +670,8 @@ accessPoints = [
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor | BossAccessPointFlags.Inside,
        roomInfo = {'RoomPtr':0xa98d, "area": 0x2 },
        exitInfo = {'DoorPtr':0x93de, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
-                   "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+                   "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000,
+                   "exitAsm": "door_transition_boss_exit_fix"},
        entryInfo = {'SamusX':0x2f, 'SamusY':0x88},
        dotOrientation = 'e'),
     AccessPoint('CrocomireBackDoorOut', 'Crocomire', 'Crocomire', {
@@ -842,7 +843,7 @@ accessPoints = [
         'Post Botwoon': lambda sm: sm.canTraverseBotwoonETankRoom()
     }, roomInfo = {'RoomPtr':0xd7e4, "area": 0x4 },
        exitInfo = {'DoorPtr':0xa84c, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
-                   "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
+                   "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe38d},
        entryInfo = {'SamusX':0x30, 'SamusY':0x88},
        dotOrientation = 'e'),
     AccessPoint('Post Botwoon', 'EastMaridia', 'Maridia Pink Top', {

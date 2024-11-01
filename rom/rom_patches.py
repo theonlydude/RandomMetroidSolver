@@ -166,6 +166,8 @@ _baseIPS = [
     'plm_spawn.ips',
     # needed fixes for VARIA
     'vanilla_bugfixes.ips',
+    # tweaked BT-typed gray doors for VARIA tweaks and boss rando
+    'gray_doors.ips',
     # custom credits
     'credits.ips',
     # actual game hijacks to update tracking stats
@@ -404,9 +406,9 @@ definitions = {
             'logic': [RomPatches.LNChozoSJCheckDisabled]
         },
         'bomb_torizo': {
-            'address': 0x23a6f, 'value': 0x20,
+            'address': 'gray_doors_bt_wake_on_item', 'value': 0x1,
             'desc': "Bomb Torizo fight is triggered when picking up the item he's holding, not by having Bomb",
-            'ips': ['bomb_torizo.ips'],
+            'ips': ["BT_Wake_On_Item_Collect"],
             'plms': [],
             'logic': [RomPatches.BombTorizoWake]
         },

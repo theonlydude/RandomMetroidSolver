@@ -201,6 +201,8 @@ class RomReader:
         patch = IPS_Patch.load(ips)
         for logic, data in RomReader.flavorPatches.items():
             address = data['address']
+            if address is str: # can be a symbol
+                address = Addresses.getOne(address)
             value = patch.getValue(address)
             if value is not None and value == data['value']:
                 return logic
@@ -442,6 +444,8 @@ class RomReader:
         addr, val = patchDict[patchName].get('address'), patchDict[patchName].get('value')
         if addr is None or val is None:
             return False
+        if addr is str: # can be a symbol
+            addr = Addresses.getOne(addr)
         value = self.romFile.readByte(addr)
         return value == val
 
@@ -461,8 +465,11 @@ class RomReader:
         # for interactive solver
         result = {}
         for patchName in self.patches:
-            value = self.romFile.readByte(self.patches[patchName]['address'])
-            result[self.patches[patchName]['address']] = value
+            addr = self.patches[patchName]['address']
+            if addr is str: # can be a symbol
+                addr = Addresses.getOne(addr)
+            value = self.romFile.readByte(addr)
+            result[addr] = value
 
         # add boss detection bytes
         doorPtr = getAccessPoint('PhantoonRoomOut').ExitInfo['DoorPtr']

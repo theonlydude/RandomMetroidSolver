@@ -62,6 +62,9 @@ patches = {
     # cancels the gamestate change by new_game.asm
     "Restore_Intro": {
         0x16EDA: [0x1E]
+    },
+    "BT_Wake_On_Item_Collect": {
+        'gray_doors_bt_wake_on_item': [0x1]
     }
 }
 

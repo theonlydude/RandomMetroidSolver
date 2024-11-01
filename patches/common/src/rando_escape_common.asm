@@ -84,7 +84,7 @@ print "bt_door_list : ", pc
 %freespaceEnd($83ae0f)
 
 ;;; CODE in bank 84 (PLM)
-%freespaceStart($84f860)
+%freespaceStart($84f037)
 
 ;;; Disables "ammo locked" elements b/c of no ammo in escape :
 ;;; makes them react to hyper beam shots
@@ -145,7 +145,7 @@ save_station:
     jmp $8cf6
 
 print "B84 end: ", pc
-%freespaceEnd($84f8ff)
+%freespaceEnd($84f0af)
 
 ;;; other door tweaks
 ;; open Tourian grey doors to disable one way

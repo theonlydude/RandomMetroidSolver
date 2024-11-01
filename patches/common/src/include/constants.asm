@@ -121,3 +121,4 @@ include
 !option_play_sfx_on_completion_mask = $80
 !option_hidden_objectives_mask = $02
 !option_BT_sleep_mask = $04
+!option_BT_wake_on_item_mask = $08

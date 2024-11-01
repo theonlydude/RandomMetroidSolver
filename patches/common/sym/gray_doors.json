@@ -11,5 +11,9 @@
     "freespace_alloc_start_1": 8712368,
     "freespace_alloc_start_2": 8714288,
     "freespace_alloc_start_3": 8769328,
-    "freespace_alloc_start_4": 11204563
+    "freespace_alloc_start_4": 11204563,
+    "gray_door_facing_down": 8702036,
+    "gray_door_facing_left": 8702018,
+    "gray_door_facing_right": 8702024,
+    "gray_door_facing_up": 8702030
 }

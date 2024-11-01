@@ -32,6 +32,15 @@ instr_list_gray_door_facing_up:
 org $84bfab
 instr_list_gray_door_facing_down:
 
+org $84C842
+%export(gray_door_facing_left)
+org $84C848
+%export(gray_door_facing_right)
+org $84C84E
+%export(gray_door_facing_up)
+org $84C854
+%export(gray_door_facing_down)
+
 org $84baf4                     ; rewrite vanilla BT PLM to use generic gray door inst list and gain a little space
 %export(bt_door_facing_right)
         dw $c794, instr_list_gray_door_facing_right, setup_bt_door_facing_right

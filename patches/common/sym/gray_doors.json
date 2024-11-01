@@ -1,11 +1,15 @@
 {
-    "bt_door_facing_down": 8712369,
-    "bt_door_facing_left": 8698597,
+    "bt_door_facing_down": 8714288,
+    "bt_door_facing_left": 8712369,
     "bt_door_facing_right": 8698612,
-    "bt_door_facing_up": 8698603,
+    "bt_door_facing_up": 8712375,
     "bt_wake_on_item": 8712368,
     "freespace_alloc_end_1": 8712383,
-    "freespace_alloc_end_2": 8714351,
+    "freespace_alloc_end_2": 8714383,
+    "freespace_alloc_end_3": 8769439,
+    "freespace_alloc_end_4": 11204607,
     "freespace_alloc_start_1": 8712368,
-    "freespace_alloc_start_2": 8714288
+    "freespace_alloc_start_2": 8714288,
+    "freespace_alloc_start_3": 8769328,
+    "freespace_alloc_start_4": 11204563
 }

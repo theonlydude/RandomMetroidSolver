@@ -18,7 +18,7 @@ incsrc "sym/objectives_options.asm"
 !BT_room = $9804
 
 ;; reuse decompression params RAM to ensure we're overwritten when leaving the room
-!trig_addr = $48
+!trig = $48
 ;; this would mean bank FF and addr starting with 00 in decomp routine so this is impossible enough that we can use this value as marker
 !trig_marker = $ff00
 
@@ -72,24 +72,7 @@ setup_bt_door_facing_up:
         dw $0001,$A707
         dw $8724,instr_list_gray_door_facing_up
 
-setup_bt_door_facing_down:
-        dw $0002,$A683          ; wait 2 frames
-        dw instr_btcheck, setup_bt_door_facing_down
-        dw $0028,$A683          ; wait 40 frames
-        dw $8C19 : db $08    ; Queue sound 8, sound library 3, max queued sounds allowed = 6 (door closed)
-        dw $0002,$A75B
-        dw $0002,$A74F
-        dw $0002,$A743
-        dw $0001,$A737
-        dw $8724,instr_list_gray_door_facing_down
-
-%export(bt_door_facing_left)
-        dw $c794, instr_list_gray_door_facing_left, setup_bt_door_facing_left
-
-%export(bt_door_facing_up)
-        dw $c794, instr_list_gray_door_facing_up, setup_bt_door_facing_up
-
-warnpc $84baf4
+warnpc $84bad1
 
 ; Statue
 org $84D33B
@@ -107,15 +90,32 @@ warnpc $84D357
 %export(bt_wake_on_item)        ; VARIA tweaks flag
         db $00
 
-%export(bt_door_facing_down)
-        dw $c794, instr_list_gray_door_facing_down, setup_bt_door_facing_down
+%export(bt_door_facing_left)
+        dw $c794, instr_list_gray_door_facing_left, setup_bt_door_facing_left
+
+%export(bt_door_facing_up)
+        dw $c794, instr_list_gray_door_facing_up, setup_bt_door_facing_up
 %freespaceEnd($84f0bf)
 
 %freespaceStart($84f830)
+%export(bt_door_facing_down)
+        dw $c794, instr_list_gray_door_facing_down, setup_bt_door_facing_down
+
+setup_bt_door_facing_down:
+        dw $0002,$A683          ; wait 2 frames
+        dw instr_btcheck, setup_bt_door_facing_down
+        dw $0028,$A683          ; wait 40 frames
+        dw $8C19 : db $08    ; Queue sound 8, sound library 3, max queued sounds allowed = 6 (door closed)
+        dw $0002,$A75B
+        dw $0002,$A74F
+        dw $0002,$A743
+        dw $0001,$A737
+        dw $8724,instr_list_gray_door_facing_down
+
 btcheck:
         lda !current_room : cmp #!BT_room : beq .bt
 .other:
-        lda !trig_addr : cmp #!trig_marker : bra .end
+        lda !trig : cmp #!trig_marker : bra .end
 .bt:
         ;; check if VARIA tweaks enabled
         lda bt_wake_on_item : and #$00ff : bne .varia_tweaks
@@ -129,5 +129,132 @@ btcheck:
 .end:
         rts
 
-print "b84 end: ", pc
-%freespaceEnd($84f86f)
+print "84 end: ", pc
+%freespaceEnd($84f88f)
+
+;;;;;;;;
+;;; Add hijacks to trigger BT-type doors to close when boss takes a hit:
+;;;;;;;;
+
+org $A7DD42
+    jsl phantoon_hurt
+    nop : nop
+
+org $A7B374
+    jsl kraid_hurt
+
+org $A5954D
+    jsl draygon_hurt
+    nop : nop
+
+; The Ridley "time frozen AI" (during reserve trigger) falls through to the hurt AI.
+; But we don't want it to trigger the gray door to close, so we make it skip over that part:
+org $A6B291
+    jsl ridley_time_frozen
+    bra ridley_odd_frame_counter
+
+warnpc $A6B297
+
+org $A6B2BA
+ridley_odd_frame_counter:
+
+org $A6B297
+    jsl ridley_hurt
+    nop : nop
+
+org $AAD3BA
+    jsl golden_torizo_hurt
+    nop : nop
+
+org $A4868A
+    jsl crocomire_hurt
+
+; Botwoon doesn't have its own hurt AI (it just uses the common enemy hurt AI),
+; so we use its shot AI and check if its full health.
+org $B3A024
+    jsl botwoon_shot
+
+; Spore Spawn doesn't have its own hurt AI (it just uses the common enemy hurt AI),
+; so we use its shot AI and check if its full health.
+org $A5EDF3
+    jsl spore_spawn_shot
+    nop : nop
+
+; free space in any bank
+%freespaceStart($85cf30)
+phantoon_hurt:
+    lda #!trig_marker : sta !trig
+    ; run hi-jacked instructions
+    lda $0F9C 
+    cmp #$0008
+    rtl
+
+kraid_hurt:
+    lda #!trig_marker : sta !trig
+    ; run hi-jacked instruction
+    lda $7E782A
+    rtl
+
+draygon_hurt:
+    lda #!trig_marker : sta !trig
+    ; run hi-jacked instruction
+    ldy #$A277
+    ldx $0E54
+    rtl
+
+ridley_time_frozen:
+    ; run hi-jacked instructions
+    lda #$0001
+    sta $0FA4
+    ; there's nothing more we need to do. 
+    ; We just needed to make space for the "BRA" instruction that comes after returning.
+    rtl
+
+ridley_hurt:
+    lda #!trig_marker : sta !trig
+    ; run hi-jacked instruction
+    lda $0FA4
+    and #$0001
+    rtl
+
+botwoon_shot:
+    lda $0F8C  ; Enemy 0 health
+    cmp #3000  ; Check if Botwoon is full health
+    bcs .miss
+    lda #!trig_marker : sta !trig
+.miss
+    ; run hi-jacked instruction
+    lda $7E8818,x
+    rtl
+
+spore_spawn_shot:
+    lda $0F8C  ; Enemy 0 health
+    cmp #960   ; Check if Spore Spawn is full health
+    bcs .miss
+    lda #!trig_marker : sta !trig
+.miss
+    ; run hi-jacked instructions
+    ldx $0E54
+    lda $0F8C,x
+    rtl
+
+crocomire_hurt:
+    lda #!trig_marker : sta !trig
+    ; run hi-jacked instruction
+    jsl $A48B5B
+    rtl
+
+print "85 end: ", pc
+%freespaceEnd($85cf9f)
+
+; Free space in bank $AA
+%freespaceStart($AAF7D3)
+golden_torizo_hurt:
+    lda #!trig_marker : sta !trig
+    ; run hi-jacked instruction
+    ldx $0E54
+    jsr $C620
+    rtl
+
+print "aa end: ", pc
+%freespaceEnd($AAF7FF)

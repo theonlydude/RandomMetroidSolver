@@ -14,6 +14,5 @@ org $a1f550
 ;;; bit 1: if set, objectives will be hidden in pause menu until a room is visited (usually G4)
 ;;; VARIA tweaks BT options:
 ;;; bit 2: don't wake up BT on item collection. set to 1 if nothing item and no "trigger chozo bots" objective
-;;; bit 3: if 0, vanilla BT behavior, if 1 wake up BT on item collection
 %export(settings_flags)
 	db %00000001

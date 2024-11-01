@@ -614,19 +614,19 @@ definitions = {
         },
         'dead_end_SporeSpawn': {
             'desc': "Seal door at the end of Spore Spawn Super Room",
-            'plms': ["DeadEnd[SporeSpawn]"]
+            'plms': ["DeadEnd[SporeSpawnBackDoorIn]"]
         },
         'dead_end_Botwoon': {
             'desc': "Seal door at the end of Botwoon's Room",
-            'plms': ["DeadEnd[Botwoon]"]
+            'plms': ["DeadEnd[BotwoonBackDoorIn]"]
         },
         'dead_end_Crocomire': {
             'desc': "Seal door at the end of Crocomire's Room",
-            'plms': ["DeadEnd[Crocomire]"]
+            'plms': ["DeadEnd[CrocomireBackDoorIn]"]
         },
         'dead_end_GoldenTorizo': {
             'desc': "Seal door at the end of Golden Torizo Room",
-            'ips': ["DeadEnd[GoldenTorizo]"]
+            'ips': ["DeadEnd[GoldenTorizoBackDoorIn]"]
         }
     },
     'mirror': {

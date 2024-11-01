@@ -253,6 +253,25 @@ class GraphUtils:
             transitions += vanillaBossesTransitions
         return transitions
 
+    def getDeadEndsAndCorridors(graph, bossFlags):
+        deadEnds, corridors = [], []
+        if not (bossFlags & BossAccessPointFlags.MiniBoss) or bossFlags & BossAccessPointFlags.Split:
+            return deadEnds, corridors
+        isG4 = lambda ap: ap.Boss & BossAccessPointFlags.G4
+        isMini = lambda ap: ap.Boss & BossAccessPointFlags.MiniBoss
+        isBack = lambda ap: ap.Boss & BossAccessPointFlags.Backdoor
+        isIn = lambda ap: ap.Boss & BossAccessPointFlags.Inside
+        for src, dst in graph.InterAreaTransitions:
+            if not src.Boss or not dst.Boss:
+                continue
+            srcBoss, _ = GraphUtils.getBossProperties(src.Name)
+            dstBoss, _ = GraphUtils.getBossProperties(dst.Name)
+            if isG4(src) and not isIn(src) and not isBack(src) and isMini(dst) and isIn(dst) and not isBack(dst):
+                deadEnds.append(dstBoss)
+            elif isG4(src) and isBack(src) and isIn(src) and isMini(dst) and isBack(dst) and not isIn(dst):
+                corridors.append(srcBoss)
+        return deadEnds, corridors
+
     def createAreaTransitions(lightAreaRando=False):
         if lightAreaRando:
             return GraphUtils.createLightAreaTransitions()
@@ -616,9 +635,10 @@ class GraphUtils:
                 continue
             GraphUtils.log.debug("Processing door connection %s" % conn['ID'])
             # where to write
-            conn['DoorPtr'] = src.ExitInfo['DoorPtr']
             if 'DoorPtrSym' in src.ExitInfo:
                 conn['DoorPtrSym'] = src.ExitInfo['DoorPtrSym']
+            else:
+                conn['DoorPtr'] = src.ExitInfo['DoorPtr']
             # door properties
             conn['RoomPtr'] = dst.RoomInfo['RoomPtr']
             conn['doorAsmPtr'] = dst.EntryInfo['doorAsmPtr']

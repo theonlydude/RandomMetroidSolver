@@ -61,7 +61,6 @@ class GraphBuilder(object):
                     transitions += vanillaTransitions
                 else:
                     transitions += GraphUtils.createAreaTransitions(self.graphSettings.lightAreaRando)
-                # boss rando after area rando is important because of Croc area transition that can turn into a boss transition
                 if not self.bossRando:
                     transitions += vanillaBossesTransitions + vanillaMiniBossesTransitions + vanillaMiniBossesTransitionsBack
                 else:

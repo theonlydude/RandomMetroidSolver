@@ -268,7 +268,8 @@ accessPoints = [
        roomInfo = {'RoomPtr':0xcd13, "area": 0x3},
        exitInfo = {'DoorPtrSym':'corridor_phantoon_door_phantoon_back_door',
                    'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
-                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
+                   "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0,
+                   "exitAsm": "door_transition_boss_exit_fix"},
        entryInfo = {'SamusX':0xcf, 'SamusY':0xb0},
        dotOrientation = 'w'),
     AccessPoint('PhantoonBackDoorOut', 'WreckedShip', 'Phantoon Boss', {}, # placeholder for transitions, does not exist in game
@@ -819,21 +820,24 @@ accessPoints = [
                 'doors': [0x96]}),
     AccessPoint('BotwoonFrontDoorOut', 'EastMaridia', 'Maridia Pink Top', { # FIXME solve area?
         'Aqueduct Bottom': lambda sm: sm.canPassBotwoonHallway()
-    }, roomInfo = {'RoomPtr':0xd617, "area": 0x4 },
+    }, boss = BossAccessPointFlags.MiniBoss,
+       roomInfo = {'RoomPtr':0xd617, "area": 0x4 },
        exitInfo = {'DoorPtr':0xa774, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x3cf, 'SamusY':0x88},
        dotOrientation = 'w'),
     AccessPoint('BotwoonFrontDoorIn', 'EastMaridia', 'Maridia Pink Top', { # FIXME solve area?
         'BotwoonBackDoorIn': lambda sm: Bosses.bossDead(sm, "Botwoon")
-    }, roomInfo = {'RoomPtr':0xd95e, "area": 0x4 },
+    }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Inside,
+       roomInfo = {'RoomPtr':0xd95e, "area": 0x4 },
        exitInfo = {'DoorPtr':0xa90c, 'direction': 0x5, "cap": (0x3e, 0x6), "bitFlag": 0x0,
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x30, 'SamusY':0xb8},
        dotOrientation = 'e'),
     AccessPoint('BotwoonBackDoorIn', 'EastMaridia', 'Maridia Pink Top', { # FIXME solve area?
         'BotwoonFrontDoorIn': lambda sm: Bosses.bossDead(sm, "Botwoon")
-    }, roomInfo = {'RoomPtr':0xd95e, "area": 0x4 },
+    }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Inside | BossAccessPointFlags.Backdoor,
+       roomInfo = {'RoomPtr':0xd95e, "area": 0x4 },
        exitInfo = {'DoorPtr':0xa918, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x1d3, 'SamusY':0x88},
@@ -841,7 +845,8 @@ accessPoints = [
     AccessPoint('BotwoonBackDoorOut', 'EastMaridia', 'Maridia Pink Top', { # FIXME solve area?
         'Aqueduct Bottom': lambda sm: SMBool(True), # go down sandpits
         'Post Botwoon': lambda sm: sm.canTraverseBotwoonETankRoom()
-    }, roomInfo = {'RoomPtr':0xd7e4, "area": 0x4 },
+    }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor,
+       roomInfo = {'RoomPtr':0xd7e4, "area": 0x4 },
        exitInfo = {'DoorPtr':0xa84c, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
                    "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe38d},
        entryInfo = {'SamusX':0x30, 'SamusY':0x88},

@@ -368,8 +368,7 @@ class RandoSetup(object):
                     # see if we can beat bosses with this equipment (infinity as max diff for a "onlyBossesLeft" type check
                     Objectives.maxDiff = infinity
                     allBosses = [loc for loc in totalAvailLocs if loc.isBoss() and loc.Name != "Mother Brain"]
-                    availLocs = self.services.currentLocations(self.startAP, container, diff=infinity)
-                    beatableBosses = [loc for loc in availLocs if loc in allBosses]
+                    beatableBosses = [loc for loc in allBosses if loc.Available(self.sm)]
                     beatableBossNames = [loc.BossItemType for loc in beatableBosses]
                     ret = mandatoryBosses.issubset(set(beatableBossNames)) and Objectives.checkLimitObjectives(beatableBossNames)
                     if ret:
@@ -388,7 +387,7 @@ class RandoSetup(object):
                                 diff = loc.difficulty.difficulty
                                 loc.difficulty.difficulty = getDiffThreshold(diff)
                     else:
-                        msg = "can't kill all mandatory bosses/minibosses"
+                        msg = f"can't kill all mandatory bosses/minibosses. non beatable and mandatory: {mandatoryBosses - set(beatableBossNames)}"
                         self.log.debug("checkPool. {}".format(msg))
                         self.errorMsgs.append(msg)
                     Objectives.maxDiff = maxDiff

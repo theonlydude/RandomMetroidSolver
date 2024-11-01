@@ -89,7 +89,7 @@ class RomPatcher:
         # objectives
         self.writeObjectives(self.settings["itemLocs"], self.settings["tourian"])
         self.writeObjectivesMapIcons(self.settings["tourian"])
-        # area connections
+        # area/boss connections
         self.writeDoorConnections(self.settings["doors"])
         self.writeDoorConnectionsMapIcons(self.settings["doors"], self.settings["tourian"])
         # door caps
@@ -388,6 +388,11 @@ class RomPatcher:
             patchSets = self.getPatchSetsFromSettings()
             for patchSet in patchSets:
                 self.applyPatchSet(patchSet, plms)
+            deadEnds, corridors = GraphUtils.getDeadEndsAndCorridors(Objectives.graph, self.settings["boss"])
+            for deadEnd in deadEnds:
+                self.applyPatchSet(f"dead_end_{deadEnd}", plms)
+            for corridor in corridors:
+                self.applyPatchSet(f"corridor_{corridor}", plms)
             # special patches
             if self.race is not None:
                 self.applyIPSPatch('race_mode_post.ips')
@@ -464,7 +469,7 @@ class RomPatcher:
         if minimizerN is not None:
             # add blinking doors inside and outside boss rooms
             for accessPoint in Logic.accessPoints():
-                if accessPoint.Boss == True:
+                if accessPoint.Boss:
                     addBlinking(accessPoint.Name)
         return doors
 

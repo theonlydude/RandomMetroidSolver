@@ -58,7 +58,7 @@ setup_bt_door_facing_right:
         dw $0002, $A6BF
         dw $0002, $A6B3
 	dw $0001, $A6A7
-        dw $8724,instr_list_gray_door_facing_left
+        dw $8724,instr_list_gray_door_facing_right
 
 setup_bt_door_facing_left:
         dw $0002,$A677          ; wait 2 frames

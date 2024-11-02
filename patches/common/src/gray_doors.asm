@@ -47,22 +47,26 @@ org $84baf4                     ; rewrite vanilla BT PLM to use generic gray doo
 
 org $84ba4c
 setup_bt_door_facing_right:
-org $84BA6D
-        dw instr_list_gray_door_facing_right ; overwrite last jump in BT door facing right setup func
-
-;; overwrite now unused vanilla BT door instr list, and some unused setup code for it
-instr_btcheck:
-        jsr btcheck : BNE +
-	INY : INY
-        RTS
-+
-	LDA $0000,y : TAY
-        RTS
+        dw $0002,$A683          ; wait 2 frames
+        dw instr_btcheck, setup_bt_door_facing_right
+        dw $0026,$A683          ; wait 38 frames
+.wait_clear:
+        dw $0002, $A683    ; Wait for Samus not to be in the doorway (to avoid getting stuck)
+        dw left_doorway_clear, .wait_clear
+        dw $8C19 : db $08    ; Queue sound 8, sound library 3, max queued sounds allowed = 6 (door closed)
+        dw $0002, $A6CB
+        dw $0002, $A6BF
+        dw $0002, $A6B3
+	dw $0001, $A6A7
+        dw $8724,instr_list_gray_door_facing_left
 
 setup_bt_door_facing_left:
-        dw $0002,$A683          ; wait 2 frames
+        dw $0002,$A677          ; wait 2 frames
         dw instr_btcheck, setup_bt_door_facing_left
-        dw $0028,$A683          ; wait 40 frames
+        dw $0026,$A677          ; wait 38 frames
+.wait_clear:
+        dw $0002, $A677    ; Wait for Samus not to be in the doorway (to avoid getting stuck)
+        dw right_doorway_clear, .wait_clear
         dw $8C19 : db $08    ; Queue sound 8, sound library 3, max queued sounds allowed = 6 (door closed)
         dw $0002, $A6CB
         dw $0002, $A6BF
@@ -71,9 +75,9 @@ setup_bt_door_facing_left:
         dw $8724,instr_list_gray_door_facing_left
 
 setup_bt_door_facing_up:
-        dw $0002,$A683          ; wait 2 frames
+        dw $0002,$A68F          ; wait 2 frames
         dw instr_btcheck, setup_bt_door_facing_up
-        dw $0028,$A683          ; wait 40 frames
+        dw $0028,$A68F          ; wait 40 frames
         dw $8C19 : db $08    ; Queue sound 8, sound library 3, max queued sounds allowed = 6 (door closed)
         dw $0002,$A72B
         dw $0002,$A71F
@@ -111,15 +115,23 @@ warnpc $84D357
         dw $c794, instr_list_gray_door_facing_down, setup_bt_door_facing_down
 
 setup_bt_door_facing_down:
-        dw $0002,$A683          ; wait 2 frames
+        dw $0002,$A69B          ; wait 2 frames
         dw instr_btcheck, setup_bt_door_facing_down
-        dw $0028,$A683          ; wait 40 frames
+        dw $0028,$A69B          ; wait 40 frames
         dw $8C19 : db $08    ; Queue sound 8, sound library 3, max queued sounds allowed = 6 (door closed)
         dw $0002,$A75B
         dw $0002,$A74F
         dw $0002,$A743
         dw $0001,$A737
         dw $8724,instr_list_gray_door_facing_down
+
+instr_btcheck:
+        jsr btcheck : BNE +
+	INY : INY
+        RTS
++
+	LDA $0000,y : TAY
+        RTS
 
 btcheck:
         lda !current_room : cmp #!BT_room : beq .bt
@@ -138,8 +150,38 @@ btcheck:
 .end:
         rts
 
+;;; Check if Samus is away from the left door (X position >= $25)
+left_doorway_clear:
+    lda $0AF6
+    cmp #$0025
+    bcc .not_clear
+    iny
+    iny
+    rts
+.not_clear:
+    lda $0000,y
+    tay
+    rts
+
+;;; Check if Samus is away from the right door (X position < room_width - $24)
+right_doorway_clear:
+    lda $07A9  ; room width in screens
+    xba        ; room width in pixels
+    clc
+    sbc #$0024
+    cmp $0AF6
+    bcc .not_clear
+    iny
+    iny
+    rts
+.not_clear:
+    lda $0000,y
+    tay
+    rts
+
+
 print "84 end: ", pc
-%freespaceEnd($84f88f)
+%freespaceEnd($84f8bf)
 
 ;;;;;;;;
 ;;; Add hijacks to trigger BT-type doors to close when boss takes a hit:

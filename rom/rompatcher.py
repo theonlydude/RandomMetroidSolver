@@ -988,7 +988,8 @@ class RomPatcher:
     # * if not, just write doorAsmPtr as the door property directly.
     def writeDoorConnections(self, doorConnections):
         assert len(self.areaMaps) > 0, "Build area maps before calling writeDoorConnections"
-        asmAddress = Addresses.getOne('customDoorsAsm')
+        r = Addresses.getRange('customDoorsAsm')
+        asmAddress, asmRegionEnd = r[0], r[1]
         def loadDoorTransitionShortPtrBytes(label, patch='door_transition'):
             ptr = self.symbols.getAddress(patch, label)
             return getWordBytes(ptr)
@@ -1107,8 +1108,8 @@ class RomPatcher:
                 asmPatch += [ 0x20 ] + reveal_objectives
             # return
             asmPatch += [ 0x60 ]   # RTS
+            assert asmAddress + len(asmPatch) <= asmRegionEnd, "door asm region overflow"
             self.romFile.writeWord(asmAddress & 0xFFFF)
-
             self.romFile.seek(asmAddress)
             for byte in asmPatch:
                 self.romFile.writeByte(byte)
@@ -1175,6 +1176,7 @@ class RomPatcher:
                     # disable original PLM, if any
                     if 'address' in door:
                         self.romFile.writeWord(0xb63b, door['address']) # PLM type = copy arrow
+        # determine bosses in the seed and write boss doors
         bosses = set()
         for apName, ap in graph.accessPoints.items():
             if ap.Boss & bossFlags:

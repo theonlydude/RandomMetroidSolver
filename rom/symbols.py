@@ -91,7 +91,7 @@ class Symbols(object):
             symbolsAbsolute = self.getAbsoluteSymbols()
         with open(mslPath, "a") as msl:
             for sym in symbolsAbsolute:
-                if sym.startswith("freespace_alloc_"):
+                if "freespace_alloc_" in sym:
                     continue
                 addr = self._symbolsAbsolute[sym]
                 msl.write("PRG:%X:%s\n" % (snes_to_pc(addr), sym))

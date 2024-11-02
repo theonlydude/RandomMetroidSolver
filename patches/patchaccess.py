@@ -47,6 +47,9 @@ class PatchAccess(object):
     def getAdditionalPLMs(self):
         return self.additionalPLMs
 
+    def updateAdditionalPLMs(self, plms):
+        self.additionalPLMs.update(plms)
+
     def postSymbolsLoad(self):
         # allow patches to have a label instead of an address
         replacements = {}

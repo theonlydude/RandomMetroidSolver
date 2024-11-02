@@ -9,6 +9,7 @@ from rom.ips import IPS_Patch
 from utils.doorsmanager import DoorsManager, IndicatorFlag
 from utils.objectives import Objectives
 from graph.graph_utils import GraphUtils, getAccessPoint, graphAreas, gameAreas
+from graph.flags import BossAccessPointFlags
 from logic.logic import Logic
 from rom.rom import RealROM, FakeROM, snes_to_pc, pc_to_snes
 from rom.addresses import Addresses
@@ -24,6 +25,10 @@ import utils.log
 
 def getWord(w):
     return (w & 0x00FF, (w & 0xFF00) >> 8)
+
+def getWordBytes(addr):
+    w = getWord(addr & 0xffff)
+    return [w[0], w[1]]
 
 class RomPatcher:
     def __init__(self, settings=None, romFileName=None, magic=None):
@@ -393,6 +398,8 @@ class RomPatcher:
                 self.applyPatchSet(f"dead_end_{deadEnd}", plms)
             for corridor in corridors:
                 self.applyPatchSet(f"corridor_{corridor}", plms)
+            if self.settings["boss"]:
+                self.writeBossDoors(self.settings["boss"], Objectives.graph, plms)
             # special patches
             if self.race is not None:
                 self.applyIPSPatch('race_mode_post.ips')
@@ -965,6 +972,10 @@ class RomPatcher:
         else:
             self.race.writeDoorTransition(roomPtr)
 
+    def symbolWordBytes(self, symbol):
+        ptr = self.symbols.getAddress(symbol)
+        return getWordBytes(ptr)
+
     # write area randomizer transitions to ROM
     # doorConnections : a list of connections. each connection is a dictionary describing
     # - where to write in the ROM :
@@ -978,14 +989,8 @@ class RomPatcher:
     def writeDoorConnections(self, doorConnections):
         assert len(self.areaMaps) > 0, "Build area maps before calling writeDoorConnections"
         asmAddress = Addresses.getOne('customDoorsAsm')
-        def getWordBytes(addr):
-            w = getWord(addr & 0xffff)
-            return [w[0], w[1]]
         def loadDoorTransitionShortPtrBytes(label, patch='door_transition'):
             ptr = self.symbols.getAddress(patch, label)
-            return getWordBytes(ptr)
-        def symbolWordBytes(symbol):
-            ptr = self.symbols.getAddress(symbol)
             return getWordBytes(ptr)
         incompatible_doors = loadDoorTransitionShortPtrBytes("incompatible_doors")
         giveiframes = loadDoorTransitionShortPtrBytes("giveiframes")
@@ -1047,7 +1052,7 @@ class RomPatcher:
             if conn['doorAsmPtr'] != 0x0000:
                 # may be a symbol
                 if type(conn['doorAsmPtr']) is str:
-                    doorAsmPtr = symbolWordBytes(conn['doorAsmPtr'])
+                    doorAsmPtr = self.symbolWordBytes(conn['doorAsmPtr'])
                 else:
                     # endian convert
                     doorAsmPtr = getWordBytes(conn['doorAsmPtr'])
@@ -1055,7 +1060,7 @@ class RomPatcher:
             # special ASM hook point for VARIA needs when taking the door (used for animals)
             if 'exitAsm' in conn:
                 # endian convert
-                exitAsm = symbolWordBytes(conn['exitAsm'])
+                exitAsm = self.symbolWordBytes(conn['exitAsm'])
                 asmPatch += [ 0x20 ] + exitAsm            # JSR exitAsm
             # for special access points display on map, artificially explore the tile where 
             # the portal is drawn, since it's not the same as the actual map tile checked to
@@ -1120,6 +1125,58 @@ class RomPatcher:
                     self.romFile.seek(0x70000 + addr)
                     self.romFile.writeByte(conn['song'])
                     self.romFile.writeByte(0x5)
+
+    def writeBossDoors(self, bossFlags, graph, plms):
+        newPlms = {}
+        def getPLMbytes(door, closed=False):
+            symbol = "gray_doors_%s_door_facing_%s" % ("gray" if closed else "bt", door['facing'])
+            return self.symbolWordBytes(symbol) + [door['x'], door['y']] + getWordBytes(door['var'])
+        def writeDoors(boss):
+            doors = Logic.boss_doors[boss]
+            if len(doors) == 1 and 'address' in doors[0]:
+                # overwrite existing PLM
+                self.romFile.seek(doors[0]['address'])
+                bytez = getPLMbytes(doors[0])
+                for b in bytez:
+                    self.romFile.writeByte(b)
+            else: 
+                for door in doors:
+                    # disable original PLM, if any
+                    if 'address' in door:
+                        self.romFile.writeWord(0xb63b, door['address']) # PLM type = copy arrow
+                    # add new PLMs: when coming in at this door, put a bt door there and gray doors elsewhere.
+                    # that way when the player enters the door behind them stays open
+                    incoming = door.get('from')
+                    if not incoming:
+                        ap = graph.accessPoints[door['connection']]
+                        if ap.ConnectedTo is None:
+                            continue
+                        incoming = graph.accessPoints[ap.ConnectedTo].ExitInfo['DoorPtr']
+                        self.log.debug("connection: %s incoming: %04x" % (ap.Name, incoming))
+                    otherDoors = [d for d in doors if d != door]
+                    plm = {
+                        'room': door['room'],
+                        'door': incoming,
+                        'plm_bytes_list': []
+                    }
+                    newPlms[f"gray_door_facing_{door['facing']}_{boss}"] = plm
+                    def addDoor(d, closed):
+                        nonlocal plm
+                        assert d['room'] == plm['room']
+                        plm['plm_bytes_list'].append(getPLMbytes(d, closed))
+                    for d in otherDoors:
+                        addDoor(d, True)
+                    addDoor(door, False)
+        bosses = set()
+        for apName, ap in graph.accessPoints.items():
+            if ap.Boss & bossFlags:
+                boss, _ = GraphUtils.getBossProperties(apName)
+                if boss:
+                    bosses.add(boss)
+        for boss in bosses:
+            writeDoors(boss)
+        self.patchAccess.updateAdditionalPLMs(newPlms)
+        plms += list(newPlms.keys())
 
     def _getExploredMapRam(self, area, index=0):
         if isinstance(area, str):

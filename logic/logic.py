@@ -18,7 +18,7 @@ class Logic(object):
             import graph.vanilla.boss_doors
             Logic.map_tiles = graph.vanilla.map_tiles
             Logic.map_tilecount = graph.vanilla.map_tilecount.tilecount
-            Logic.boss_doors = graph.vanilla.boss_doors
+            Logic.boss_doors = graph.vanilla.boss_doors.boss_doors
             Logic._locations = locations
             Logic._locationsDict = locationsDict
             Logic._accessPoints = accessPoints
@@ -36,7 +36,7 @@ class Logic(object):
             import graph.mirror.boss_doors
             Logic.map_tiles = graph.mirror.map_tiles
             Logic.map_tilecount = graph.mirror.map_tilecount.tilecount
-            Logic.boss_doors = graph.mirror.boss_doors
+            Logic.boss_doors = graph.mirror.boss_doors.boss_doors
             Logic._locations = locations
             Logic._locationsDict = locationsDict
             Logic._accessPoints = accessPoints

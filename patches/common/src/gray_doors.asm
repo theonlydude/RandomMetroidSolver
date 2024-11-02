@@ -54,10 +54,10 @@ setup_bt_door_facing_right:
         dw $0002, $A683    ; Wait for Samus not to be in the doorway (to avoid getting stuck)
         dw left_doorway_clear, .wait_clear
         dw $8C19 : db $08    ; Queue sound 8, sound library 3, max queued sounds allowed = 6 (door closed)
-        dw $0002, $A6CB
-        dw $0002, $A6BF
-        dw $0002, $A6B3
-	dw $0001, $A6A7
+        dw $0002, $A6FB
+        dw $0002, $A6EF
+        dw $0002, $A6E3
+        dw $0001, $A6D7
         dw $8724,instr_list_gray_door_facing_right
 
 setup_bt_door_facing_left:

@@ -9,12 +9,12 @@ boss_doors = {
         { "facing": "left", "connection": "PhantoonBackDoorIn", "x": 0xe, "y": 0x6, "var": 0x0086, "room": 0xCD13 }
     ],
     'Draygon': [
-        { "facing": "right", "connection": "DraygonRoomIn", "x": 0x1, "y": 0x16, "var": 0x009f, "address": 0x7C7C1, "room": 0xDA60 },
-        { "facing": "left", "from": 0xa924, "x": 0x1e, "y": 0x6, "var": 0x009e, "address": 0x7C7BB, "room": 0xDA60 }
+        { "facing": "left", "connection": "DraygonRoomIn", "x": 0x1, "y": 0x16, "var": 0x009f, "address": 0x7C7C1, "room": 0xDA60 },
+        { "facing": "right", "from": 0xa924, "x": 0x1e, "y": 0x6, "var": 0x009e, "address": 0x7C7BB, "room": 0xDA60 }
     ],
     'Ridley': [
-        { "facing": "right", "connection": "RidleyRoomIn", "x": 0x1, "y": 0x16, "var": 0x005b, "address": 0x78E9E, "room": 0xB32E },
-        { "facing": "left", "from": 0x9a62, "x": 0xe, "y": 0x6, "var": 0x005a, "address": 0x78E98, "room": 0xB32E }
+        { "facing": "left", "connection": "RidleyRoomIn", "x": 0x1, "y": 0x16, "var": 0x005b, "address": 0x78E9E, "room": 0xB32E },
+        { "facing": "right", "from": 0x9a62, "x": 0xe, "y": 0x6, "var": 0x005a, "address": 0x78E98, "room": 0xB32E }
     ],
     'SporeSpawn': [
         { "facing": "up", "connection": "SporeSpawnFrontDoorIn", "x": 0x6, "y": 0x2e, "var": 0x042e, "address": 0x78642 },

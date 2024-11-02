@@ -1140,33 +1140,41 @@ class RomPatcher:
                 for b in bytez:
                     self.romFile.writeByte(b)
             else: 
-                for door in doors:
-                    # disable original PLM, if any
-                    if 'address' in door:
-                        self.romFile.writeWord(0xb63b, door['address']) # PLM type = copy arrow
+                for i, door in enumerate(doors):
+                    self.log.debug(f"processing boss {boss} door {i}")
                     # add new PLMs: when coming in at this door, put a bt door there and gray doors elsewhere.
-                    # that way when the player enters the door behind them stays open
+                    # that way when the player enters the door behind them stays open until hurting the boss,
+                    # and other doors are locked by the boss (or already sealed off if dead end)
                     incoming = door.get('from')
                     if not incoming:
                         ap = graph.accessPoints[door['connection']]
                         if ap.ConnectedTo is None:
+                            self.log.debug("skipped")
                             continue
                         incoming = graph.accessPoints[ap.ConnectedTo].ExitInfo['DoorPtr']
-                        self.log.debug("connection: %s incoming: %04x" % (ap.Name, incoming))
+                        self.log.debug("connection: %s" % ap.Name)
+                    self.log.debug("incoming: %04x" % incoming)
                     otherDoors = [d for d in doors if d != door]
                     plm = {
                         'room': door['room'],
                         'door': incoming,
                         'plm_bytes_list': []
                     }
-                    newPlms[f"gray_door_facing_{door['facing']}_{boss}"] = plm
+                    newPlms[f"{boss}_entering_from_door_facing_{door['facing']}_{incoming:04x}"] = plm
                     def addDoor(d, closed):
                         nonlocal plm
                         assert d['room'] == plm['room']
+                        self.log.debug("adding %s door: %s" % ("gray" if closed else "bt", str(d)))
                         plm['plm_bytes_list'].append(getPLMbytes(d, closed))
                     for d in otherDoors:
+                        if "connection" in d and graph.accessPoints[d['connection']].ConnectedTo is None:
+                            # don't add doors where dead end permanent gray doors are already added
+                            continue
                         addDoor(d, True)
                     addDoor(door, False)
+                    # disable original PLM, if any
+                    if 'address' in door:
+                        self.romFile.writeWord(0xb63b, door['address']) # PLM type = copy arrow
         bosses = set()
         for apName, ap in graph.accessPoints.items():
             if ap.Boss & bossFlags:

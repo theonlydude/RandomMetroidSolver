@@ -1512,4 +1512,15 @@ class Objectives(object):
         rom.writeWord(0xAE5B)
         rom.writeWord(0x9698)
 
+    def __deepcopy__(self, memo=None):
+        cls = self.__class__
+        cp = cls.__new__(cls)
+        if memo is None:
+            memo = {}
+        memo[id(self.graph)] = self.graph
+        for k, v in self.__dict__.items():
+            setattr(cp, k, copy.deepcopy(v, memo))
+        return cp
+
+
 objective_mapicons = [ObjectiveMapIcon(i) for i in range(Objectives.maxActiveGoals)]

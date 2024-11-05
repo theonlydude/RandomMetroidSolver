@@ -201,7 +201,7 @@ class RomReader:
         patch = IPS_Patch.load(ips)
         for logic, data in RomReader.flavorPatches.items():
             address = data['address']
-            if address is str: # can be a symbol
+            if isinstance(address, str): # can be a symbol
                 address = Addresses.getOne(address)
             value = patch.getValue(address)
             if value is not None and value == data['value']:
@@ -444,7 +444,7 @@ class RomReader:
         addr, val = patchDict[patchName].get('address'), patchDict[patchName].get('value')
         if addr is None or val is None:
             return False
-        if addr is str: # can be a symbol
+        if isinstance(addr, str): # can be a symbol
             addr = Addresses.getOne(addr)
         value = self.romFile.readByte(addr)
         return value == val
@@ -466,7 +466,7 @@ class RomReader:
         result = {}
         for patchName in self.patches:
             addr = self.patches[patchName]['address']
-            if addr is str: # can be a symbol
+            if isinstance(addr, str): # can be a symbol
                 addr = Addresses.getOne(addr)
             value = self.romFile.readByte(addr)
             result[addr] = value

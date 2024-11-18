@@ -1,5 +1,7 @@
 # object to handle the smbools and optimize them
 
+import copy
+
 from logic.cache import Cache
 from logic.smbool import SMBool, smboolFalse
 from logic.helpers import Bosses
@@ -225,6 +227,17 @@ class SMBoolManager(object):
             return SMBool(True, difficulty, items = [items])
         else:
             return smboolFalse
+
+    def __deepcopy__(self, memo=None):
+        cls = self.__class__
+        cp = cls.__new__(cls)
+        if memo is None:
+            memo = {}
+        memo[id(self)] = cp
+        for k, v in self.__dict__.items():
+            setattr(cp, k, copy.deepcopy(v, memo))
+        return cp
+
 
 class SMBoolManagerPlando(SMBoolManager):
     def __init__(self):

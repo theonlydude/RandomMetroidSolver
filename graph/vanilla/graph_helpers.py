@@ -797,7 +797,8 @@ class HelpersGraph(Helpers):
                       sm.wand(sm.knowsMaridiaWallJumps(), # wjs and/or 3 tile mid air morph
                               sm.wor(sm.canUseSpringBall(),
                                      sm.canPassBombPassages(),
-                                     sm.knowsWestSandHoleMorphOnlyItemAccess())))
+                                     sm.wand(sm.haveItem('Morph'),
+                                             sm.knowsWestSandHoleMorphOnlyItemAccess()))))
 
     @Cache.decorator
     def canAccessMaridiaReserveFromTopWestSandHole(self):

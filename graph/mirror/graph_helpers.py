@@ -33,8 +33,8 @@ class HelpersGraphMirror(HelpersGraph):
 
     @Cache.decorator
     def canAccessMaridiaReserveFromTopWestSandHole(self):
+        sm = self.smbm
+        sm.changeKnows('WestSandHoleMorphOnlyItemAccess', SMBool(False, 0))
         v = super().canAccessItemsInWestSandHole()
-        if 'WestSandHoleMorphOnlyItemAccess' in v.knows:
-            # wiggling is not possible from right to left
-            return SMBool(False, 0)
+        sm.restoreKnows('WestSandHoleMorphOnlyItemAccess')
         return v

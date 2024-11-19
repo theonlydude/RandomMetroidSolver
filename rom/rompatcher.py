@@ -1473,9 +1473,6 @@ class RomPatcher:
             if area in accessibleAreasNoBoss:
                 # count all tiles
                 offset = 0 if not isEscape else escapeRandoOffsets.get(area, 0)
-                if area == "Crateria" and not isArea and tourian == "Fast":
-                    # remove G4 room for count (only one tile, as the one below elevator is already removed)
-                    offset -= 1
                 count = tilecount[area] + offset
             elif area in bossTiles:
                 # only boss tiles

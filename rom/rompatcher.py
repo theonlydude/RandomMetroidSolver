@@ -621,6 +621,7 @@ class RomPatcher:
         # write room table terminator
         addRoomPatchData([0x0] * 8)
         assert plmTblOffset < roomTblAddr, "Spawn PLM table overlap. PLM table offset is 0x%x, Room table address is 0x%x" % (plmTblOffset,roomTblAddr)
+        self.log.debug(f"finished PLM table: {plmTblOffset - plmTblAddr} bytes, {roomTblAddr - plmTblOffset} bytes left")
         patchDict = {
             "PLM_Spawn_Tables" : {
                 plmTblAddr: plmPatchData,
@@ -1109,6 +1110,7 @@ class RomPatcher:
             # return
             asmPatch += [ 0x60 ]   # RTS
             assert asmAddress + len(asmPatch) <= asmRegionEnd, "door asm region overflow"
+            self.log.debug(f"door connections asm patch: {len(asmPatch)} bytes, {asmRegionEnd - asmAddress - len(asmPatch)} bytes left")
             self.romFile.writeWord(asmAddress & 0xFFFF)
             self.romFile.seek(asmAddress)
             for byte in asmPatch:

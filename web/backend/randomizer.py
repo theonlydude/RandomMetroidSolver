@@ -3,8 +3,8 @@ import functools, traceback
 from datetime import datetime
 
 from web.backend.utils import loadPresetsList, loadRandoPresetsList, displayNames, get_client_files
-from web.backend.utils import validateWebServiceParams, getCustomMapping, localIpsDir, raiseHttp, getInt
-from utils.utils import getRandomizerDefaultParameters, getDefaultMultiValues, PresetLoader, getPresetDir, getPythonExec
+from web.backend.utils import validateWebServiceParams, localIpsDir, raiseHttp, getInt
+from utils.utils import getRandomizerDefaultParameters, getDefaultMultiValues, PresetLoader, getPresetDir, getPythonExec, getCustomMapping
 from graph.graph_utils import GraphUtils
 from utils.db import DB
 from utils.objectives import Objectives

@@ -3,9 +3,9 @@ from datetime import datetime
 from collections import defaultdict
 
 from web.backend.utils import raiseHttp, loadPresetsList, updateParameterDisplay, get_client_files
-from web.backend.utils import validateWebServiceParams, localIpsDir, getCustomMapping
+from web.backend.utils import validateWebServiceParams, localIpsDir
 from urllib.parse import urlparse, parse_qs
-from utils.utils import getRandomizerDefaultParameters, removeChars, getPresetDir, PresetLoader, getPythonExec
+from utils.utils import getRandomizerDefaultParameters, removeChars, getPresetDir, PresetLoader, getPythonExec, getCustomMapping
 from utils.db import DB
 from logic.logic import Logic
 from rom.romreader import RomReader

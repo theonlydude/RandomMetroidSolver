@@ -359,17 +359,6 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
             validatePatches(key, getattr(request.vars, custom_key))
 
     return errors
-
-def getCustomMapping(controlMapping):
-    if len(controlMapping) == 0:
-        return (False, None)
-
-    inv = {}
-    for button in controlMapping:
-        inv[controlMapping[button]] = button
-
-    return (True, "{},{},{},{},{},{},{}".format(inv["Shoot"], inv["Jump"], inv["Dash"], inv["Item Select"], inv["Item Cancel"], inv["Angle Up"], inv["Angle Down"]))
-
 def completePreset(params):
     # add missing knows
     for know in Knows.__dict__:

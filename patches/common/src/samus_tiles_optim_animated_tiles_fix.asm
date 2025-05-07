@@ -40,7 +40,7 @@ process_animated_tiles:
 	LDX #$0A ; X = Ah (animated tiles object index)
 	LDY #$02 ; Y = 2
 -
-	LDA $1EF5,x : BEQ ++ : LDA $1F25,x : BEQ ++ ; If [animated tiles object ID and src addr] != 0:
+	LDA $1EF5,x : BEQ ++ ; If [animated tiles object ID] != 0:
 	LDA $1F25,x : BPL ++ ; If animated tiles object tiles flagged for transfer:
 	STA $4312 ; DMA 1 source address = $87:0000 + [animated tiles object source address]
 	; DMA 1 control / target = 16-bit VRAM write (set by $809376)

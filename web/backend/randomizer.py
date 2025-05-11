@@ -260,7 +260,7 @@ class Randomizer(object):
         multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
                   'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
                   'areaRandomization', 'logic']
-        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective', 'nbObjectivesRequired', 'areaLayoutCustom', 'variaTweaksCustom', 'layoutCustom']
+        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective', 'nbObjectivesRequired', 'minorQtyEqLeGe', 'areaLayoutCustom', 'variaTweaksCustom', 'layoutCustom']
         errors = validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
 
         # randomize

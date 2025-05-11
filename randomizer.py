@@ -141,6 +141,10 @@ if __name__ == "__main__":
                         help="quantity of minors",
                         dest='minorQty', nargs='?', default=100,
                         choices=[str(i) for i in range(0,101)])
+    parser.add_argument('--minorQtyEqLeGe',
+                        help="if qhantity of minors shall be equal, lower equal or greater equal the entered value on minorQty",
+                        dest='minorQtyEqLeGe', nargs='?', default="=",
+                        choices=['=', '>=', '<='])
     parser.add_argument('--energyQty', '-g',
                         help="quantity of ETanks/Reserve Tanks",
                         dest='energyQty', nargs='?', default='vanilla',
@@ -556,6 +560,7 @@ if __name__ == "__main__":
     superQty = float(args.superQty)
     powerBombQty = float(args.powerBombQty)
     minorQty = int(args.minorQty)
+    minorQtyEqLeGe = args.minorQtyEqLeGe
     energyQty = args.energyQty
     if missileQty < 1:
         missileQty = random.randint(1, 9)
@@ -565,6 +570,10 @@ if __name__ == "__main__":
         powerBombQty = random.randint(1, 9)
     if minorQty < 1:
         minorQty = random.randint(25, 100)
+    elif minorQtyEqLeGe == "<=":
+        minorQty = random.randint(7, minorQty)
+    elif minorQtyEqLeGe == ">=":
+        minorQty = random.randint(minorQty, 100)
     if energyQty == 'random':
         if args.energyQtyList is not None:
             energyQties = args.energyQtyList.split(',')

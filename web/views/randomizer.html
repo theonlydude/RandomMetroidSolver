@@ -377,7 +377,7 @@ function randomize(evt, elemId) {
   disableElement(elemId, isActive);
 
   // disable elements on the same line
-  var additionnal = {"escapeRando": ["removeEscapeEnemies"]};
+  var additionnal = {"escapeRando": ["removeEscapeEnemies"], "minorQty": ["minorQtyEqLeGe"]};
   if(elemId in additionnal) {
       for(var i=0; i<additionnal[elemId].length; i++) {
           // disable it if isActive is false
@@ -691,7 +691,7 @@ function showHide(show, hide) {
 function getRandomizerParameters(setDisabledToOff, trueJson) {
     var dataDict = {};
 
-    var elems = ["seed", "preset", "raceMode", "removeEscapeEnemies", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "revealMap", "scavRandomized", "relaxed_round_robin_cf", "hiddenObjectives", "distributeObjectives", "better_reserves"];
+    var elems = ["seed", "preset", "raceMode", "minorQtyEqLeGe", "removeEscapeEnemies", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "revealMap", "scavRandomized", "relaxed_round_robin_cf", "hiddenObjectives", "distributeObjectives", "better_reserves"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "tourian", "areaRandomization"];
     var imgPickers = ["logic"];
@@ -1994,6 +1994,11 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
       content: "<p>From 7%: minimum number of ammunition required to finish the game to 100%: all ammunition locations contain an ammo (vanilla like).</p><p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
+      element: "#minorQtyEqLeGeStep",
+      title: "Percentage of Ammunition available equal, lower equal or greater equal value before",
+      content: "<p>Define if value of Percentage of Ammunition available shall be either equal the value entered, or lower equal that or greater equal that.</p>"
+    },
+    {
       element: "#energyQtyStep",
       title: "Quantity of Energy/Reserve Tanks available",
       content: "<p>Choose how many Energy <img src=\"/solver/static/images/tracker/inventory/ETank.png\" class=\"width: 32px\"/> / Reserve Tanks <img src=\"/solver/static/images/tracker/inventory/Reserve.png\" class=\"width: 32px\"/> will be available, from 0-1 in ultra sparse, 4-6 in sparse, 8-12 in medium and 18 in vanilla.</p>\
@@ -2791,6 +2796,18 @@ def displayNumber(id, min, max, default, step="1"):
                   <td><span id="minorQtyText">Percentage of Ammunition (<img src="/solver/static/images/tracker/inventory/Missile.png" class="width: 32px"/>/<img src="/solver/static/images/tracker/inventory/Super.png" class="width: 32px"/>/<img src="/solver/static/images/tracker/inventory/PowerBomb.png" class="width: 32px"/>) available:</span></td>
                   <td>{{displayNumber("minorQty", "7", "100", "100")}}</td>
                   <td id="minorQtyStep"><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td><span id="minorQtyEqLeGeText">Percentage of Ammunition equal, lower equal or larger equal than value before:</span></td>
+                  <td>
+                    <select class="full" id="minorQtyEqLeGe" name="minorQtyEqLeGe" style="display: block;" value="{{response.write(session.randomizer.get('minorQtyEqLeGe', 'off'))}}">
+                      <option selected="selected" value="=">=</option>
+                      <option value="<=">&#8804</option>
+                      <option value=">=">&#8805</option>
+                    </select>
+                  </td>
+                  <td id="minorQtyEqLeGeStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
                 <tr>
                   <td class="small"><div class="random"><button id="energyQtyRandom" type="button" onclick="randomize(event, 'energyQty')" class="small"><span class="small dice_rotate">&#x2684;</span></button></div></td>

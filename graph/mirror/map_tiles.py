@@ -38,9 +38,9 @@ areaAccessPoints = {
 # additional info for in-game tracker for some APs (top of elevators, the maridia part of red brinstar),
 # to show on a more intuitive map
 areaAccessPointsInGameDisplay = {
-    "Green Brinstar Elevator": {"area": "Brinstar", "coords": (54, 1)},
+    "Green Brinstar Elevator": {"area": "Brinstar", "coords": (54, 1), "coversTile": True},
     "Red Brinstar Elevator": {"area": "Brinstar", "coords": (26, 4)},
-    "Le Coude Right": {"area": "Maridia", "coords": (32, 1)},
+    "Le Coude Right": {"area": "Maridia", "coords": (32, 1), "coversTile": True},
     "Warehouse Entrance Left": {"area": "Norfair", "coords": (53, 1)},
     "Warehouse Entrance Right": {"area": "Norfair", "coords": (51, 1)},
     "Glass Tunnel Top": {"area": "Brinstar", "coords": (24, 18)},

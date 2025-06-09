@@ -15,6 +15,7 @@
     "superQty": "2",
     "powerBombQty": "1",
     "minorQty": "100",
+    "minorQtyEqLeGe": "=",
     "energyQty": "vanilla",
     "objective": ["kill all G4"],
     "objectiveRandom": "false",

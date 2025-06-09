@@ -441,6 +441,8 @@ def loadRandoPreset(randoPreset, args):
             args.minorQty = 0
         else:
             args.minorQty = randoParams["minorQty"]
+    if "minorQtyEqLeGe" in randoParams:
+        args.minorQtyEqLeGe = randoParams["minorQtyEqLeGe"]
     if "energyQty" in randoParams:
         args.energyQty = randoParams["energyQty"]
 
@@ -503,6 +505,7 @@ def getRandomizerDefaultParameters():
     defaultParams['superQty'] = "2"
     defaultParams['powerBombQty'] = "1"
     defaultParams['minorQty'] = "100"
+    defaultParams['minorQtyEqLeGe'] = "="
     defaultParams['energyQty'] = "vanilla"
     defaultParams['energyQtyMultiSelect'] = defaultMultiValues['energyQty']
     defaultParams['objectiveRandom'] = "off"

@@ -5,11 +5,11 @@ import argparse, os.path, json, sys, shutil, random
 from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
 from graph.graph_utils import GraphUtils, getAccessPoint
-from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity, text2diff, appDir
+from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity, text2diff, appDir, Controller
 from rom.rom_patches import RomPatches, getPatchSet, getPatchSetsFromPatcherSettings, getPatchDescriptions
 from rom.rompatcher import RomPatcher
 from rom.flavor import RomFlavor
-from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues, getPresetDir
+from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues, getPresetDir, getCustomMapping
 from utils.version import displayedVersion
 from utils.doorsmanager import DoorsManager
 from logic.logic import Logic
@@ -328,10 +328,11 @@ if __name__ == "__main__":
             args.paramsFileName = '{}/{}/{}.json'.format(appDir, getPresetDir(preset), preset)
 
     # if diff preset given, load it
+    presetLoader = None
     if args.paramsFileName is not None:
-        PresetLoader.factory(args.paramsFileName).load()
+        presetLoader = PresetLoader.factory(args.paramsFileName)
+        presetLoader.load()
         preset = os.path.splitext(os.path.basename(args.paramsFileName))[0]
-
         if args.preset is not None:
             preset = args.preset
     else:
@@ -589,6 +590,10 @@ if __name__ == "__main__":
 
     # controls
     ctrlDict = None
+    if args.controls is None and presetLoader is not None:
+        isCustom, controls = getCustomMapping(presetLoader.params["Controller"])
+        if isCustom:
+            args.controls = controls
     if args.controls:
         ctrlList = args.controls.split(',')
         if len(ctrlList) != 7:
@@ -727,7 +732,7 @@ if __name__ == "__main__":
         "doorsColorsRando": args.doorsColorsRando,
         "vanillaObjectives": objectivesManager.isVanilla(),
         "ctrlDict": ctrlDict,
-        "moonWalk": args.moonWalk,
+        "moonWalk": args.moonWalk or Controller.Moonwalk,
         "seed": seed,
         "randoSettings": randoSettings,
         "displayedVersion": displayedVersion,

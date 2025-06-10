@@ -593,3 +593,15 @@ def dumpErrorMsg(outFileName, msg):
 def transition2isolver(transition):
     transition = str(transition)
     return transition[0].lower() + removeChars(transition[1:], " ,()-")
+
+# controlMapping: from loaded preset
+# return custom control arg for CLI
+def getCustomMapping(controlMapping):
+    if len(controlMapping) == 0:
+        return (False, None)
+
+    inv = {}
+    for button in controlMapping:
+        inv[controlMapping[button]] = button
+
+    return (True, "{},{},{},{},{},{},{}".format(inv["Shoot"], inv["Jump"], inv["Dash"], inv["Item Select"], inv["Item Cancel"], inv["Angle Up"], inv["Angle Down"]))

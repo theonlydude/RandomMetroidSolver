@@ -93,8 +93,8 @@ ResetStuff:
 UnpauseAnimatedTiles:
 	LDX #$000A ; X = Ah (animated tiles object index)
 -
-	LDA $1EF5,x : BEQ + ; If [animated tiles object ID] != 0:
-	LDA $1F25,x : ORA #$8000 : STA $1F25,x ; Flag animated tiles object tiles for transfer
+	LDA $1EF5,x : BEQ + : LDA $1F25,x : BEQ + ; If [animated tiles object ID and src addr] != 0:
+	ORA #$8000 : STA $1F25,x ; Flag animated tiles object tiles for transfer
 +
 	DEX : DEX ; X -= 2 (next animated tiles object index)
 	BPL - ; If [X] >= 0: loop

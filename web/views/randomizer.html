@@ -2800,13 +2800,7 @@ def displayNumber(id, min, max, default, step="1"):
                 <tr>
                   <td></td>
                   <td><span id="minorQtyEqLeGeText">Percentage of Ammunition equal, lower equal or larger equal than value before:</span></td>
-                  <td>
-                    <select class="full" id="minorQtyEqLeGe" name="minorQtyEqLeGe" style="display: block;" value="{{response.write(session.randomizer.get('minorQtyEqLeGe', 'off'))}}">
-                      <option selected="selected" value="=">=</option>
-                      <option value="<=">&#8804</option>
-                      <option value=">=">&#8805</option>
-                    </select>
-                  </td>
+                  <td>{{displaySelect("minorQtyEqLeGe", ['=', '<=', '>='], "=")}}</td>
                   <td id="minorQtyEqLeGeStep"><button type="button" onclick="startTheTour(event)">?</button></td>
                 </tr>
                 <tr>

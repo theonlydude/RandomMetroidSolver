@@ -31,6 +31,28 @@ class Randomizer(object):
 
         self.vars = self.request.vars
 
+        self.parameters_switchs = [
+            'suitsRestriction', 'hideItems', 'strictMinors',
+            'areaLayout',
+            'doorsColorsRando', 'allowGreyDoors', 'escapeRando', 'removeEscapeEnemies',
+            'bossRandomization', 'minimizer',
+            'funCombat', 'funMovement', 'funSuits',
+            'layoutPatches', 'variaTweaks', 'nerfedCharge',
+            'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
+            'rando_speed', 'animals', 'No_Music', 'random_music',
+            'Infinite_Space_Jump', 'refill_before_save', 'hud', "revealMap", "scavRandomized",
+            'relaxed_round_robin_cf', 'hiddenObjectives', 'distributeObjectives', 'better_reserves']
+        self.parameters_quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
+        self.parameters_multis = [
+            'majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
+            'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
+            'areaRandomization', 'logic']
+        self.parameters_others = [
+            'complexity', 'preset', 'maxDifficulty', 'objective', 'nbObjectivesRequired',
+            'minorQtyEqLeGe', 'areaLayoutCustom', 'variaTweaksCustom', 'layoutCustom', 'minorQty']
+        self.parameters_others_rando = self.parameters_others + ['paramsFileTarget', 'seed']
+        self.parameters_others_session = self.parameters_others + ['randoPreset']
+
     @simple_view
     def randomizerData(self):
         types = Objectives.getObjectivesTypes()
@@ -246,22 +268,8 @@ class Randomizer(object):
         print("randomizerWebService")
 
         # check validity of all parameters
-        switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-                   'areaLayout',
-                   'doorsColorsRando', 'allowGreyDoors', 'escapeRando', 'removeEscapeEnemies',
-                   'bossRandomization', 'minimizer',
-                   'funCombat', 'funMovement', 'funSuits',
-                   'layoutPatches', 'variaTweaks', 'nerfedCharge',
-                   'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
-                   'rando_speed', 'animals', 'No_Music', 'random_music',
-                   'Infinite_Space_Jump', 'refill_before_save', 'hud', "revealMap", "scavRandomized",
-                   'relaxed_round_robin_cf', 'hiddenObjectives', 'distributeObjectives', 'better_reserves']
-        quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
-        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
-                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
-                  'areaRandomization', 'logic']
-        others = ['complexity', 'paramsFileTarget', 'seed', 'preset', 'maxDifficulty', 'objective', 'nbObjectivesRequired', 'minorQtyEqLeGe', 'areaLayoutCustom', 'variaTweaksCustom', 'layoutCustom']
-        errors = validateWebServiceParams(self.request, switchs, quantities, multis, others, isJson=True)
+        errors = validateWebServiceParams(self.request, self.parameters_switchs, self.parameters_quantities,
+                                          self.parameters_multis, self.parameters_others_rando, isJson=True)
 
         # randomize
         db = DB()
@@ -434,22 +442,8 @@ class Randomizer(object):
 
     def sessionWebService(self):
         # web service to update the session
-        switchs = ['suitsRestriction', 'hideItems', 'strictMinors',
-                   'areaLayout',
-                   'doorsColorsRando', 'allowGreyDoors', 'escapeRando', 'removeEscapeEnemies',
-                   'bossRandomization', 'minimizer',
-                   'funCombat', 'funMovement', 'funSuits',
-                   'layoutPatches', 'variaTweaks', 'nerfedCharge',
-                   'itemsounds', 'elevators_speed', 'fast_doors', 'spinjumprestart',
-                   'rando_speed', 'animals', 'No_Music', 'random_music',
-                   'Infinite_Space_Jump', 'refill_before_save', 'hud', 'revealMap', "scavRandomized",
-                   'relaxed_round_robin_cf', 'hiddenObjectives', 'distributeObjectives', 'better_reserves']
-        quantities = ['missileQty', 'superQty', 'powerBombQty', 'minimizerQty', "scavNumLocs"]
-        multis = ['majorsSplit', 'progressionSpeed', 'progressionDifficulty', 'tourian',
-                  'morphPlacement', 'energyQty', 'startLocation', 'gravityBehaviour',
-                  'areaRandomization', 'logic']
-        others = ['complexity', 'preset', 'randoPreset', 'maxDifficulty', 'minorQty', 'objective', 'nbObjectivesRequired', 'areaLayoutCustom', 'variaTweaksCustom', 'layoutCustom']
-        validateWebServiceParams(self.request, switchs, quantities, multis, others)
+        validateWebServiceParams(self.request, self.parameters_switchs, self.parameters_quantities,
+                                 self.parameters_multis, self.parameters_others_session)
 
         if self.session.randomizer is None:
             self.session.randomizer = {}
@@ -468,6 +462,7 @@ class Randomizer(object):
         self.session.randomizer['superQty'] = self.vars.superQty
         self.session.randomizer['powerBombQty'] = self.vars.powerBombQty
         self.session.randomizer['minorQty'] = self.vars.minorQty
+        self.session.randomizer['minorQtyEqLeGe'] = self.vars.minorQtyEqLeGe
         self.session.randomizer['areaRandomization'] = self.vars.areaRandomization
         self.session.randomizer['areaLayout'] = self.vars.areaLayout
         self.session.randomizer['doorsColorsRando'] = self.vars.doorsColorsRando
@@ -512,7 +507,7 @@ class Randomizer(object):
         else:
             self.session.randomizer['objective'] = self.vars.objective.split(',')
 
-        for multi in multis:
+        for multi in self.parameters_multis:
             self.session.randomizer[multi] = self.vars[multi]
             if self.vars[multi] == 'random':
                 self.session.randomizer[multi+"MultiSelect"] = self.vars[multi+"MultiSelect"].split(',')

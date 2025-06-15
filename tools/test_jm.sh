@@ -184,7 +184,8 @@ function generate_rando_presets {
     "missileQty": "$(random "0" ${missileQty})",
     "superQty": "$(random "0" ${superQty})",
     "powerBombQty": "$(random "0" ${powerBombQty})",
-    "minorQty": "$(random "0" ${minorQty})",
+    "minorQty": "$(random_range 7 100 ${minorQty})",
+    "minorQtyEqLeGe": $(random_select "=" ">=" "<="),
     "energyQty": "$(random "random" ${energyQty})",
     $(generate_multi_select "energyQty" 'ultra_sparse' 'sparse' 'medium' 'vanilla')
     "objective": "$(random "random" ${objective})",
@@ -209,7 +210,7 @@ function generate_rando_presets {
     "variaTweaks": "$(random_switch ${variaTweaks})",
     "nerfedCharge": "$(random_switch ${nerfedCharge})",
     "relaxed_round_robin_cf": "$(random_switch ${relaxed_round_robin_cf})",
-    "gravityBehaviour":  "$(random "random" ${gravityBehaviour})",
+    "gravityBehaviour": "$(random "random" ${gravityBehaviour})",
     $(generate_multi_select "gravityBehaviour" 'Vanilla' 'Balanced' 'Progressive')
     "itemsounds": "$(random_switch ${itemsounds})",
     "elevators_speed": "$(random_switch ${elevators_speed})",

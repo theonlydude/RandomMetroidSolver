@@ -608,3 +608,12 @@ def getCustomMapping(controlMapping):
         inv[controlMapping[button]] = button
 
     return (True, "{},{},{},{},{},{},{}".format(inv["Shoot"], inv["Jump"], inv["Dash"], inv["Item Select"], inv["Item Cancel"], inv["Angle Up"], inv["Angle Down"]))
+
+def getRandomizerSeed():
+    # we always want seeds to have the same number of digits as sys.maxsize (ie. 19 digits)
+    targetLen = len(str(sys.maxsize))
+    seed = random.randrange(sys.maxsize)
+    while len(str(seed)) < targetLen:
+        # just reroll
+        seed = random.randrange(sys.maxsize)
+    return seed

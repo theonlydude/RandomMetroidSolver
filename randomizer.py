@@ -10,11 +10,11 @@ from rom.rom_patches import RomPatches, getPatchSet, getPatchSetsFromPatcherSett
 from rom.rompatcher import RomPatcher
 from rom.flavor import RomFlavor
 from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues, getPresetDir, getCustomMapping
+from utils.utils import dumpErrorMsg, getRandomizerSeed
 from utils.version import displayedVersion
 from utils.doorsmanager import DoorsManager
 from logic.logic import Logic
 from utils.objectives import Objectives
-from utils.utils import dumpErrorMsg
 
 import utils.log
 import utils.db as db
@@ -347,7 +347,7 @@ if __name__ == "__main__":
     # initialize random seed
     if args.seed == 0:
         # if no seed given, choose one
-        seed = random.randrange(sys.maxsize)
+        seed = getRandomizerSeed()
     else:
         seed = args.seed
     logger.debug("seed: {}".format(seed))

@@ -479,7 +479,7 @@ class InteractiveSolver(CommonSolver):
             ##
             "revealMap": self.romConf.revealMap,
             "escapeRandoRemoveEnemies": self.romConf.escapeRandoRemoveEnemies,
-            "minimizerN": 100 if RomPatches.NoGadoras in RomPatches.ActivePatches else None,
+            "minimizerN": 100 if GraphUtils.areTransitionsMixed(self.curGraphTransitions) else None,
             "tourian": self.romConf.tourian,
             "doorsColorsRando": DoorsManager.isRandom(),
             "vanillaObjectives": self.objectives.isVanilla(),

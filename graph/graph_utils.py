@@ -591,6 +591,7 @@ class GraphUtils:
         return transitions
 
     def hasMixedTransitions(areaTransitions, bossTransitions):
+        # when reading a rom
         vanillaAPs = []
         for (src, dest) in vanillaTransitions:
             vanillaAPs += [src, dest]
@@ -607,4 +608,13 @@ class GraphUtils:
             if src in vanillaAPs or dest in vanillaAPs:
                 return True
 
+        return False
+
+    def areTransitionsMixed(transitions):
+        # when saving a plando
+        for (srcName, destName) in transitions:
+            src = getAccessPoint(srcName)
+            dest = getAccessPoint(destName)
+            if src.Boss != dest.Boss:
+                return True
         return False

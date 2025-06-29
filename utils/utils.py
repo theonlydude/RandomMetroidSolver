@@ -442,6 +442,8 @@ def loadRandoPreset(randoPreset, args):
             args.minorQty = 0
         else:
             args.minorQty = randoParams["minorQty"]
+    if "minorQtyEqLeGe" in randoParams:
+        args.minorQtyEqLeGe = randoParams["minorQtyEqLeGe"]
     if "energyQty" in randoParams:
         args.energyQty = randoParams["energyQty"]
 
@@ -504,6 +506,7 @@ def getRandomizerDefaultParameters():
     defaultParams['superQty'] = "2"
     defaultParams['powerBombQty'] = "1"
     defaultParams['minorQty'] = "100"
+    defaultParams['minorQtyEqLeGe'] = "="
     defaultParams['energyQty'] = "vanilla"
     defaultParams['energyQtyMultiSelect'] = defaultMultiValues['energyQty']
     defaultParams['objectiveRandom'] = "off"
@@ -595,3 +598,24 @@ def dumpErrorMsg(outFileName, msg):
 def transition2isolver(transition):
     transition = str(transition)
     return transition[0].lower() + removeChars(transition[1:], " ,()-")
+
+# controlMapping: from loaded preset
+# return custom control arg for CLI
+def getCustomMapping(controlMapping):
+    if len(controlMapping) == 0:
+        return (False, None)
+
+    inv = {}
+    for button in controlMapping:
+        inv[controlMapping[button]] = button
+
+    return (True, "{},{},{},{},{},{},{}".format(inv["Shoot"], inv["Jump"], inv["Dash"], inv["Item Select"], inv["Item Cancel"], inv["Angle Up"], inv["Angle Down"]))
+
+def getRandomizerSeed():
+    # we always want seeds to have the same number of digits as sys.maxsize (ie. 19 digits)
+    targetLen = len(str(sys.maxsize))
+    seed = random.randrange(sys.maxsize)
+    while len(str(seed)) < targetLen:
+        # just reroll
+        seed = random.randrange(sys.maxsize)
+    return seed

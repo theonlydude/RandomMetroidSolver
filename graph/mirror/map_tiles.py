@@ -38,9 +38,9 @@ areaAccessPoints = {
 # additional info for in-game tracker for some APs (top of elevators, the maridia part of red brinstar),
 # to show on a more intuitive map
 areaAccessPointsInGameDisplay = {
-    "Green Brinstar Elevator": {"area": "Brinstar", "coords": (54, 1)},
+    "Green Brinstar Elevator": {"area": "Brinstar", "coords": (54, 1), "coversTile": True},
     "Red Brinstar Elevator": {"area": "Brinstar", "coords": (26, 4)},
-    "Le Coude Right": {"area": "Maridia", "coords": (32, 1)},
+    "Le Coude Right": {"area": "Maridia", "coords": (32, 1), "coversTile": True},
     "Warehouse Entrance Left": {"area": "Norfair", "coords": (53, 1)},
     "Warehouse Entrance Right": {"area": "Norfair", "coords": (51, 1)},
     "Glass Tunnel Top": {"area": "Brinstar", "coords": (24, 18)},
@@ -208,8 +208,8 @@ doors = {
     "BusinessCenterTopLeft": {"byteIndex": 146, "bitMask": 8, "room": 0xa7de, "area": "Norfair", "graphArea": "Norfair"},
     "BusinessCenterBottomLeft": {"byteIndex": 154, "bitMask": 8, "room": 0xa7de, "area": "Norfair", "graphArea": "Norfair"},
     "CrocomireSpeedwayBottom": {"byteIndex": 169, "bitMask": 1, "room": 0xa923, "area": "Norfair", "graphArea": "Norfair"},
-    "PostCrocomireUpperLeft": {"byteIndex": 174, "bitMask": 4, "room": 0xaa82, "area": "Norfair", "graphArea": "Crocomire"},
-    "PostCrocomireShaftRight": {"byteIndex": 194, "bitMask": 4, "room": 0xab07, "area": "Norfair", "graphArea": "Crocomire"},
+    "PostCrocomireUpperLeft": {"byteIndex": 174, "bitMask": 8, "room": 0xaa82, "area": "Norfair", "graphArea": "Crocomire"},
+    "PostCrocomireShaftRight": {"byteIndex": 194, "bitMask": 8, "room": 0xab07, "area": "Norfair", "graphArea": "Crocomire"},
     "BubbleMountainTopLeft": {"byteIndex": 141, "bitMask": 128, "room": 0xacb3, "area": "Norfair", "graphArea": "Norfair"},
     "BubbleMountainTopRight": {"byteIndex": 140, "bitMask": 1, "room": 0xacb3, "area": "Norfair", "graphArea": "Norfair"},
     "SpeedBoosterHallRight": {"byteIndex": 15, "bitMask": 32, "room": 0xacf0, "area": "Norfair", "graphArea": "Norfair"},

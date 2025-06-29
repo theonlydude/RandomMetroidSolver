@@ -241,6 +241,9 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
         minorQtyInt = getInt(request, 'minorQty', isJson)
         if minorQtyInt < 7 or minorQtyInt > 100:
             raiseHttp(400, "Wrong value for minorQty, must be between 7 and 100", isJson)
+        if 'minorQtyEqLeGe' in others:
+            if request.vars.minorQtyEqLeGe not in ['=', '>=', '<=']:
+                 raiseHttp(400, "Wrong value for minorQtyEqLeGe, authorized values =/>=/<=", isJson)
 
     if 'gravityBehaviour' in others:
         if request.vars.gravityBehaviour not in ['Balanced', 'Progressive', 'Vanilla']:
@@ -359,17 +362,6 @@ def validateWebServiceParams(request, switchs, quantities, multis, others, isJso
             validatePatches(key, getattr(request.vars, custom_key))
 
     return errors
-
-def getCustomMapping(controlMapping):
-    if len(controlMapping) == 0:
-        return (False, None)
-
-    inv = {}
-    for button in controlMapping:
-        inv[controlMapping[button]] = button
-
-    return (True, "{},{},{},{},{},{},{}".format(inv["Shoot"], inv["Jump"], inv["Dash"], inv["Item Select"], inv["Item Cancel"], inv["Angle Up"], inv["Angle Down"]))
-
 def completePreset(params):
     # add missing knows
     for know in Knows.__dict__:

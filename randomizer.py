@@ -6,16 +6,16 @@ from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
 from graph.graph_utils import GraphUtils, getAccessPoint
 from graph.flags import BossAccessPointFlags
-from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity, text2diff, appDir
+from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity, text2diff, appDir, Controller
 from rom.rom_patches import RomPatches, getPatchSet, getPatchSetsFromPatcherSettings, getPatchDescriptions
 from rom.rompatcher import RomPatcher
 from rom.flavor import RomFlavor
-from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues, getPresetDir
+from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues, getPresetDir, getCustomMapping
+from utils.utils import dumpErrorMsg, getRandomizerSeed
 from utils.version import displayedVersion
 from utils.doorsmanager import DoorsManager
 from logic.logic import Logic
 from utils.objectives import Objectives
-from utils.utils import dumpErrorMsg
 
 import utils.log
 import utils.db as db
@@ -154,6 +154,10 @@ if __name__ == "__main__":
                         help="quantity of minors",
                         dest='minorQty', nargs='?', default=100,
                         choices=[str(i) for i in range(0,101)])
+    parser.add_argument('--minorQtyEqLeGe',
+                        help="if qhantity of minors shall be equal, lower equal or greater equal the entered value on minorQty",
+                        dest='minorQtyEqLeGe', nargs='?', default="=",
+                        choices=['=', '>=', '<='])
     parser.add_argument('--energyQty', '-g',
                         help="quantity of ETanks/Reserve Tanks",
                         dest='energyQty', nargs='?', default='vanilla',
@@ -341,10 +345,11 @@ if __name__ == "__main__":
             args.paramsFileName = '{}/{}/{}.json'.format(appDir, getPresetDir(preset), preset)
 
     # if diff preset given, load it
+    presetLoader = None
     if args.paramsFileName is not None:
-        PresetLoader.factory(args.paramsFileName).load()
+        presetLoader = PresetLoader.factory(args.paramsFileName)
+        presetLoader.load()
         preset = os.path.splitext(os.path.basename(args.paramsFileName))[0]
-
         if args.preset is not None:
             preset = args.preset
     else:
@@ -355,7 +360,7 @@ if __name__ == "__main__":
     # initialize random seed
     if args.seed == 0:
         # if no seed given, choose one
-        seed = random.randrange(sys.maxsize)
+        seed = getRandomizerSeed()
     else:
         seed = args.seed
     logger.debug("seed: {}".format(seed))
@@ -566,6 +571,7 @@ if __name__ == "__main__":
     superQty = float(args.superQty)
     powerBombQty = float(args.powerBombQty)
     minorQty = int(args.minorQty)
+    minorQtyEqLeGe = args.minorQtyEqLeGe
     energyQty = args.energyQty
     if missileQty < 1:
         missileQty = random.randint(1, 9)
@@ -575,6 +581,10 @@ if __name__ == "__main__":
         powerBombQty = random.randint(1, 9)
     if minorQty < 1:
         minorQty = random.randint(25, 100)
+    elif minorQtyEqLeGe == "<=":
+        minorQty = random.randint(7, minorQty)
+    elif minorQtyEqLeGe == ">=":
+        minorQty = random.randint(minorQty, 100)
     if energyQty == 'random':
         if args.energyQtyList is not None:
             energyQties = args.energyQtyList.split(',')
@@ -600,6 +610,10 @@ if __name__ == "__main__":
 
     # controls
     ctrlDict = None
+    if args.controls is None and presetLoader is not None:
+        isCustom, controls = getCustomMapping(presetLoader.params["Controller"])
+        if isCustom:
+            args.controls = controls
     if args.controls:
         ctrlList = args.controls.split(',')
         if len(ctrlList) != 7:
@@ -739,7 +753,7 @@ if __name__ == "__main__":
         "doorsColorsRando": args.doorsColorsRando,
         "vanillaObjectives": objectivesManager.isVanilla(),
         "ctrlDict": ctrlDict,
-        "moonWalk": args.moonWalk,
+        "moonWalk": args.moonWalk or Controller.Moonwalk,
         "seed": seed,
         "randoSettings": randoSettings,
         "displayedVersion": displayedVersion,

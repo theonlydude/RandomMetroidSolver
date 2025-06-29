@@ -639,7 +639,7 @@ definitions = {
                     'baby_room.ips', 'baby_remove_blocks.ips', 'escape_animals.ips',
                     'snails.ips', 'boulders.ips', 'rinkas.ips', 'etecoons.ips', 'crab_main_street.ips',
                     'crab_mt_everest.ips', 'mother_brain.ips', 'kraid.ips', 'torizos.ips', 'botwoon.ips',
-                    'crocomire.ips', 'ridley.ips', 'ws_treadmill.ips']
+                    'crocomire.ips', 'ridley.ips', 'ws_treadmill.ips', 'baby_kraid.ips']
         },
         # Anti-softlock layout patches
         'dachora': {

@@ -296,18 +296,21 @@ function ajaxOkSave(data) {
         }
     }
 
-    if(useLocalStorage) {
-        var bytes = new Uint8Array(plandoROM);
-        applyToROM(bytes, data);
-    } else {
-        var file = uploadFile.files[0];
-
-        var reader = new FileReader();
-        reader.readAsArrayBuffer(file)
-
-        reader.onload = function(e) {
-            var bytes = new Uint8Array(e.target.result);
+    // if an error occured they could be no ips data
+    if("ips" in data) {
+        if(useLocalStorage) {
+            var bytes = new Uint8Array(plandoROM);
             applyToROM(bytes, data);
+        } else {
+            var file = uploadFile.files[0];
+
+            var reader = new FileReader();
+            reader.readAsArrayBuffer(file)
+
+            reader.onload = function(e) {
+                var bytes = new Uint8Array(e.target.result);
+                applyToROM(bytes, data);
+            }
         }
     }
 

@@ -92,6 +92,10 @@ class RomConf:
         self.majorUpgrades = []
         self.splitLocsByArea = {}
 
+        # to re-apply patches in plando
+        self.hud = False
+        self.round_robin_cf = False
+
         # vanilla transitions
         self.areaTransitions = vanillaTransitions[:]
         self.bossTransitions = vanillaBossesTransitions[:]

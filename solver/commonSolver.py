@@ -92,6 +92,8 @@ class CommonSolver(object):
                 romConf.additionalETanks = self.romLoader.getAdditionalEtanks()
                 romConf.escapeRandoRemoveEnemies = bool(self.romLoader.readOption("escapeRandoRemoveEnemies"))
                 romConf.revealMap = self.romLoader.hasPatch('revealMap')
+                romConf.hud = self.romLoader.hasPatch("hud")
+                romConf.round_robin_cf = self.romLoader.hasPatch("round_robin_cf")
             if self.conf.interactive:
                 print("majors: {} area: {} boss: {} escape: {}".format(
                     romConf.majorsSplit, romConf.areaRando,

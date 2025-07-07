@@ -1178,6 +1178,8 @@ class RomPatcher:
                     # disable original PLM, if any
                     if 'address' in door:
                         self.romFile.writeWord(0xb63b, door['address']) # PLM type = copy arrow
+                        self.romFile.writeWord(0x0101) # x=1,y=1
+                        self.romFile.writeWord(0x0) # var=0
         # determine bosses in the seed and write boss doors
         bosses = set()
         for apName, ap in graph.accessPoints.items():

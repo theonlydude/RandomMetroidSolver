@@ -353,7 +353,7 @@ class GraphUtils:
         # it a feature to include all minibosses as random corridors
         # in minimizers to make them more chaotic? at least take
         # objectives into consideration to force add minibosses
-        inBossFlags = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside 
+        inBossFlags = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside
         inBossCheck = lambda ap: ap.Boss & inBossFlags == inBossFlags
         nLocs = 0
         transitions = []

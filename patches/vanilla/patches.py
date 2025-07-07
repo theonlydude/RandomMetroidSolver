@@ -241,8 +241,9 @@ patches = {
     # (only needed for escape peek in Crateria-less minimizer with disabled Tourian)
     'Blinking[Climb Bottom Left]': {
         0x782FE: [0x48, 0xc8, 0x01, 0x86, 0x12, 0x8c],
-        0x108683: [0x0]
-    },
+        0x108683: [0x0], # open door when zebes asleep
+        0x10897B: [0x7F] # lock the door when zebes awake
+    }
 }
 
 additional_PLMs = {

@@ -747,20 +747,24 @@ if __name__ == "__main__":
         "nerfedCharge": args.nerfedCharge,
         "nerfedRainbowBeam": energyQty == 'ultra sparse',
         "escapeAttr": None if args.escapeRando == False else True, # tmp value before actual attrs after randomization
+        "ctrlDict": ctrlDict,
+        "moonWalk": args.moonWalk or Controller.Moonwalk,
+        "debug": args.debug,
         "escapeRandoRemoveEnemies": not args.noRemoveEscapeEnemies,
         "minimizerN": minimizerN,
         "tourian": args.tourian,
         "doorsColorsRando": args.doorsColorsRando,
         "vanillaObjectives": objectivesManager.isVanilla(),
-        "ctrlDict": ctrlDict,
-        "moonWalk": args.moonWalk or Controller.Moonwalk,
         "seed": seed,
         "randoSettings": randoSettings,
         "displayedVersion": displayedVersion,
         "revealMap": args.revealMap,
+        # added later:
+        #  doors
+        #  itemLocs
+        #  progItemLocs
         "hud": args.hud == True or args.majorsSplit == "FullWithHUD",
         "round_robin_cf": 'relaxed_round_robin_cf.ips' in args.patches, # will be applied twice but keep it like this for retrocompat
-        "debug": args.debug
     }
     patchSets = [getPatchSet(patchSetName, RomFlavor.flavor) for patchSetName in getPatchSetsFromPatcherSettings(patcherSettings)]
     for patchSet in [p for p in patchSets if 'logic' in p]:

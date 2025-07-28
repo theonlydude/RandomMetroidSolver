@@ -699,6 +699,8 @@ if __name__ == "__main__":
     else:
         args.tourian = plandoRando["tourian"]
         objectivesManager = Objectives(args.tourian != 'Disabled')
+        # startAP also required when called from plando
+        Objectives.startAP = args.startLocation
         for goal in plandoRando["objectives"]:
             objectivesManager.addGoal(goal)
 

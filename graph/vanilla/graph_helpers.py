@@ -34,7 +34,7 @@ class HelpersGraph(Helpers):
                                              sm.wand(sm.canUsePowerBombs(),
                                                      sm.wor(sm.itemCountOk('PowerBomb', nPB),
                                                             sm.wand(sm.haveItem('SpeedBooster'),
-                                                                    sm.energyReserveCountOk(nTanksSpark))))),
+                                                                    sm.wor(RomPatches.has(RomPatches.NoDamageSpark), sm.energyReserveCountOk(nTanksSpark)))))),
                                      sm.wand(sm.energyReserveCountOkHardRoom('Gauntlet', 0.51),
                                              sm.canUseBombs()))))
 

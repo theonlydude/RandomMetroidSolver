@@ -320,7 +320,7 @@ class Helpers(object):
         sm = self.smbm
         return sm.wand(sm.canShortCharge(),
                        sm.canUsePowerBombs(),
-                       sm.itemCountOk('ETank', 1),
+                       sm.wor(RomPatches.has(RomPatches.NoDamageSpark), sm.itemCountOk('ETank', 1)),
                        sm.knowsLowGauntlet())
 
     @Cache.decorator

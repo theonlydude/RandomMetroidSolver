@@ -598,14 +598,17 @@ loc.Available = (
     lambda sm: sm.wand(sm.canPassBombPassages(),
                        sm.traverse("ClimbRight"),
                        sm.haveItem('SpeedBooster'),
-                       # reserves are hard to trigger midspark when not having ETanks
-                       sm.wor(sm.wand(sm.energyReserveCountOk(2), sm.itemCountOk('ETank', 1)), # need energy to get out
-                              sm.wand(sm.itemCountOk('ETank', 1),
-                                      sm.wor(sm.haveItem('Grapple'), # use grapple/space or dmg protection to get out
-                                             sm.haveItem('SpaceJump'),
-                                             sm.heatProof()))),
+                       sm.wor(RomPatches.has(RomPatches.NoDamageSpark), sm.itemCountOk('ETank', 1)), # reserves are hard to trigger midspark when not having ETanks
+                       sm.wor(# need energy to get out
+                              sm.wand(RomPatches.has(RomPatches.NoDamageSpark), sm.energyReserveCountOk(1)),
+                              sm.energyReserveCountOk(2),
+                              # use grapple/space or dmg protection to get out
+                              sm.haveItem('Grapple'),
+                              sm.haveItem('SpaceJump'),
+                              sm.heatProof()),
                        sm.wor(sm.haveItem('Ice'),
-                              sm.wand(sm.canSimpleShortCharge(), sm.canUsePowerBombs()))) # there's also a dboost involved in simple short charge or you have to kill the yellow enemies with some power bombs
+                              sm.wand(sm.canSimpleShortCharge(), sm.canUsePowerBombs()), # kill boyons with PBs
+                              sm.canShortCharge())) # d-boost or go through boyons with blue
 )
 
 
@@ -1105,7 +1108,7 @@ loc.Available = (
                        sm.wor(sm.wand(sm.traverse('MainStreetBottomRight'), # run from room on the right
                                       sm.wor(RomPatches.has(RomPatches.CrabTunnelGreenGateRemoved),
                                              sm.haveItem('Super')),
-                                      sm.itemCountOk('ETank', 1)), # etank for the spark since sparking from low ground
+                                      sm.wor(RomPatches.has(RomPatches.NoDamageSpark), sm.itemCountOk('ETank', 1))), # etank for the spark since sparking from low ground
                               sm.canSimpleShortCharge())) # run from above
 )
 

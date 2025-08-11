@@ -756,6 +756,7 @@ if __name__ == "__main__":
         #  progItemLocs
         "hud": args.hud == True or args.majorsSplit == "FullWithHUD",
         "round_robin_cf": 'relaxed_round_robin_cf.ips' in args.patches, # will be applied twice but keep it like this for retrocompat
+        "disable_spark_damage": 'disable_spark_damage.ips' in args.patches
     }
     patchSets = [getPatchSet(patchSetName, RomFlavor.flavor) for patchSetName in getPatchSetsFromPatcherSettings(patcherSettings)]
     for patchSet in [p for p in patchSets if 'logic' in p]:

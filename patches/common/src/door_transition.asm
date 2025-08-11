@@ -30,16 +30,15 @@ org $90d2ba
 org $90f700
 shinespark_end:
 	;; at this point A should contain samus health and is
-	;; about to be compared to 30 so when we return from this,
-	;; A shall contain either samus health or a < 30 value to
-	;; cancel spark
+	;; about to be compared to 30 (or 1 if shinespark damage is disabled) so when we
+	;; return from this, A shall contain either samus health or 0 to  cancel spark
 	lda !spark_flag
 	cmp !MAGIC
 	beq +
 	lda !samus_health	; load samus health
 	rts
 +
-	lda #$0010		; if cancel spark flag is set, fill A with fake health, and clear flag
+	lda #$0000		; if cancel spark flag is set, fill A with fake health, and clear flag
 	stz !spark_flag
 	rts
 

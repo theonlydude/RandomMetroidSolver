@@ -8,4 +8,4 @@ org $90D0F5
 org $90D121
     rts
 org $90D2BD
-    cmp.w #0
+    cmp.w #1

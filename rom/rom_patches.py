@@ -177,7 +177,7 @@ _baseIPS = [
     'endingtotals.ips',
     # MSU-1 patch
     'supermetroid_msu1.ips',
-    # displays max ammo 
+    # displays max ammo
     'max_ammo_display.ips',
     # VARIA logo on startup screen
     'varia_logo.ips',
@@ -715,7 +715,7 @@ def getPatchSetsFromPatcherSettings(patcherSettings):
         "round_robin_cf",
         "disable_spark_damage",
         "debug"
-    ] 
+    ]
     patchSets += [k for k in boolSettings if patcherSettings.get(k) == True]
     # patcher settings flags matching patch set group names
     for grp, patchList in groups.items():

@@ -124,8 +124,7 @@ if __name__ == "__main__":
                                  'fast_doors.ips', 'elevators_speed.ips',
                                  'spinjumprestart.ips', 'rando_speed.ips', 'No_Music', 'AimAnyButton.ips',
                                  'max_ammo_display.ips', 'supermetroid_msu1.ips', 'Infinite_Space_Jump',
-                                 'refill_before_save.ips', 'relaxed_round_robin_cf.ips', 'better_reserves.ips',
-                                 'disable_spark_damage.ips'])
+                                 'refill_before_save.ips', 'relaxed_round_robin_cf.ips', 'better_reserves.ips'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,
@@ -267,6 +266,8 @@ if __name__ == "__main__":
                         choices=tourians+['random'])
     parser.add_argument('--tourianList', help="list to choose from when random",
                         dest='tourianList', nargs='?', default=None)
+    parser.add_argument('--disable_spark_damage', help="Disables Shinespark damage",
+                        dest='disable_spark_damage', nargs='?', const=True, default=False)
     # parse args
     args = parser.parse_args()
 
@@ -587,6 +588,10 @@ if __name__ == "__main__":
            'strictMinors' : args.strictMinors }
     logger.debug("quantities: {}".format(qty))
 
+    # dread mode/ultra sparse
+    if energyQty == 'ultra sparse' or energyQty == 'dread':
+        forceArg('disable_spark_damage', True, "Shinespark damage disabled due to energy settings")
+
     if len(args.superFun) > 0:
         superFun = []
         for fun in args.superFun:
@@ -737,6 +742,7 @@ if __name__ == "__main__":
         "variaTweaksCustom": None if args.variaTweaksCustom is None else args.variaTweaksCustom.split(','),
         "nerfedCharge": args.nerfedCharge,
         "nerfedRainbowBeam": energyQty == 'ultra sparse',
+        "dread_mode": energyQty == "dread",
         "escapeAttr": None if args.escapeRando == False else True, # tmp value before actual attrs after randomization
         "ctrlDict": ctrlDict,
         "moonWalk": args.moonWalk or Controller.Moonwalk,
@@ -756,7 +762,7 @@ if __name__ == "__main__":
         #  progItemLocs
         "hud": args.hud == True or args.majorsSplit == "FullWithHUD",
         "round_robin_cf": 'relaxed_round_robin_cf.ips' in args.patches, # will be applied twice but keep it like this for retrocompat
-        "disable_spark_damage": 'disable_spark_damage.ips' in args.patches
+        "disable_spark_damage": args.disable_spark_damage
     }
     patchSets = [getPatchSet(patchSetName, RomFlavor.flavor) for patchSetName in getPatchSetsFromPatcherSettings(patcherSettings)]
     for patchSet in [p for p in patchSets if 'logic' in p]:

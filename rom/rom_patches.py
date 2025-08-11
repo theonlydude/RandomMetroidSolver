@@ -103,6 +103,8 @@ class RomPatches:
     RoundRobinCF            = 1009
     # No damage shinespark (active in dread and ultra sparse modes)
     NoDamageSpark           = 1010
+    # Dread Mode (1 HP)
+    DreadMode               = 1011
 
     ### Hacks
     # rotation hack
@@ -332,6 +334,12 @@ definitions = {
             'desc': 'nerfed rainbow beam',
             'ips': ["nerfed_rainbow_beam.ips"],
             'logic': [RomPatches.NerfedRainbowBeam]
+        },
+        'dread_mode': {
+            'address': snes_to_pc(0x90EA7F), 'value': 0x60,
+            'desc': "Dread Mode",
+            'ips': ["dread_mode.ips"],
+            'logic': [RomPatches.DreadMode]
         },
         'disable_spark_damage': {
             'address': snes_to_pc(0x90D0C6), 'value': 0x60,
@@ -714,6 +722,7 @@ def getPatchSetsFromPatcherSettings(patcherSettings):
         "revealMap",
         "round_robin_cf",
         "disable_spark_damage",
+        "dread_mode",
         "debug"
     ]
     patchSets += [k for k in boolSettings if patcherSettings.get(k) == True]

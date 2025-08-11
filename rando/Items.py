@@ -494,7 +494,7 @@ class ItemPoolGeneratorChozo(ItemPoolGenerator):
     def addEnergy(self):
         total = 18
         energyQty = self.qty['energy']
-        if energyQty == 'ultra sparse':
+        if energyQty == 'ultra sparse' or energyQty == 'dread':
             # 0-1, remove reserve tank and two etanks, check if it also remove the last etank
             self.itemManager.removeItem('Reserve')
             self.itemManager.addItem('NoEnergy', 'Chozo')
@@ -502,7 +502,7 @@ class ItemPoolGeneratorChozo(ItemPoolGenerator):
             self.itemManager.addItem('NoEnergy', 'Chozo')
             self.itemManager.removeItem('ETank')
             self.itemManager.addItem('NoEnergy', 'Chozo')
-            if self.isUltraSparseNoTanks():
+            if energyQty == 'dread' or self.isUltraSparseNoTanks():
                 # no etank nor reserve
                 self.itemManager.removeItem('ETank')
                 self.itemManager.addItem('NoEnergy', 'Chozo')
@@ -569,7 +569,7 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
         super(ItemPoolGeneratorMajors, self).__init__(itemManager, qty, sm, maxDiff)
         self.sparseRest = 1 + randGaussBounds(2, 5)
         self.mediumRest = 3 + randGaussBounds(4, 3.7)
-        self.ultraSparseNoTanks = self.isUltraSparseNoTanks()
+        self.ultraSparseNoTanks = qty['energy'] == 'dread' or self.isUltraSparseNoTanks()
 
     def addNoEnergy(self):
         self.itemManager.addItem('NoEnergy')
@@ -693,7 +693,7 @@ class ItemPoolGeneratorMinimizer(ItemPoolGeneratorMajors):
             self.maxEnergy = int(max(self.maxEnergy, maxItems - nMajors - self.minorLocations))
             if self.maxEnergy > 18:
                 self.maxEnergy = 18
-        elif energyQty == 'ultra sparse':
+        elif energyQty == 'ultra sparse' or energyQty == 'dread':
             self.maxEnergy = 0 if self.ultraSparseNoTanks else 1
         elif energyQty == 'sparse':
             self.maxEnergy = 3 + self.sparseRest

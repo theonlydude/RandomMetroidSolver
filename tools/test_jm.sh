@@ -210,6 +210,7 @@ function generate_rando_presets {
     "variaTweaks": "$(random_switch ${variaTweaks})",
     "nerfedCharge": "$(random_switch ${nerfedCharge})",
     "relaxed_round_robin_cf": "$(random_switch ${relaxed_round_robin_cf})",
+    "disable_spark_damage": "$(random_switch ${disable_spark_damage})",
     "gravityBehaviour": "$(random "random" ${gravityBehaviour})",
     $(generate_multi_select "gravityBehaviour" 'Vanilla' 'Balanced' 'Progressive')
     "itemsounds": "$(random_switch ${itemsounds})",

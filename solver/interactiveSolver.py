@@ -491,6 +491,7 @@ class InteractiveSolver(CommonSolver):
             "progItemLocs": progItemLocs,
             "hud": self.romConf.hud,
             "round_robin_cf": self.romConf.round_robin_cf,
+            "disable_spark_damage": self.romConf.disable_spark_damage,
             "plando": {
                 "graphTrans": self.curGraphTransitions,
                 "maxTransitions": len(vanillaBossesTransitions) + len(vanillaTransitions),

@@ -124,7 +124,8 @@ if __name__ == "__main__":
                                  'fast_doors.ips', 'elevators_speed.ips',
                                  'spinjumprestart.ips', 'rando_speed.ips', 'No_Music', 'AimAnyButton.ips',
                                  'max_ammo_display.ips', 'supermetroid_msu1.ips', 'Infinite_Space_Jump',
-                                 'refill_before_save.ips', 'relaxed_round_robin_cf.ips', 'better_reserves.ips'])
+                                 'refill_before_save.ips', 'relaxed_round_robin_cf.ips', 'better_reserves.ips',
+                                 'disable_spark_damage.ips'])
     parser.add_argument('--missileQty', '-m',
                         help="quantity of missiles",
                         dest='missileQty', nargs='?', default=3,

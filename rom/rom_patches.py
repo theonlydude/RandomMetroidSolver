@@ -101,6 +101,8 @@ class RomPatches:
     BombTorizoWake          = 1008
     # Round-Robin Crystal Flash patch
     RoundRobinCF            = 1009
+    # No damage shinespark (active in dread and ultra sparse modes)
+    NoDamageSpark           = 1010
 
     ### Hacks
     # rotation hack
@@ -330,6 +332,12 @@ definitions = {
             'desc': 'nerfed rainbow beam',
             'ips': ["nerfed_rainbow_beam.ips"],
             'logic': [RomPatches.NerfedRainbowBeam]
+        },
+        'disable_spark_damage': {
+            'address': snes_to_pc(0x90D0C6), 'value': 0x60,
+            'desc': "No damage Shinespark",
+            'ips': ["disable_spark_damage.ips"],
+            'logic': [RomPatches.NoDamageSpark]
         },
         'minimizer_bosses': {
             'address': snes_to_pc(0xa7afad), 'value': 0x5C,
@@ -705,6 +713,7 @@ def getPatchSetsFromPatcherSettings(patcherSettings):
         "hud",
         "revealMap",
         "round_robin_cf",
+        "disable_spark_damage",
         "debug"
     ] 
     patchSets += [k for k in boolSettings if patcherSettings.get(k) == True]

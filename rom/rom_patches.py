@@ -722,7 +722,6 @@ def getPatchSetsFromPatcherSettings(patcherSettings):
         "revealMap",
         "round_robin_cf",
         "disable_spark_damage",
-        "dread_mode",
         "debug"
     ]
     patchSets += [k for k in boolSettings if patcherSettings.get(k) == True]
@@ -745,6 +744,8 @@ def getPatchSetsFromPatcherSettings(patcherSettings):
         patchSets.append("minimizer_bosses")
     if patcherSettings["tourian"] == "Fast":
         patchSets.append("fast_tourian")
+    if patcherSettings["starting_energy"] < 99:
+        patchSets.append("dread_mode")
     return patchSets
 
 def getPatchDescriptionsByGroup(patchList, flavor):

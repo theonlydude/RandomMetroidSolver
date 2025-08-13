@@ -111,14 +111,13 @@ class RomPatcher:
 
         self.writeMagic()
         self.writeMajorsSplit(self.settings["majorsSplit"])
+        self.writeStartingEnergy(self.settings["starting_energy"])
 
         if self.settings["isPlando"] and self.race is None:
             doorsPtrs = GraphUtils.getAps2DoorsPtrs()
             self.writePlandoTransitions(self.settings["plando"]["graphTrans"], doorsPtrs,
                                         self.settings["plando"]["maxTransitions"])
             self.writePlandoAddresses(self.settings["plando"]["visitedLocations"])
-        if self.settings["isPlando"] and self.settings["plando"]["additionalETanks"] != 0:
-            self.writeAdditionalETanks(self.settings["plando"]["additionalETanks"])
         if self.settings["isPlando"] and self.settings["escapeAttr"] is not None:
             self.removeAnimalsHunt()
 
@@ -1052,7 +1051,7 @@ class RomPatcher:
                 # endian convert
                 exitAsm = symbolWordBytes(conn['exitAsm'])
                 asmPatch += [ 0x20 ] + exitAsm            # JSR exitAsm
-            # for special access points display on map, artificially explore the tile where 
+            # for special access points display on map, artificially explore the tile where
             # the portal is drawn, since it's not the same as the actual map tile checked to
             # see if the portal is taken
             src, dst = conn['transition']
@@ -1257,8 +1256,12 @@ class RomPatcher:
         # replace STZ with STA since A is non-zero at this point
         self.romFile.writeByte(0x8D, Addresses.getOne('moonwalk'))
 
+    def writeStartingEnergy(self, energy):
+        self.romFile.writeWord(energy, Addresses.getOne("start_starting_energy"))
+
     def writeAdditionalETanks(self, additionalETanks):
-        self.romFile.writeByte(additionalETanks, Addresses.getOne("additionalETanks"))
+        energy = additionalETanks*100 + 99
+        self.writeStartingEnergy(energy)
 
     def writeHellrunRate(self, hellrunRatePct):
         hellrunRateVal = min(int(0x40*float(hellrunRatePct)/100.0), 0xff)
@@ -1651,7 +1654,7 @@ class MusicPatcher(object):
 
     # tracks: dict with track name to replace as key, and replacing track name as value
     # updateReferences: change room state headers and special tracks. may be False if you're patching a rom hack or something
-    # output: if not None, dump a JSON file with what was done 
+    # output: if not None, dump a JSON file with what was done
     # replaced tracks must be in
     # replaceableTracks, and new tracks must be in allTracks
     # tracks not in the dict will be kept vanilla

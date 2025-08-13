@@ -7,7 +7,7 @@ lorom
 
 incsrc "sym/base.asm"
 incsrc "macros.asm"
-incsrc "constants.asm"	
+incsrc "constants.asm"
 
 ;;; CONSTANTS
 !GameStartState = $7ED914
@@ -88,16 +88,11 @@ gameplay_start:
 warnpc $a1f28f
 
 org $a1f470
-%export(additional_etanks)
-	db $00
+%export(starting_energy)
+	dw 99
 
 add_etanks_and_save:
-	sep #$20
-	lda.l additional_etanks : sta $4202
-	lda #$64 : sta $4203
-	pha : pla : xba : xba
-	rep #$20
-	lda $4216 : clc : adc #$0063
+    lda.l starting_energy
 	sta $09c4
 	sta $09c2
 	jsl base_new_save

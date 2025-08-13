@@ -89,12 +89,12 @@ class CommonSolver(object):
             romConf.splitLocsByArea = self.romLoader.getSplitLocsByArea(self.locations)
             self.objectives.setSolverMode(self, romConf)
             if self.conf.mode == 'plando':
-                romConf.additionalETanks = self.romLoader.getAdditionalEtanks()
                 romConf.escapeRandoRemoveEnemies = bool(self.romLoader.readOption("escapeRandoRemoveEnemies"))
                 romConf.revealMap = self.romLoader.hasPatch('revealMap')
                 romConf.hud = self.romLoader.hasPatch("hud")
                 romConf.round_robin_cf = self.romLoader.hasPatch("round_robin_cf")
                 romConf.disable_spark_damage = self.romLoader.hasPatch("disable_spark_damage")
+                romConf.startingEnergy = self.romLoader.getStartingEnergy()
 
             if self.conf.interactive:
                 print("majors: {} area: {} boss: {} escape: {}".format(

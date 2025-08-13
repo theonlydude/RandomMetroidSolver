@@ -492,11 +492,11 @@ class InteractiveSolver(CommonSolver):
             "hud": self.romConf.hud,
             "round_robin_cf": self.romConf.round_robin_cf,
             "disable_spark_damage": self.romConf.disable_spark_damage,
+            "starting_energy": self.romConf.startingEnergy,
             "plando": {
                 "graphTrans": self.curGraphTransitions,
                 "maxTransitions": len(vanillaBossesTransitions) + len(vanillaTransitions),
-                "visitedLocations": self.container.visitedLocations(),
-                "additionalETanks": self.romConf.additionalETanks
+                "visitedLocations": self.container.visitedLocations()
             }
         }
 

@@ -69,7 +69,7 @@ class RomConf:
     def __init__(self):
         self.scavengerOrder = []
         self.plandoScavengerOrder = []
-        self.additionalETanks = 0
+        self.startingEnergy = 99
         self.escapeRandoRemoveEnemies = True
         self.revealMap = False
         self.objectivesHidden = False

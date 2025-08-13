@@ -574,6 +574,7 @@ class RomReader:
             ret[i] = {"byteIndex": byteIndex, "bitMask": bitMask}
         return ret
 
-    def getAdditionalEtanks(self):
-        address = Addresses.getOne('additionalETanks')
-        return self.romFile.readByte(address)
+    def getStartingEnergy(self):
+        address = Addresses.getOne('start_starting_energy')
+        energy = self.romFile.readWord(address)
+        return energy

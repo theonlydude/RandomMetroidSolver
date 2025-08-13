@@ -1,15 +1,13 @@
 ;;; Dread mode : one-hit KO from everything
-;;; - forces starting and max health to 01
 ;;; - removes low health beep
 ;;; - disables rainbow beam damage
+;;;
+;;; Additional setup needed :
+;;; - set starting energy to 1 in start
+;;; - remove all health tanks from seed
 
 lorom
 arch 65816
-
-;;; set Samus health/max health to 01
-org $81B2CD
-health_init:
-    lda.w #1
 
 ;;; disable low health beep
 org $90EA7F

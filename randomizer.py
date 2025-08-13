@@ -742,7 +742,7 @@ if __name__ == "__main__":
         "variaTweaksCustom": None if args.variaTweaksCustom is None else args.variaTweaksCustom.split(','),
         "nerfedCharge": args.nerfedCharge,
         "nerfedRainbowBeam": energyQty == 'ultra sparse',
-        "dread_mode": energyQty == "dread",
+        "starting_energy": 99 if energyQty != "dread" else 1,
         "escapeAttr": None if args.escapeRando == False else True, # tmp value before actual attrs after randomization
         "ctrlDict": ctrlDict,
         "moonWalk": args.moonWalk or Controller.Moonwalk,

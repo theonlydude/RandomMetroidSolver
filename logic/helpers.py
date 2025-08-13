@@ -752,9 +752,10 @@ class Helpers(object):
     @Cache.decorator
     def canPassMetroids(self):
         sm = self.smbm
-        return sm.wor(sm.wand(sm.haveItem('Ice'), sm.haveMissileOrSuper()),
-                      # to avoid leaving tourian to refill power bombs
-                      sm.itemCountOk('PowerBomb', 3))
+        return sm.wand(sm.wor(sm.wnot(RomPatches.has(RomPatches.DreadMode)), sm.haveItem("SpaceJump")), # lava dip in Metroid Room 1
+                       sm.wor(sm.wand(sm.haveItem('Ice'), sm.haveMissileOrSuper()),
+                              # to avoid leaving tourian to refill power bombs
+                              sm.itemCountOk('PowerBomb', 3)))
 
     @Cache.decorator
     def canPassZebetites(self):

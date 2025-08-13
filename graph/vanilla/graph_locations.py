@@ -76,7 +76,7 @@ loc.AccessFrom = {
     'Blue Brinstar Elevator Bottom': lambda sm: sm.wor(RomPatches.has(RomPatches.BlueBrinstarBlueDoor), sm.traverse('ConstructionZoneRight'))
 }
 loc.Available = (
-    lambda sm: sm.wor(sm.knowsCeilingDBoost(),
+    lambda sm: sm.wor(sm.wand(sm.wnot(RomPatches.has(RomPatches.DreadMode)), sm.knowsCeilingDBoost()),
                       sm.canFly(),
                       sm.wor(sm.haveItem('HiJump'),
                              sm.haveItem('Ice'),
@@ -905,7 +905,7 @@ loc.Available = (
                               sm.wor(sm.haveItem('HiJump'), # run and jump from yellow platform
                                      sm.wand(sm.haveItem('Ice'),
                                              sm.knowsCrocPBsIce()),
-                                     sm.knowsCrocPBsDBoost())))
+                                     sm.wand(sm.wnot(RomPatches.has(RomPatches.DreadMode)), sm.knowsCrocPBsDBoost()))))
 )
 
 

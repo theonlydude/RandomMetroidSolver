@@ -130,7 +130,8 @@ class RandoSetup(object):
         if self.restrictions.isEarlyMorph() and GraphUtils.isStandardStart(self.startAP):
             morphLocs = ['Morphing Ball']
             if self.restrictions.split in ['Full', 'Major']:
-                dboost = self.sm.knowsCeilingDBoost()
+                sm = self.sm
+                dboost = sm.wand(sm.wnot(RomPatches.has(RomPatches.DreadMode)), sm.knowsCeilingDBoost())
                 if dboost.bool == True and dboost.difficulty <= self.settings.maxDiff:
                     morphLocs.append('Energy Tank, Brinstar Ceiling')
             for area, locDict in restrictionDict.items():

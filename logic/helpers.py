@@ -558,7 +558,7 @@ class Helpers(object):
         cfClipOffset = 0 if (not cfClip or sm.canFireChargedShots()) else 4000
         (ammoMargin, secs, items) = self.canInflictEnoughDamages(6000+cfClipOffset, givesDrops=False)
         diff = SMBool(True, easy, [], items)
-        lowStuff = sm.knowsLowStuffBotwoon()
+        lowStuff = sm.wor(RomPatches.has(RomPatches.DreadMode), sm.knowsLowStuffBotwoon())
         if ammoMargin == 0 and lowStuff.bool:
             (ammoMargin, secs, items) = self.canInflictEnoughDamages(3500+cfClipOffset, givesDrops=False)
             diff = SMBool(lowStuff.bool, lowStuff.difficulty, lowStuff.knows, items)

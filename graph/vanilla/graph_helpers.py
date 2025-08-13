@@ -404,7 +404,7 @@ class HelpersGraph(Helpers):
         return sm.wand(sm.traverse('BubbleMountainTopLeft'),
                        sm.wor(sm.haveItem('Grapple'),
                               sm.haveItem('SpaceJump'),
-                              sm.knowsNorfairReserveDBoost()))
+                              sm.wand(sm.wnot(RomPatches.has(RomPatches.DreadMode)), sm.knowsNorfairReserveDBoost())))
 
     @Cache.decorator
     def canPassLavaPit(self):
@@ -973,7 +973,7 @@ class HelpersGraph(Helpers):
                        sm.wor(sm.haveItem('Grapple'),
                               sm.haveItem('SpaceJump'),
                               sm.wand(sm.energyReserveCountOkHardRoom('X-Ray'),
-                                      sm.wor(sm.knowsXrayDboost(),
+                                      sm.wor(sm.wand(sm.wnot(RomPatches.has(RomPatches.DreadMode)), sm.knowsXrayDboost()),
                                              sm.wand(sm.haveItem('Ice'),
                                                      sm.wor(sm.haveItem('HiJump'), sm.knowsXrayIce())),
                                              sm.canInfiniteBombJump(),

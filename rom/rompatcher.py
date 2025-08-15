@@ -9,16 +9,14 @@ from rom.ips import IPS_Patch
 from utils.doorsmanager import DoorsManager, IndicatorFlag
 from utils.objectives import Objectives
 from graph.graph_utils import GraphUtils, getAccessPoint, graphAreas, gameAreas
-from graph.flags import BossAccessPointFlags
 from logic.logic import Logic
 from rom.rom import RealROM, FakeROM, snes_to_pc, pc_to_snes
 from rom.addresses import Addresses
 from rom.rom_patches import RomPatches, getPatchSet, getPatchSetsFromPatcherSettings
 from rom.rom_options import RomOptions
 from rom.flavor import RomFlavor
-from rom.map import AreaMap, getTileIndex, portal_mapicons, areaSpriteMaps
+from rom.map import AreaMap, portal_mapicons, areaSpriteMaps
 from rom.enemies_objectives_data import enemies_objectives_data
-from patches.patchaccess import PatchAccess
 from utils.parameters import appDir, Settings
 from logic.helpers import Bosses
 import utils.log
@@ -1141,7 +1139,7 @@ class RomPatcher:
                 bytez = getPLMbytes(doors[0])
                 for b in bytez:
                     self.romFile.writeByte(b)
-            else: 
+            else:
                 for i, door in enumerate(doors):
                     self.log.debug(f"processing boss {boss} door {i}")
                     # add new PLMs: when coming in at this door, put a bt door there and gray doors elsewhere.

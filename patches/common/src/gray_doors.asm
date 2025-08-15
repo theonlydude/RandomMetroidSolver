@@ -1,5 +1,5 @@
 ;;; Add bomb torizo-type doors for all directions, and improve them to change trigger conditions.
-;;; 
+;;;
 ;;; In BT room: Fix bomb torizo awakening, wakes up on item acquisition instead of bombs collected
 ;;; (original patch by PJBoy, adapted for VARIA)
 ;;; In other rooms: check a temporary RAM flag (lifetime being the current room) to trigger, and use
@@ -71,7 +71,7 @@ setup_bt_door_facing_left:
         dw $0002, $A6CB
         dw $0002, $A6BF
         dw $0002, $A6B3
-	dw $0001, $A6A7
+        dw $0001, $A6A7
         dw $8724,instr_list_gray_door_facing_left
 
 setup_bt_door_facing_up:
@@ -89,13 +89,13 @@ warnpc $84bad1
 
 ; Statue
 org $84D33B
-	jsr btcheck : BNE +
-        ;; vanilla code to wake plm
-	LDA #$0001 : STA $7EDE1C,x
-	INC $1D27,x : INC $1D27,x
-	LDA #$D356 : STA $1CD7,x
+    jsr btcheck : BNE +
+    ;; vanilla code to wake plm
+    LDA #$0001 : STA $7EDE1C,x
+    INC $1D27,x : INC $1D27,x
+    LDA #$D356 : STA $1CD7,x
 +
-	RTS
+    RTS
 
 warnpc $84D357
 
@@ -126,29 +126,29 @@ setup_bt_door_facing_down:
         dw $8724,instr_list_gray_door_facing_down
 
 instr_btcheck:
-        jsr btcheck : BNE +
-	INY : INY
-        RTS
+    jsr btcheck : BNE +
+    INY : INY
+    RTS
 +
-	LDA $0000,y : TAY
-        RTS
+    LDA $0000,y : TAY
+    RTS
 
 btcheck:
-        lda !current_room : cmp #!BT_room : beq .bt
+    lda !current_room : cmp #!BT_room : beq .bt
 .other:
-        lda !trig : cmp #!trig_marker : bra .end
+    lda !trig : cmp #!trig_marker : bra .end
 .bt:
-        ;; check if VARIA tweaks enabled
-        lda bt_wake_on_item : and #$00ff : bne .varia_tweaks
-        ;; vanilla check, wake if Samus has bombs
-        lda !collected_items_mask : and #$1000 : cmp #$1000 : bra .end
+    ;; check if VARIA tweaks enabled
+    lda bt_wake_on_item : and #$00ff : bne .varia_tweaks
+    ;; vanilla check, wake if Samus has bombs
+    lda !collected_items_mask : and #$1000 : cmp #$1000 : bra .end
 .varia_tweaks:
-        ;; check if BT should never wake up
-        lda.l objectives_options_settings_flags : bit.w #!option_BT_sleep_mask : bne .end
-        ;; return 0 flag if PLM 1 is deleted
-        LDA $1C83
+    ;; check if BT should never wake up
+    lda.l objectives_options_settings_flags : bit.w #!option_BT_sleep_mask : bne .end
+    ;; return 0 flag if PLM 1 is deleted
+    LDA $1C83
 .end:
-        rts
+    rts
 
 ;;; Check if Samus is away from the left door (X position >= $25)
 left_doorway_clear:
@@ -236,7 +236,7 @@ org $A5EDF3
 phantoon_hurt:
     lda #!trig_marker : sta !trig
     ; run hi-jacked instructions
-    lda $0F9C 
+    lda $0F9C
     cmp #$0008
     rtl
 
@@ -257,7 +257,7 @@ ridley_time_frozen:
     ; run hi-jacked instructions
     lda #$0001
     sta $0FA4
-    ; there's nothing more we need to do. 
+    ; there's nothing more we need to do.
     ; We just needed to make space for the "BRA" instruction that comes after returning.
     rtl
 

@@ -89,13 +89,13 @@ gameplay_start:
 
 %freespaceStart($a1f470)
 %export(starting_energy)
-	dw 99
+    dw 99
 
 add_etanks_and_save:
     lda.l starting_energy
-	sta $09c4
-	sta $09c2
-	jsl base_new_save
-	rts
+    sta $09c4
+    sta $09c2
+    jsl base_new_save
+    rts
 
 %freespaceEnd($a1f48f)

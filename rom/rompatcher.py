@@ -465,7 +465,7 @@ class RomPatcher:
         if area == True:
             plms += ['Maridia Sand Hall Seal', "Save_Main_Street", "Save_Crab_Shaft"]
             for accessPoint in Logic.accessPoints():
-                if accessPoint.Internal == True or accessPoint.Boss == True:
+                if accessPoint.Internal == True or accessPoint.Boss != 0:
                     continue
                 addBlinking(accessPoint.Name)
             addBlinking("West Sand Hall Left")
@@ -1175,6 +1175,8 @@ class RomPatcher:
                     # disable original PLM, if any
                     if 'address' in door:
                         self.romFile.writeWord(0xb63b, door['address']) # PLM type = copy arrow
+                        self.romFile.writeWord(0x0101) # x=y=1
+                        self.romFile.writeWord(0x0) # arg=0
         # determine bosses in the seed and write boss doors
         bosses = set()
         for apName, ap in graph.accessPoints.items():

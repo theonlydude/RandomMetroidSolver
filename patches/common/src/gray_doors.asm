@@ -309,3 +309,15 @@ golden_torizo_hurt:
 
 print "aa end: ", pc
 %freespaceEnd($AAF7FF)
+
+org $a7d4e5
+phantoon_door_spawn:
+	bra .skip
+org $a7d4ed
+.skip:
+
+org $a7db89
+phantoon_door_restore:
+	bra .skip
+org $a7db91
+.skip:

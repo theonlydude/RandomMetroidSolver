@@ -263,7 +263,12 @@ class InteractiveSolver(CommonSolver):
         # no time limitation
         self.runtimeLimiter = RuntimeLimiter(-1)
 
+        # change mode from plando to standard to avoid issue when rollbacking steps in plando mode
+        # which set items to nothing (see SolverStepLocation.rollback() in container.py)
+        modeBackup = self.conf.mode
+        self.conf.mode = "solver"
         (self.difficulty, self.itemsOk) = self.computeDifficulty()
+        self.conf.mode = modeBackup
 
         # if last location is the gunship remove it as it's not handled by the tracker
         if any(loc.Name == 'Gunship' for loc in self.container.visitedLocations()):
@@ -462,33 +467,36 @@ class InteractiveSolver(CommonSolver):
             "boss": self.romConf.bossRando,
             "areaLayout": len(areaLayoutCustom) > 0,
             "areaLayoutCustom": areaLayoutCustom,
-            "escapeAttr": escapeAttr,
             "variaTweaks": len(variaTweaksCustom) > 0,
             "variaTweaksCustom": variaTweaksCustom,
             "nerfedCharge": RomPatches.NerfedCharge in RomPatches.ActivePatches,
             "nerfedRainbowBeam": RomPatches.NerfedRainbowBeam in RomPatches.ActivePatches,
+            "escapeAttr": escapeAttr,
             # these settings are kept to False or None to keep what's in base ROM
             "ctrlDict": None,
             "moonWalk": False,
             "debug": False,
             ##
-            "revealMap": self.romConf.revealMap,
             "escapeRandoRemoveEnemies": self.romConf.escapeRandoRemoveEnemies,
-            "minimizerN": 100 if RomPatches.NoGadoras in RomPatches.ActivePatches else None,
+            "minimizerN": 100 if GraphUtils.areTransitionsMixed(self.curGraphTransitions) else None,
             "tourian": self.romConf.tourian,
             "doorsColorsRando": DoorsManager.isRandom(),
             "vanillaObjectives": self.objectives.isVanilla(),
             "seed": None,
             "randoSettings": randoSettings,
-            "doors": doors,
             "displayedVersion": displayedVersion,
+            "revealMap": self.romConf.revealMap,
+            "doors": doors,
             "itemLocs": itemLocs,
             "progItemLocs": progItemLocs,
+            "hud": self.romConf.hud,
+            "round_robin_cf": self.romConf.round_robin_cf,
+            "disable_spark_damage": self.romConf.disable_spark_damage,
+            "starting_energy": self.romConf.startingEnergy,
             "plando": {
                 "graphTrans": self.curGraphTransitions,
                 "maxTransitions": len(vanillaBossesTransitions) + len(vanillaTransitions),
-                "visitedLocations": self.container.visitedLocations(),
-                "additionalETanks": self.romConf.additionalETanks
+                "visitedLocations": self.container.visitedLocations()
             }
         }
 

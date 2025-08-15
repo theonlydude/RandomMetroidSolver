@@ -1,10 +1,10 @@
 {
-    "additional_etanks": 10613872,
     "freespace_alloc_end_1": 10613391,
-    "freespace_alloc_end_2": 10614015,
+    "freespace_alloc_end_2": 10613903,
     "freespace_alloc_start_1": 10613248,
     "freespace_alloc_start_2": 10613872,
     "opt_doors": 10613250,
     "start_location": 10613248,
+    "starting_energy": 10613872,
     "startup": 10613280
 }

@@ -359,7 +359,7 @@ window.onload = function(){
 
         // detect race mode patch
         romIsRaceProtected = false;
-        for(var addr=0x1C0200; addr<0x1C0210; addr++) {
+        for(var addr=0x1C0200; addr<0x1c7fff; addr++) {
             if(bytes[addr] != 0xff) {
                 if(mode == "plando" && debug == false) {
                     clearInputSeed();

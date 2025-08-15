@@ -12,3 +12,7 @@ org $8B9f2C
     bra loop                    ; no longer branch when timer is zero
 org $8B9F38
 loop:
+
+;;; skip writing "supermetroid" to SRAM
+org $8BE7B5
+	rts

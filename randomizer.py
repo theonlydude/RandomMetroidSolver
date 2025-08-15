@@ -6,16 +6,16 @@ from rando.RandoSettings import RandoSettings, GraphSettings
 from rando.RandoExec import RandoExec
 from graph.graph_utils import GraphUtils, getAccessPoint
 from graph.flags import BossAccessPointFlags
-from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity, text2diff, appDir
+from utils.parameters import easy, medium, hard, harder, hardcore, mania, infinity, text2diff, appDir, Controller
 from rom.rom_patches import RomPatches, getPatchSet, getPatchSetsFromPatcherSettings, getPatchDescriptions
 from rom.rompatcher import RomPatcher
 from rom.flavor import RomFlavor
-from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues, getPresetDir
+from utils.utils import PresetLoader, loadRandoPreset, getDefaultMultiValues, getPresetDir, getCustomMapping
+from utils.utils import dumpErrorMsg, getRandomizerSeed
 from utils.version import displayedVersion
 from utils.doorsmanager import DoorsManager
 from logic.logic import Logic
 from utils.objectives import Objectives
-from utils.utils import dumpErrorMsg
 
 import utils.log
 import utils.db as db
@@ -154,6 +154,10 @@ if __name__ == "__main__":
                         help="quantity of minors",
                         dest='minorQty', nargs='?', default=100,
                         choices=[str(i) for i in range(0,101)])
+    parser.add_argument('--minorQtyEqLeGe',
+                        help="if qhantity of minors shall be equal, lower equal or greater equal the entered value on minorQty",
+                        dest='minorQtyEqLeGe', nargs='?', default="=",
+                        choices=['=', '>=', '<='])
     parser.add_argument('--energyQty', '-g',
                         help="quantity of ETanks/Reserve Tanks",
                         dest='energyQty', nargs='?', default='vanilla',
@@ -275,6 +279,8 @@ if __name__ == "__main__":
                         choices=tourians+['random'])
     parser.add_argument('--tourianList', help="list to choose from when random",
                         dest='tourianList', nargs='?', default=None)
+    parser.add_argument('--disable_spark_damage', help="Disables Shinespark damage",
+                        dest='disable_spark_damage', nargs='?', const=True, default=False)
     # parse args
     args = parser.parse_args()
 
@@ -341,10 +347,11 @@ if __name__ == "__main__":
             args.paramsFileName = '{}/{}/{}.json'.format(appDir, getPresetDir(preset), preset)
 
     # if diff preset given, load it
+    presetLoader = None
     if args.paramsFileName is not None:
-        PresetLoader.factory(args.paramsFileName).load()
+        presetLoader = PresetLoader.factory(args.paramsFileName)
+        presetLoader.load()
         preset = os.path.splitext(os.path.basename(args.paramsFileName))[0]
-
         if args.preset is not None:
             preset = args.preset
     else:
@@ -355,7 +362,7 @@ if __name__ == "__main__":
     # initialize random seed
     if args.seed == 0:
         # if no seed given, choose one
-        seed = random.randrange(sys.maxsize)
+        seed = getRandomizerSeed()
     else:
         seed = args.seed
     logger.debug("seed: {}".format(seed))
@@ -566,6 +573,7 @@ if __name__ == "__main__":
     superQty = float(args.superQty)
     powerBombQty = float(args.powerBombQty)
     minorQty = int(args.minorQty)
+    minorQtyEqLeGe = args.minorQtyEqLeGe
     energyQty = args.energyQty
     if missileQty < 1:
         missileQty = random.randint(1, 9)
@@ -575,6 +583,10 @@ if __name__ == "__main__":
         powerBombQty = random.randint(1, 9)
     if minorQty < 1:
         minorQty = random.randint(25, 100)
+    elif minorQtyEqLeGe == "<=":
+        minorQty = random.randint(7, minorQty)
+    elif minorQtyEqLeGe == ">=":
+        minorQty = random.randint(minorQty, 100)
     if energyQty == 'random':
         if args.energyQtyList is not None:
             energyQties = args.energyQtyList.split(',')
@@ -586,6 +598,10 @@ if __name__ == "__main__":
                      'PowerBomb': powerBombQty },
            'strictMinors' : args.strictMinors }
     logger.debug("quantities: {}".format(qty))
+
+    # dread mode/ultra sparse
+    if energyQty == 'ultra sparse' or energyQty == 'dread':
+        forceArg('disable_spark_damage', True, "Shinespark damage disabled due to energy settings")
 
     if len(args.superFun) > 0:
         superFun = []
@@ -600,6 +616,10 @@ if __name__ == "__main__":
 
     # controls
     ctrlDict = None
+    if args.controls is None and presetLoader is not None:
+        isCustom, controls = getCustomMapping(presetLoader.params["Controller"])
+        if isCustom:
+            args.controls = controls
     if args.controls:
         ctrlList = args.controls.split(',')
         if len(ctrlList) != 7:
@@ -697,6 +717,8 @@ if __name__ == "__main__":
     else:
         args.tourian = plandoRando["tourian"]
         objectivesManager = Objectives(args.tourian != 'Disabled')
+        # startAP also required when called from plando
+        Objectives.startAP = args.startLocation
         for goal in plandoRando["objectives"]:
             objectivesManager.addGoal(goal)
 
@@ -732,21 +754,27 @@ if __name__ == "__main__":
         "variaTweaksCustom": None if args.variaTweaksCustom is None else args.variaTweaksCustom.split(','),
         "nerfedCharge": args.nerfedCharge,
         "nerfedRainbowBeam": energyQty == 'ultra sparse',
+        "starting_energy": 99 if energyQty != "dread" else 1,
         "escapeAttr": None if args.escapeRando == False else True, # tmp value before actual attrs after randomization
+        "ctrlDict": ctrlDict,
+        "moonWalk": args.moonWalk or Controller.Moonwalk,
+        "debug": args.debug,
         "escapeRandoRemoveEnemies": not args.noRemoveEscapeEnemies,
         "minimizerN": minimizerN,
         "tourian": args.tourian,
         "doorsColorsRando": args.doorsColorsRando,
         "vanillaObjectives": objectivesManager.isVanilla(),
-        "ctrlDict": ctrlDict,
-        "moonWalk": args.moonWalk,
         "seed": seed,
         "randoSettings": randoSettings,
         "displayedVersion": displayedVersion,
         "revealMap": args.revealMap,
+        # added later:
+        #  doors
+        #  itemLocs
+        #  progItemLocs
         "hud": args.hud == True or args.majorsSplit == "FullWithHUD",
         "round_robin_cf": 'relaxed_round_robin_cf.ips' in args.patches, # will be applied twice but keep it like this for retrocompat
-        "debug": args.debug
+        "disable_spark_damage": args.disable_spark_damage
     }
     patchSets = [getPatchSet(patchSetName, RomFlavor.flavor) for patchSetName in getPatchSetsFromPatcherSettings(patcherSettings)]
     for patchSet in [p for p in patchSets if 'logic' in p]:

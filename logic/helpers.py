@@ -320,7 +320,7 @@ class Helpers(object):
         sm = self.smbm
         return sm.wand(sm.canShortCharge(),
                        sm.canUsePowerBombs(),
-                       sm.itemCountOk('ETank', 1),
+                       sm.wor(RomPatches.has(RomPatches.NoDamageSpark), sm.itemCountOk('ETank', 1)),
                        sm.knowsLowGauntlet())
 
     @Cache.decorator
@@ -558,7 +558,7 @@ class Helpers(object):
         cfClipOffset = 0 if (not cfClip or sm.canFireChargedShots()) else 4000
         (ammoMargin, secs, items) = self.canInflictEnoughDamages(6000+cfClipOffset, givesDrops=False)
         diff = SMBool(True, easy, [], items)
-        lowStuff = sm.knowsLowStuffBotwoon()
+        lowStuff = sm.wor(RomPatches.has(RomPatches.DreadMode), sm.knowsLowStuffBotwoon())
         if ammoMargin == 0 and lowStuff.bool:
             (ammoMargin, secs, items) = self.canInflictEnoughDamages(3500+cfClipOffset, givesDrops=False)
             diff = SMBool(lowStuff.bool, lowStuff.difficulty, lowStuff.knows, items)
@@ -752,9 +752,10 @@ class Helpers(object):
     @Cache.decorator
     def canPassMetroids(self):
         sm = self.smbm
-        return sm.wor(sm.wand(sm.haveItem('Ice'), sm.haveMissileOrSuper()),
-                      # to avoid leaving tourian to refill power bombs
-                      sm.itemCountOk('PowerBomb', 3))
+        return sm.wand(sm.wor(sm.wnot(RomPatches.has(RomPatches.DreadMode)), sm.haveItem("SpaceJump")), # lava dip in Metroid Room 1
+                       sm.wor(sm.wand(sm.haveItem('Ice'), sm.haveMissileOrSuper()),
+                              # to avoid leaving tourian to refill power bombs
+                              sm.itemCountOk('PowerBomb', 3)))
 
     @Cache.decorator
     def canPassZebetites(self):

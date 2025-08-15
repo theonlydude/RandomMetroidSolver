@@ -1,10 +1,10 @@
 # VARIA Randomizer, Solver, Tracker, Plandomizer for Super Metroid
 
-There's a website to use the VARIA Randomizer, Solver, Tracker, Plandomizer: [http://varia.run/](http://varia.run/)
+There's a website to use the VARIA Randomizer, Solver, Tracker, Plandomizer: [https://varia.run/](https://varia.run/)
 
-The current work in progress version is available on the beta website [http://beta.varia.run/](http://beta.varia.run/)
+The current work in progress version is available on the beta website [https://beta.varia.run/](https://beta.varia.run/)
 
-You can join the VARIA discord too: [http://discord.varia.run/](http://discord.varia.run/)
+You can join the VARIA discord too: [https://discord.varia.run/](https://discord.varia.run/)
 
 # Getting the sources
 
@@ -15,7 +15,7 @@ dude@computer:~$ cd RandomMetroidSolver
 dude@computer:~/RandomMetroidSolver (master)$ git submodule foreach git checkout main
 ```
 
-The current work in progress version is in the master branch (the default one, accessible on beta website (http://beta.varia.run/), if you want the version running on the production website (http://varia.run/) you have to checkout the production branch:
+The current work in progress version is in the master branch (the default one, accessible on beta website (https://beta.varia.run/), if you want the version running on the production website (https://varia.run/) you have to checkout the production branch:
 ```
 dude@computer:~/RandomMetroidSolver (master)$ git checkout production
 Basculement sur la branche 'production'

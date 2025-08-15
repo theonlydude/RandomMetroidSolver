@@ -255,8 +255,9 @@ patches = {
     'Blinking[Climb Bottom Left]': {
         # door Door_12_Room_96BA_PLM_ x/y updated
         snes_to_pc(0x8f82fe): [0x42, 0xc8, 0x2e, 0x86, 0x12, 0x8c],
-        snes_to_pc(0xa18683): [0x0],
-    },
+        0x108683: [0x0], # open door when zebes asleep
+        0x10897B: [0x7F] # lock the door when zebes awake
+    }
 }
 
 additional_PLMs = {

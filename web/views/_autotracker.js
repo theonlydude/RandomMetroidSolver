@@ -264,7 +264,7 @@ function startAutoTracker() {
     resetLog();
     appendLog("\r\n\u2026 Starting Auto Tracker");
     // open websocket
-    var url = 'ws://localhost:8080';
+    var url = 'ws://localhost:23074';
     socket = new WebSocket(url);
     socket.onopen = socketOnOpen;
     socket.onmessage = socketOnMessage;

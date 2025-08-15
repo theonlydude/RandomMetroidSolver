@@ -77,7 +77,6 @@ class Addresses(object):
                                        end=symbols.getAddress('objectives', 'locs_end')),
             'plmSpawnTable': ValueSingle(symbols.getAddress('plm_spawn', 'plm_lists')),
             'plmSpawnRoomTable': ValueSingle(symbols.getAddress('plm_spawn', 'room_plms_upwards')),
-            'additionalETanks': ValueSingle(symbols.getAddress('start', 'additional_etanks'), storage=Byte),
             'introText': ValueSingle(symbols.getAddress('intro_text', 'page1_text')),
             'objectivesList': ValueSingle(symbols.getAddress('objectives', 'objective_funcs')),
             'objectiveEventsArray': ValueRange(symbols.getAddress('objectives', 'objective_events'), length=2*MAX_OBJECTIVES),

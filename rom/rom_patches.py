@@ -106,6 +106,10 @@ class RomPatches:
     BombTorizoWake          = 1008
     # Round-Robin Crystal Flash patch
     RoundRobinCF            = 1009
+    # No damage shinespark (active in dread and ultra sparse modes)
+    NoDamageSpark           = 1010
+    # Dread Mode (1 HP)
+    DreadMode               = 1011
 
     ### Hacks
     # rotation hack
@@ -182,7 +186,7 @@ _baseIPS = [
     'endingtotals.ips',
     # MSU-1 patch
     'supermetroid_msu1.ips',
-    # displays max ammo 
+    # displays max ammo
     'max_ammo_display.ips',
     # VARIA logo on startup screen
     'varia_logo.ips',
@@ -343,6 +347,18 @@ definitions = {
             'desc': 'nerfed rainbow beam',
             'ips': ["nerfed_rainbow_beam.ips"],
             'logic': [RomPatches.NerfedRainbowBeam]
+        },
+        'dread_mode': {
+            'address': snes_to_pc(0x90EA7F), 'value': 0x60,
+            'desc': "Dread Mode",
+            'ips': ["dread_mode.ips"],
+            'logic': [RomPatches.DreadMode]
+        },
+        'disable_spark_damage': {
+            'address': snes_to_pc(0x90D0C6), 'value': 0x60,
+            'desc': "No damage Shinespark",
+            'ips': ["disable_spark_damage.ips"],
+            'logic': [RomPatches.NoDamageSpark]
         },
         'minimizer_bosses': {
             'address': snes_to_pc(0xa7afad), 'value': 0x5C,
@@ -639,7 +655,7 @@ definitions = {
                     'baby_room.ips', 'baby_remove_blocks.ips', 'escape_animals.ips',
                     'snails.ips', 'boulders.ips', 'rinkas.ips', 'etecoons.ips', 'crab_main_street.ips',
                     'crab_mt_everest.ips', 'mother_brain.ips', 'kraid.ips', 'torizos.ips', 'botwoon.ips',
-                    'crocomire.ips', 'ridley.ips', 'ws_treadmill.ips']
+                    'crocomire.ips', 'ridley.ips', 'ws_treadmill.ips', 'baby_kraid.ips']
         },
         # Anti-softlock layout patches
         'dachora': {
@@ -760,6 +776,7 @@ def getPatchSetsFromPatcherSettings(patcherSettings):
         "hud",
         "revealMap",
         "round_robin_cf",
+        "disable_spark_damage",
         "debug"
     ]
     patchSets += [k for k in boolSettings if patcherSettings.get(k) == True]
@@ -790,6 +807,8 @@ def getPatchSetsFromPatcherSettings(patcherSettings):
         patchSets.append("minimizer_bosses")
     if patcherSettings["tourian"] == "Fast":
         patchSets.append("fast_tourian")
+    if patcherSettings["starting_energy"] < 99:
+        patchSets.append("dread_mode")
     return patchSets
 
 def getPatchDescriptionsByGroup(patchList, flavor):

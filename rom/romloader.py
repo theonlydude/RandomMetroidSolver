@@ -173,8 +173,8 @@ class RomLoader(object):
     def loadEventBitMasks(self):
         return self.romReader.loadEventBitMasks()
 
-    def getAdditionalEtanks(self):
-        return self.romReader.getAdditionalEtanks()
+    def getStartingEnergy(self):
+        return self.romReader.getStartingEnergy()
 
 class RomLoaderSfc(RomLoader):
     # standard usage (when calling from the command line)

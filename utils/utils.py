@@ -271,7 +271,7 @@ def getDefaultMultiValues():
         'progressionSpeed': ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'VARIAble', 'speedrun'],
         'progressionDifficulty': ['easier', 'normal', 'harder'],
         'morphPlacement': ['early', 'late', 'normal'],
-        'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla'],
+        'energyQty': ['dread', 'ultra sparse', 'sparse', 'medium', 'vanilla'],
         'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive'],
         'areaRandomization': ['off', 'full', 'light'],
         'objective': Objectives.getAllGoals(exclude=True),
@@ -389,7 +389,7 @@ def loadRandoPreset(randoPreset, args):
         else:
             args.superFun.append("SuitsRandom")
 
-    ipsPatches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "refill_before_save", "relaxed_round_robin_cf", "better_reserves"]
+    ipsPatches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "refill_before_save", "relaxed_round_robin_cf", "better_reserves", "disable_spark_damage"]
     for patch in ipsPatches:
         if randoParams.get(patch, "off") == "on":
             args.patches.append(patch + '.ips')
@@ -442,6 +442,8 @@ def loadRandoPreset(randoPreset, args):
             args.minorQty = 0
         else:
             args.minorQty = randoParams["minorQty"]
+    if "minorQtyEqLeGe" in randoParams:
+        args.minorQtyEqLeGe = randoParams["minorQtyEqLeGe"]
     if "energyQty" in randoParams:
         args.energyQty = randoParams["energyQty"]
 
@@ -504,6 +506,7 @@ def getRandomizerDefaultParameters():
     defaultParams['superQty'] = "2"
     defaultParams['powerBombQty'] = "1"
     defaultParams['minorQty'] = "100"
+    defaultParams['minorQtyEqLeGe'] = "="
     defaultParams['energyQty'] = "vanilla"
     defaultParams['energyQtyMultiSelect'] = defaultMultiValues['energyQty']
     defaultParams['objectiveRandom'] = "off"
@@ -539,6 +542,7 @@ def getRandomizerDefaultParameters():
     defaultParams['nerfedCharge'] = "off"
     defaultParams['revealMap'] = "on"
     defaultParams['relaxed_round_robin_cf'] = "off"
+    defaultParams['disable_spark_damage'] = "off"
     defaultParams['itemsounds'] = "on"
     defaultParams['elevators_speed'] = "on"
     defaultParams['fast_doors'] = "on"
@@ -595,3 +599,24 @@ def dumpErrorMsg(outFileName, msg):
 def transition2isolver(transition):
     transition = str(transition)
     return transition[0].lower() + removeChars(transition[1:], " ,()-")
+
+# controlMapping: from loaded preset
+# return custom control arg for CLI
+def getCustomMapping(controlMapping):
+    if len(controlMapping) == 0:
+        return (False, None)
+
+    inv = {}
+    for button in controlMapping:
+        inv[controlMapping[button]] = button
+
+    return (True, "{},{},{},{},{},{},{}".format(inv["Shoot"], inv["Jump"], inv["Dash"], inv["Item Select"], inv["Item Cancel"], inv["Angle Up"], inv["Angle Down"]))
+
+def getRandomizerSeed():
+    # we always want seeds to have the same number of digits as sys.maxsize (ie. 19 digits)
+    targetLen = len(str(sys.maxsize))
+    seed = random.randrange(sys.maxsize)
+    while len(str(seed)) < targetLen:
+        # just reroll
+        seed = random.randrange(sys.maxsize)
+    return seed

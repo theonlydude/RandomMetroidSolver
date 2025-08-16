@@ -246,14 +246,20 @@ accessPoints = [
        dotOrientation = 'w'),
     AccessPoint('LN Entrance', 'LowerNorfair', 'Lower Norfair Screw Attack', {
         'Lava Dive Right': lambda sm: sm.canPassLavaPitReverse(),
-        'LN Above GT': lambda sm: sm.canPassLowerNorfairChozo(),
+        'LN Above GT': Cache.ldeco(lambda sm: sm.wand(sm.wor(sm.wnot(RomPatches.has(RomPatches.DreadMode)),
+                                                             sm.haveItem("SpaceJump"), sm.haveItem("ScrewAttack"),
+                                                             sm.canShortCharge()),
+                                                      sm.canPassLowerNorfairChozo())),
         'Screw Attack Bottom': Cache.ldeco(lambda sm: sm.wand(sm.canUsePowerBombs(),
                                                               sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                               sm.canGreenGateGlitch(),
                                                               sm.canDestroyBombWalls())),
         'Worst Room Top': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                          sm.canPassWorstRoom(),
-                                                         sm.canUsePowerBombs()))
+                                                         sm.wand(sm.canUsePowerBombs(),
+                                                                 sm.wor(sm.wnot(RomPatches.has(RomPatches.DreadMode)),
+                                                                        sm.canSimpleShortCharge(), # spark from ripper room
+                                                                        sm.haveItem("ScrewAttack")))))
     }, internal=True),
     AccessPoint('LN Above GT', 'LowerNorfair', 'Lower Norfair Screw Attack', {
         'LN Entrance': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),

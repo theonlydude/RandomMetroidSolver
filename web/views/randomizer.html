@@ -2012,9 +2012,10 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
     {
       element: "#energyQtyStep",
       title: "Quantity of Energy/Reserve Tanks available",
-      content: "<p>TODO::dread mode</p>\
-<p>Choose how many Energy <img src=\"/solver/static/images/tracker/inventory/ETank.png\" class=\"width: 32px\"/> / Reserve Tanks <img src=\"/solver/static/images/tracker/inventory/Reserve.png\" class=\"width: 32px\"/> will be available, from 0-1 in ultra sparse, 4-6 in sparse, 8-12 in medium and 18 in vanilla.</p>\
-<p>In ultra sparse <a href=\"https://metroid.fandom.com/wiki/Mother_Brain\" target=\"_blank\">Mother Brain's</a> <a href=\"https://metroid.fandom.com/wiki/Laser_Brain_Attack\" target=\"_blank\">rainbow beam</a> only does 20 damage instead of 300.</p><p>Click on the dice button to randomly set this parameter.</p>"
+      content: "<p>Choose how many Energy <img src=\"/solver/static/images/tracker/inventory/ETank.png\" class=\"width: 32px\"/> / Reserve Tanks <img src=\"/solver/static/images/tracker/inventory/Reserve.png\" class=\"width: 32px\"/> will be available, from 0 in Dread Mode, 0-1 in ultra sparse, 4-6 in sparse, 8-12 in medium and 18 in vanilla.</p>\
+<p>In Dread Mode, Samus max energy is stuck at 1 HP, meaning that <b>any</b> damage source will kill Samus! <a href=\"https://wiki.supermetroid.run/Shinespark\" target=\"_blank\">Shinespark</a> damage is disabled, as well as <a href=\"https://metroid.fandom.com/wiki/Mother_Brain\" target=\"_blank\">Mother Brain's</a> <a href=\"https://metroid.fandom.com/wiki/Laser_Brain_Attack\" target=\"_blank\">rainbow beam</a>.</p>\
+<p>In ultra sparse, <a href=\"https://wiki.supermetroid.run/Shinespark\" target=\"_blank\">Shinespark</a> damage is disabled, and <a href=\"https://metroid.fandom.com/wiki/Mother_Brain\" target=\"_blank\">Mother Brain's</a> <a href=\"https://metroid.fandom.com/wiki/Laser_Brain_Attack\" target=\"_blank\">rainbow beam</a> only does 20 damage instead of 300 (with Varia, 40 without).</p>\
+<p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#missileQtyStep",
@@ -2274,7 +2275,7 @@ Click on the dice button to randomly set this parameter.",
     {
       element: "#disable_spark_damageStep",
       title: "Disable Shinespark damage",
-      content: "<p>TODO::disable shinespark damange</p>\
+      content: "<p><a href=\"https://wiki.supermetroid.run/Shinespark\" target=\"_blank\">Shinesparks</a> no longer damage Samus. Removes the 29 Energy low limit to be able to shinespark whatever the energy level.</p>\
 <p>Patch developed by Flo.</p>",
       placement: "auto left"
     },

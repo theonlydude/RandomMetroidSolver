@@ -389,7 +389,7 @@ def loadRandoPreset(randoPreset, args):
         else:
             args.superFun.append("SuitsRandom")
 
-    ipsPatches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "refill_before_save", "relaxed_round_robin_cf", "better_reserves", "disable_spark_damage"]
+    ipsPatches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "refill_before_save", "relaxed_round_robin_cf", "better_reserves"]
     for patch in ipsPatches:
         if randoParams.get(patch, "off") == "on":
             args.patches.append(patch + '.ips')
@@ -446,6 +446,8 @@ def loadRandoPreset(randoPreset, args):
         args.minorQtyEqLeGe = randoParams["minorQtyEqLeGe"]
     if "energyQty" in randoParams:
         args.energyQty = randoParams["energyQty"]
+    if randoParams.get("disable_spark_damage", "on") == "on":
+        args.disable_spark_damage = True
 
     if randoParams.get("objectiveRandom", "false") == "true":
         nbObjective = randoParams.get("nbObjective", 4)

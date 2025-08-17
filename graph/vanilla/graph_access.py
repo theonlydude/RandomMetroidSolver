@@ -277,7 +277,9 @@ accessPoints = [
         'Firefleas': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
         'LN Entrance': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                       sm.canPassWorstRoomPirates(),
-                                                      sm.canUsePowerBombs()))
+                                                      sm.canUsePowerBombs(),
+                                                      sm.wor(sm.wnot(RomPatches.has(RomPatches.DreadMode)),
+                                                             sm.haveItem("ScrewAttack"))))
     }, internal=True),
     AccessPoint('Firefleas', 'LowerNorfair', 'Lower Norfair After Amphitheater', {
         'Worst Room Top': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
@@ -296,6 +298,7 @@ accessPoints = [
         'Screw Attack Bottom': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                               sm.canPassAmphitheaterReverse(),
                                                               sm.canDestroyBombWalls(),
+                                                              sm.wor(sm.wnot(RomPatches.has(RomPatches.DreadMode)), sm.haveItem("ScrewAttack")),
                                                               sm.canGreenGateGlitch())),
         'Firefleas Top': Cache.ldeco(lambda sm: sm.wand(sm.canPassBombPassages(),
                                                         sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])))

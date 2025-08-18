@@ -1,4 +1,4 @@
-
+# TODO add state information to avoid overlap between boss doors and blinking doors
 boss_doors = {
     'Kraid': [
         { "facing": "right", "connection": "KraidRoomIn", "x": 0x1, "y": 0x16, "var": 0x0047, "address": 0x78A34, "room": 0xA59F },

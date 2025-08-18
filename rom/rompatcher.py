@@ -3,22 +3,21 @@ import os, random, re, json
 from math import ceil
 from enum import IntFlag
 from collections import defaultdict
+from graph.flags import BossAccessPointFlags
 from rando.Items import ItemManager
 from rom.compression import Compressor
 from rom.ips import IPS_Patch
 from utils.doorsmanager import DoorsManager, IndicatorFlag
 from utils.objectives import Objectives
 from graph.graph_utils import GraphUtils, getAccessPoint, graphAreas, gameAreas
-from graph.flags import BossAccessPointFlags
 from logic.logic import Logic
 from rom.rom import RealROM, FakeROM, snes_to_pc, pc_to_snes
 from rom.addresses import Addresses
 from rom.rom_patches import RomPatches, getPatchSet, getPatchSetsFromPatcherSettings
 from rom.rom_options import RomOptions
 from rom.flavor import RomFlavor
-from rom.map import AreaMap, getTileIndex, portal_mapicons, areaSpriteMaps
+from rom.map import AreaMap, portal_mapicons, areaSpriteMaps
 from rom.enemies_objectives_data import enemies_objectives_data
-from patches.patchaccess import PatchAccess
 from utils.parameters import appDir, Settings
 from logic.helpers import Bosses
 import utils.log
@@ -116,14 +115,13 @@ class RomPatcher:
 
         self.writeMagic()
         self.writeMajorsSplit(self.settings["majorsSplit"])
+        self.writeStartingEnergy(self.settings["starting_energy"])
 
         if self.settings["isPlando"] and self.race is None:
             doorsPtrs = GraphUtils.getAps2DoorsPtrs()
             self.writePlandoTransitions(self.settings["plando"]["graphTrans"], doorsPtrs,
                                         self.settings["plando"]["maxTransitions"])
             self.writePlandoAddresses(self.settings["plando"]["visitedLocations"])
-        if self.settings["isPlando"] and self.settings["plando"]["additionalETanks"] != 0:
-            self.writeAdditionalETanks(self.settings["plando"]["additionalETanks"])
         if self.settings["isPlando"] and self.settings["escapeAttr"] is not None:
             self.removeAnimalsHunt()
 
@@ -426,13 +424,13 @@ class RomPatcher:
                 self.applyIPSPatch('minimap_data_area_rando.ips')
             if self.settings["minimizerN"] is not None:
                 self.removeMinimizerUnusedAreas()
-            # blue doors
-            doors = self.getStartDoors(plms, self.settings["area"], self.settings["minimizerN"])
-            DoorsManager.getBlueDoors(doors)
+            self.addPortals(plms, deadEnds)
             # door indicators
             if "door_indicators_plms" in patchSets:
                 self.writeDoorIndicators(plms, self.settings["area"], self.settings["doorsColorsRando"])
-            # starting locations
+            # starting locations / blue doors
+            doors = [0x10] # red brin elevator
+            DoorsManager.getBlueDoors(doors)
             self.applyStartAP(self.settings["startLocation"], plms, doors)
             # patch PLMs
             self.applyPLMs(plms)
@@ -457,28 +455,31 @@ class RomPatcher:
                 patch = IPS_Patch.load(os.path.join(appDir, ipsDir, patchName))
         self.ipsPatches.append(patch)
 
-    def getStartDoors(self, plms, area, minimizerN):
-        doors = [0x10] # red brin elevator
-        def addBlinking(name):
-            key = 'Blinking[{}]'.format(name)
+    def addPortals(self, plms, deadEnds):
+        area, boss, minimizerN = self.settings["area"], self.settings["boss"], self.settings["minimizerN"]
+        def addBlinking(name, prefix="Blinking"):
+            key = f'{prefix}[{name}]'
             if key in self.patchAccess.getDictPatches():
                 self.applyIPSPatch(key)
             if key in self.patchAccess.getAdditionalPLMs():
                 plms.append(key)
-        if area == True:
+        def isDeadEnd(ap):
+            return ap.Name in deadEnds
+        apList = Objectives.graph.accessPoints.values()
+        if area:
             plms += ['Maridia Sand Hall Seal', "Save_Main_Street", "Save_Crab_Shaft"]
-            for accessPoint in Logic.accessPoints():
-                if accessPoint.Internal == True or accessPoint.Boss == True:
-                    continue
-                addBlinking(accessPoint.Name)
             addBlinking("West Sand Hall Left")
             addBlinking("Below Botwoon Energy Tank Right")
-        if minimizerN is not None:
-            # add blinking doors inside and outside boss rooms
-            for accessPoint in Logic.accessPoints():
-                if accessPoint.Boss:
-                    addBlinking(accessPoint.Name)
-        return doors
+            # filter Croc duplicates from AP list
+            if boss & BossAccessPointFlags.MiniBoss:
+                apList = [ap for ap in apList if ap.Name != "CrocomireFrontDoorOut" and ap.Name != "Crocomire Room Top"]
+        for accessPoint in apList:
+            if accessPoint.Internal == True:
+                continue
+            if (area and not accessPoint.Boss) or ((boss & accessPoint.Boss) != 0 and not isDeadEnd(accessPoint)):
+                addBlinking(accessPoint.Name)
+            if accessPoint.Boss != 0 and minimizerN:
+                addBlinking(accessPoint.Name, prefix="BlinkingMinimizer")
 
     def applyStartAP(self, apName, plms, doors):
         ap = getAccessPoint(apName)
@@ -1064,7 +1065,7 @@ class RomPatcher:
                 # endian convert
                 exitAsm = self.symbolWordBytes(conn['exitAsm'])
                 asmPatch += [ 0x20 ] + exitAsm            # JSR exitAsm
-            # for special access points display on map, artificially explore the tile where 
+            # for special access points display on map, artificially explore the tile where
             # the portal is drawn, since it's not the same as the actual map tile checked to
             # see if the portal is taken
             src, dst = conn['transition']
@@ -1142,7 +1143,7 @@ class RomPatcher:
                 bytez = getPLMbytes(doors[0])
                 for b in bytez:
                     self.romFile.writeByte(b)
-            else: 
+            else:
                 for i, door in enumerate(doors):
                     self.log.debug(f"processing boss {boss} door {i}")
                     # add new PLMs: when coming in at this door, put a bt door there and gray doors elsewhere.
@@ -1178,8 +1179,8 @@ class RomPatcher:
                     # disable original PLM, if any
                     if 'address' in door:
                         self.romFile.writeWord(0xb63b, door['address']) # PLM type = copy arrow
-                        self.romFile.writeWord(0x0101) # x=1,y=1
-                        self.romFile.writeWord(0x0) # var=0
+                        self.romFile.writeWord(0x0101) # x=y=1
+                        self.romFile.writeWord(0x0) # arg=0
         # determine bosses in the seed and write boss doors
         bosses = set()
         for apName, ap in graph.accessPoints.items():
@@ -1333,8 +1334,12 @@ class RomPatcher:
         # replace STZ with STA since A is non-zero at this point
         self.romFile.writeByte(0x8D, Addresses.getOne('moonwalk'))
 
+    def writeStartingEnergy(self, energy):
+        self.romFile.writeWord(energy, Addresses.getOne("start_starting_energy"))
+
     def writeAdditionalETanks(self, additionalETanks):
-        self.romFile.writeByte(additionalETanks, Addresses.getOne("additionalETanks"))
+        energy = additionalETanks*100 + 99
+        self.writeStartingEnergy(energy)
 
     def writeHellrunRate(self, hellrunRatePct):
         hellrunRateVal = min(int(0x40*float(hellrunRatePct)/100.0), 0xff)
@@ -1724,7 +1729,7 @@ class MusicPatcher(object):
 
     # tracks: dict with track name to replace as key, and replacing track name as value
     # updateReferences: change room state headers and special tracks. may be False if you're patching a rom hack or something
-    # output: if not None, dump a JSON file with what was done 
+    # output: if not None, dump a JSON file with what was done
     # replaced tracks must be in
     # replaceableTracks, and new tracks must be in allTracks
     # tracks not in the dict will be kept vanilla

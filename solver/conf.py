@@ -69,7 +69,7 @@ class RomConf:
     def __init__(self):
         self.scavengerOrder = []
         self.plandoScavengerOrder = []
-        self.additionalETanks = 0
+        self.startingEnergy = 99
         self.escapeRandoRemoveEnemies = True
         self.revealMap = False
         self.objectivesHidden = False
@@ -95,6 +95,7 @@ class RomConf:
         # to re-apply patches in plando
         self.hud = False
         self.round_robin_cf = False
+        self.disable_spark_damage = False
 
         # vanilla transitions
         self.areaTransitions = vanillaTransitions[:]

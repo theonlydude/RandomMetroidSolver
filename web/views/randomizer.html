@@ -691,7 +691,7 @@ function showHide(show, hide) {
 function getRandomizerParameters(setDisabledToOff, trueJson) {
     var dataDict = {};
 
-    var elems = ["seed", "preset", "raceMode", "minorQtyEqLeGe", "removeEscapeEnemies", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "revealMap", "scavRandomized", "relaxed_round_robin_cf", "hiddenObjectives", "distributeObjectives", "better_reserves"];
+    var elems = ["seed", "preset", "raceMode", "minorQtyEqLeGe", "removeEscapeEnemies", "nerfedCharge", "itemsounds", "elevators_speed", "fast_doors", "spinjumprestart", "rando_speed", "animals", "No_Music", "randoPreset", "random_music", "maxDifficulty", "Infinite_Space_Jump", "refill_before_save", "minimizer", "allowGreyDoors", "hud", "revealMap", "scavRandomized", "relaxed_round_robin_cf", "hiddenObjectives", "distributeObjectives", "better_reserves", "disable_spark_damage"];
     var randomElems = ["missileQty", "superQty", "powerBombQty", "minorQty", "suitsRestriction", "funCombat", "funMovement", "funSuits", "hideItems", "strictMinors", "areaRandomization", "doorsColorsRando", "bossRandomization", "escapeRando", "minimizerQty", "scavNumLocs"];
     var multiElems = ["majorsSplit", "startLocation","energyQty", "morphPlacement", "progressionDifficulty", "progressionSpeed", "gravityBehaviour", "tourian", "areaRandomization"];
     var imgPickers = ["logic"];
@@ -1430,6 +1430,17 @@ window.onload = function(){
     }
     majorsSplit.onchange();
 
+    var energyQty = document.getElementById("energyQty");
+    energyQty.onchange = function() {
+        var energyQty = document.getElementById("energyQty");
+        var disable_spark_damage = document.getElementById("disable_spark_damage");
+        if(energyQty.value == 'dread' || energyQty.value == 'ultra sparse'){
+            setSwitchToOn(disable_spark_damage);
+        } else {
+            setSwitchToOff(disable_spark_damage);
+        }
+    }
+
     var inputs = document.getElementsByTagName("input");
     for(var i = 0; i < inputs.length; i++) {
         if(inputs[i].type == "checkbox") {
@@ -2001,8 +2012,10 @@ Standard speeds go from <b>slowest</b>, stuffing your way with as many non-progr
     {
       element: "#energyQtyStep",
       title: "Quantity of Energy/Reserve Tanks available",
-      content: "<p>Choose how many Energy <img src=\"/solver/static/images/tracker/inventory/ETank.png\" class=\"width: 32px\"/> / Reserve Tanks <img src=\"/solver/static/images/tracker/inventory/Reserve.png\" class=\"width: 32px\"/> will be available, from 0-1 in ultra sparse, 4-6 in sparse, 8-12 in medium and 18 in vanilla.</p>\
-<p>In ultra sparse <a href=\"https://metroid.fandom.com/wiki/Mother_Brain\" target=\"_blank\">Mother Brain's</a> <a href=\"https://metroid.fandom.com/wiki/Laser_Brain_Attack\" target=\"_blank\">rainbow beam</a> only does 20 damage instead of 300.</p><p>Click on the dice button to randomly set this parameter.</p>"
+      content: "<p>Choose how many Energy <img src=\"/solver/static/images/tracker/inventory/ETank.png\" class=\"width: 32px\"/> / Reserve Tanks <img src=\"/solver/static/images/tracker/inventory/Reserve.png\" class=\"width: 32px\"/> will be available, from 0 in Dread Mode, 0-1 in ultra sparse, 4-6 in sparse, 8-12 in medium and 18 in vanilla.</p>\
+<p>In Dread Mode, Samus max energy is stuck at 1 HP, meaning that <b>any</b> damage source will kill Samus! <a href=\"https://wiki.supermetroid.run/Shinespark\" target=\"_blank\">Shinespark</a> damage is disabled, as well as <a href=\"https://metroid.fandom.com/wiki/Mother_Brain\" target=\"_blank\">Mother Brain's</a> <a href=\"https://metroid.fandom.com/wiki/Laser_Brain_Attack\" target=\"_blank\">rainbow beam</a>.</p>\
+<p>In ultra sparse, <a href=\"https://wiki.supermetroid.run/Shinespark\" target=\"_blank\">Shinespark</a> damage is disabled, and <a href=\"https://metroid.fandom.com/wiki/Mother_Brain\" target=\"_blank\">Mother Brain's</a> <a href=\"https://metroid.fandom.com/wiki/Laser_Brain_Attack\" target=\"_blank\">rainbow beam</a> only does 20 damage instead of 300 (with Varia, 40 without).</p>\
+<p>Click on the dice button to randomly set this parameter.</p>"
     },
     {
       element: "#missileQtyStep",
@@ -2257,6 +2270,13 @@ Click on the dice button to randomly set this parameter.",
 <li>Once the Charge Beam <img src=\"/solver/static/images/tracker/inventory/Charge.png\" alt=\"Charge.png\" title=\"Charge.png\" class=\"width: 32px\"/> item has been collected, it does full damage and special attacks are back to normal.</li>\
 </ul>\
 <p>Patch developed by Smiley and Flo.</p>",
+      placement: "auto left"
+    },
+    {
+      element: "#disable_spark_damageStep",
+      title: "Disable Shinespark damage",
+      content: "<p><a href=\"https://wiki.supermetroid.run/Shinespark\" target=\"_blank\">Shinesparks</a> no longer damage Samus. Removes the 29 Energy low limit to be able to shinespark whatever the energy level.</p>\
+<p>Patch developed by Flo.</p>",
       placement: "auto left"
     },
     {
@@ -2992,6 +3012,14 @@ def displayNumber(id, min, max, default, step="1"):
                     Relaxed Round Robin Crystal Flash
                   </td>
                   <td><button type="button" onclick="startTheTour(event)">?</button></td>
+                </tr>
+                <tr>
+                  <td class="half" id="disable_spark_damageStep">
+                    {{displayCheckbox("disable_spark_damage")}}
+                    Disable Shinespark damage
+                  </td>
+                  <td><button type="button" onclick="startTheTour(event)">?</button></td>
+                  <td class="half"></td><td></td>
                 </tr>
               </table>
               <table class="full" id="gravityBehaviourVisibility">

@@ -279,6 +279,8 @@ if __name__ == "__main__":
                         choices=tourians+['random'])
     parser.add_argument('--tourianList', help="list to choose from when random",
                         dest='tourianList', nargs='?', default=None)
+    parser.add_argument('--disable_spark_damage', help="Disables Shinespark damage",
+                        dest='disable_spark_damage', nargs='?', const=True, default=False)
     # parse args
     args = parser.parse_args()
 
@@ -597,6 +599,10 @@ if __name__ == "__main__":
            'strictMinors' : args.strictMinors }
     logger.debug("quantities: {}".format(qty))
 
+    # dread mode/ultra sparse
+    if energyQty == 'ultra sparse' or energyQty == 'dread':
+        forceArg('disable_spark_damage', True, "Shinespark damage disabled due to energy settings")
+
     if len(args.superFun) > 0:
         superFun = []
         for fun in args.superFun:
@@ -711,6 +717,8 @@ if __name__ == "__main__":
     else:
         args.tourian = plandoRando["tourian"]
         objectivesManager = Objectives(args.tourian != 'Disabled')
+        # startAP also required when called from plando
+        Objectives.startAP = args.startLocation
         for goal in plandoRando["objectives"]:
             objectivesManager.addGoal(goal)
 
@@ -746,6 +754,7 @@ if __name__ == "__main__":
         "variaTweaksCustom": None if args.variaTweaksCustom is None else args.variaTweaksCustom.split(','),
         "nerfedCharge": args.nerfedCharge,
         "nerfedRainbowBeam": energyQty == 'ultra sparse',
+        "starting_energy": 99 if energyQty != "dread" else 1,
         "escapeAttr": None if args.escapeRando == False else True, # tmp value before actual attrs after randomization
         "ctrlDict": ctrlDict,
         "moonWalk": args.moonWalk or Controller.Moonwalk,
@@ -765,6 +774,7 @@ if __name__ == "__main__":
         #  progItemLocs
         "hud": args.hud == True or args.majorsSplit == "FullWithHUD",
         "round_robin_cf": 'relaxed_round_robin_cf.ips' in args.patches, # will be applied twice but keep it like this for retrocompat
+        "disable_spark_damage": args.disable_spark_damage
     }
     patchSets = [getPatchSet(patchSetName, RomFlavor.flavor) for patchSetName in getPatchSetsFromPatcherSettings(patcherSettings)]
     for patchSet in [p for p in patchSets if 'logic' in p]:

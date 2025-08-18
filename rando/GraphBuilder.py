@@ -25,8 +25,10 @@ class GraphBuilder(object):
     # builds everything but escape transitions
     def createGraph(self, maxDiff):
         transitions = self.graphSettings.plandoRandoTransitions
-        accessPoints = Logic.accessPointsDict()
+        # work on APs copy because we modify croc connection APs in miniboss rando, and we can call createGraph several times in area rando
+        accessPoints = copy.deepcopy(Logic.accessPointsDict())
         if transitions is None:
+            self.log.debug("createGraph attempt")
             transitions = []
             if self.minimizerN is not None:
                 forcedAreas = set()
@@ -61,10 +63,12 @@ class GraphBuilder(object):
                     transitions += vanillaTransitions
                 else:
                     transitions += GraphUtils.createAreaTransitions(self.graphSettings.lightAreaRando)
+                self.log.debug(f"Post-Area transitions ({len(transitions)}): {transitions}")
                 if not self.bossRando:
                     transitions += vanillaBossesTransitions + vanillaMiniBossesTransitions + vanillaMiniBossesTransitionsBack
                 else:
                     transitions += GraphUtils.createBossesTransitions(self.bossRando)
+                self.log.debug(f"Post-Boss transitions ({len(transitions)}): {transitions}")
                 # special case of Croc: we have to juggle with transitions because it is both an area and a boss transition
                 if self.areaRando and not self.bossRando:
                     transitions.remove(('CrocomireFrontDoorOut', 'CrocomireFrontDoorIn'))
@@ -76,11 +80,14 @@ class GraphBuilder(object):
                         return tr, conn
                     crocAreaTransition, crocAreaConnection = getTransitionAndConnection('Crocomire Room Top')
                     crocBossTransition, crocBossConnection = getTransitionAndConnection('CrocomireFrontDoorOut')
+                    self.log.debug(f"crocAreaTransition = {crocAreaTransition}, crocAreaConnection = {crocAreaConnection}")
+                    self.log.debug(f"crocBossTransition = {crocBossTransition}, crocBossConnection = {crocBossConnection}")
                     transitions.remove(crocAreaTransition)
                     transitions.remove(crocBossTransition)
                     transitions.append((crocAreaConnection, crocBossConnection))
                     accessPoints[crocAreaConnection].Boss = BossAccessPointFlags.MiniBoss
-        ret = AccessGraph(Logic.accessPoints(), transitions, self.graphSettings.dotFile)
+                self.log.debug(f"Post-Croc transitions ({len(transitions)}): {transitions}")
+        ret = AccessGraph(accessPoints.values(), transitions, self.graphSettings.dotFile) # create graph with our copied APs
         Objectives.setGraph(ret, maxDiff)
         ret.printGraph()
         return ret

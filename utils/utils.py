@@ -271,7 +271,7 @@ def getDefaultMultiValues():
         'progressionSpeed': ['slowest', 'slow', 'medium', 'fast', 'fastest', 'basic', 'VARIAble', 'speedrun'],
         'progressionDifficulty': ['easier', 'normal', 'harder'],
         'morphPlacement': ['early', 'late', 'normal'],
-        'energyQty': ['ultra sparse', 'sparse', 'medium', 'vanilla'],
+        'energyQty': ['dread', 'ultra sparse', 'sparse', 'medium', 'vanilla'],
         'gravityBehaviour': ['Vanilla', 'Balanced', 'Progressive'],
         'areaRandomization': ['off', 'full', 'light'],
         'objective': Objectives.getAllGoals(exclude=True),
@@ -446,6 +446,8 @@ def loadRandoPreset(randoPreset, args):
         args.minorQtyEqLeGe = randoParams["minorQtyEqLeGe"]
     if "energyQty" in randoParams:
         args.energyQty = randoParams["energyQty"]
+    if randoParams.get("disable_spark_damage", "on") == "on":
+        args.disable_spark_damage = True
 
     if randoParams.get("objectiveRandom", "false") == "true":
         nbObjective = randoParams.get("nbObjective", 4)
@@ -542,6 +544,7 @@ def getRandomizerDefaultParameters():
     defaultParams['nerfedCharge'] = "off"
     defaultParams['revealMap'] = "on"
     defaultParams['relaxed_round_robin_cf'] = "off"
+    defaultParams['disable_spark_damage'] = "off"
     defaultParams['itemsounds'] = "on"
     defaultParams['elevators_speed'] = "on"
     defaultParams['fast_doors'] = "on"

@@ -290,7 +290,7 @@ loc.Available = (
 
 loc = locationsDict["Energy Tank, Ridley"]
 loc.AccessFrom = {
-    'RidleyBackDoorIn': lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
+    'RidleyBackDoorIn': lambda sm: sm.canDipHeatedRoom()
 }
 loc.Available = (
     lambda sm: sm.haveItem('Morph')

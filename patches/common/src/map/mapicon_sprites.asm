@@ -98,11 +98,19 @@ portal_DraygonBoss:
 	    dw $0000 : db $ff : dw $28fa
 portal_RidleyBoss:
 	    dw $0000 : db $ff : dw $28fb
+portal_SporeSpawnBoss:
+	    dw $0000 : db $ff : dw $28fc
+portal_BotwoonBoss:
+	    dw $0000 : db $ff : dw $28fd
+portal_CrocomireBoss:
+	    dw $0000 : db $ff : dw $28fe
+portal_GoldenTorizoBoss:
+	    dw $0000 : db $ff : dw $28ff
 portal_Unexplored:
 	    dw $0000 : db $ff : dw $2adb
 
 portals_mapicons_sprite_table:
-	dw portal_Crateria,portal_GreenPinkBrinstar,portal_RedBrinstar,portal_WreckedShip,portal_Kraid,portal_Norfair,portal_Crocomire,portal_LowerNorfair,portal_WestMaridia,portal_EastMaridia,portal_Tourian,portal_KraidBoss,portal_PhantoonBoss,portal_DraygonBoss,portal_RidleyBoss,portal_Unexplored
+	dw portal_Crateria,portal_GreenPinkBrinstar,portal_RedBrinstar,portal_WreckedShip,portal_Kraid,portal_Norfair,portal_Crocomire,portal_LowerNorfair,portal_WestMaridia,portal_EastMaridia,portal_Tourian,portal_KraidBoss,portal_PhantoonBoss,portal_DraygonBoss,portal_RidleyBoss,portal_SporeSpawnBoss,portal_BotwoonBoss,portal_CrocomireBoss,portal_GoldenTorizoBoss,portal_Unexplored
 
 objective_1:
 	    dw $0001 : db $ff : dw $2ee6

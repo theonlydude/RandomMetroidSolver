@@ -1,7 +1,7 @@
 {
     "ItemTileCheckList": 9029632,
     "area_tiles": 9480988,
-    "doors_mapicons_by_area": 8764602,
+    "doors_mapicons_by_area": 8764630,
     "freespace_alloc_end_1": 9029632,
     "freespace_alloc_end_2": 9030432,
     "freespace_alloc_end_3": 9365503,
@@ -20,9 +20,9 @@
     "freespace_alloc_start_7": 8761952,
     "freespace_alloc_start_8": 8761344,
     "freespace_alloc_start_9": 8443392,
-    "mapicons_tables": 8764638,
+    "mapicons_tables": 8764666,
     "mapicons_tables_limit": 8769279,
-    "objectives_mapicons_by_area": 8764626,
-    "portals_mapicons_by_area": 8764614,
+    "objectives_mapicons_by_area": 8764654,
+    "portals_mapicons_by_area": 8764642,
     "total_tiles": 9481000
 }

@@ -46,18 +46,42 @@ areaAccessPointsInGameDisplay = {
     "Warehouse Entrance Right": {"area": "Norfair", "coords": (11, 1)},
     "Glass Tunnel Top": {"area": "Brinstar", "coords": (39, 18)},
     "East Tunnel Right": {"area": "Brinstar", "coords": (40, 19)},
-    "East Tunnel Top Right": {"area": "Brinstar", "coords": (40, 18)}
+    "East Tunnel Top Right": {"area": "Brinstar", "coords": (40, 18)},
+    "KraidBackDoorIn": {"area": "Brinstar", "coords": (58, 20)},
+    "PhantoonBackDoorIn": {"area": "WreckedShip", "coords": (20, 20)},
+    "DraygonBackDoorIn": {"area": "Maridia", "coords": (37, 11)},
+    "RidleyBackDoorIn": {"area": "Norfair", "coords": (21, 18)}
 }
 
 bossAccessPoints = {
     "PhantoonRoomOut": {"byteIndex": 82, "bitMask": 32, "room": 0xcc6f, "area": "WreckedShip"},
     "PhantoonRoomIn": {"byteIndex": 82, "bitMask": 16, "room": 0xcd13, "area": "WreckedShip"},
+    "PhantoonBackDoorIn": {"byteIndex": 82, "bitMask": 16, "room": 0xcd13, "area": "WreckedShip"},
     "RidleyRoomOut": {"byteIndex": 71, "bitMask": 128, "room": 0xb37a, "area": "Norfair"},
     "RidleyRoomIn": {"byteIndex": 70, "bitMask": 1, "room": 0xb32e, "area": "Norfair"},
+    "RidleyBackDoorIn": {"byteIndex": 74, "bitMask": 2, "room": 0xb698, "area": "Norfair"},
     "KraidRoomOut": {"byteIndex": 210, "bitMask": 2, "room": 0xa56b, "area": "Brinstar"},
     "KraidRoomIn": {"byteIndex": 210, "bitMask": 1, "room": 0xa59f, "area": "Brinstar"},
+    "KraidBackDoorIn": {"byteIndex": 211, "bitMask": 64, "room": 0xa6e2, "area": "Brinstar"},
     "DraygonRoomOut": {"byteIndex": 169, "bitMask": 64, "room": 0xd78f, "area": "Maridia"},
-    "DraygonRoomIn": {"byteIndex": 169, "bitMask": 128, "room": 0xda60, "area": "Maridia"}
+    "DraygonRoomIn": {"byteIndex": 169, "bitMask": 128, "room": 0xda60, "area": "Maridia"},
+    "DraygonBackDoorIn": {"byteIndex": 172, "bitMask": 2, "room": 0xd9aa, "area": "Maridia"},
+    "BotwoonFrontDoorOut": {"byteIndex": 38, "bitMask": 1, "room": 0xd617, "area": "Maridia"},
+    "BotwoonFrontDoorIn": {"byteIndex": 39, "bitMask": 128, "room": 0xd95e, "area": "Maridia"},
+    "BotwoonBackDoorOut": {"byteIndex": 39, "bitMask": 32, "room": 0xd617, "area": "Maridia"},
+    "BotwoonBackDoorIn": {"byteIndex": 39, "bitMask": 64, "room": 0xd95e, "area": "Maridia"},
+    "SporeSpawnFrontDoorOut": {"byteIndex": 22, "bitMask": 2, "room": 0x9D9C, "area": "Brinstar"},
+    "SporeSpawnFrontDoorIn": {"byteIndex": 18, "bitMask": 2, "room": 0x9DC7, "area": "Brinstar"},
+    "SporeSpawnBackDoorOut": {"byteIndex": 42, "bitMask": 2, "room": 0xA0A4, "area": "Brinstar"},
+    "SporeSpawnBackDoorIn": {"byteIndex": 42, "bitMask": 1, "room": 0x9B5B, "area": "Brinstar"},
+    "CrocomireFrontDoorOut": {"byteIndex": 41, "bitMask": 1, "room": 0xa923, "area": "Norfair"},
+    "CrocomireFrontDoorIn": {"byteIndex": 45, "bitMask": 1, "room": 0xa98d, "area": "Norfair"},
+    "CrocomireBackDoorOut": {"byteIndex": 45, "bitMask": 16, "room": 0xAA82, "area": "Norfair"},
+    "CrocomireBackDoorIn": {"byteIndex": 45, "bitMask": 8, "room": 0xa98d, "area": "Norfair"},
+    "GoldenTorizoFrontDoorOut": {"byteIndex": 66, "bitMask": 64, "room": 0xB1E5, "area": "Norfair"},
+    "GoldenTorizoFrontDoorIn": {"byteIndex": 66, "bitMask": 32, "room": 0xB283, "area": "Norfair"},
+    "GoldenTorizoBackDoorOut": {"byteIndex": 70, "bitMask": 8, "room": 0xB6C1, "area": "Norfair"},
+    "GoldenTorizoBackDoorIn": {"byteIndex": 70, "bitMask": 16, "room": 0xB283, "area": "Norfair"}
 }
 
 escapeAccessPoints = {

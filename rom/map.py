@@ -294,6 +294,10 @@ portal_mapicons = {
     "PhantoonBoss": PortalMapIcon(0xF9),
     "DraygonBoss": PortalMapIcon(0xFA),
     "RidleyBoss": PortalMapIcon(0xFB),
+    "SporeSpawnBoss": PortalMapIcon(0xFC),
+    "BotwoonBoss": PortalMapIcon(0xFD),
+    "CrocomireBoss": PortalMapIcon(0xFE),
+    "GoldenTorizoBoss": PortalMapIcon(0xFF),
     "Unexplored": PortalMapIcon(0xDB, palette=5)
 }
 

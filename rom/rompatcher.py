@@ -1227,9 +1227,21 @@ class RomPatcher:
             return None
         graphAreaOverride = {
             "KraidRoomIn": "KraidBoss",
+            "KraidBackDoorIn": "KraidBoss",
             "PhantoonRoomIn": "PhantoonBoss",
+            "PhantoonBackDoorIn": "PhantoonBoss",
             "DraygonRoomIn": "DraygonBoss",
-            "RidleyRoomIn": "RidleyBoss"
+            "DraygonBackDoorIn": "DraygonBoss",
+            "RidleyRoomIn": "RidleyBoss",
+            "RidleyBackDoorIn": "RidleyBoss",
+            "SporeSpawnFrontDoorIn": "SporeSpawnBoss",
+            "SporeSpawnBackDoorIn": "SporeSpawnBoss",
+            "BotwoonFrontDoorIn": "BotwoonBoss",
+            "BotwoonBackDoorIn": "BotwoonBoss",
+            "CrocomireFrontDoorIn": "CrocomireBoss",
+            "CrocomireBackDoorIn": "CrocomireBoss",
+            "GoldenTorizoFrontDoorIn": "GoldenTorizoBoss",
+            "GoldenTorizoBackDoorIn": "GoldenTorizoBoss"
         }
         allAreas = list(self._accessibleAreasNoBoss)
         if tourian != "Disabled":

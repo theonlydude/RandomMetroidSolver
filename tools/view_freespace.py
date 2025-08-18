@@ -9,7 +9,7 @@ import utils.log
 
 from logic.logic import Logic
 from rom.flavor import RomFlavor
-from rom.symbols import Symbols, Freespace
+from rom.symbols import Freespace
 from collections import namedtuple
 
 flavor = "vanilla" if len(sys.argv) < 2 else sys.argv[1]

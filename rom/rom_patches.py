@@ -314,7 +314,7 @@ definitions = {
             'ips': _area,
             'logic': RomPatches.AreaBaseSet,
             'plms': ["WS_Save_Blinking_Door"]
-        },        
+        },
         'boss': {
             'desc': "Bosses randomization base patches",
             'ips': ['door_transition.ips'],
@@ -603,7 +603,7 @@ definitions = {
             'plms': [],
             'logic': [RomPatches.CrabHoleClimb]
         },
-        #miniboss rando patches
+        # miniboss rando patches
         'boss_mini': {
             'address': 0x2460ad, 'value': 0xde,
             'desc': 'Turn crumble blocks in Golden Torizo Room into shot blocks, remove crumble blocks at the top of Spore Spawn Super Room',

@@ -176,8 +176,9 @@ while True:
                 x = mouse_x // DISP_TILE_SIZE
                 y = mouse_y // DISP_TILE_SIZE
                 # Output the tile description
-                mapTile = areaMap.getTile(x, y)            
-                print("Tile clicked at (%d, %d): %s" % (x, y, str(mapTile)))
+                mapTile = areaMap.getTile(x, y)
+                byteIndex, mask = areaMap.getByteIndexMask(x, y)
+                print("Tile clicked at (%d, %d) [%d, %d]: %s" % (x, y, byteIndex, mask, str(mapTile)))
                 if mode == "attrs":
                     kind, category = getTileKind(mapTile.idx)
                     if kind != LocationMapTileKind.Unknown:

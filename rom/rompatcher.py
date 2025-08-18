@@ -424,7 +424,8 @@ class RomPatcher:
                 self.applyIPSPatch('minimap_data_area_rando.ips')
             if self.settings["minimizerN"] is not None:
                 self.removeMinimizerUnusedAreas()
-            self.addPortals(plms, deadEnds)
+            # area/boss portals
+            self.addPortals(plms, deadEnds, corridors)
             # door indicators
             if "door_indicators_plms" in patchSets:
                 self.writeDoorIndicators(plms, self.settings["area"], self.settings["doorsColorsRando"])
@@ -455,31 +456,36 @@ class RomPatcher:
                 patch = IPS_Patch.load(os.path.join(appDir, ipsDir, patchName))
         self.ipsPatches.append(patch)
 
-    def addPortals(self, plms, deadEnds):
-        area, boss, minimizerN = self.settings["area"], self.settings["boss"], self.settings["minimizerN"]
+    def addPortals(self, plms, deadEnds, corridors):
+        area, bossFlags, minimizerN = self.settings["area"], self.settings["boss"], self.settings["minimizerN"]
         def addBlinking(name, prefix="Blinking"):
             key = f'{prefix}[{name}]'
             if key in self.patchAccess.getDictPatches():
                 self.applyIPSPatch(key)
             if key in self.patchAccess.getAdditionalPLMs():
                 plms.append(key)
+        def _isSpecialBackDoor(ap, apNameList):
+            bossName, bossProps = GraphUtils.getBossProperties(ap.Name)
+            return bossName in apNameList and (bossProps & BossAccessPointFlags.Backdoor) and (bossProps & BossAccessPointFlags.Inside)
         def isDeadEnd(ap):
-            return ap.Name in deadEnds
-        apList = Objectives.graph.accessPoints.values()
+            return _isSpecialBackDoor(ap, deadEnds)
+        def isCorridor(ap):
+            return _isSpecialBackDoor(ap, corridors)
+        apList = [ap for ap in Objectives.graph.accessPoints.values() if not ap.Internal]
         if area:
             plms += ['Maridia Sand Hall Seal', "Save_Main_Street", "Save_Crab_Shaft"]
             addBlinking("West Sand Hall Left")
             addBlinking("Below Botwoon Energy Tank Right")
             # filter Croc duplicates from AP list
-            if boss & BossAccessPointFlags.MiniBoss:
+            if bossFlags & BossAccessPointFlags.MiniBoss:
                 apList = [ap for ap in apList if ap.Name != "CrocomireFrontDoorOut" and ap.Name != "Crocomire Room Top"]
         for accessPoint in apList:
-            if accessPoint.Internal == True:
-                continue
-            if (area and not accessPoint.Boss) or ((boss & accessPoint.Boss) != 0 and not isDeadEnd(accessPoint)):
+            if (area and not accessPoint.Boss) or ((bossFlags & accessPoint.Boss) != 0 and not isDeadEnd(accessPoint)):
                 addBlinking(accessPoint.Name)
             if accessPoint.Boss != 0 and minimizerN:
                 addBlinking(accessPoint.Name, prefix="BlinkingMinimizer")
+            if isCorridor(accessPoint):
+                addBlinking(accessPoint.Name, prefix="BlinkingCorridor")
 
     def applyStartAP(self, apName, plms, doors):
         ap = getAccessPoint(apName)
@@ -1137,50 +1143,44 @@ class RomPatcher:
             return self.symbolWordBytes(symbol) + [door['x'], door['y']] + getWordBytes(door['var'])
         def writeDoors(boss):
             doors = Logic.boss_doors[boss]
-            if len(doors) == 1 and 'address' in doors[0]:
-                # overwrite existing PLM
-                self.romFile.seek(doors[0]['address'])
-                bytez = getPLMbytes(doors[0])
-                for b in bytez:
-                    self.romFile.writeByte(b)
-            else:
-                for i, door in enumerate(doors):
-                    self.log.debug(f"processing boss {boss} door {i}")
-                    # add new PLMs: when coming in at this door, put a bt door there and gray doors elsewhere.
-                    # that way when the player enters the door behind them stays open until hurting the boss,
-                    # and other doors are locked by the boss (or already sealed off if dead end)
-                    incoming = door.get('from')
-                    if not incoming:
-                        ap = graph.accessPoints[door['connection']]
-                        if ap.ConnectedTo is None:
-                            self.log.debug("skipped")
-                            continue
-                        incoming = graph.accessPoints[ap.ConnectedTo].ExitInfo['DoorPtr']
-                        self.log.debug("connection: %s" % ap.Name)
-                    self.log.debug("incoming: %04x" % incoming)
-                    otherDoors = [d for d in doors if d != door]
-                    plm = {
-                        'room': door['room'],
-                        'door': incoming,
-                        'plm_bytes_list': []
-                    }
-                    newPlms[f"{boss}_entering_from_door_facing_{door['facing']}_{incoming:04x}"] = plm
-                    def addDoor(d, closed):
-                        nonlocal plm
-                        assert d['room'] == plm['room']
-                        self.log.debug("adding %s door: %s" % ("gray" if closed else "bt", str(d)))
-                        plm['plm_bytes_list'].append(getPLMbytes(d, closed))
-                    for d in otherDoors:
-                        if "connection" in d and graph.accessPoints[d['connection']].ConnectedTo is None:
-                            # don't add doors where dead end permanent gray doors are already added
-                            continue
-                        addDoor(d, True)
-                    addDoor(door, False)
-                    # disable original PLM, if any
-                    if 'address' in door:
-                        self.romFile.writeWord(0xb63b, door['address']) # PLM type = copy arrow
-                        self.romFile.writeWord(0x0101) # x=y=1
-                        self.romFile.writeWord(0x0) # arg=0
+            for i, door in enumerate(doors):
+                self.log.debug(f"processing boss {boss} door {i}")
+                # add new PLMs: when coming in at this door, put a bt door there and gray doors elsewhere.
+                # that way when the player enters the door behind them stays open until hurting the boss,
+                # and other doors are locked by the boss (or already sealed off if dead end)
+                incoming = door.get('from')
+                if not incoming:
+                    ap = graph.accessPoints[door['connection']]
+                    if ap.ConnectedTo is None:
+                        self.log.debug("skipped")
+                        continue
+                    incoming = graph.accessPoints[ap.ConnectedTo].ExitInfo['DoorPtr']
+                    self.log.debug("connection: %s" % ap.Name)
+                self.log.debug("incoming: %04x" % incoming)
+                otherDoors = [d for d in doors if d != door]
+                plm = {
+                    'room': door['room'],
+                    'state': door['state'],
+                    'door': incoming,
+                    'plm_bytes_list': []
+                }
+                newPlms[f"{boss}_entering_from_door_facing_{door['facing']}_{incoming:04x}"] = plm
+                def addDoor(d, closed):
+                    nonlocal plm
+                    assert d['room'] == plm['room']
+                    self.log.debug("adding %s door: %s" % ("gray" if closed else "bt", str(d)))
+                    plm['plm_bytes_list'].append(getPLMbytes(d, closed))
+                for d in otherDoors:
+                    if "connection" in d and graph.accessPoints[d['connection']].ConnectedTo is None:
+                        # don't add doors where dead end permanent gray doors are already added
+                        continue
+                    addDoor(d, True)
+                addDoor(door, False)
+                # disable original PLM, if any
+                if 'address' in door:
+                    self.romFile.writeWord(0xb63b, door['address']) # PLM type = copy arrow
+                    self.romFile.writeWord(0x0101) # x=y=1
+                    self.romFile.writeWord(0x0) # arg=0
         # determine bosses in the seed and write boss doors
         bosses = set()
         for apName, ap in graph.accessPoints.items():

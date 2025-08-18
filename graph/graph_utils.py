@@ -270,6 +270,7 @@ class GraphUtils:
                 deadEnds.append(dstBoss)
             elif isG4(src) and isBack(src) and isIn(src) and isMini(dst) and isBack(dst) and not isIn(dst):
                 corridors.append(srcBoss)
+        GraphUtils.log.debug(f"deadEnds: {deadEnds}, corridors: {corridors}")
         return deadEnds, corridors
 
     def createAreaTransitions(lightAreaRando=False):

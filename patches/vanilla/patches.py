@@ -152,17 +152,29 @@ patches = {
         0x78E98: _arrow,
         0x10A638: [0x0]
     },
+    'BlinkingCorridor[RidleyBackDoorIn]': {
+        0x10AEAD: [0x0]
+    },
     'Blinking[DraygonRoomIn]': {
         0x7C7BB: _arrow,
         0x10D356: [0x0]
+    },
+    'BlinkingCorridor[DraygonBackDoorIn]': {
+        0x10D452: [0x0]
     },
     'Blinking[PhantoonRoomIn]': {
         0x7C2B3: _arrow,
         0x10CD16: [0x0]
     },
+    'BlinkingCorridor[PhantoonBackDoorIn]': {
+        0x10CD16: [0x0]
+    },
     'Blinking[KraidRoomIn]': {
         0x78A34: _arrow,
         0x109F37: [0x0]
+    },
+    'BlinkingCorridor[KraidBackDoorIn]': {
+        0x109668: [0x0]
     },
     'Blinking[BotwoonBackDoorIn]': {
         0x10DE6C: [0x0]
@@ -656,11 +668,23 @@ additional_PLMs = {
             [0x42, 0xc8, 0x0e, 0x06, 0x63, 0x8c]
         ]
     },
+    'BlinkingCorridor[RidleyBackDoorIn]': {
+        'room': 0xb698,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
+        ]
+    },
     'Blinking[DraygonRoomIn]': {
         'room': 0xDA60,
         'state': 0xDA8C,
         'plm_bytes_list': [
             [0x42, 0xc8, 0x1e, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'BlinkingCorridor[DraygonBackDoorIn]': {
+        'room': 0xd9aa,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
         ]
     },
     'Blinking[PhantoonRoomIn]': {
@@ -670,11 +694,24 @@ additional_PLMs = {
             [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
         ]
     },
+    'BlinkingCorridor[PhantoonBackDoorIn]': {
+        'room': 0xcd13,
+        'state': 0xCD3F,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x0e, 0x06, 0x63, 0x8c]
+        ]
+    },
     'Blinking[KraidRoomIn]': {
         'room': 0xA59F,
         'state': 0xA5CB,
         'plm_bytes_list': [
             [0x48, 0xc8, 0x01, 0x16, 0x63, 0x8c]
+        ]
+    },
+    'BlinkingCorridor[KraidBackDoorIn]': {
+        'room': 0xa6e2,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x0e, 0x06, 0x63, 0x8c]
         ]
     },
     'Blinking[SporeSpawnFrontDoorIn]': {
@@ -767,5 +804,4 @@ additional_PLMs = {
             [0x42, 0xc8, 0x2e, 0x26, 0x63, 0x8c]
         ]
     }
-    # TODO missing "corridor" portals
 }

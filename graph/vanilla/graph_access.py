@@ -548,7 +548,8 @@ accessPoints = [
         'Bubble Mountain': Cache.ldeco(# go through cathedral
                                        lambda sm: sm.wand(sm.traverse('CathedralRight'),
                                                           sm.canEnterCathedral(Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Bubble']['mult']))),
-        'Bubble Mountain Bottom': lambda sm: sm.canPassFrogSpeedwayLeftToRight(),
+        'Bubble Mountain Bottom': Cache.ldeco(lambda sm: sm.wand(sm.canDipHeatedRoom(),
+                                                                 sm.canPassFrogSpeedwayLeftToRight())),
         'Crocomire Speedway Bottom': Cache.ldeco(lambda sm: sm.wor(sm.wand(sm.canPassFrogSpeedwayLeftToRight(),
                                                                            sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Norfair Entrance -> Croc via Frog w/Wave' if sm.haveItem('Wave') else 'Norfair Entrance -> Croc via Frog']),
                                                                            sm.wor(sm.canBlueGateGlitch(),
@@ -645,7 +646,7 @@ accessPoints = [
                                                                     sm.wor(sm.canBlueGateGlitch(),
                                                                            sm.haveItem('Wave')))),
         'Kronic Boost Room Bottom Left': Cache.ldeco(lambda sm: sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Kronic Boost Room'])),
-        'Business Center': lambda sm: sm.canPassFrogSpeedwayRightToLeft(),
+        'Business Center': Cache.ldeco(lambda sm: sm.wand(sm.canDipHeatedRoom(), sm.canPassFrogSpeedwayRightToLeft())),
         # all the way around
         'Bubble Mountain Top': Cache.ldeco(lambda sm: sm.wand(sm.haveItem('Morph'),
                                                               sm.canHellRun(**Settings.hellRunsTable['MainUpperNorfair']['Bubble Top <-> Bubble Bottom'])))

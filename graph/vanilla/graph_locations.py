@@ -892,7 +892,7 @@ loc.Available = (
 
 loc = locationsDict["Power Bomb (Crocomire)"]
 loc.AccessFrom = {
-    'Crocomire Room Top': lambda sm: SMBool(True)
+    'Crocomire Room Top': lambda sm: sm.canDipHeatedRoom()
 }
 loc.Available = (
     lambda sm: sm.wand(sm.traverse('PostCrocomireUpperLeft'),
@@ -900,7 +900,8 @@ loc.Available = (
                        sm.wor(sm.wor(sm.canFly(),
                                      sm.haveItem('Grapple'),
                                      sm.wand(sm.haveItem('SpeedBooster'),
-                                             sm.wor(sm.heatProof(),
+                                             sm.wor(RomPatches.has(RomPatches.NoDamageSpark),
+                                                    sm.heatProof(),
                                                     sm.energyReserveCountOk(1)))), # spark from the room before
                               sm.wor(sm.haveItem('HiJump'), # run and jump from yellow platform
                                      sm.wand(sm.haveItem('Ice'),

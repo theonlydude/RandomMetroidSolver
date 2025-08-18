@@ -120,13 +120,18 @@ class Helpers(object):
         nCF = int(math.ceil(2/multCF))
         return nCF
 
+    # for tiny hellruns with no actual hell run req needed
+    @Cache.decorator
+    def canDipHeatedRoom(self):
+        sm = self.smbm
+        return sm.wor(sm.wnot(RomPatches.has(RomPatches.DreadMode)), sm.heatProof())
+
     # higher values for mult means hell run is that much "easier" (HP mult)
     def canHellRun(self, hellRun, mult=1.0, minE=2):
         sm = self.smbm
-
         items = []
         isHeatProof = sm.heatProof()
-        if isHeatProof == True:
+        if isHeatProof == True or RomPatches.has(RomPatches.DreadMode).bool == True:
             return isHeatProof
         if sm.wand(RomPatches.has(RomPatches.ProgressiveSuits), sm.haveItem('Gravity')).bool == True:
             # half heat protection

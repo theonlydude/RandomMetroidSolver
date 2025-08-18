@@ -1,3 +1,6 @@
+# useless arrow to cancel out PLMs from lists
+_arrow = [0x3b, 0xb6, 0x01, 0x01, 0x00, 0x00]
+
 patches = {
     "Escape_Animals_Open_Brinstar": {
         0x784BD: [0x10]
@@ -44,7 +47,7 @@ patches = {
     'Blinking[Warehouse Zeela Room Left]': {
         0x109451: [0x0]
     },
-    'Blinking[KraidRoomOut]': {
+    'BlinkingMinimizer[KraidRoomOut]': {
         # removes gadora by ending PLM list
         0x78A1A: [0x42, 0xc8, 0x1e, 0x16, 0x63, 0x8c, 0x00, 0x00],
         0x10A056: [0x0]
@@ -68,7 +71,7 @@ patches = {
     'Blinking[Lava Dive Right]': {
         0x10AD6B: [0x0]
     },
-    'Blinking[RidleyRoomOut]': {
+    'BlinkingMinimizer[RidleyRoomOut]': {
         # removes gadora by ending PLM list
         0x78EA6: [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c, 0x00, 0x00],
         0x10B81B: [0x0]
@@ -76,7 +79,7 @@ patches = {
     'Blinking[West Ocean Left]': {
         0x1086F6: [0x0]
     },
-    'Blinking[PhantoonRoomOut]': {
+    'BlinkingMinimizer[PhantoonRoomOut]': {
         # removes gadora by ending PLM list
         0x7C29D: [0x42, 0xc8, 0x4e, 0x06, 0x63, 0x8c, 0x00, 0x00],
         # zero needed enemy count for both room states
@@ -99,10 +102,10 @@ patches = {
         0x7823E: [0x42, 0xc8, 0x0e, 0x06, 0x63, 0x8c],
         0x1085DD: [0x0]
     },
-    'Blinking[DraygonRoomOut]': {
+    'BlinkingMinimizer[DraygonRoomOut]': {
         # overwrites a gadoras PLMs and replace the rest with useless arrow PLMs
         # (we cannot end the list because the item is after in the list)
-        0x7C73B: [0x48, 0xc8, 0x01, 0x26, 0x63, 0x8c] + [0x3b, 0xb6, 0x31, 0x26, 0x00, 0x00]*2,
+        0x7C73B: [0x48, 0xc8, 0x01, 0x26, 0x63, 0x8c] + _arrow*2,
         0x10D111: [0x0]
     },
     'Blinking[East Tunnel Top Right]': {
@@ -146,20 +149,71 @@ patches = {
         0x10D005: [0x0]
     },
     'Blinking[RidleyRoomIn]': {
-        0x78E98: [0x42, 0xc8, 0x0e, 0x06, 0x5a, 0x8c],
+        0x78E98: _arrow,
         0x10A638: [0x0]
     },
     'Blinking[DraygonRoomIn]': {
-        0x7C7BB: [0x42, 0xc8, 0x1e, 0x06, 0x9e, 0x8c],
+        0x7C7BB: _arrow,
         0x10D356: [0x0]
     },
     'Blinking[PhantoonRoomIn]': {
-        0x7C2B3: [0x48, 0xc8, 0x01, 0x06, 0x86, 0x8c],
+        0x7C2B3: _arrow,
         0x10CD16: [0x0]
     },
     'Blinking[KraidRoomIn]': {
-        0x78A34: [0x48, 0xc8, 0x01, 0x16, 0x47, 0x8c],
+        0x78A34: _arrow,
         0x109F37: [0x0]
+    },
+    'Blinking[BotwoonBackDoorIn]': {
+        0x10DE6C: [0x0]
+    },
+    'Blinking[BotwoonBackDoorOut]': {
+        0x10D1B4: [0x0]
+    },
+    'Blinking[BotwoonFrontDoorOut]': {
+        0x10DCE1: [0x0]
+    },
+    'Blinking[BotwoonFrontDoorIn]': {
+        0x10DE6C: [0x0]
+    },
+    'Blinking[CrocomireFrontDoorOut]': { # same as speedway bottom
+        0x78B96: [0x4e, 0xc8, 0xc6, 0x2d, 0x4e, 0x8c],
+        0x10AA8C: [0x0]
+    },
+    'Blinking[CrocomireFrontDoorIn]': {
+        0x10BB30: [0x0]
+    },
+    'Blinking[CrocomireBackDoorOut]': {
+        0x10A82D: [0x0]
+    },
+    'Blinking[CrocomireBackDoorIn]': {
+        0x10BB30: [0x0]
+    },
+    'Blinking[SporeSpawnFrontDoorIn]': {
+        0x10A10F: [0x0]
+    },
+    'Blinking[SporeSpawnFrontDoorOut]': {
+        # replace left door and end PLM list (otherwise the left door is blinking as well)
+        0x78634: [0x54, 0xc8, 0x36, 0x03, 0x2d, 0x8c, 0x0, 0x0],
+        0x109027: [0x0]
+    },
+    'Blinking[SporeSpawnBackDoorOut]': {
+        0x109080: [0x0]
+    },
+    'Blinking[SporeSpawnBackDoorIn]': {
+        0x109A3F: [0x0]
+    },
+    'Blinking[GoldenTorizoFrontDoorIn]': {
+        0x10B732: [0x0]
+    },
+    'Blinking[GoldenTorizoBackDoorIn]': {
+        0x10B732: [0x0]
+    },
+    'Blinking[GoldenTorizoBackDoorOut]': {
+        0x10AEB0: [0x0]
+    },
+    'Blinking[GoldenTorizoFrontDoorOut]': {
+        0x10A2DE: [0x0]
     },
     # Indicator PLM IDs set to ffff because they're set dynamically
     'Indicator[KihunterBottom]': {
@@ -595,4 +649,123 @@ additional_PLMs = {
             [0x42, 0xc8, 0x1e, 0x06, 0x63, 0x90]
         ]
     },
+    'Blinking[RidleyRoomIn]': {
+        'room': 0xB32E,
+        'state': 0xB35A,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x0e, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[DraygonRoomIn]': {
+        'room': 0xDA60,
+        'state': 0xDA8C,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x1e, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[PhantoonRoomIn]': {
+        'room': 0xCD13,
+        'state': 0xCD3F,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[KraidRoomIn]': {
+        'room': 0xA59F,
+        'state': 0xA5CB,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x16, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[SporeSpawnFrontDoorIn]': {
+        'room': 0x9dc7,
+        'state': 0x9DF3,
+        'plm_bytes_list': [
+            [0x4e, 0xc8, 0x06, 0x2e, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[SporeSpawnBackDoorIn]': {
+        'room': 0x9b5b,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x86, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[SporeSpawnBackDoorOut]': {
+        'room': 0xa0a4,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x2e, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[CrocomireBackDoorIn]': {
+        'room': 0xa98d,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[CrocomireBackDoorOut]': {
+        'room': 0xaa82,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x1e, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[CrocomireFrontDoorIn]': {
+        'room': 0xa98d,
+        'state': 0xA9B9,
+        'plm_bytes_list': [
+            [0x54, 0xc8, 0x36, 0x02, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[BotwoonBackDoorOut]': {
+        'room': 0xd7e4,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[BotwoonBackDoorIn]': {
+        'room': 0xd95e,
+        'state': 0xD98A,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x1e, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[BotwoonFrontDoorIn]': {
+        'room': 0xd95e,
+        'state': 0xD98A,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c],
+        ]
+    },
+    'Blinking[BotwoonFrontDoorOut]': {
+        'room': 0xd617,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x3e, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[GoldenTorizoBackDoorOut]': {
+        'room': 0xb6c1,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x26, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[GoldenTorizoBackDoorIn]': {
+        'room': 0xB283,
+        'state': 0xB2AF,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x1e, 0x16, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[GoldenTorizoFrontDoorIn]': {
+        'room': 0xB283,
+        'state': 0xB2AF,
+        'plm_bytes_list': [
+            [0x48, 0xc8, 0x01, 0x06, 0x63, 0x8c]
+        ]
+    },
+    'Blinking[GoldenTorizoFrontDoorOut]': {
+        'room': 0xb1e5,
+        'plm_bytes_list': [
+            [0x42, 0xc8, 0x2e, 0x26, 0x63, 0x8c]
+        ]
+    }
+    # TODO missing "corridor" portals
 }

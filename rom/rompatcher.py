@@ -3,6 +3,7 @@ import os, random, re, json
 from math import ceil
 from enum import IntFlag
 from collections import defaultdict
+from graph.flags import BossAccessPointFlags
 from rando.Items import ItemManager
 from rom.compression import Compressor
 from rom.ips import IPS_Patch
@@ -423,13 +424,13 @@ class RomPatcher:
                 self.applyIPSPatch('minimap_data_area_rando.ips')
             if self.settings["minimizerN"] is not None:
                 self.removeMinimizerUnusedAreas()
-            # blue doors
-            doors = self.getStartDoors(plms, self.settings["area"], self.settings["minimizerN"])
-            DoorsManager.getBlueDoors(doors)
+            self.addPortals(plms, deadEnds)
             # door indicators
             if "door_indicators_plms" in patchSets:
                 self.writeDoorIndicators(plms, self.settings["area"], self.settings["doorsColorsRando"])
-            # starting locations
+            # starting locations / blue doors
+            doors = [0x10] # red brin elevator
+            DoorsManager.getBlueDoors(doors)
             self.applyStartAP(self.settings["startLocation"], plms, doors)
             # patch PLMs
             self.applyPLMs(plms)
@@ -454,28 +455,31 @@ class RomPatcher:
                 patch = IPS_Patch.load(os.path.join(appDir, ipsDir, patchName))
         self.ipsPatches.append(patch)
 
-    def getStartDoors(self, plms, area, minimizerN):
-        doors = [0x10] # red brin elevator
-        def addBlinking(name):
-            key = 'Blinking[{}]'.format(name)
+    def addPortals(self, plms, deadEnds):
+        area, boss, minimizerN = self.settings["area"], self.settings["boss"], self.settings["minimizerN"]
+        def addBlinking(name, prefix="Blinking"):
+            key = f'{prefix}[{name}]'
             if key in self.patchAccess.getDictPatches():
                 self.applyIPSPatch(key)
             if key in self.patchAccess.getAdditionalPLMs():
                 plms.append(key)
-        if area == True:
+        def isDeadEnd(ap):
+            return ap.Name in deadEnds
+        apList = Objectives.graph.accessPoints.values()
+        if area:
             plms += ['Maridia Sand Hall Seal', "Save_Main_Street", "Save_Crab_Shaft"]
-            for accessPoint in Logic.accessPoints():
-                if accessPoint.Internal == True or accessPoint.Boss != 0:
-                    continue
-                addBlinking(accessPoint.Name)
             addBlinking("West Sand Hall Left")
             addBlinking("Below Botwoon Energy Tank Right")
-        if minimizerN is not None:
-            # add blinking doors inside and outside boss rooms
-            for accessPoint in Logic.accessPoints():
-                if accessPoint.Boss:
-                    addBlinking(accessPoint.Name)
-        return doors
+            # filter Croc duplicates from AP list
+            if boss & BossAccessPointFlags.MiniBoss:
+                apList = [ap for ap in apList if ap.Name != "CrocomireFrontDoorOut" and ap.Name != "Crocomire Room Top"]
+        for accessPoint in apList:
+            if accessPoint.Internal == True:
+                continue
+            if (area and not accessPoint.Boss) or ((boss & accessPoint.Boss) != 0 and not isDeadEnd(accessPoint)):
+                addBlinking(accessPoint.Name)
+            if accessPoint.Boss != 0 and minimizerN:
+                addBlinking(accessPoint.Name, prefix="BlinkingMinimizer")
 
     def applyStartAP(self, apName, plms, doors):
         ap = getAccessPoint(apName)

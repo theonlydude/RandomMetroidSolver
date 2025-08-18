@@ -53,7 +53,7 @@ patches = {
     'Blinking[Warehouse Zeela Room Left]': {
         snes_to_pc(0xa19451): [0x0],
     },
-    'Blinking[KraidRoomOut]': {
+    'BlinkingMinimizer[KraidRoomOut]': {
         # removes gadora by ending PLM list
         # door Door_45_Room_A56B_PLM_ x/y updated
         snes_to_pc(0x8f8a1a): [0x48, 0xc8, 0x1, 0x16, 0x63, 0x8c, 0x0, 0x0],
@@ -79,7 +79,7 @@ patches = {
     'Blinking[Lava Dive Right]': {
         snes_to_pc(0xa1ad6b): [0x0],
     },
-    'Blinking[RidleyRoomOut]': {
+    'BlinkingMinimizer[RidleyRoomOut]': {
         # door Door_5C_Room_B37A_PLM_ x/y updated
         snes_to_pc(0x8f8ea6): [0x42, 0xc8, 0x2e, 0x6, 0x63, 0x8c, 0x0, 0x0],
         snes_to_pc(0xa1b81b): [0x0],
@@ -87,7 +87,7 @@ patches = {
     'Blinking[West Ocean Left]': {
         snes_to_pc(0xa186f6): [0x0],
     },
-    'Blinking[PhantoonRoomOut]': {
+    'BlinkingMinimizer[PhantoonRoomOut]': {
         # door Door_85_Room_CC6F_PLM_ x/y updated
         snes_to_pc(0x8fc29d): [0x48, 0xc8, 0x1, 0x6, 0x63, 0x8c, 0x0, 0x0],
         snes_to_pc(0xa1c3e5): [0x0],
@@ -111,7 +111,7 @@ patches = {
         snes_to_pc(0x8f823e): [0x48, 0xc8, 0x1, 0x6, 0x63, 0x8c],
         snes_to_pc(0xa185dd): [0x0],
     },
-    'Blinking[DraygonRoomOut]': {
+    'BlinkingMinimizer[DraygonRoomOut]': {
         # door Door_9B_Room_D78F_PLM_ x/y updated
         snes_to_pc(0x8fc73b): [0x42, 0xc8, 0x1e, 0x26, 0x63, 0x8c, 0x3b, 0xb6, 0x31, 0x26, 0x0, 0x0, 0x3b, 0xb6, 0x31, 0x26, 0x0, 0x0],
         snes_to_pc(0xa1d111): [0x0],

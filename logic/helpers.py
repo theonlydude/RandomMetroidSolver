@@ -765,7 +765,7 @@ class Helpers(object):
     @Cache.decorator
     def canPassZebetites(self):
         sm = self.smbm
-        return sm.wor(sm.wand(sm.wnot(RomPatches.has(RomPatches.DreadMode)), sm.haveItem('Ice'), sm.knowsIceZebSkip()),
+        return sm.wor(sm.wand(sm.haveItem('Ice'), sm.knowsIceZebSkip()), # don't check for dread mode here because of the Chozo trick that forces zeb skip in. it is handled in minor pool generation though.
                       sm.wand(sm.haveItem('SpeedBooster'), sm.knowsSpeedZebSkip()),
                       # account for one zebetite, refill may be necessary
                       SMBool(self.canInflictEnoughDamages(1100, charge=False, givesDrops=False, ignoreSupers=True)[0] >= 1, 0))

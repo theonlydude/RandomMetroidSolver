@@ -584,7 +584,7 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
                 toAdd += d
             return toAdd
         energyQty = self.qty['energy']
-        if energyQty == 'ultra sparse':
+        if energyQty == 'ultra sparse' or energyQty == 'dread':
             # 0-1, add up to one energy (etank or reserve)
             self.itemManager.removeItem('Reserve')
             self.itemManager.removeItem('ETank')

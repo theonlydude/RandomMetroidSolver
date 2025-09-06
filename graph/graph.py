@@ -29,7 +29,7 @@ class AccessPoint(object):
     def __init__(self, name, graphArea, solveArea, transitions,
                  traverse=lambda sm: SMBool(True),
                  exitInfo=None, entryInfo=None, roomInfo=None,
-                 internal=False, boss=0, escape=False,
+                 internal=False, boss=0, bossName=None, escape=False,
                  start=None,
                  dotOrientation='w'):
         self.Name = name
@@ -40,6 +40,7 @@ class AccessPoint(object):
         self.RoomInfo = roomInfo
         self.Internal = internal
         self.Boss = boss
+        self.BossName = bossName
         self.Escape = escape
         self.Start = start
         self.DotOrientation = dotOrientation
@@ -58,7 +59,7 @@ class AccessPoint(object):
         # in any case, do not copy connections
         return AccessPoint(self.Name, self.GraphArea, self.SolveArea, self.intraTransitions, self.traverse,
                            exitInfo, entryInfo, roomInfo,
-                           self.Internal, self.Boss, self.Escape,
+                           self.Internal, self.Boss, self.BossName, self.Escape,
                            start, self.DotOrientation)
 
     def __str__(self):

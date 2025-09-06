@@ -207,21 +207,11 @@ class GraphUtils:
                 transitions.append((src,dst))
         return transitions
 
-    def getBossProperties(bossApName):
-        m = re.match('(\w+)(Room|FrontDoor|BackDoor)(In|Out)', bossApName)
-        if m is None:
-            return None, None
-        bossName, door, inside = m.group(1), m.group(2), m.group(3)
-        bossFlags = 0
-        if bossName in Bosses.Golden4():
-            bossFlags |= BossAccessPointFlags.G4
-        elif bossName in Bosses.miniBosses():
-            bossFlags |= BossAccessPointFlags.MiniBoss
-        if door == "BackDoor":
-            bossFlags |= BossAccessPointFlags.Backdoor
-        if inside == "In":
-            bossFlags |= BossAccessPointFlags.Inside
-        return bossName, bossFlags
+    def getBossProperties(bossApName, apDict=None):
+        if apDict is None:
+            apDict = Logic.accessPointsDict()
+        ap = apDict[bossApName]
+        return ap.BossName, ap.Boss
 
     def _addBackDoorTransitions(transitions):
         newTransitions = []
@@ -264,8 +254,7 @@ class GraphUtils:
         for src, dst in graph.InterAreaTransitions:
             if not src.Boss or not dst.Boss:
                 continue
-            srcBoss, _ = GraphUtils.getBossProperties(src.Name)
-            dstBoss, _ = GraphUtils.getBossProperties(dst.Name)
+            srcBoss, dstBoss = src.BossName, dst.BossName
             if isG4(src) and not isIn(src) and not isBack(src) and isMini(dst) and isIn(dst) and not isBack(dst):
                 deadEnds.append(dstBoss)
             elif isG4(src) and isBack(src) and isIn(src) and isMini(dst) and isBack(dst) and not isIn(dst):

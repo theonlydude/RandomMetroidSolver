@@ -129,6 +129,7 @@ accessPoints = [
     AccessPoint('SporeSpawnFrontDoorOut', 'GreenPinkBrinstar', 'Pink Brinstar', { # FIXME solve area?
         'Big Pink': lambda sm: SMBool(True)
     }, boss = BossAccessPointFlags.MiniBoss,
+       bossName = "SporeSpawn",
        roomInfo = {'RoomPtr':0x9d9c, "area": 0x1 },
        exitInfo = {'DoorPtr':0x8e3e, 'direction': 0x7, "cap": (0x6, 0x2e), "bitFlag": 0x0,
                    "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -137,6 +138,7 @@ accessPoints = [
     AccessPoint('SporeSpawnFrontDoorIn', 'GreenPinkBrinstar', 'Pink Brinstar', { # FIXME solve area?
         'SporeSpawnBackDoorIn': lambda sm: Bosses.bossDead(sm, "SporeSpawn")
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Inside,
+       bossName = "SporeSpawn",
        roomInfo = {'RoomPtr':0x9dc7, "area": 0x1 },
        exitInfo = {'DoorPtr':0x8e56, 'direction': 0x6, "cap": (0x36, 0x3), "bitFlag": 0x0,
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -145,6 +147,7 @@ accessPoints = [
     AccessPoint('SporeSpawnBackDoorIn', 'GreenPinkBrinstar', 'Pink Brinstar', { # FIXME solve area?
         'SporeSpawnFrontDoorIn': lambda sm: sm.wand(RomPatches.has(RomPatches.SporeSpawnNoCrumble), Bosses.bossDead(sm, "SporeSpawn"))
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor | BossAccessPointFlags.Inside,
+       bossName = "SporeSpawn",
        roomInfo = {'RoomPtr':0x9b5b, "area": 0x1 },
        exitInfo = {'DoorPtr':0x8d1e, 'direction': 0x5, "cap": (0x2e, 0x6), "bitFlag": 0x0,
                    "screen": (0x2, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -153,6 +156,7 @@ accessPoints = [
     AccessPoint('SporeSpawnBackDoorOut', 'GreenPinkBrinstar', 'Pink Brinstar', { # FIXME solve area?
         'Big Pink': lambda sm: sm.wand(sm.haveItem('Super'), sm.canPassBombPassages())
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor,
+       bossName = "SporeSpawn",
        roomInfo = {'RoomPtr':0xa0a4, "area": 0x1 },
        exitInfo = {'DoorPtr':0x8f76, 'direction': 0x4, "cap": (0x1, 0x86), "bitFlag": 0x0,
                    "screen": (0x0, 0x8), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -246,6 +250,7 @@ accessPoints = [
     AccessPoint('PhantoonRoomOut', 'WreckedShip', 'Phantoon Boss', {
         'Wrecked Ship Main': lambda sm: sm.canPassBombPassages()
     }, boss = BossAccessPointFlags.G4,
+       bossName = "Phantoon",
        roomInfo = {'RoomPtr':0xcc6f, "area": 0x3},
        exitInfo = {'DoorPtr':0xa2ac, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
@@ -255,6 +260,7 @@ accessPoints = [
     AccessPoint('PhantoonRoomIn', 'WreckedShip', 'Phantoon Boss', {
         'PhantoonBackDoorIn': lambda sm: SMBool(True)
     }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside,
+       bossName = "Phantoon",
        traverse = lambda sm: Bosses.bossDead(sm, 'Phantoon'),
        roomInfo = {'RoomPtr':0xcd13, "area": 0x3},
        exitInfo = {'DoorPtr':0xa2c4, 'direction': 0x5, "cap": (0x4e, 0x6), "bitFlag": 0x0,
@@ -265,6 +271,7 @@ accessPoints = [
     AccessPoint('PhantoonBackDoorIn', 'WreckedShip', 'Phantoon Boss', {
         'PhantoonRoomIn': lambda sm: SMBool(True)
     }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside | BossAccessPointFlags.Backdoor,
+       bossName = "Phantoon",
        roomInfo = {'RoomPtr':0xcd13, "area": 0x3},
        exitInfo = {'DoorPtrSym':'corridor_phantoon_door_phantoon_back_door',
                    'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
@@ -274,6 +281,7 @@ accessPoints = [
        dotOrientation = 'w'),
     AccessPoint('PhantoonBackDoorOut', 'WreckedShip', 'Phantoon Boss', {}, # placeholder for transitions, does not exist in game
        boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Backdoor,
+       bossName = "Phantoon",
        roomInfo = {'RoomPtr':0xffff, "area": 0x3},
        exitInfo = {'DoorPtr':0xffff,
                    'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
@@ -330,6 +338,7 @@ accessPoints = [
     AccessPoint('GoldenTorizoFrontDoorOut', 'LowerNorfair', 'Lower Norfair Screw Attack', { # FIXME solve area?
         'LN Above GT': lambda sm: SMBool(True)
     }, boss = BossAccessPointFlags.MiniBoss,
+       bossName = "GoldenTorizo",
        roomInfo = {'RoomPtr':0xb1e5, "area": 0x2 },
        exitInfo = {'DoorPtr':0x983a, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xc089},
@@ -338,6 +347,7 @@ accessPoints = [
     AccessPoint('GoldenTorizoFrontDoorIn', 'LowerNorfair', 'Lower Norfair Screw Attack', { # FIXME solve area?
         'GoldenTorizoBackDoorIn': lambda sm: Bosses.bossDead(sm, 'GoldenTorizo')
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Inside,
+       bossName = "GoldenTorizo",
        roomInfo = {'RoomPtr':0xb283, "area": 0x2 },
        exitInfo = {'DoorPtr':0x9876, 'direction': 0x5, "cap": (0x2e, 0x26), "bitFlag": 0x0,
                    "screen": (0x2, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbf9e},
@@ -355,6 +365,7 @@ accessPoints = [
                                                                          sm.canSpringBallJumpFromWall(),
                                                                          sm.knowsWorstRoomWallJump())))
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor | BossAccessPointFlags.Inside,
+       bossName = "GoldenTorizo",
        roomInfo = {'RoomPtr':0xb283, "area": 0x2 },
        exitInfo = {'DoorPtr':0x9882, 'direction': 0x4, "cap": (0x1, 0x26), "bitFlag": 0x0,
                    "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -364,6 +375,7 @@ accessPoints = [
     AccessPoint('GoldenTorizoBackDoorOut', 'LowerNorfair', 'Lower Norfair Screw Attack', { # FIXME solve area?
         'Screw Attack Bottom': lambda sm: SMBool(True)
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor,
+       bossName = "GoldenTorizo",
        roomInfo = {'RoomPtr':0xb6c1, "area": 0x2 },
        exitInfo = {'DoorPtr':0x9a86, 'direction': 0x5, "cap": (0x1e, 0x16), "bitFlag": 0x0,
                    "screen": (0x1, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -448,6 +460,7 @@ accessPoints = [
     AccessPoint('RidleyRoomOut', 'LowerNorfair', 'Ridley Boss', {
         'Ridley Zone': Cache.ldeco(lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']))
     }, boss = BossAccessPointFlags.G4,
+       bossName = "Ridley",
        roomInfo = {'RoomPtr':0xb37a, "area": 0x2},
        exitInfo = {'DoorPtr':0x98ca, 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
@@ -458,6 +471,7 @@ accessPoints = [
     AccessPoint('RidleyRoomIn', 'LowerNorfair', 'Ridley Boss', {
         'RidleyBackDoorIn': lambda sm: Bosses.bossDead(sm, 'Ridley')
     }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside,
+       bossName = "Ridley",
        traverse = lambda sm: Bosses.bossDead(sm, 'Ridley'),
        roomInfo = {'RoomPtr':0xb32e, "area": 0x2},
        exitInfo = {'DoorPtr':0x98be, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
@@ -467,6 +481,7 @@ accessPoints = [
     AccessPoint('RidleyBackDoorIn', 'LowerNorfair', 'Ridley Boss', {
         'RidleyRoomIn': lambda sm: SMBool(True)
     }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside | BossAccessPointFlags.Backdoor,
+       bossName = "Ridley",
        roomInfo = {'RoomPtr':0xb698, "area": 0x2},
        exitInfo = {'DoorPtrSym':'corridor_ridley_door_ridley_tank_back_door',
                    'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
@@ -475,6 +490,7 @@ accessPoints = [
        dotOrientation = 'w'),
     AccessPoint('RidleyBackDoorOut', 'LowerNorfair', 'Ridley Boss', {}, # placeholder for transitions, does not exist in game
        boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Backdoor,
+       bossName = "Ridley",
        roomInfo = {'RoomPtr':0xffff, "area": 0x2},
        exitInfo = {'DoorPtr':0xffff,
                    'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
@@ -491,6 +507,7 @@ accessPoints = [
     AccessPoint('KraidRoomOut', 'Kraid', 'Kraid Boss', {
         'Warehouse Zeela Room Left': lambda sm: sm.canPassBombPassages()
     }, boss = BossAccessPointFlags.G4,
+       bossName = "Kraid",
        roomInfo = {'RoomPtr':0xa56b, "area": 0x1,
                    # put red brin song in both pre-kraid rooms,
                    # (vanilla music only makes sense if kraid is
@@ -504,6 +521,7 @@ accessPoints = [
     AccessPoint('KraidRoomIn', 'Kraid', 'Kraid Boss', {
         'KraidBackDoorIn': lambda sm: Bosses.bossDead(sm, 'Kraid')
     }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside,
+       bossName = "Kraid",
        traverse = lambda sm: Bosses.bossDead(sm, 'Kraid'),
        roomInfo = {'RoomPtr':0xa59f, "area": 0x1},
        exitInfo = {'DoorPtr':0x91ce, 'direction': 0x5, "cap": (0x1e, 0x16), "bitFlag": 0x0,
@@ -514,6 +532,7 @@ accessPoints = [
     AccessPoint('KraidBackDoorIn', 'Kraid', 'Kraid Boss', {
         'KraidRoomIn': lambda sm: SMBool(True)
     }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside | BossAccessPointFlags.Backdoor,
+       bossName = "Kraid",
        roomInfo = {'RoomPtr':0xa6e2, "area": 0x1},
        exitInfo = {'DoorPtrSym':'corridor_kraid_door_varia_suit_back_door',
                    'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
@@ -522,6 +541,7 @@ accessPoints = [
        dotOrientation = 'w'),
     AccessPoint('KraidBackDoorOut', 'Kraid', 'Kraid Boss', {}, # placeholder for transitions, does not exist in game
        boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Backdoor,
+       bossName = "Kraid",
        roomInfo = {'RoomPtr':0xffff, "area": 0x1},
        exitInfo = {'DoorPtr':0xffff,
                    'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
@@ -679,6 +699,7 @@ accessPoints = [
     AccessPoint('CrocomireBackDoorIn', 'Crocomire', 'Crocomire', {
         'CrocomireFrontDoorIn': lambda sm: Bosses.bossDead(sm, 'Crocomire')
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor | BossAccessPointFlags.Inside,
+       bossName = "Crocomire",
        roomInfo = {'RoomPtr':0xa98d, "area": 0x2 },
        exitInfo = {'DoorPtr':0x93de, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
                    "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000,
@@ -687,6 +708,7 @@ accessPoints = [
        dotOrientation = 'e'),
     AccessPoint('CrocomireBackDoorOut', 'Crocomire', 'Crocomire', {
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor,
+       bossName = "Crocomire",
        roomInfo = {'RoomPtr':0xaa82, "area": 0x2 },
        exitInfo = {'DoorPtr':0x9432, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbfda},
@@ -831,6 +853,7 @@ accessPoints = [
     AccessPoint('BotwoonFrontDoorOut', 'EastMaridia', 'Maridia Pink Top', { # FIXME solve area?
         'Aqueduct Bottom': lambda sm: sm.canPassBotwoonHallway()
     }, boss = BossAccessPointFlags.MiniBoss,
+       bossName = "Botwoon",
        roomInfo = {'RoomPtr':0xd617, "area": 0x4 },
        exitInfo = {'DoorPtr':0xa774, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -839,6 +862,7 @@ accessPoints = [
     AccessPoint('BotwoonFrontDoorIn', 'EastMaridia', 'Maridia Pink Top', { # FIXME solve area?
         'BotwoonBackDoorIn': lambda sm: Bosses.bossDead(sm, "Botwoon")
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Inside,
+       bossName = "Botwoon",
        roomInfo = {'RoomPtr':0xd95e, "area": 0x4 },
        exitInfo = {'DoorPtr':0xa90c, 'direction': 0x5, "cap": (0x3e, 0x6), "bitFlag": 0x0,
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -847,6 +871,7 @@ accessPoints = [
     AccessPoint('BotwoonBackDoorIn', 'EastMaridia', 'Maridia Pink Top', { # FIXME solve area?
         'BotwoonFrontDoorIn': lambda sm: Bosses.bossDead(sm, "Botwoon")
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Inside | BossAccessPointFlags.Backdoor,
+       bossName = "Botwoon",
        roomInfo = {'RoomPtr':0xd95e, "area": 0x4 },
        exitInfo = {'DoorPtr':0xa918, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
@@ -856,6 +881,7 @@ accessPoints = [
         'Aqueduct Bottom': lambda sm: SMBool(True), # go down sandpits
         'Post Botwoon': lambda sm: sm.canTraverseBotwoonETankRoom()
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor,
+       bossName = "Botwoon",
        roomInfo = {'RoomPtr':0xd7e4, "area": 0x4 },
        exitInfo = {'DoorPtr':0xa84c, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
                    "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe38d},
@@ -914,6 +940,7 @@ accessPoints = [
     AccessPoint('DraygonRoomOut', 'EastMaridia', 'Draygon Boss', {
         'Precious Room Top': lambda sm: sm.canExitPreciousRoom()
     }, boss = BossAccessPointFlags.G4,
+       bossName = "Draygon",
        roomInfo = {'RoomPtr':0xd78f, "area": 0x4, "songs":[0xd7a5]},
        exitInfo = {'DoorPtr':0xa840, 'direction': 0x5, "cap": (0x1e, 0x6), "bitFlag": 0x0,
                    "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
@@ -925,6 +952,7 @@ accessPoints = [
                                                              sm.wand(sm.canFightDraygon(),
                                                                      sm.enoughStuffsDraygon())))
     }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside,
+       bossName = "Draygon",
        roomInfo = {'RoomPtr':0xda60, "area": 0x4},
        exitInfo = {'DoorPtr':0xa96c, 'direction': 0x4, "cap": (0x1, 0x26), "bitFlag": 0x0,
                    "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe3d9,
@@ -938,6 +966,7 @@ accessPoints = [
     AccessPoint('DraygonBackDoorIn', 'EastMaridia', 'Draygon Boss', {
         'Draygon Room Bottom': lambda sm: SMBool(True)
     }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside | BossAccessPointFlags.Backdoor,
+       bossName = "Draygon",
        roomInfo = {'RoomPtr':0xd9aa, "area": 0x4},
        exitInfo = {'DoorPtrSym':'corridor_draygon_door_space_jump_back_door', 'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
@@ -945,6 +974,7 @@ accessPoints = [
        dotOrientation = 'w'),
     AccessPoint('DraygonBackDoorOut', 'EastMaridia', 'Draygon Boss', {}, # placeholder for transitions, does not exist in game
        boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Backdoor,
+       bossName = "Draygon",
        roomInfo = {'RoomPtr':0xffff, "area": 0x4},
        exitInfo = {'DoorPtr':0xffff,
                    'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
@@ -1041,18 +1071,19 @@ accessPoints = [
 ]
 
 # this is needed for Crocomire (boss AP/area AP collision)
-def addBossAlias(apName, bossApName, bossApFlags):
+def addBossAlias(apName, bossApName, bossApFlags, bossName):
     ap = next(accessPoint for accessPoint in accessPoints if accessPoint.Name == apName)
     bossAp = copy.copy(ap)
     bossAp.Name = bossApName
     bossAp.Boss = bossApFlags
+    bossAp.BossName = bossName
     bossAp.intraTransitions = { apName: lambda sm: SMBool(True) }
     bossAp.transitions = { apName: lambda sm: SMBool(True) }
     ap.intraTransitions[bossApName] = lambda sm: SMBool(True)
     ap.transitions[bossApName] = lambda sm: SMBool(True)
     accessPoints.append(bossAp)
 
-addBossAlias('Crocomire Speedway Bottom', 'CrocomireFrontDoorOut', BossAccessPointFlags.MiniBoss)
-addBossAlias('Crocomire Room Top', 'CrocomireFrontDoorIn', BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Inside)
+addBossAlias('Crocomire Speedway Bottom', 'CrocomireFrontDoorOut', BossAccessPointFlags.MiniBoss, "Crocomire")
+addBossAlias('Crocomire Room Top', 'CrocomireFrontDoorIn', BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Inside, "Crocomire")
 
 accessPointsDict = {ap.Name:ap for ap in accessPoints}

@@ -464,13 +464,10 @@ class RomPatcher:
                 self.applyIPSPatch(key)
             if key in self.patchAccess.getAdditionalPLMs():
                 plms.append(key)
-        def _isSpecialBackDoor(ap, apNameList):
-            bossName, bossProps = GraphUtils.getBossProperties(ap.Name)
-            return bossName in apNameList and (bossProps & BossAccessPointFlags.Backdoor) and (bossProps & BossAccessPointFlags.Inside)
-        def isDeadEnd(ap):
-            return _isSpecialBackDoor(ap, deadEnds)
-        def isCorridor(ap):
-            return _isSpecialBackDoor(ap, corridors)
+        isSpecialBackDoor = lambda ap, bossNameList: ap.BossName in bossNameList and \
+            (ap.Boss & BossAccessPointFlags.Backdoor) and (ap.Boss & BossAccessPointFlags.Inside)
+        isDeadEnd = lambda ap: isSpecialBackDoor(ap, deadEnds)
+        isCorridor = lambda ap: isSpecialBackDoor(ap, corridors)
         apList = [ap for ap in Objectives.graph.accessPoints.values() if not ap.Internal]
         if area:
             plms += ['Maridia Sand Hall Seal', "Save_Main_Street", "Save_Crab_Shaft"]
@@ -1182,12 +1179,7 @@ class RomPatcher:
                     self.romFile.writeWord(0x0101) # x=y=1
                     self.romFile.writeWord(0x0) # arg=0
         # determine bosses in the seed and write boss doors
-        bosses = set()
-        for apName, ap in graph.accessPoints.items():
-            if ap.Boss & bossFlags:
-                boss, _ = GraphUtils.getBossProperties(apName)
-                if boss:
-                    bosses.add(boss)
+        bosses = {ap.BossName for ap in graph.accessPoints.values() if ap.Boss & bossFlags and ap.BossName is not None}
         for boss in bosses:
             writeDoors(boss)
         self.patchAccess.updateAdditionalPLMs(newPlms)

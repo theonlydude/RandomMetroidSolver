@@ -427,6 +427,7 @@ if __name__ == "__main__":
             minimizerN = int(args.minimizerN)
         if minimizerN < 100:
             forceArg('majorsSplit', 'Full', "'Majors Split' forced to Full. Use 100 locations on your minimizer to use a non-Full split.", altValue='FullWithHUD')
+        forceArg('bossesRandomization', 'G4', "Boss randomization forced to G4 because of minimizer")
     else:
         minimizerN = None
     logger.debug(f"majorsSplit: {args.majorsSplit}")

@@ -309,18 +309,19 @@ class GraphUtils:
             apList = Logic.accessPoints()
         return [ap for ap in apList if apPredicate(ap) == True]
 
-    def loopUnusedTransitions(transitions, apList=None):
+    def loopUnusedTransitions(transitions, apList=None, apFilter=None):
         if apList is None:
             apList = Logic.accessPoints()
+        if apFilter is None:
+            apFilter = lambda ap: True
         usedAPs = set()
         for (src,dst) in transitions:
             usedAPs.add(getAccessPoint(src, apList))
             usedAPs.add(getAccessPoint(dst, apList))
-        unusedAPs = [ap for ap in apList if not ap.isInternal() and ap not in usedAPs]
+        unusedAPs = [ap for ap in apList if not ap.isInternal() and apFilter(ap) and ap not in usedAPs]
         for ap in unusedAPs:
             transitions.append((ap.Name, ap.Name))
 
-    # crateria can be forced in corner cases
     def createMinimizerTransitions(startApName, locLimit, forcedAreas=None):
         if forcedAreas is None:
             forcedAreas = []
@@ -339,20 +340,15 @@ class GraphUtils:
         GraphUtils.log.debug("availAreas: {}".format(availAreas))
         GraphUtils.log.debug("forcedAreas: {}".format(forcedAreas))
         GraphUtils.log.debug("areas: {}".format(areas))
-        # FIXME? this is broken due to minibosses transitions...or is
-        # it a feature to include all minibosses as random corridors
-        # in minimizers to make them more chaotic? at least take
-        # objectives into consideration to force add minibosses
-        inBossFlags = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside
-        inBossCheck = lambda ap: ap.Boss & inBossFlags == inBossFlags
         nLocs = 0
         transitions = []
         usedAPs = []
         trLimit = 5
         locLimit -= 3 # 3 "post boss" locs will always be available, and are filtered out in getNLocs
+        apCheck = lambda ap: not ap.isInternal() and ap.Boss & (BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Inside | BossAccessPointFlags.Backdoor) == 0 and ap not in usedAPs
         def openTransitions():
-            nonlocal areas, inBossCheck, usedAPs
-            return GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and not ap.isInternal() and not inBossCheck(ap) and not ap in usedAPs)
+            nonlocal areas, apCheck
+            return GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and apCheck(ap))
         while nLocs < locLimit or len(openTransitions()) < trLimit or len(forcedAreas) > 0:
             GraphUtils.log.debug("openTransitions="+str([ap.Name for ap in openTransitions()]))
             fromAreas = availAreas
@@ -375,7 +371,6 @@ class GraphUtils:
             if nextArea in forcedAreas:
                 forcedAreas.remove(nextArea)
             GraphUtils.log.debug("nextArea="+str(nextArea))
-            apCheck = lambda ap: not ap.isInternal() and not inBossCheck(ap) and ap not in usedAPs
             possibleSources = GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and apCheck(ap))
             possibleTargets = GraphUtils.getAPs(lambda ap: ap.GraphArea == nextArea and apCheck(ap))
             src = random.choice(possibleSources)
@@ -391,14 +386,15 @@ class GraphUtils:
         # we picked the areas, add transitions (bosses and tourian first)
         sourceAPs = openTransitions()
         random.shuffle(sourceAPs)
-        targetAPs = GraphUtils.getAPs(lambda ap: (inBossCheck(ap) or ap.Name == "Golden Four") and not ap in usedAPs)
+        inBossFlags = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside
+        targetAPs = GraphUtils.getAPs(lambda ap: (ap.Boss & inBossFlags == inBossFlags and not ap.Boss & BossAccessPointFlags.Backdoor or ap.Name == "Golden Four") and not ap in usedAPs)
         random.shuffle(targetAPs)
         assert len(sourceAPs) >= len(targetAPs), "Minimizer: less source than target APs"
         while len(targetAPs) > 0:
             transitions.append((sourceAPs.pop().Name, targetAPs.pop().Name))
         transitions += GraphUtils.createRegularAreaTransitions(sourceAPs, lambda ap: not ap.isInternal())
         GraphUtils.log.debug("FINAL MINIMIZER transitions: {}".format(transitions))
-        GraphUtils.loopUnusedTransitions(transitions)
+        GraphUtils.loopUnusedTransitions(transitions, apFilter=lambda ap: not ap.Boss & (BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor))
         GraphUtils.log.debug("FINAL MINIMIZER nLocs: "+str(nLocs+3))
         GraphUtils.log.debug("FINAL MINIMIZER areas: "+str(areas))
         return transitions

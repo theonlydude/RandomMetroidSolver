@@ -1,3 +1,4 @@
+from rom.rom_patches import RomPatches
 from utils.utils import randGaussBounds, getRangeDict, chooseFromRange
 import utils.log, logging, copy, random
 

@@ -428,7 +428,7 @@ class ItemPoolGenerator(object):
         # always add enough minors to pass zebetites (1100 damages) and mother brain 1 (3000 damages)
         # accounting for missile refill. so 15-10, or 10-10 if ice zeb skip is known (Ice is always in item pool)
         zebSkip = self.sm.knowsIceZebSkip()
-        if zebSkip.bool == False or zebSkip.difficulty > self.maxDiff:
+        if zebSkip.bool == False or zebSkip.difficulty > self.maxDiff or RomPatches.has(RomPatches.DreadMode): # dread mode prevents zeb skip dboost
             self.log.debug("Add missile because ice zeb skip is not known")
             self.itemManager.addMinor('Missile')
             self.nbMinorsAlready += 1
@@ -584,7 +584,7 @@ class ItemPoolGeneratorMajors(ItemPoolGenerator):
                 toAdd += d
             return toAdd
         energyQty = self.qty['energy']
-        if energyQty == 'ultra sparse':
+        if energyQty == 'ultra sparse' or energyQty == 'dread':
             # 0-1, add up to one energy (etank or reserve)
             self.itemManager.removeItem('Reserve')
             self.itemManager.removeItem('ETank')

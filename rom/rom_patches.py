@@ -352,7 +352,7 @@ definitions = {
             'address': snes_to_pc(0x90EA7F), 'value': 0x60,
             'desc': "Dread Mode",
             'ips': ["dread_mode.ips"],
-            'logic': [RomPatches.DreadMode]
+            'logic': [RomPatches.DreadMode, RomPatches.NerfedRainbowBeam]
         },
         'disable_spark_damage': {
             'address': snes_to_pc(0x90D0C6), 'value': 0x60,

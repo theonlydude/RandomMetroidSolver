@@ -1,6 +1,7 @@
 ;;; Dread mode : one-hit KO from everything
 ;;; - removes low health beep
 ;;; - disables rainbow beam damage
+;;; - tweak drop system to prevent systematic health drops
 ;;;
 ;;; Additional setup needed :
 ;;; - set starting energy to 1 in start
@@ -30,3 +31,7 @@ org $A9C57D
 rainbow_drain:
     clc
     rtl
+
+;;; disables low health drop chance (only energy)
+org $86F151
+    STZ $0E1A                   ; replace STY with STZ to zero out health drop bias flag

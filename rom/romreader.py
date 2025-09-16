@@ -354,12 +354,16 @@ class RomReader:
         for accessPoint in Logic.accessPoints():
             if accessPoint.isInternal() == True:
                 continue
-            key = getTransition(accessPoint.ExitInfo['DoorPtr'])
+            if 'DoorPtrSym' in accessPoint.ExitInfo:
+                doorPtr = self.symbols.getAddress(accessPoint.ExitInfo['DoorPtrSym']) & 0xffff
+            else:
+                doorPtr = accessPoint.ExitInfo['DoorPtr']
+            key = getTransition(doorPtr)
             if key is None:
                 # can happen with race mode seeds
                 continue
             destAP = rooms[key]
-            if accessPoint.Boss == True or destAP.Boss == True:
+            if accessPoint.Boss or destAP.Boss:
                 bossTransitions[accessPoint.Name] = destAP.Name
             else:
                 areaTransitions[accessPoint.Name] = destAP.Name

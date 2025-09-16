@@ -241,6 +241,9 @@ class GraphUtils:
             transitions += vanillaMiniBossesTransitions + vanillaMiniBossesTransitionsBack
         if not (transitionFlags & BossAccessPointFlags.G4):
             transitions += vanillaBossesTransitions
+        if not split and transitionFlags & BossAccessPointFlags.MiniBoss:
+            apFlagCheck = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor | BossAccessPointFlags.Inside
+            GraphUtils.loopUnusedTransitions(transitions, apFilter=lambda ap: ap.Boss & apFlagCheck == apFlagCheck)
         return transitions
 
     def getDeadEndsAndCorridors(graph, bossFlags):
@@ -320,6 +323,7 @@ class GraphUtils:
             usedAPs.add(getAccessPoint(dst, apList))
         unusedAPs = [ap for ap in apList if not ap.isInternal() and apFilter(ap) and ap not in usedAPs]
         for ap in unusedAPs:
+            GraphUtils.log.debug(f"loop ap {ap.Name}")
             transitions.append((ap.Name, ap.Name))
 
     def createMinimizerTransitions(startApName, locLimit, forcedAreas=None):
@@ -450,7 +454,7 @@ class GraphUtils:
         return transitions
 
     def getVanillaExit(apName):
-        allVanillaTransitions = vanillaTransitions + vanillaBossesTransitions + vanillaEscapeTransitions
+        allVanillaTransitions = vanillaTransitions + vanillaBossesTransitions + vanillaEscapeTransitions + vanillaMiniBossesTransitions + vanillaMiniBossesTransitionsBack + vanillaBossesTransitionsBack
         for (src,dst) in allVanillaTransitions:
             if apName == src:
                 return dst

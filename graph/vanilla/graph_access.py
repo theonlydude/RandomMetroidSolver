@@ -721,9 +721,7 @@ accessPoints = [
                                                                 sm.canTraverseCrabTunnelLeftToRight())),
         # this transition leads to EastMaridia directly
         'Oasis Bottom': Cache.ldeco(lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
-                                                       sm.traverse('MainStreetBottomRight'),
-                                                       sm.wor(RomPatches.has(RomPatches.CrabTunnelGreenGateRemoved),
-                                                              sm.haveItem('Super')),
+                                                       sm.canTraverseCrabTunnelLeftToRight(),
                                                        sm.canTraverseWestSandHallLeftToRight())),
         'Crab Shaft Left': lambda sm: sm.canPassMtEverest(),
         "Mama Turtle": lambda sm: sm.canAccessMamaTurtleFromMainStreet()
@@ -894,9 +892,8 @@ accessPoints = [
                                                      sm.canPassCacatacAlleyEastToWest()))
     }, internal=True),
     AccessPoint('West Sand Hall Left', 'EastMaridia', 'Maridia Sandpits', {
-        # XXX there might be some tech to do this suitless, but HJ+ice is not enough
-        'Oasis Bottom': Cache.ldeco(lambda sm: sm.haveItem('Gravity')),
-        'Aqueduct Bottom': Cache.ldeco(lambda sm: RomPatches.has(RomPatches.MaridiaSandWarp)),
+        'Oasis Bottom': lambda sm: sm.canTraverseWestSandHallLeftToRight(),
+        'Aqueduct Bottom': lambda sm: RomPatches.has(RomPatches.MaridiaSandWarp),
         # this goes directly to WestMaridia
         'Main Street Bottom': Cache.ldeco(lambda sm: sm.wand(sm.wnot(RomPatches.has(RomPatches.MaridiaSandWarp)),
                                                              sm.wor(RomPatches.has(RomPatches.CrabTunnelGreenGateRemoved),

@@ -1449,6 +1449,7 @@ class RomPatcher:
         #
         # special boss check to avoid varia/space jump/ridley E locs in minimizer and get only graph
         # areas entirely in layout :
+        # (NOTE: no need to do the same for minibosses, as they are vanilla in minimizer)
         bossSolveAreeas = [b + " Boss" for b in Bosses.Golden4()]
         bossChk = lambda loc: loc.isBoss() or loc.SolveArea in bossSolveAreeas
         return {il.Location.GraphArea for il in itemLocs if not bossChk(il.Location) and not il.Location.restricted}

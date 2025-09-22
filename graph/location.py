@@ -6,7 +6,7 @@ class Location:
     graph_slots = (
         'distance', 'accessPoint', 'difficulty', 'path',
         'pathDifficulty', 'locDifficulty' )
-    
+
     rando_slots = (
         'restricted', )
 
@@ -401,7 +401,7 @@ define_location(
 define_location(
     Area="Norfair",
     GraphArea="Crocomire",
-    SolveArea="Crocomire",
+    SolveArea="Crocomire Miniboss",
     Name="Energy Tank, Crocomire",
     Class=["Major"],
     CanHidden=True,
@@ -724,7 +724,7 @@ define_location(
 define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
-    SolveArea="Pink Brinstar",
+    SolveArea="Spore Spawn Miniboss",
     Name="Spore Spawn",
     Class=["Boss"],
     CanHidden=False,
@@ -738,7 +738,7 @@ define_location(
 define_location(
     Area="Maridia",
     GraphArea="EastMaridia",
-    SolveArea="Maridia Pink Top",
+    SolveArea="Botwoon Miniboss",
     Name="Botwoon",
     Class=["Boss"],
     CanHidden=False,
@@ -752,7 +752,7 @@ define_location(
 define_location(
     Area="Norfair",
     GraphArea="Crocomire",
-    SolveArea="Crocomire",
+    SolveArea="Crocomire Miniboss",
     Name="Crocomire",
     Class=["Boss"],
     CanHidden=False,
@@ -766,7 +766,7 @@ define_location(
 define_location(
     Area="Norfair",
     GraphArea="LowerNorfair",
-    SolveArea="Lower Norfair Screw Attack",
+    SolveArea="GoldenTorizo Miniboss",
     Name="Golden Torizo",
     Class=["Boss"],
     CanHidden=False,
@@ -924,7 +924,7 @@ define_location(
 define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
-    SolveArea="Pink Brinstar",
+    SolveArea="Spore Spawn Miniboss",
     Name="Super Missile (pink Brinstar)",
     Class=["Minor", "Chozo"],
     CanHidden=False,
@@ -1340,7 +1340,7 @@ define_location(
 define_location(
     Area="Norfair",
     GraphArea="LowerNorfair",
-    SolveArea="Lower Norfair Screw Attack",
+    SolveArea="GoldenTorizo Miniboss",
     Name="Missile (Gold Torizo)",
     Class=["Minor"],
     CanHidden=True,
@@ -1353,7 +1353,7 @@ define_location(
 define_location(
     Area="Norfair",
     GraphArea="LowerNorfair",
-    SolveArea="Lower Norfair Screw Attack",
+    SolveArea="GoldenTorizo Miniboss",
     Name="Super Missile (Gold Torizo)",
     Class=["Minor"],
     CanHidden=False,

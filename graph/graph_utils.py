@@ -574,14 +574,6 @@ class GraphUtils:
         # otherwise keep exit direction and remove cap
         return GraphUtils.removeCap(exitDir)
 
-    def getBitFlag(srcArea, dstArea, origFlag):
-        flags = origFlag
-        if srcArea == dstArea:
-            flags &= 0xBF
-        else:
-            flags |= 0x40
-        return flags
-
     def getDoorConnections(graph, areas=True, bossFlags=0,
                            escape=True, escapeAnimals=True):
         transitions = []
@@ -635,8 +627,9 @@ class GraphUtils:
             if 'exitAsm' in src.ExitInfo:
                 conn['exitAsm'] = src.ExitInfo['exitAsm']
             conn['direction'] = GraphUtils.getDirection(src, dst)
-            conn['bitFlag'] = GraphUtils.getBitFlag(src.RoomInfo['area'], dst.RoomInfo['area'],
-                                                    dst.EntryInfo['bitFlag'])
+            # systematically act as if we change areas to mirror current area map explored
+            # and avoid special cases
+            conn['bitFlag'] = dst.EntryInfo['bitFlag'] | 0x40
             conn['cap'] = dst.EntryInfo['cap']
             conn['screen'] = dst.EntryInfo['screen']
             if conn['direction'] != src.ExitInfo['direction']: # incompatible transition

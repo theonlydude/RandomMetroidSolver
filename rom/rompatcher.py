@@ -1072,7 +1072,7 @@ class RomPatcher:
             # the portal is drawn, since it's not the same as the actual map tile checked to
             # see if the portal is taken
             src, dst = conn['transition']
-            def writeExploreMapAsm(ap, matching):
+            def writeExploreMapAsm(ap):
                 nonlocal asmPatch
                 apInfo = Logic.map_tiles.areaAccessPointsInGameDisplay.get(ap.Name)
                 if apInfo is not None:
@@ -1100,14 +1100,9 @@ class RomPatcher:
                         asmPatch += [ 0x09 ] + getWordBytes(bitMask)
                         # STA.l $7E[map tile byte index]
                         asmPatch += [ 0x8F ] + ramAddrBytes
-                    # for index
-                    if apInfo['area'] == gameAreas[matching.RoomInfo['area']]:
-                        # JSL $80858C ; Load mirror of current area's map explored
-                        # (needed for current area explored tiles to be synced)
-                        asmPatch += [ 0x22, 0x8C, 0x85, 0x80 ]
-            writeExploreMapAsm(src, dst)
+            writeExploreMapAsm(src)
             if src != dst:
-                writeExploreMapAsm(dst, src)
+                writeExploreMapAsm(dst)
             # if crateria-less minimizer, append reveal_objectives function to door asm leading to climb
             if dst.Name == "Climb Bottom Left":
                 asmPatch += [ 0x20 ] + reveal_objectives

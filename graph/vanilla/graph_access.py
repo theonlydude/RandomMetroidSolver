@@ -126,7 +126,7 @@ accessPoints = [
                                                     sm.haveItem('Super'),
                                                     sm.canPassBombPassages())
     }, internal=True, start={'spawn': 0x0100, 'layout': ['spospo_save'], 'solveArea': "Pink Brinstar"}),
-    AccessPoint('SporeSpawnFrontDoorOut', 'GreenPinkBrinstar', 'Pink Brinstar', { # FIXME solve area?
+    AccessPoint('SporeSpawnFrontDoorOut', 'GreenPinkBrinstar', 'Pink Brinstar', {
         'Big Pink': lambda sm: SMBool(True)
     }, boss = BossAccessPointFlags.MiniBoss,
        bossName = "SporeSpawn",
@@ -135,7 +135,7 @@ accessPoints = [
                    "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x382, 'SamusY':0x78},
        dotOrientation = 'n'),
-    AccessPoint('SporeSpawnFrontDoorIn', 'GreenPinkBrinstar', 'Pink Brinstar', { # FIXME solve area?
+    AccessPoint('SporeSpawnFrontDoorIn', 'GreenPinkBrinstar', 'SporeSpawn Miniboss', {
         'SporeSpawnBackDoorIn': lambda sm: Bosses.bossDead(sm, "SporeSpawn")
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Inside,
        bossName = "SporeSpawn",
@@ -144,7 +144,7 @@ accessPoints = [
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x45, 'SamusY':0x2c8},
        dotOrientation = 's'),
-    AccessPoint('SporeSpawnBackDoorIn', 'GreenPinkBrinstar', 'Pink Brinstar', { # FIXME solve area?
+    AccessPoint('SporeSpawnBackDoorIn', 'GreenPinkBrinstar', 'SporeSpawn Miniboss', {
         'SporeSpawnFrontDoorIn': lambda sm: sm.wand(RomPatches.has(RomPatches.SporeSpawnNoCrumble), Bosses.bossDead(sm, "SporeSpawn"))
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor | BossAccessPointFlags.Inside,
        bossName = "SporeSpawn",
@@ -153,7 +153,7 @@ accessPoints = [
                    "screen": (0x2, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x35, 'SamusY':0x888},
        dotOrientation = 'e'),
-    AccessPoint('SporeSpawnBackDoorOut', 'GreenPinkBrinstar', 'Pink Brinstar', { # FIXME solve area?
+    AccessPoint('SporeSpawnBackDoorOut', 'GreenPinkBrinstar', 'Pink Brinstar', {
         'Big Pink': lambda sm: sm.wand(sm.haveItem('Super'), sm.canPassBombPassages())
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor,
        bossName = "SporeSpawn",
@@ -335,7 +335,7 @@ accessPoints = [
         'GoldenTorizoFrontDoorOut': lambda sm: SMBool(True)
     }, internal=True),
     # GoldenTorizoFrontDoorOut is logically the same as "LN Above GT" but keep prevous AP for compatibility
-    AccessPoint('GoldenTorizoFrontDoorOut', 'LowerNorfair', 'Lower Norfair Screw Attack', { # FIXME solve area?
+    AccessPoint('GoldenTorizoFrontDoorOut', 'LowerNorfair', 'Lower Norfair Screw Attack', {
         'LN Above GT': lambda sm: SMBool(True)
     }, boss = BossAccessPointFlags.MiniBoss,
        bossName = "GoldenTorizo",
@@ -344,7 +344,7 @@ accessPoints = [
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xc089},
        entryInfo = {'SamusX':0x2d2, 'SamusY':0x288},
        dotOrientation = 'w'),
-    AccessPoint('GoldenTorizoFrontDoorIn', 'LowerNorfair', 'Lower Norfair Screw Attack', { # FIXME solve area?
+    AccessPoint('GoldenTorizoFrontDoorIn', 'LowerNorfair', 'GoldenTorizo Miniboss', {
         'GoldenTorizoBackDoorIn': lambda sm: Bosses.bossDead(sm, 'GoldenTorizo')
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Inside,
        bossName = "GoldenTorizo",
@@ -353,7 +353,7 @@ accessPoints = [
                    "screen": (0x2, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbf9e},
        entryInfo = {'SamusX':0x30, 'SamusY':0x88},
        dotOrientation = 'e'),
-    AccessPoint('GoldenTorizoBackDoorIn', 'LowerNorfair', 'Lower Norfair Screw Attack', { # FIXME solve area?
+    AccessPoint('GoldenTorizoBackDoorIn', 'LowerNorfair', 'GoldenTorizo Miniboss', {
         'GoldenTorizoFrontDoorIn': Cache.ldeco(lambda sm: sm.wand(Bosses.bossDead(sm, 'GoldenTorizo'),
                                                                   RomPatches.has(RomPatches.GoldenTorizoNoCrumble),
                                                                   sm.wor(sm.canFly(),
@@ -372,7 +372,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x1cd, 'SamusY':0x188},
        dotOrientation = 'w'),
     # GoldenTorizoFrontDoorOut is logically the same as "Screw Attack Bottom" but keep prevous AP for compatibility
-    AccessPoint('GoldenTorizoBackDoorOut', 'LowerNorfair', 'Lower Norfair Screw Attack', { # FIXME solve area?
+    AccessPoint('GoldenTorizoBackDoorOut', 'LowerNorfair', 'Lower Norfair Screw Attack', {
         'Screw Attack Bottom': lambda sm: SMBool(True)
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor,
        bossName = "GoldenTorizo",
@@ -848,7 +848,7 @@ accessPoints = [
                 'save':"Save_Aqueduct", 'needsPreRando':True,
                 'areaLayout': ['aqueduct_bomb_blocks'],
                 'doors': [0x96]}),
-    AccessPoint('BotwoonFrontDoorOut', 'EastMaridia', 'Maridia Pink Top', { # FIXME solve area?
+    AccessPoint('BotwoonFrontDoorOut', 'EastMaridia', 'Maridia Pink Top', {
         'Aqueduct Bottom': lambda sm: sm.canPassBotwoonHallway()
     }, boss = BossAccessPointFlags.MiniBoss,
        bossName = "Botwoon",
@@ -857,7 +857,7 @@ accessPoints = [
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x3cf, 'SamusY':0x88},
        dotOrientation = 'w'),
-    AccessPoint('BotwoonFrontDoorIn', 'EastMaridia', 'Maridia Pink Top', { # FIXME solve area?
+    AccessPoint('BotwoonFrontDoorIn', 'EastMaridia', 'Botwoon Miniboss', {
         'BotwoonBackDoorIn': lambda sm: Bosses.bossDead(sm, "Botwoon")
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Inside,
        bossName = "Botwoon",
@@ -866,7 +866,7 @@ accessPoints = [
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x30, 'SamusY':0xb8},
        dotOrientation = 'e'),
-    AccessPoint('BotwoonBackDoorIn', 'EastMaridia', 'Maridia Pink Top', { # FIXME solve area?
+    AccessPoint('BotwoonBackDoorIn', 'EastMaridia', 'Botwoon Miniboss', {
         'BotwoonFrontDoorIn': lambda sm: Bosses.bossDead(sm, "Botwoon")
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Inside | BossAccessPointFlags.Backdoor,
        bossName = "Botwoon",
@@ -875,7 +875,7 @@ accessPoints = [
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x1d3, 'SamusY':0x88},
        dotOrientation = 'w'),
-    AccessPoint('BotwoonBackDoorOut', 'EastMaridia', 'Maridia Pink Top', { # FIXME solve area?
+    AccessPoint('BotwoonBackDoorOut', 'EastMaridia', 'Maridia Pink Top', {
         'Aqueduct Bottom': lambda sm: SMBool(True), # go down sandpits
         'Post Botwoon': lambda sm: sm.canTraverseBotwoonETankRoom()
     }, boss = BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor,

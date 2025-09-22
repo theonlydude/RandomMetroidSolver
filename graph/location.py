@@ -724,7 +724,7 @@ define_location(
 define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
-    SolveArea="Spore Spawn Miniboss",
+    SolveArea="SporeSpawn Miniboss",
     Name="Spore Spawn",
     Class=["Boss"],
     CanHidden=False,
@@ -924,7 +924,7 @@ define_location(
 define_location(
     Area="Brinstar",
     GraphArea="GreenPinkBrinstar",
-    SolveArea="Spore Spawn Miniboss",
+    SolveArea="SporeSpawn Miniboss",
     Name="Super Missile (pink Brinstar)",
     Class=["Minor", "Chozo"],
     CanHidden=False,

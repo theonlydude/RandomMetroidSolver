@@ -391,12 +391,12 @@ class RomPatcher:
             patchSets = self.getPatchSetsFromSettings()
             for patchSet in patchSets:
                 self.applyPatchSet(patchSet, plms)
-            deadEnds, corridors = GraphUtils.getDeadEndsAndCorridors(Objectives.graph, self.settings["boss"])
-            for deadEnd in deadEnds:
-                self.applyPatchSet(f"dead_end_{deadEnd}", plms)
-            for corridor in corridors:
-                self.applyPatchSet(f"corridor_{corridor}", plms)
             if self.settings["boss"]:
+                deadEnds, corridors = GraphUtils.getDeadEndsAndCorridors(Objectives.graph, self.settings["boss"])
+                for deadEnd in deadEnds:
+                    self.applyPatchSet(f"dead_end_{deadEnd}", plms)
+                for corridor in corridors:
+                    self.applyPatchSet(f"corridor_{corridor}", plms)
                 self.writeBossDoors(self.settings["boss"], Objectives.graph, plms)
             # special patches
             if self.race is not None:
@@ -470,7 +470,6 @@ class RomPatcher:
         isCorridor = lambda ap: isSpecialBackDoor(ap, corridors)
         apList = [ap for ap in Objectives.graph.accessPoints.values() if not ap.Internal]
         if area:
-            plms += ['Maridia Sand Hall Seal', "Save_Main_Street", "Save_Crab_Shaft"]
             addBlinking("West Sand Hall Left")
             addBlinking("Below Botwoon Energy Tank Right")
             # filter Croc duplicates from AP list
@@ -1163,7 +1162,7 @@ class RomPatcher:
                     self.log.debug("adding %s door: %s" % ("gray" if closed else "bt", str(d)))
                     plm['plm_bytes_list'].append(getPLMbytes(d, closed))
                 for d in otherDoors:
-                    if "connection" in d and graph.accessPoints[d['connection']].ConnectedTo is None:
+                    if "connection" in d and graph.accessPoints[d['connection']].isLoop():
                         # don't add doors where dead end permanent gray doors are already added
                         continue
                     addDoor(d, True)

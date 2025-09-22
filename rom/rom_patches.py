@@ -313,7 +313,7 @@ definitions = {
             'desc': "Area Randomization",
             'ips': _area,
             'logic': RomPatches.AreaBaseSet,
-            'plms': ["WS_Save_Blinking_Door"]
+            'plms': ["WS_Save_Blinking_Door", 'Maridia Sand Hall Seal', "Save_Main_Street", "Save_Crab_Shaft"]
         },
         'boss': {
             'desc': "Bosses randomization base patches",

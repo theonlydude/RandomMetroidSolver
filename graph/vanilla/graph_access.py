@@ -258,10 +258,9 @@ accessPoints = [
        traverse=lambda sm: sm.canOpenEyeDoors(),
        dotOrientation = 's'),
     AccessPoint('PhantoonRoomIn', 'WreckedShip', 'Phantoon Boss', {
-        'PhantoonBackDoorIn': lambda sm: SMBool(True)
+        'PhantoonBackDoorIn': lambda sm: Bosses.bossDead(sm, "Phantoon")
     }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside,
        bossName = "Phantoon",
-       traverse = lambda sm: Bosses.bossDead(sm, 'Phantoon'),
        roomInfo = {'RoomPtr':0xcd13, "area": 0x3},
        exitInfo = {'DoorPtr':0xa2c4, 'direction': 0x5, "cap": (0x4e, 0x6), "bitFlag": 0x0,
                    "screen": (0x4, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xe1fe,
@@ -269,7 +268,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x2e, 'SamusY':0xb8},
        dotOrientation = 's'),
     AccessPoint('PhantoonBackDoorIn', 'WreckedShip', 'Phantoon Boss', {
-        'PhantoonRoomIn': lambda sm: SMBool(True)
+        'PhantoonRoomIn': lambda sm: Bosses.bossDead(sm, "Phantoon")
     }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside | BossAccessPointFlags.Backdoor,
        bossName = "Phantoon",
        roomInfo = {'RoomPtr':0xcd13, "area": 0x3},
@@ -472,14 +471,13 @@ accessPoints = [
         'RidleyBackDoorIn': lambda sm: Bosses.bossDead(sm, 'Ridley')
     }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside,
        bossName = "Ridley",
-       traverse = lambda sm: Bosses.bossDead(sm, 'Ridley'),
        roomInfo = {'RoomPtr':0xb32e, "area": 0x2},
        exitInfo = {'DoorPtr':0x98be, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
        entryInfo = {'SamusX':0xbf, 'SamusY':0x198}, # on Ridley's platform. entry screen has to be changed (see getDoorConnections)
        dotOrientation = 'e'),
     AccessPoint('RidleyBackDoorIn', 'LowerNorfair', 'Ridley Boss', {
-        'RidleyRoomIn': lambda sm: SMBool(True)
+        'RidleyRoomIn': lambda sm: Bosses.bossDead(sm, 'Ridley')
     }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside | BossAccessPointFlags.Backdoor,
        bossName = "Ridley",
        roomInfo = {'RoomPtr':0xb698, "area": 0x2},
@@ -522,7 +520,6 @@ accessPoints = [
         'KraidBackDoorIn': lambda sm: Bosses.bossDead(sm, 'Kraid')
     }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside,
        bossName = "Kraid",
-       traverse = lambda sm: Bosses.bossDead(sm, 'Kraid'),
        roomInfo = {'RoomPtr':0xa59f, "area": 0x1},
        exitInfo = {'DoorPtr':0x91ce, 'direction': 0x5, "cap": (0x1e, 0x16), "bitFlag": 0x0,
                    "screen": (0x1, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0,
@@ -530,7 +527,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x34, 'SamusY':0x188},
        dotOrientation = 'e'),
     AccessPoint('KraidBackDoorIn', 'Kraid', 'Kraid Boss', {
-        'KraidRoomIn': lambda sm: SMBool(True)
+        'KraidRoomIn': lambda sm: Bosses.bossDead(sm, 'Kraid')
     }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside | BossAccessPointFlags.Backdoor,
        bossName = "Kraid",
        roomInfo = {'RoomPtr':0xa6e2, "area": 0x1},
@@ -689,8 +686,7 @@ accessPoints = [
     ### Croc
     AccessPoint('Crocomire Room Top', 'Crocomire', 'Crocomire', {
         'CrocomireBackDoorIn': lambda sm: Bosses.bossDead(sm, 'Crocomire')
-    }, traverse=Cache.ldeco(lambda sm: sm.wor(RomPatches.has(RomPatches.CrocBlueDoors), Bosses.bossDead(sm, 'Crocomire'))),
-       roomInfo = {'RoomPtr':0xa98d, "area": 0x2, 'songs':[0xa9bd]},
+    }, roomInfo = {'RoomPtr':0xa98d, "area": 0x2, 'songs':[0xa9bd]},
        exitInfo = {'DoorPtr':0x93ea, 'direction': 0x7, "cap": (0xc6, 0x2d), "bitFlag": 0x0,
                    "screen": (0xc, 0x2), "distanceToSpawn": 0x1c0, "doorAsmPtr": 0x0000,
                    "exitAsm": "door_transition_boss_exit_fix"},
@@ -961,7 +957,7 @@ accessPoints = [
         'DraygonBackDoorIn': lambda sm: Bosses.bossDead(sm, 'Draygon')
     }, internal = True),
     AccessPoint('DraygonBackDoorIn', 'EastMaridia', 'Draygon Boss', {
-        'Draygon Room Bottom': lambda sm: SMBool(True)
+        'Draygon Room Bottom': lambda sm: Bosses.bossDead(sm, 'Draygon')
     }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside | BossAccessPointFlags.Backdoor,
        bossName = "Draygon",
        roomInfo = {'RoomPtr':0xd9aa, "area": 0x4},

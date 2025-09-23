@@ -158,6 +158,7 @@ class CommonSolver(object):
         self.areaGraph = AccessGraph(Logic.accessPoints(), self.curGraphTransitions)
         Objectives.startAP = romConf.startLocation
         Objectives.setGraph(self.areaGraph, infinity)
+        self.areaGraph.printGraph()
 
     def loadPreset(self, presetFileName):
         presetLoader = PresetLoader.factory(presetFileName)

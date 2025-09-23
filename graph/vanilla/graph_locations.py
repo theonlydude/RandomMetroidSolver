@@ -158,7 +158,8 @@ loc.Available = (
 
 loc = locationsDict["Kraid"]
 loc.AccessFrom = {
-    'KraidRoomIn': lambda sm: SMBool(True)
+    'KraidRoomIn': lambda sm: SMBool(True),
+    'KraidBackDoorIn': lambda sm: SMBool(True)
 }
 loc.Available = (
     lambda sm: sm.enoughStuffsKraid()
@@ -281,9 +282,11 @@ loc.PostAvailable = (
 
 loc = locationsDict["Ridley"]
 loc.AccessFrom = {
-    'RidleyRoomIn': lambda sm: SMBool(True)
+    'RidleyRoomIn': lambda sm: SMBool(True),
+    'RidleyBackDoorIn': lambda sm: SMBool(True)
 }
 loc.Available = (
+    # TODO add coeff for when boss is not vanilla
     lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']), sm.enoughStuffsRidley())
 )
 
@@ -352,7 +355,8 @@ loc.Available = (
 
 loc = locationsDict["Phantoon"]
 loc.AccessFrom = {
-    'PhantoonRoomIn': lambda sm: SMBool(True)
+    'PhantoonRoomIn': lambda sm: SMBool(True),
+    'PhantoonBackDoorIn': lambda sm: SMBool(True)
 }
 loc.Available = (
     lambda sm: sm.enoughStuffsPhantoon()
@@ -443,7 +447,9 @@ loc.Available = (
 
 loc = locationsDict["Draygon"]
 loc.AccessFrom = {
-    'Draygon Room Bottom': lambda sm: SMBool(True)
+    'Draygon Room Bottom': lambda sm: SMBool(True), # fight logic from DraygonRoomIn transition
+    'DraygonBackDoorIn': lambda sm: sm.wand(sm.canFightDraygon(),
+                                            sm.enoughStuffsDraygon())
 }
 loc.Available = (
     lambda sm: SMBool(True)
@@ -502,10 +508,12 @@ loc.Available = (
 
 loc = locationsDict["Golden Torizo"]
 loc.AccessFrom = {
-    'Screw Attack Bottom': lambda sm: SMBool(True)
+    'GoldenTorizoFrontDoorIn': lambda sm: SMBool(True),
+    'GoldenTorizoBackDoorIn': lambda sm: SMBool(True)
 }
 loc.Available = (
-    lambda sm: sm.enoughStuffGT()
+    # TODO add coeff for when boss is not vanilla
+    lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']), sm.enoughStuffGT())
 )
 
 
@@ -984,25 +992,22 @@ loc.Available = (
 
 loc = locationsDict["Missile (Gold Torizo)"]
 loc.AccessFrom = {
-    'LN Above GT': lambda sm: SMBool(True)
+    'GoldenTorizoFrontDoorIn': lambda sm: sm.canDipHeatedRoom()
 }
 loc.Available = (
-    lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main'])
-)
-loc.PostAvailable = (
-    lambda sm: sm.enoughStuffGT()
+    lambda sm: sm.wor(RomPatches.has(RomPatches.GoldenTorizoNoCrumble), # no crumbles
+                      sm.haveItem("SpaceJump"), # over crumbles
+                      sm.canUseSpringBall(), # bounce on crumbles
+                      sm.canPassBombPassages()) # single diag bomb jump over crumble
 )
 
 
 loc = locationsDict["Super Missile (Gold Torizo)"]
 loc.AccessFrom = {
-    'Screw Attack Bottom': lambda sm: SMBool(True)
+    'GoldenTorizoBackDoorIn': lambda sm: Bosses.bossDead(sm, "GoldenTorizo")
 }
 loc.Available = (
     lambda sm: sm.canDestroyBombWalls()
-)
-loc.PostAvailable = (
-    lambda sm: sm.enoughStuffGT()
 )
 
 

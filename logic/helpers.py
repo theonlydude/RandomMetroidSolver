@@ -578,12 +578,12 @@ class Helpers(object):
     def enoughStuffGT(self):
         sm = self.smbm
         hasBeams = sm.wand(sm.haveItem('Charge'), sm.haveItem('Plasma')).bool
-        (ammoMargin, secs, items) = self.canInflictEnoughDamages(9000, ignoreMissiles=True, givesDrops=hasBeams)
-        diff = SMBool(True, easy, [], items)
+        (ammoMargin, secs, items) = self.canInflictEnoughDamages(9000, ignoreMissiles=True, charge=False, givesDrops=hasBeams)
+        diff = sm.canHellRun("LowerNorfair", mult=10, minE=7) # no CF required, just 7 E
         lowStuff = sm.knowsLowStuffGT()
         if ammoMargin == 0 and lowStuff.bool:
-            (ammoMargin, secs, items) = self.canInflictEnoughDamages(3000, ignoreMissiles=True)
-            diff = SMBool(lowStuff.bool, lowStuff.difficulty, lowStuff.knows, items)
+            (ammoMargin, secs, items) = self.canInflictEnoughDamages(1000, ignoreMissiles=True)
+            diff = sm.wand(sm.heatProof(), SMBool(lowStuff.bool, lowStuff.difficulty, lowStuff.knows, items))
         if ammoMargin == 0:
             return smboolFalse
         fight = sm.wor(sm.energyReserveCountOk(math.ceil(8/sm.getDmgReduction(envDmg=False)[0])),
@@ -598,12 +598,20 @@ class Helpers(object):
         (ammoMargin, secs, ammoItems) = self.canInflictEnoughDamages(19000, doubleSuper=True, power=True, givesDrops=False)
         if ammoMargin == 0:
             return smboolFalse
+        if 'Charge' in ammoItems and not 'Plasma' in ammoItems:
+            heatDiff = sm.heatProof()
+        else:
+            heatDiff = sm.canHellRun("LowerNorfair", mult=5.1, minE=7) # do not require CF for the fight itself
         # if suitless, check for enogh ammo left for a CF
         if sm.heatProof().bool == False and self.hasRidleyHeatedConnection():
             nMiss = sm.itemCount('Missile') - ammoItems.count('Missile')
             nSupers = sm.itemCount('Super') - ammoItems.count('Super')
             nPB = sm.itemCount('PowerBomb') - ammoItems.count('PowerBomb')
-            if nMiss < 2 or nSupers < 2 or nPB < 3:
+            if not RomPatches.has(RomPatches.RoundRobinCF):
+                fail = nMiss < 2 or nSupers < 2 or nPB < 3
+            else:
+                fail = (nMiss + nSupers + nPB) < 7
+            if fail:
                 return smboolFalse
         # print('RIDLEY', ammoMargin, secs)
         (diff, defenseItems) = self.computeBossDifficulty(ammoMargin, secs,
@@ -611,7 +619,7 @@ class Helpers(object):
         if diff < 0:
             return smboolFalse
         else:
-            return SMBool(True, diff, items=ammoItems+defenseItems)
+            return sm.wand(heatDiff, SMBool(True, diff, items=ammoItems+defenseItems))
 
     @Cache.decorator
     def enoughStuffsKraid(self):

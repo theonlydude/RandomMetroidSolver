@@ -286,8 +286,7 @@ loc.AccessFrom = {
     'RidleyBackDoorIn': lambda sm: SMBool(True)
 }
 loc.Available = (
-    # TODO add coeff for when boss is not vanilla
-    lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']), sm.enoughStuffsRidley())
+    lambda sm: sm.enoughStuffsRidley()
 )
 
 
@@ -512,8 +511,7 @@ loc.AccessFrom = {
     'GoldenTorizoBackDoorIn': lambda sm: SMBool(True)
 }
 loc.Available = (
-    # TODO add coeff for when boss is not vanilla
-    lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']), sm.enoughStuffGT())
+    lambda sm: sm.enoughStuffGT()
 )
 
 

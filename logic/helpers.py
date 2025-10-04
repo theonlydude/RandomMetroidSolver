@@ -112,13 +112,12 @@ class Helpers(object):
 
     # gives number of required Crystal Flashes when hellrunning LN
     # see canHellRun for description of mult
-    # can be 0 if mult is high
     def getLNRequiredCFs(self, mult):
         tanks = self.energyReserveCount()
         multCF = mult
         if tanks >= 14:
             multCF *= 2.0
-        nCF = int(normalizeRounding(2.5/multCF))
+        nCF = int(math.ceil(2.0/multCF))
         return nCF
 
     # for tiny hellruns with no actual hell run req needed
@@ -128,7 +127,7 @@ class Helpers(object):
         return sm.wor(sm.wnot(RomPatches.has(RomPatches.DreadMode)), sm.heatProof())
 
     # higher values for mult means hell run is that much "easier" (HP mult)
-    def canHellRun(self, hellRun, mult=1.0, minE=2):
+    def canHellRun(self, hellRun, mult=1.0, minE=2, noCF=False):
         sm = self.smbm
         items = []
         isHeatProof = sm.heatProof()
@@ -146,7 +145,7 @@ class Helpers(object):
                     ret._items.append(items)
                 return ret
             else:
-                nCF = self.getLNRequiredCFs(mult)
+                nCF = self.getLNRequiredCFs(mult) if not noCF else 0
                 ret = sm.wand(self.energyReserveCountOkHellRun(hellRun, mult),
                               self.canCrystalFlash(nCF))
                 if ret.bool == True:
@@ -296,6 +295,8 @@ class Helpers(object):
         return sm.wor(sm.canPassBombPassages(), sm.canUseSpringBall())
 
     def canCrystalFlash(self, n=1):
+        if n == 0:
+            return SMBool(True)
         sm = self.smbm
         if not RomPatches.has(RomPatches.RoundRobinCF).bool:
             ret = sm.wand(sm.canUsePowerBombs(),
@@ -579,7 +580,7 @@ class Helpers(object):
         sm = self.smbm
         hasBeams = sm.wand(sm.haveItem('Charge'), sm.haveItem('Plasma')).bool
         (ammoMargin, secs, items) = self.canInflictEnoughDamages(9000, ignoreMissiles=True, charge=False, givesDrops=hasBeams)
-        diff = sm.canHellRun("LowerNorfair", mult=10, minE=7) # no CF required, just 7 E
+        diff = sm.canHellRun("LowerNorfair", mult=1.25, minE=6, noCF=True)
         lowStuff = sm.knowsLowStuffGT()
         if ammoMargin == 0 and lowStuff.bool:
             (ammoMargin, secs, items) = self.canInflictEnoughDamages(1000, ignoreMissiles=True)
@@ -598,10 +599,11 @@ class Helpers(object):
         (ammoMargin, secs, ammoItems) = self.canInflictEnoughDamages(19000, doubleSuper=True, power=True, givesDrops=False)
         if ammoMargin == 0:
             return smboolFalse
-        if 'Charge' in ammoItems and not 'Plasma' in ammoItems:
+        if 'Missile' in ammoItems or 'PowerBomb' in ammoItems or 'Charge' in ammoItems:
+            # don't bother with complicated logic, just require 30 supers for suitless fight
             heatDiff = sm.heatProof()
         else:
-            heatDiff = sm.canHellRun("LowerNorfair", mult=5.1, minE=7) # do not require CF for the fight itself
+            heatDiff = sm.canHellRun("LowerNorfair", mult=1.25, minE=6, noCF=True) # do not require CF for the fight itself
         # if suitless, check for enogh ammo left for a CF
         if sm.heatProof().bool == False and self.hasRidleyHeatedConnection():
             nMiss = sm.itemCount('Missile') - ammoItems.count('Missile')

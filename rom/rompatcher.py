@@ -391,8 +391,8 @@ class RomPatcher:
             patchSets = self.getPatchSetsFromSettings()
             for patchSet in patchSets:
                 self.applyPatchSet(patchSet, plms)
+            deadEnds, corridors = GraphUtils.getDeadEndsAndCorridors(Objectives.graph, self.settings["boss"])
             if self.settings["boss"]:
-                deadEnds, corridors = GraphUtils.getDeadEndsAndCorridors(Objectives.graph, self.settings["boss"])
                 for deadEnd in deadEnds:
                     self.applyPatchSet(f"dead_end_{deadEnd}", plms)
                 for corridor in corridors:

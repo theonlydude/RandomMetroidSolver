@@ -112,12 +112,13 @@ class Helpers(object):
 
     # gives number of required Crystal Flashes when hellrunning LN
     # see canHellRun for description of mult
+    # can be 0 if mult is high
     def getLNRequiredCFs(self, mult):
         tanks = self.energyReserveCount()
         multCF = mult
         if tanks >= 14:
             multCF *= 2.0
-        nCF = int(math.ceil(2/multCF))
+        nCF = int(normalizeRounding(2.5/multCF))
         return nCF
 
     # for tiny hellruns with no actual hell run req needed
@@ -598,7 +599,7 @@ class Helpers(object):
         if ammoMargin == 0:
             return smboolFalse
         # if suitless, check for enogh ammo left for a CF
-        if sm.heatProof().bool == False:
+        if sm.heatProof().bool == False and self.hasRidleyHeatedConnection():
             nMiss = sm.itemCount('Missile') - ammoItems.count('Missile')
             nSupers = sm.itemCount('Super') - ammoItems.count('Super')
             nPB = sm.itemCount('PowerBomb') - ammoItems.count('PowerBomb')

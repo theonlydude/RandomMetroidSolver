@@ -998,7 +998,7 @@ loc.Available = (
     lambda sm: sm.wor(RomPatches.has(RomPatches.GoldenTorizoNoCrumble), # no crumbles
                       sm.haveItem("SpaceJump"), # over crumbles
                       sm.canUseSpringBall(), # bounce on crumbles
-                      sm.canPassBombPassages()) # single diag bomb jump over crumble
+                      sm.wand(sm.canHellRun("LowerNorfair", mult=10, minE=1), sm.canPassBombPassages())) # single diag bomb jump over crumble
 )
 
 

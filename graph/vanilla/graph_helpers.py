@@ -4,8 +4,8 @@ from logic.smbool import SMBool
 from logic.helpers import Helpers, Bosses
 from logic.cache import Cache
 from rom.rom_patches import RomPatches
-from graph.graph_utils import getAccessPoint
 from utils.parameters import Settings
+from utils.objectives import Objectives
 
 class HelpersGraph(Helpers):
     def __init__(self, smbm):
@@ -807,11 +807,19 @@ class HelpersGraph(Helpers):
 
     @Cache.decorator
     def getDraygonConnection(self):
-        return getAccessPoint('DraygonRoomOut').ConnectedTo
+        return Objectives.graph.accessPoints['DraygonRoomOut'].ConnectedTo
 
     @Cache.decorator
     def getBotwoonConnection(self):
-        return getAccessPoint('BotwoonFrontDoorOut').ConnectedTo
+        return Objectives.graph.accessPoints['BotwoonFrontDoorOut'].ConnectedTo
+
+    @Cache.decorator
+    def hasRidleyHeatedConnection(self):
+        apDict = Objectives.graph.accessPoints
+        apFront = apDict[apDict['RidleyRoomIn'].ConnectedTo]
+        apBackName = apDict['RidleyBackDoorIn'].ConnectedTo
+        apBack = apDict[apBackName] if apBackName is not None else None
+        return apFront.Heated and (apBack is None or apBack.Heated)
 
     @Cache.decorator
     def isVanillaDraygon(self):
@@ -824,8 +832,8 @@ class HelpersGraph(Helpers):
     @Cache.decorator
     def canUseCrocRoomToChargeSpeed(self):
         sm = self.smbm
-        crocRoom = getAccessPoint('Crocomire Room Top')
-        speedway = getAccessPoint('Crocomire Speedway Bottom')
+        crocRoom = Objectives.graph.accessPoints['Crocomire Room Top']
+        speedway = Objectives.graph.accessPoints['Crocomire Speedway Bottom']
         return sm.wand(SMBool(crocRoom.ConnectedTo == 'Crocomire Speedway Bottom'),
                        crocRoom.traverse(sm),
                        speedway.traverse(sm))

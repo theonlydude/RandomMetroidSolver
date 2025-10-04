@@ -308,6 +308,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x96d2, 'direction': 0x4, "cap": (0x11, 0x26), "bitFlag": 0x0,
                    "screen": (0x1, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x3d0, 'SamusY':0x88, 'song': 0x15},
+       heated = True,
        dotOrientation = 'w'),
     AccessPoint('LN Entrance', 'LowerNorfair', 'Lower Norfair Screw Attack', {
         'Lava Dive Right': lambda sm: sm.canPassLavaPitReverse(),
@@ -342,6 +343,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x983a, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xc089},
        entryInfo = {'SamusX':0x2d2, 'SamusY':0x288},
+       heated = True,
        dotOrientation = 'w'),
     AccessPoint('GoldenTorizoFrontDoorIn', 'LowerNorfair', 'GoldenTorizo Miniboss', {
         'GoldenTorizoBackDoorIn': lambda sm: Bosses.bossDead(sm, 'GoldenTorizo')
@@ -351,6 +353,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x9876, 'direction': 0x5, "cap": (0x2e, 0x26), "bitFlag": 0x0,
                    "screen": (0x2, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0xbf9e},
        entryInfo = {'SamusX':0x30, 'SamusY':0x88},
+       heated = True,
        dotOrientation = 'e'),
     AccessPoint('GoldenTorizoBackDoorIn', 'LowerNorfair', 'GoldenTorizo Miniboss', {
         'GoldenTorizoFrontDoorIn': Cache.ldeco(lambda sm: sm.wand(Bosses.bossDead(sm, 'GoldenTorizo'),
@@ -369,6 +372,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x9882, 'direction': 0x4, "cap": (0x1, 0x26), "bitFlag": 0x0,
                    "screen": (0x0, 0x2), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x1cd, 'SamusY':0x188},
+       heated = True,
        dotOrientation = 'w'),
     # GoldenTorizoFrontDoorOut is logically the same as "Screw Attack Bottom" but keep prevous AP for compatibility
     AccessPoint('GoldenTorizoBackDoorOut', 'LowerNorfair', 'Lower Norfair Screw Attack', {
@@ -379,6 +383,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x9a86, 'direction': 0x5, "cap": (0x1e, 0x16), "bitFlag": 0x0,
                    "screen": (0x1, 0x1), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x31, 'SamusY':0x298},
+       heated = True,
        dotOrientation = 'e'),
     AccessPoint('Screw Attack Bottom', 'LowerNorfair', 'Lower Norfair Screw Attack', {
         'LN Entrance': Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
@@ -455,6 +460,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x9a4a, 'direction': 0x5, "cap": (0x5e, 0x6), "bitFlag": 0x0,
                    "screen": (0x5, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x134, 'SamusY':0x88},
+       heated = True,
        dotOrientation = 'n'),
     AccessPoint('RidleyRoomOut', 'LowerNorfair', 'Ridley Boss', {
         'Ridley Zone': Cache.ldeco(lambda sm: sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']))
@@ -466,6 +472,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x2e, 'SamusY':0x98},
        traverse=Cache.ldeco(lambda sm: sm.wand(sm.canHellRun(**Settings.hellRunsTable['LowerNorfair']['Main']),
                                                sm.canOpenEyeDoors())),
+       heated = True,
        dotOrientation = 'e'),
     AccessPoint('RidleyRoomIn', 'LowerNorfair', 'Ridley Boss', {
         'RidleyBackDoorIn': lambda sm: Bosses.bossDead(sm, 'Ridley')
@@ -475,6 +482,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x98be, 'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
        entryInfo = {'SamusX':0xbf, 'SamusY':0x198}, # on Ridley's platform. entry screen has to be changed (see getDoorConnections)
+       heated = True,
        dotOrientation = 'e'),
     AccessPoint('RidleyBackDoorIn', 'LowerNorfair', 'Ridley Boss', {
         'RidleyRoomIn': lambda sm: Bosses.bossDead(sm, 'Ridley')
@@ -485,6 +493,7 @@ accessPoints = [
                    'direction': 0x5, "cap": (0xe, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
        entryInfo = {'SamusX':0x38, 'SamusY':0xa8},
+       heated = True,
        dotOrientation = 'w'),
     AccessPoint('RidleyBackDoorOut', 'LowerNorfair', 'Ridley Boss', {}, # placeholder for transitions, does not exist in game
        boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Backdoor,
@@ -493,7 +502,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0xffff,
                    'direction': 0x4, "cap": (0x1, 0x6), "bitFlag": 0x0,
                    "screen": (0x0, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0},
-       entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}),
+       entryInfo = {'SamusX':0xffff, 'SamusY':0xffff}, heated = True),
     ### Kraid
     AccessPoint('Warehouse Zeela Room Left', 'Kraid', 'Kraid', {
         'KraidRoomOut': lambda sm: sm.canPassBombPassages()
@@ -593,6 +602,7 @@ accessPoints = [
         exitInfo = {'DoorPtr':0x95fa, 'direction': 0x4, "cap": (0x11, 0x6), "bitFlag": 0x0,
                     "screen": (0x1, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
         entryInfo = {'SamusX':0x5cf, 'SamusY':0x88},
+        heated = True,
         dotOrientation = 'ne'),
     AccessPoint('Cathedral', 'Norfair', 'Norfair Cathedral', {
         'Business Center': Cache.ldeco(lambda sm: sm.canExitCathedral(Settings.hellRunsTable['MainUpperNorfair']['Bubble -> Cathedral Missiles'])),
@@ -611,6 +621,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x967e, 'direction': 0x5, "cap": (0x3e, 0x6), "bitFlag": 0x0,
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0x134, 'SamusY':0x288, 'song': 0x15},
+       heated = True,
        dotOrientation = 'se'),
     AccessPoint('Crocomire Speedway Bottom', 'Norfair', 'Norfair Grapple Escape', {
         'Grapple Escape': lambda sm: sm.canGrappleEscape(),
@@ -624,6 +635,7 @@ accessPoints = [
        exitInfo = {'DoorPtr':0x93d2, 'direction': 0x6, "cap": (0x36, 0x2), "bitFlag": 0x0,
                    "screen": (0x3, 0x0), "distanceToSpawn": 0x8000, "doorAsmPtr": 0x0000},
        entryInfo = {'SamusX':0xc57, 'SamusY':0x2b8},
+       heated = True,
        dotOrientation = 'se'),
     AccessPoint('Grapple Escape', 'Norfair', 'Norfair Grapple Escape', {
         'Business Center': lambda sm: sm.haveItem('Super'),

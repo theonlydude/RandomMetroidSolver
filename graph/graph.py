@@ -30,7 +30,7 @@ class AccessPoint(object):
                  traverse=lambda sm: SMBool(True),
                  exitInfo=None, entryInfo=None, roomInfo=None,
                  internal=False, boss=0, bossName=None, escape=False,
-                 start=None,
+                 start=None, heated=False,
                  dotOrientation='w'):
         self.Name = name
         self.GraphArea = graphArea
@@ -43,6 +43,7 @@ class AccessPoint(object):
         self.BossName = bossName
         self.Escape = escape
         self.Start = start
+        self.Heated = heated
         self.DotOrientation = dotOrientation
         self.intraTransitions = self.sortTransitions(transitions)
         self.transitions = copy.copy(self.intraTransitions)
@@ -60,7 +61,7 @@ class AccessPoint(object):
         return AccessPoint(self.Name, self.GraphArea, self.SolveArea, self.intraTransitions, self.traverse,
                            exitInfo, entryInfo, roomInfo,
                            self.Internal, self.Boss, self.BossName, self.Escape,
-                           start, self.DotOrientation)
+                           start, self.Heated, self.DotOrientation)
 
     def __str__(self):
         return "[" + self.GraphArea + "] " + self.Name

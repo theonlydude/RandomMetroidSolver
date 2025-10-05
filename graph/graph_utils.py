@@ -349,7 +349,7 @@ class GraphUtils:
         usedAPs = []
         trLimit = 5
         locLimit -= 3 # 3 "post boss" locs will always be available, and are filtered out in getNLocs
-        apCheck = lambda ap: not ap.isInternal() and ap.Boss & BossAccessPointFlags.MiniBoss == 0 and ap not in usedAPs
+        apCheck = lambda ap: not ap.isInternal() and (ap.Boss & (BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Backdoor | BossAccessPointFlags.Inside)) == 0 and ap not in usedAPs
         def openTransitions():
             nonlocal areas, apCheck
             return GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and apCheck(ap))

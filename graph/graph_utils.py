@@ -349,7 +349,7 @@ class GraphUtils:
         usedAPs = []
         trLimit = 5
         locLimit -= 3 # 3 "post boss" locs will always be available, and are filtered out in getNLocs
-        apCheck = lambda ap: not ap.isInternal() and ap.Boss & (BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Inside | BossAccessPointFlags.Backdoor) == 0 and ap not in usedAPs
+        apCheck = lambda ap: not ap.isInternal() and ap.Boss & BossAccessPointFlags.MiniBoss == 0 and ap not in usedAPs
         def openTransitions():
             nonlocal areas, apCheck
             return GraphUtils.getAPs(lambda ap: ap.GraphArea in areas and apCheck(ap))
@@ -357,8 +357,8 @@ class GraphUtils:
             GraphUtils.log.debug("openTransitions="+str([ap.Name for ap in openTransitions()]))
             fromAreas = availAreas
             if len(openTransitions()) <= 1: # dont' get stuck by adding dead ends
-                GraphUtils.log.debug("avoid being stuck")
-                fromAreas = [area for area in fromAreas if len(GraphUtils.getAPs(lambda ap: ap.GraphArea == area and not ap.isInternal())) > 1]
+                fromAreas = [area for area in fromAreas if len(GraphUtils.getAPs(lambda ap: ap.GraphArea == area and apCheck(ap))) > 1]
+                GraphUtils.log.debug(f"avoid being stuck. fromAreas={fromAreas}")
             elif len(forcedAreas) > 0: # no risk to get stuck, we can pick a forced area if necessary
                 GraphUtils.log.debug("add forced area")
                 fromAreas = forcedAreas
@@ -592,26 +592,21 @@ class GraphUtils:
             transitions += vanillaEscapeTransitions
             if escapeAnimals:
                 transitions += vanillaEscapeAnimalsTransitions
+        connectedAPs = set()
         for srcName, dstName in transitions:
             src = graph.accessPoints[srcName]
             dst = graph.accessPoints[dstName]
             dst.EntryInfo.update(src.ExitInfo)
             src.EntryInfo.update(dst.ExitInfo)
+            connectedAPs.add(src)
+            connectedAPs.add(dst)
         connections = []
         for src, dst in graph.InterAreaTransitions:
-            if not (escape and src.Escape and dst.Escape):
-                # area only
-                if not bossFlags and src.Boss:
-                    continue
-                # boss only
-                if not areas and not (src.Boss & bossFlags or dst.Boss & bossFlags):
-                    continue
-                # no random escape
-                if not escape and src.Escape:
-                    continue
-
+            if not (src in connectedAPs and dst in connectedAPs):
+                continue
             conn = {}
             conn['ID'] = str(src) + ' -> ' + str(dst)
+            #print(conn['ID'])
             # remove duplicates (loop transitions)
             if any(c['ID'] == conn['ID'] for c in connections):
                 continue

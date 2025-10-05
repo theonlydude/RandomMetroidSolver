@@ -158,12 +158,14 @@ function generate_rando_presets {
     local SEED="$1"
     local PRESET="$2"
     local RANDO_PRESET="${SEED}_${PRESET}.json"
+ # FIXME put back random logic instead of forced vanilla
+ #    "logic": "$(random "random" ${logic})",
+ #    $(generate_multi_select "logic" "vanilla" "mirror")
 
     cat > ${RANDO_PRESET} <<EOF
 {
     "seed": "${SEED}",
-    "logic": "$(random "random" ${logic})",
-    $(generate_multi_select "logic" "vanilla" "mirror")
+    "logic": "vanilla",
     "preset": "${PRESET}",
     "startLocation": "$(random "random" "${startLocation}")",
     $(generate_multi_select "startLocation" "Ceres" "Landing_Site" "Gauntlet_Top" "Green_Brinstar_Elevator" "Big_Pink" "Etecoons_Supers" "Wrecked_Ship_Main" "Firefleas_Top" "Business_Center" "Bubble_Mountain" "Mama_Turtle" "Watering_Hole" "Aqueduct" "Red_Brinstar_Elevator" "Golden_Four")
@@ -196,7 +198,8 @@ function generate_rando_presets {
     "areaLayout": "$(random_switch ${areaLayout})",
     "doorsColorsRando": "$(random_switch ${doorsColorsRando})",
     "allowGreyDoors": "$(random_switch ${allowGreyDoors})",
-    "bossRandomization": "$(random_switch ${bossRandomization})",
+    "bossesRandomization": "$(random "random" ${bossesRandomization})",
+    $(generate_multi_select "bossesRandomization" "Off" "G4" "Minibosses" "All_Mixed" "All_Split")
     "minimizer": "$(random_switch ${minimizer})",
     "minimizerQty": "$(random_range 35 100 ${minimizerQty})",
     "tourian": "$(random "random" ${tourian})",

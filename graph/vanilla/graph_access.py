@@ -954,8 +954,7 @@ accessPoints = [
        dotOrientation = 'e'),
     AccessPoint('DraygonRoomIn', 'EastMaridia', 'Draygon Boss', {
         'Draygon Room Bottom': Cache.ldeco(lambda sm: sm.wor(Bosses.bossDead(sm, "Draygon"),
-                                                             sm.wand(sm.canFightDraygon(),
-                                                                     sm.enoughStuffsDraygon())))
+                                                             sm.canDefeatDraygon()))
     }, boss = BossAccessPointFlags.G4 | BossAccessPointFlags.Inside,
        bossName = "Draygon",
        roomInfo = {'RoomPtr':0xda60, "area": 0x4},
@@ -966,7 +965,8 @@ accessPoints = [
        dotOrientation = 'e'),
     AccessPoint('Draygon Room Bottom', 'EastMaridia', 'Draygon Boss', {
         'DraygonRoomIn': Cache.ldeco(lambda sm: sm.wand(Bosses.bossDead(sm, 'Draygon'), sm.canExitDraygon())),
-        'DraygonBackDoorIn': lambda sm: Bosses.bossDead(sm, 'Draygon')
+        'DraygonBackDoorIn': Cache.ldeco(lambda sm: sm.wor(Bosses.bossDead(sm, "Draygon"),
+                                                           sm.canDefeatDraygon()))
     }, internal = True),
     AccessPoint('DraygonBackDoorIn', 'EastMaridia', 'Draygon Boss', {
         'Draygon Room Bottom': lambda sm: Bosses.bossDead(sm, 'Draygon')

@@ -447,8 +447,7 @@ loc.Available = (
 loc = locationsDict["Draygon"]
 loc.AccessFrom = {
     'Draygon Room Bottom': lambda sm: SMBool(True), # fight logic from DraygonRoomIn transition
-    'DraygonBackDoorIn': lambda sm: sm.wand(sm.canFightDraygon(),
-                                            sm.enoughStuffsDraygon())
+    'DraygonBackDoorIn': lambda sm: sm.canDefeatDraygon()
 }
 loc.Available = (
     lambda sm: SMBool(True)

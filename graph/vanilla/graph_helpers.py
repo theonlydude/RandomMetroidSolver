@@ -847,6 +847,11 @@ class HelpersGraph(Helpers):
                                      sm.knowsGravLessLevel3())))
 
     @Cache.decorator
+    def canDefeatDraygon(self):
+        sm = self.smbm
+        return sm.wand(sm.canFightDraygon(), sm.enoughStuffsDraygon())
+
+    @Cache.decorator
     def canDraygonCrystalFlashSuit(self):
         sm = self.smbm
         return sm.wand(sm.canCrystalFlash(),

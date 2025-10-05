@@ -812,54 +812,6 @@ class Pickup:
             return True
 
 class Bosses:
-    # bosses helpers to know if they are dead
-    areaBosses = {
-        # classic areas
-        'Brinstar': 'Kraid',
-        'Norfair': 'Ridley',
-        'LowerNorfair': 'Ridley',
-        'WreckedShip': 'Phantoon',
-        'Maridia': 'Draygon',
-        # solver areas
-        'Blue Brinstar': 'Kraid',
-        'Brinstar Hills': 'Kraid',
-        'Bubble Norfair': 'Ridley',
-        'Bubble Norfair Bottom': 'Ridley',
-        'Bubble Norfair Reserve': 'Ridley',
-        'Bubble Norfair Speed': 'Ridley',
-        'Bubble Norfair Wave': 'Ridley',
-        'Draygon Boss': 'Draygon',
-        'Green Brinstar': 'Kraid',
-        'Green Brinstar Reserve': 'Kraid',
-        'Kraid': 'Kraid',
-        'Kraid Boss': 'Kraid',
-        'Left Sandpit': 'Draygon',
-        'Lower Norfair After Amphitheater': 'Ridley',
-        'Lower Norfair Before Amphitheater': 'Ridley',
-        'Lower Norfair Screw Attack': 'Ridley',
-        'Maridia Forgotten Highway': 'Draygon',
-        'Maridia Green': 'Draygon',
-        'Maridia Pink Bottom': 'Draygon',
-        'Maridia Pink Top': 'Draygon',
-        'Maridia Sandpits': 'Draygon',
-        'Norfair Entrance': 'Ridley',
-        'Norfair Grapple Escape': 'Ridley',
-        'Norfair Ice': 'Ridley',
-        'Phantoon Boss': 'Phantoon',
-        'Pink Brinstar': 'Kraid',
-        'Red Brinstar': 'Kraid',
-        'Red Brinstar Top': 'Kraid',
-        'Ridley Boss': 'Ridley',
-        'Right Sandpit': 'Draygon',
-        'Warehouse': 'Kraid',
-        'WreckedShip': 'Phantoon',
-        'WreckedShip Back': 'Phantoon',
-        'WreckedShip Bottom': 'Phantoon',
-        'WreckedShip Gravity': 'Phantoon',
-        'WreckedShip Main': 'Phantoon',
-        'WreckedShip Top': 'Phantoon'
-    }
-
     accessPoints = {
         "Kraid": "KraidRoomIn",
         "Phantoon": "PhantoonRoomIn",
@@ -882,12 +834,6 @@ class Bosses:
     @staticmethod
     def bossDead(sm, boss):
         return sm.haveItem(boss)
-
-    @staticmethod
-    def areaBossDead(sm, area):
-        if area not in Bosses.areaBosses:
-            return True
-        return Bosses.bossDead(sm, Bosses.areaBosses[area])
 
     @staticmethod
     def allBossesDead(smbm):

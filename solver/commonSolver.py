@@ -289,9 +289,6 @@ class CommonSolver(object):
         around = [loc for loc in locations if( (loc.areaWeight is not None and loc.areaWeight == 1)
                                                or ((loc.SolveArea == self.container.lastArea() or loc.distance < 3)
                                                    and loc.difficulty.difficulty <= threshold
-                                                   and (not Bosses.areaBossDead(self.smbm, self.container.lastArea())
-                                                        and (self.container.lastArea() not in Bosses.areaBosses
-                                                             or Bosses.areaBosses[self.container.lastArea()] in mandatoryBosses))
                                                    and loc.comeBack is not None and loc.comeBack == True)
                                                or (loc.Name == "Gunship") )]
         outside = [loc for loc in locations if not loc in around]
@@ -318,8 +315,9 @@ class CommonSolver(object):
             self.printLocs(around, "around2")
 
         # we want to sort the outside locations by putting the ones in the same area first,
-        # then we sort the remaining areas starting whith boss dead status.
+        # then we sort the remaining areas by distance.
         # we also want to sort by range of difficulty and not only with the difficulty threshold.
+        # TODO find a way to prioritize area with objectives to complete here
         ranged = {
             "areaWeight": [],
             "easy": [],
@@ -355,15 +353,7 @@ class CommonSolver(object):
                 # first locs in the same area
                 0 if loc.SolveArea == self.container.lastArea() else 1,
                 # first nearest locs
-                loc.distance,
-                # beating a boss
-                loc.difficulty.difficulty if (not Bosses.areaBossDead(self.smbm, loc.Area)
-                                              and loc.isBoss())
-                else 100000,
-                # areas with boss still alive
-                loc.difficulty.difficulty if (not Bosses.areaBossDead(self.smbm, loc.Area))
-                else 100000,
-                loc.difficulty.difficulty))
+                loc.distance))
 
 
         if self.log.getEffectiveLevel() == logging.DEBUG:

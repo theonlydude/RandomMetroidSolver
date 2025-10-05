@@ -277,7 +277,7 @@ def getDefaultMultiValues():
         'objective': Objectives.getAllGoals(exclude=True),
         'tourian': ['Vanilla', 'Fast', 'Disabled'],
         'logic': ['vanilla', 'mirror'],
-        'bossesRandomization': ["Off", "G4", "Minibosses", "All_Mixed", "All_Split" ]
+        'bossesRandomization': ["Off", "G4", "Minibosses", "All Mixed", "All Split" ]
     }
     return defaultMultiValues
 

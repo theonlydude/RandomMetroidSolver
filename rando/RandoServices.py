@@ -154,18 +154,7 @@ class RandoServices(object):
 
     def fullComebackCheck(self, container, ap, item, loc, comebackCheck):
         sm = container.sm
-        tmpItems = []
-        # draygon special case: there are two locations, and we can
-        # place one item, but we might need both the item and the boss
-        # dead to get out
-        if loc.SolveArea == "Draygon Boss" and Bosses.bossDead(sm, 'Draygon').bool == False:
-            # temporary kill draygon
-            tmpItems.append('Draygon')
-        sm.addItems(tmpItems)
-        ret = self.locPostAvailable(sm, loc, item.Type if item is not None else None) and not self.isSoftlockPossible(container, ap, item, loc, comebackCheck)
-        for tmp in tmpItems:
-            sm.removeItem(tmp)
-        return ret
+        return self.locPostAvailable(sm, loc, item.Type if item is not None else None) and not self.isSoftlockPossible(container, ap, item, loc, comebackCheck)
 
     def isProgression(self, item, ap, container):
         sm = container.sm

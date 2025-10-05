@@ -952,6 +952,13 @@ accessPoints = [
        entryInfo = {'SamusX':0x34, 'SamusY':0x288, 'song':0x1b},
        traverse=lambda sm: sm.canOpenEyeDoors(),
        dotOrientation = 'e'),
+    # NOTE on Draygon exit logic: Space Jump location can help exit draygon, but it requires dray dead.
+    # At least it should. We add draygon fight logic to a bunch of transitions here, but don't require
+    # actually killing dray to access Space Jump, or even exit the room.
+    # No impact on the rando, since it has to fill all locs. Limited impact on solver, as Space Jump and Dray
+    # will be collected at roughly the same time, being in the same Solve Area.
+    # Space Jump and Draygon access logic have also been tweaked to accesss them from everywhere possible
+    # and have draygon fight logic for the whole thing to work.
     AccessPoint('DraygonRoomIn', 'EastMaridia', 'Draygon Boss', {
         'Draygon Room Bottom': Cache.ldeco(lambda sm: sm.wor(Bosses.bossDead(sm, "Draygon"),
                                                              sm.canDefeatDraygon()))
@@ -964,7 +971,7 @@ accessPoints = [
        entryInfo = {'SamusX':0x1c8, 'SamusY':0x88},
        dotOrientation = 'e'),
     AccessPoint('Draygon Room Bottom', 'EastMaridia', 'Draygon Boss', {
-        'DraygonRoomIn': Cache.ldeco(lambda sm: sm.wand(Bosses.bossDead(sm, 'Draygon'), sm.canExitDraygon())),
+        'DraygonRoomIn': lambda sm: sm.canExitDraygon(),
         'DraygonBackDoorIn': Cache.ldeco(lambda sm: sm.wor(Bosses.bossDead(sm, "Draygon"),
                                                            sm.canDefeatDraygon()))
     }, internal = True),

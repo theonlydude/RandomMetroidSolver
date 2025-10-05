@@ -443,7 +443,7 @@ loc.Available = (
     lambda sm: sm.haveItem('Morph')
 )
 
-
+# NOTE: see note in graph_access.py on Draygon exit logic
 loc = locationsDict["Draygon"]
 loc.AccessFrom = {
     'Draygon Room Bottom': lambda sm: SMBool(True), # fight logic from DraygonRoomIn transition
@@ -456,7 +456,8 @@ loc.Available = (
 
 loc = locationsDict["Space Jump"]
 loc.AccessFrom = {
-    'DraygonBackDoorIn': lambda sm: SMBool(True)
+    'DraygonBackDoorIn': lambda sm: SMBool(True),
+    'Draygon Room Bottom': lambda sm: sm.canDefeatDraygon()
 }
 loc.Available = (
     lambda sm: SMBool(True)

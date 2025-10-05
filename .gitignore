@@ -1,6 +1,7 @@
 *.py[oc]
 *~
 *.log
+logs/*
 **/build/
 **/include/sym/
 db_params.py

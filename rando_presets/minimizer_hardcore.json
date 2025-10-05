@@ -7,7 +7,7 @@
     "startLocationMultiSelect": ["Landing Site","Gauntlet Top","Green Brinstar Elevator","Big Pink","Etecoons Supers","Wrecked Ship Main","Firefleas Top","Business Center","Bubble Mountain","Mama Turtle","Watering Hole","Aqueduct","Red Brinstar Elevator","Golden Four"],
     "tourian": "Fast",
     "minimizerQty": "30",
-    "bossRandomization": "on",
+    "bossesRandomization": "G4",
     "escapeRando": "on",
     "removeEscapeEnemies": "on",
   "hideItems": "off",

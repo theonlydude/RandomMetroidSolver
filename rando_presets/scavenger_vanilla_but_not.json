@@ -4,7 +4,7 @@
     "areaRandomization": "full",
     "escapeRando": "on",
     "removeEscapeEnemies": "on",
-    "bossRandomization": "on",
+    "bossesRandomization": "G4",
     "hud": "on",
     "progressionSpeed":"speedrun",
     "scavNumLocs": "17",

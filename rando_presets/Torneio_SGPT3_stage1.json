@@ -4,7 +4,7 @@
     "maxDifficulty": "medium",
     "progressionSpeed": "VARIAble",
     "missileQty": "3.5",
-    "bossRandomization": "on",
+    "bossesRandomization": "G4",
     "gravityBehaviour": "Progressive",
     "itemsounds": "off",
     "elevators_speed": "off",

@@ -5,7 +5,7 @@
   "progressionSpeed": "speedrun",
   "areaRandomization": "full",
   "areaLayout": "on",
-  "bossRandomization": "on",
+  "bossesRandomization": "G4",
   "escapeRando": "off",
   "maxDifficulty": "harder",
   "preset": "Season_Races",

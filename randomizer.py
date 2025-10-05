@@ -40,8 +40,8 @@ bossRandoFlags = {
     "Off": 0,
     "G4": BossAccessPointFlags.G4,
     "Minibosses": BossAccessPointFlags.MiniBoss,
-    "All_Mixed": BossAccessPointFlags.G4 | BossAccessPointFlags.MiniBoss,
-    "All_Split": BossAccessPointFlags.G4 | BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Split
+    "All Mixed": BossAccessPointFlags.G4 | BossAccessPointFlags.MiniBoss,
+    "All Split": BossAccessPointFlags.G4 | BossAccessPointFlags.MiniBoss | BossAccessPointFlags.Split
 }
 
 def randomMulti(args, param, defaultMultiValues):
@@ -440,7 +440,7 @@ if __name__ == "__main__":
     logger.debug("doorsColorsRando: {}".format(args.doorsColorsRando))
 
     # boss rando
-    logger.debug("bosses: {}".format(bossesRandomization))
+    logger.debug("bosses: {}".format(args.bossesRandomization))
 
     # escape rando
     if args.escapeRando == 'random':

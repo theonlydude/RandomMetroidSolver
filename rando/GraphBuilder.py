@@ -70,8 +70,6 @@ class GraphBuilder(object):
                     transitions += GraphUtils.createBossesTransitions(self.bossRando)
                 self.log.debug(f"Post-Boss transitions ({len(transitions)}): {transitions}")
                 # special case of Croc: we have to juggle with transitions because it is both an area and a boss transition
-                if self.areaRando and not self.bossRando:
-                    transitions.remove(('CrocomireFrontDoorOut', 'CrocomireFrontDoorIn'))
                 if self.bossRando & BossAccessPointFlags.MiniBoss:
                     def getTransitionAndConnection(apName):
                         nonlocal transitions
@@ -86,6 +84,8 @@ class GraphBuilder(object):
                     transitions.remove(crocBossTransition)
                     transitions.append((crocAreaConnection, crocBossConnection))
                     accessPoints[crocAreaConnection].Boss = BossAccessPointFlags.MiniBoss
+                elif self.areaRando:
+                    transitions.remove(('CrocomireFrontDoorOut', 'CrocomireFrontDoorIn'))
                 self.log.debug(f"Post-Croc transitions ({len(transitions)}): {transitions}")
         ret = AccessGraph(accessPoints.values(), transitions, self.graphSettings.dotFile) # create graph with our copied APs
         Objectives.setGraph(ret, maxDiff)

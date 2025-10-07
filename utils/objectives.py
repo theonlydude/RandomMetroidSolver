@@ -134,7 +134,7 @@ class Goal(object):
             print(e)
             outLen = maxLen + 1
         assert outLen <= maxLen, "Goal '{}' text is too long: '{}'".format(self.name, out)
-        out = out.rstrip()        
+        out = out.rstrip()
         # as we can save the plando multiple time in the same instance we have to use new intro text each time
         if self.introText is not None:
             self.curIntroText = idxTxt + self.introText
@@ -295,9 +295,8 @@ def getAreaAccessPointsNames(area):
 def getAreaLocations(area):
     return [loc.Name for loc in Objectives.accessibleLocations if loc.GraphArea == area]
 
-GTsettingsConflict = lambda settings: settings.qty['energy'] == 'ultra sparse' and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))
-
-exploreSettingsConflict = lambda settings: settings.qty['energy'] == 'ultra sparse'
+exploreSettingsConflict = lambda settings: settings.qty['energy'] == 'ultra sparse' or settings.qty['energy'] == 'dread'
+GTsettingsConflict = lambda settings: exploreSettingsConflict(settings) and (not Knows.LowStuffGT or (Knows.LowStuffGT.difficulty > settings.maxDiff))
 
 _goalsList = [
     # bosses
@@ -546,7 +545,7 @@ _goalsList = [
          introText="explore 75 percent of map",
          category="Map"),
     Goal("explore 100% map", "map", lambda sm, ap: sm.wand(Objectives.canExploreMap(sm, ap),
-                                                           sm.canExploreAmphitheater(), # requires SJ, so covers Croc 
+                                                           sm.canExploreAmphitheater(), # requires SJ, so covers Croc
                                                            sm.canGoUpMtEverest(),
                                                            sm.canPassCacatacAlleyEastToWest()),
          "explored_map_100", romInProgressFunc="explored_all_map_percent",
@@ -558,7 +557,6 @@ _goalsList = [
          category="Map"),
     Goal("explore crateria", "map", lambda sm, ap: Objectives.canExploreArea(sm, ap, "Crateria"),
          "crateria_explored", romInProgressFunc="crateria_explored_percent",
-         conflictFunc=exploreSettingsConflict,
          text="Explore Crateria",
          category="Map",
          objCompletedFuncVisit=lambda ap: (getAreaAccessPointsNames("Crateria"), getAreaLocations("Crateria")),

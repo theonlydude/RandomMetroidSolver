@@ -306,9 +306,6 @@ loc.AccessFrom = {
 loc.Available = (
     lambda sm: SMBool(True)
 )
-loc.PostAvailable = (
-    lambda sm: sm.canExitScrewAttackArea()
-)
 
 
 loc = locationsDict["Energy Tank, Firefleas"]
@@ -318,16 +315,16 @@ loc.AccessFrom = {
 loc.Available = (
     lambda sm: sm.wor(RomPatches.has(RomPatches.FirefleasRemoveFune),
                       # get past the fune
-                                     sm.haveItem('Super'),
+                      sm.haveItem('Super'),
                       sm.canPassBombPassages(),
                       sm.canUseSpringBall())
 )
 loc.PostAvailable = (
     lambda sm: sm.wor(sm.knowsFirefleasWalljump(),
-                      sm.wor(sm.haveItem('Ice'),
-                             sm.haveItem('HiJump'),
-                             sm.canFly(),
-                             sm.canSpringBallJump()))
+                      sm.haveItem('Ice'),
+                      sm.haveItem('HiJump'),
+                      sm.canFly(),
+                      sm.canSpringBallJump())
 )
 
 
@@ -457,7 +454,7 @@ loc.Available = (
 loc = locationsDict["Space Jump"]
 loc.AccessFrom = {
     'DraygonBackDoorIn': lambda sm: SMBool(True),
-    'Draygon Room Bottom': lambda sm: sm.canDefeatDraygon()
+    'Draygon Room Bottom': lambda sm: sm.wor(Bosses.bossDead(sm, 'Draygon'), sm.canDefeatDraygon())
 }
 loc.Available = (
     lambda sm: SMBool(True)

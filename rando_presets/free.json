@@ -13,7 +13,7 @@
   "progressionSpeed": "fastest",
   "areaRandomization": "off",
   "escapeRando": "off",
-  "bossRandomization": "off",
+  "bossesRandomization": "Off",
   "maxDifficulty": "easy",
   "powerBombQty": "1",
   "minorQty": "100",

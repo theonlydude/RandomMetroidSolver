@@ -29,7 +29,7 @@
   "funSuits": "off",
   "variaTweaks": "off",
   "nerfedCharge": "on",
-  "bossRandomization": "off",
+  "bossesRandomization": "Off",
   "rando_speed": "off",
   "doorsColorsRando": "off"
 }

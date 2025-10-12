@@ -15,7 +15,7 @@
   "progressionSpeed": "speedrun",
   "No_Music": "off",
   "areaRandomization": "off",
-  "bossRandomization": "off",
+  "bossesRandomization": "Off",
   "escapeRando": "off",
   "maxDifficulty": "hardcore",
   "powerBombQty": "1",

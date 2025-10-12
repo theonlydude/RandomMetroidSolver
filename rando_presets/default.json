@@ -27,7 +27,7 @@
     "areaLayout": "on",
     "doorsColorsRando": "off",
     "allowGreyDoors": "off",
-    "bossRandomization": "off",
+    "bossesRandomization": "Off",
     "minimizer": "off",
     "minimizerQty": "45",
     "tourian": "Vanilla",

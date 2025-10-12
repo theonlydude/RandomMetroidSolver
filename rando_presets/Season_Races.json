@@ -36,7 +36,7 @@
   "energyQty": "vanilla",
   "funSuits": "off",
   "variaTweaks": "off",
-  "bossRandomization": "off",
+  "bossesRandomization": "Off",
   "nerfedCharge": "off",
   "rando_speed": "off",
   "doorsColorsRando": "off"

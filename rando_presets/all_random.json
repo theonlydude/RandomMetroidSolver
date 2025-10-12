@@ -16,7 +16,7 @@
   "nbObjective": "random",
   "nbObjectivesRequired": "random",
   "areaRandomization": "random",
-  "bossRandomization": "random",
+  "bossesRandomization": "random",
   "maxDifficulty": "hardcore",
   "powerBombQty": "random",
   "minorQty": "random",

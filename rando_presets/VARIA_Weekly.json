@@ -24,7 +24,7 @@
   "areaRandomization": "off",
   "escapeRando": "off",
   "removeEscapeEnemies": "off",
-  "bossRandomization": "off",
+  "bossesRandomization": "Off",
   "funCombat": "off",
   "funMovement": "off",
   "funSuits": "off",

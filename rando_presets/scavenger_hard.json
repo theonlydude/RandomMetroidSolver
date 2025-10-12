@@ -13,7 +13,7 @@
     "funSuits": "random",
     "hud": "on",
     "areaRandomization": "random",
-    "bossRandomization": "random",
+    "bossesRandomization": "random",
     "escapeRando": "random",
     "doorsColorsRando": "random"
 }

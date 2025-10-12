@@ -371,7 +371,7 @@ def loadRandoPreset(randoPreset, args):
 
     args.doorsColorsRando = convertParam(randoParams, "doorsColorsRando")
     args.allowGreyDoors = convertParam(randoParams, "allowGreyDoors")
-    args.bossesRandomization = convertParam(randoParams, "bossesRandomization")
+    args.bossesRandomization = randoParams["bossesRandomization"]
 
     if randoParams.get("funCombat", "off") != "off":
         if randoParams["funCombat"] == "on":
@@ -528,7 +528,7 @@ def getRandomizerDefaultParameters():
     defaultParams['allowGreyDoors'] = "off"
     defaultParams['escapeRando'] = "off"
     defaultParams['removeEscapeEnemies'] = "off"
-    defaultParams['bossesRandomization'] = "off"
+    defaultParams['bossesRandomization'] = "Off"
     defaultParams['bossesRandomizationMultiSelect'] = defaultMultiValues['bossesRandomization']
     defaultParams['minimizer'] = "off"
     defaultParams['minimizerQty'] = "45"

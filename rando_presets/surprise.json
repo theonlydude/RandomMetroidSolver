@@ -4,7 +4,7 @@
   "startLocation": "random",
   "areaRandomization": "random",
   "escapeRando": "random",
-  "bossRandomization": "random",
+  "bossesRandomization": "random",
   "doorsColorsRando": "random",
   "hideItems": "off",
   "funCombat": "off",

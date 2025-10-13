@@ -129,6 +129,7 @@ class Symbols(object):
         self._symbolsAbsolute[absSymName] = addr
 
     def getAddress(self, namespaceOrAbsoluteSymbol, localSymbol=None):
+        self.log.debug(f"getAddress: {namespaceOrAbsoluteSymbol}:{str(localSymbol)}")
         if localSymbol is None:
             addr = self._symbolsAbsolute.get(namespaceOrAbsoluteSymbol)
         else:

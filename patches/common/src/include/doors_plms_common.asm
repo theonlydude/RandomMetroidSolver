@@ -119,8 +119,7 @@ main_list_indicator_<req>_<direction>:
 endmacro
 
 macro defineIndicatorPLM(req,direction)
-print "plm_indicator_<req>_<direction>: ", pc
-plm_indicator_<req>_<direction>:
+%export(plm_indicator_<req>_<direction>)
 	dw $C7B1
 	dw main_list_indicator_<req>_<direction>
 	dw close_list_indicator_<req>_<direction>

@@ -19,29 +19,6 @@ class Facing(IntEnum):
     Top = 2
     Bottom = 3
 
-# door facing left - right - top   - bottom
-plmRed    = [0xc88a, 0xc890, 0xc896, 0xc89c]
-plmGreen  = [0xc872, 0xc878, 0xc87e, 0xc884]
-plmYellow = [0xc85a, 0xc860, 0xc866, 0xc86c]
-plmGrey   = [0xc842, 0xc848, 0xc84e, 0xc854]
-plmWave   = [0xf763, 0xf769, 0xf70f, 0xf715]
-plmSpazer = [0xf733, 0xf739, 0xf73f, 0xf745]
-plmPlasma = [0xf74b, 0xf751, 0xf757, 0xf75d]
-plmIce    = [0xf71b, 0xf721, 0xf727, 0xf72d]
-
-plmFacing = {plms[f]: f for plms in [plmRed, plmGreen, plmYellow, plmGrey, plmWave, plmSpazer, plmPlasma, plmIce] for f in Facing}
-
-colors2plm = {
-    'red': plmRed,
-    'green': plmGreen,
-    'yellow': plmYellow,
-    'grey': plmGrey,
-    'wave': plmWave,
-    'spazer': plmSpazer,
-    'plasma': plmPlasma,
-    'ice': plmIce
-}
-
 # door color indicators PLMs (flashing on the other side of colored doors)
 indicatorsDirection = {
     Facing.Left: Facing.Right,
@@ -50,26 +27,7 @@ indicatorsDirection = {
     Facing.Bottom: Facing.Top
 }
 
-# door facing        left -   right - top   - bottom
-plmRedIndicator    = [0xFBB0, 0xFBB6, 0xFBBC, 0xFBC2]
-plmGreenIndicator  = [0xFBC8, 0xFBCE, 0xFBD4, 0xFBDA]
-plmYellowIndicator = [0xFBE0, 0xFBE6, 0xFBEC, 0xFBF2]
-plmGreyIndicator   = [0xFBF8, 0xFBFE, 0xFC04, 0xFC0A]
-plmWaveIndicator   = [0xF60B, 0xF611, 0xF617, 0xF61D]
-plmSpazerIndicator = [0xF63B, 0xF641, 0xF647, 0xF64D]
-plmPlasmaIndicator = [0xF623, 0xF629, 0xF62F, 0xF635]
-plmIceIndicator    = [0xF653, 0xF659, 0xF65F, 0xF665]
-
-colors2plmIndicator = {
-    'red': plmRedIndicator,
-    'green': plmGreenIndicator,
-    'yellow': plmYellowIndicator,
-    'grey': plmGreyIndicator,
-    'wave': plmWaveIndicator,
-    'spazer': plmSpazerIndicator,
-    'plasma': plmPlasmaIndicator,
-    'ice': plmIceIndicator
-}
+colors2plmIndicator = None
 
 class IndicatorFlag(IntFlag):
     Standard = 1
@@ -81,8 +39,45 @@ IndicatorAll = IndicatorFlag.Standard | IndicatorFlag.AreaRando | IndicatorFlag.
 # indicator there when not in area rando
 IndicatorDoor = IndicatorFlag.Standard | IndicatorFlag.DoorRando
 
+colorSymbols = {
+    "red": "missile",
+    "green": "super",
+    "yellow": "PB",
+    "grey": "none"
+}
+
+directions = ["left", "right", "top", "bottom"]
+beams = ["wave", "spazer", "plasma", "ice"]
+
+class DoorsAddresses(object):
+    _instance = None
+
+    def Instance(symbols):
+        if DoorsAddresses._instance is None:
+            DoorsAddresses._instance = DoorsAddresses(symbols)
+        return DoorsAddresses._instance
+
+    def __init__(self, symbols):
+        getReq = lambda color: colorSymbols[color] if color in colorSymbols else color
+        beamDoorPLM = lambda color, dir: symbols.getAddress("beam_doors_plms", f"plm_{getReq(color)}_{dir}") & 0xffff
+        indicatorPatch = "door_indicators_plms"
+        indicatorPLM = lambda color, dir: symbols.getAddress(indicatorPatch, f"plm_indicator_{getReq(color)}_{dir}") & 0xffff
+        self.doorPLMs = {
+            # door facing left - right - top   - bottom
+            "red": [0xc88a, 0xc890, 0xc896, 0xc89c],
+            "green": [0xc872, 0xc878, 0xc87e, 0xc884],
+            "yellow": [0xc85a, 0xc860, 0xc866, 0xc86c],
+            "grey": [0xc842, 0xc848, 0xc84e, 0xc854]
+        }
+        self.indicatorPLMs = {color:[indicatorPLM(color, direction) for direction in directions] for color in self.doorPLMs.keys()}
+        indicatorPatch = "beam_doors_plms"
+        for beam in beams:
+            self.doorPLMs[beam] = [beamDoorPLM(beam, direction) for direction in directions]
+            self.indicatorPLMs[beam] = [indicatorPLM(beam, direction) for direction in directions]
+        self.plmInfoById = {plms[f]: (f, color) for color, plms in self.doorPLMs.items() for f in Facing}
+
 class Door(object):
-    __slots__ = ('name', 'canRandom', 'address', 'vanillaColor', 'color', 'forced', 'facing', 'hidden', 'id', 'canGrey', 'forbiddenColors','indicator')
+    __slots__ = ('name', 'canRandom', 'address', 'vanillaColor', 'color', 'forced', 'facing', 'hidden', 'id', 'canGrey', 'forbiddenColors','indicator', 'doorsAddresses')
     def __init__(self, name, canRandom, vanillaColor, id, canGrey=False, forbiddenColors=None, indicator=0):
         self.name = name
         self.canRandom = canRandom
@@ -95,11 +90,13 @@ class Door(object):
         # list of forbidden colors
         self.forbiddenColors = forbiddenColors
         self.indicator = indicator
+        self.doorsAddresses = None
 
     def vanilla(self):
         self.setColor(self.vanillaColor)
 
     def setAddress(self, symbols):
+        self.doorsAddresses = DoorsAddresses.Instance(symbols)
         # using door id get symbol label containing PLM id and its associated address
         # labels are: Door_95_Room_D48E_PLM_C884, need namespace as prefix: bank_8f
         labelRegex = 'Door_{0:0{1}X}_Room_[0-9A-Z]*_PLM_[0-9A-Z]*'.format(self.id, 2)
@@ -112,7 +109,7 @@ class Door(object):
 
         # get facing from plm id
         plmId = int(label[-4:], 16)
-        self.facing = plmFacing[plmId]
+        self.facing = self.doorsAddresses.plmInfoById[plmId][0]
 
     def forceBlue(self):
         # custom start location, area, patches can force doors to blue
@@ -181,7 +178,7 @@ class Door(object):
         if self.isBlue() or self.isRefillSave():
             return
 
-        writeWordFunc(colors2plm[self.color][self.facing], snes_to_pc(self.address))
+        writeWordFunc(self.doorsAddresses.doorPLMs[self.color][self.facing], snes_to_pc(self.address))
 
         # also set plm args high byte to never opened, even during escape
         if self.color == 'grey':
@@ -200,24 +197,10 @@ class Door(object):
     def readColor(self, rom, readWordFunc):
         if self.forced or self.isRefillSave():
             return
-
         plm = readWordFunc(snes_to_pc(self.address))
-        if plm in plmRed:
-            self.setColor('red')
-        elif plm in plmGreen:
-            self.setColor('green')
-        elif plm in plmYellow:
-            self.setColor('yellow')
-        elif plm in plmGrey:
-            self.setColor('grey')
-        elif plm in plmWave:
-            self.setColor('wave')
-        elif plm in plmSpazer:
-            self.setColor('spazer')
-        elif plm in plmPlasma:
-            self.setColor('plasma')
-        elif plm in plmIce:
-            self.setColor('ice')
+        plmInfo = self.doorsAddresses.plmInfoById.get(plm)
+        if plmInfo is not None:
+            self.setColor(plmInfo[1])
         else:
             # we can't read the color, handle as grey door (can happen in race protected seeds)
             self.setColor('grey')
@@ -225,8 +208,8 @@ class Door(object):
     # gives the PLM ID for matching indicator door
     def getIndicatorPLM(self, indicatorFlags):
         ret = None
-        if (indicatorFlags & self.indicator) != 0 and self.color in colors2plmIndicator:
-            ret = colors2plmIndicator[self.color][indicatorsDirection[self.facing]]
+        if (indicatorFlags & self.indicator) != 0 and self.color in self.doorsAddresses.indicatorPLMs:
+            ret = self.doorsAddresses.indicatorPLMs[self.color][indicatorsDirection[self.facing]]
         return ret
 
     # for tracker

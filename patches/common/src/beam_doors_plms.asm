@@ -35,264 +35,264 @@ set_open_bottom:
 ;;; Also removed the copy-pasted "blink when shot" loop, useless as only one shot is
 ;;; needed to open doors.
 
-   close_list_wave_left: dw $0008,$A677,$0002,$A90B,$8C19     ;  
-                       db $15                               ;  
-                       dw $0002,$A8FF,$0002,$A8F3,$0001     ;  
+   close_list_wave_left: dw $0008,$A677,$0002,$A90B,$8C19     ;
+                       db $15                               ;
+                       dw $0002,$A8FF,$0002,$A8F3,$0001     ;
                        dw draw_wave_left                    ; ptr to draw instructions
-                                                            ;  
-  main_list_wave_left: dw $8A72,$C4B1,$8A24                 ;  
+                                                            ;
+  main_list_wave_left: dw $8A72,$C4B1,$8A24                 ;
 			dw set_open_left
-                       dw $86C1                             ;  
+                       dw $86C1                             ;
                        dw check_wave                        ; ptr to hit check code
-                       dw $0001                             ;  
+                       dw $0001                             ;
                        dw draw_wave_left                    ; ptr to draw instructions
-        DATA16_84F05E: dw $86B4                             ;  
+        DATA16_84F05E: dw $86B4                             ;
                                 ;
 
-   close_list_wave_right: dw $0008,$A683,$0002,$A93B,$8C19     ;  
-                       db $15                               ;  
-                       dw $0002,$A92F,$0002,$A923,$0001     ;  
+   close_list_wave_right: dw $0008,$A683,$0002,$A93B,$8C19     ;
+                       db $15                               ;
+                       dw $0002,$A92F,$0002,$A923,$0001     ;
                        dw draw_wave_right                    ; ptr to draw instructions
-                                                            ;  
-  main_list_wave_right: dw $8A72,$C4E2,$8A24                 ;  
+                                                            ;
+  main_list_wave_right: dw $8A72,$C4E2,$8A24                 ;
 			dw set_open_right
-                       dw $86C1                             ;  
+                       dw $86C1                             ;
                        dw check_wave                        ; ptr to hit check code
-                       dw $0001                             ;  
+                       dw $0001                             ;
                        dw draw_wave_right                    ; ptr to draw instructions
-        DATA16_84F0C0: dw $86B4                             ;  
-                                                            ;  
-   close_list_wave_top: dw $0002,$A68F,$0002,$A96B,$8C19     ;  
-                       db $08                               ;  
-                       dw $0002,$A95F,$0002,$A953,$0001     ;  
+        DATA16_84F0C0: dw $86B4                             ;
+                                                            ;
+   close_list_wave_top: dw $0002,$A68F,$0002,$A96B,$8C19     ;
+                       db $08                               ;
+                       dw $0002,$A95F,$0002,$A953,$0001     ;
                        dw draw_wave_top                    ; ptr to draw instructions
-                                                            ;  
-  main_list_wave_top: dw $8A72,$C513,$8A24                 ;  
+                                                            ;
+  main_list_wave_top: dw $8A72,$C513,$8A24                 ;
 			dw set_open_top
-                       dw $86C1                             ;  
+                       dw $86C1                             ;
                        dw check_wave                        ; ptr to hit check code
-                       dw $0001                             ;  
+                       dw $0001                             ;
                        dw draw_wave_top                    ; ptr to draw instructions
-        DATA16_84F122: dw $86B4                             ;  
-                                                            ;  
-   close_list_wave_bottom: dw $0008,$A69B,$0002,$A99B,$8C19     ;  
-                       db $08                               ;  
-                       dw $0002,$A98F,$0002,$A983,$0001     ;  
+        DATA16_84F122: dw $86B4                             ;
+                                                            ;
+   close_list_wave_bottom: dw $0008,$A69B,$0002,$A99B,$8C19     ;
+                       db $08                               ;
+                       dw $0002,$A98F,$0002,$A983,$0001     ;
                        dw draw_wave_bottom                    ; ptr to draw instructions
-                                                            ;  
-  main_list_wave_bottom: dw $8A72,$C544,$8A24                 ;  
+                                                            ;
+  main_list_wave_bottom: dw $8A72,$C544,$8A24                 ;
 			dw set_open_bottom
-                       dw $86C1                             ;  
+                       dw $86C1                             ;
                        dw check_wave                        ; ptr to hit check code
-                       dw $0001                             ;  
+                       dw $0001                             ;
                        dw draw_wave_bottom                    ; ptr to draw instructions
-        DATA16_84F184: dw $86B4                             ;  
-                                                            ;  
-    close_list_ice_left: dw $0008,$A677,$0002,$A90B,$8C19     ;  
-                       db $15                               ;  
-                       dw $0002,$A8FF,$0002,$A8F3,$0001     ;  
+        DATA16_84F184: dw $86B4                             ;
+                                                            ;
+    close_list_ice_left: dw $0008,$A677,$0002,$A90B,$8C19     ;
+                       db $15                               ;
+                       dw $0002,$A8FF,$0002,$A8F3,$0001     ;
                        dw draw_ice_left                     ; ptr to draw instructions
-                                                            ;  
-   main_list_ice_left: dw $8A72,$C4B1,$8A24                 ;  
+                                                            ;
+   main_list_ice_left: dw $8A72,$C4B1,$8A24                 ;
 			dw set_open_left
-                       dw $86C1                             ;  
+                       dw $86C1                             ;
                        dw check_ice                         ; ptr to hit check code
-                       dw $0001                             ;  
+                       dw $0001                             ;
                        dw draw_ice_left                     ; ptr to draw instructions
-        DATA16_84F1E6: dw $86B4                             ;  
-                                                            ;  
-    close_list_ice_right: dw $0008,$A683,$0002,$A93B,$8C19     ;  
-                       db $15                               ;  
-                       dw $0002,$A92F,$0002,$A923,$0001     ;  
+        DATA16_84F1E6: dw $86B4                             ;
+                                                            ;
+    close_list_ice_right: dw $0008,$A683,$0002,$A93B,$8C19     ;
+                       db $15                               ;
+                       dw $0002,$A92F,$0002,$A923,$0001     ;
                        dw draw_ice_right                     ; ptr to draw instructions
-                                                            ;  
-   main_list_ice_right: dw $8A72,$C4E2,$8A24                 ;  
+                                                            ;
+   main_list_ice_right: dw $8A72,$C4E2,$8A24                 ;
 			dw set_open_right
-                       dw $86C1                             ;  
+                       dw $86C1                             ;
                        dw check_ice                         ; ptr to hit check code
-                       dw $0001                             ;  
+                       dw $0001                             ;
                        dw draw_ice_right                     ; ptr to draw instructions
-        DATA16_84F248: dw $86B4                             ;  
-                                                            ;  
-    close_list_ice_top: dw $0002,$A68F,$0002,$A96B,$8C19     ;  
-                       db $08                               ;  
-                       dw $0002,$A95F,$0002,$A953,$0001     ;  
+        DATA16_84F248: dw $86B4                             ;
+                                                            ;
+    close_list_ice_top: dw $0002,$A68F,$0002,$A96B,$8C19     ;
+                       db $08                               ;
+                       dw $0002,$A95F,$0002,$A953,$0001     ;
                        dw draw_ice_top                     ; ptr to draw instructions
-                                                            ;  
-   main_list_ice_top: dw $8A72,$C513,$8A24                 ;  
+                                                            ;
+   main_list_ice_top: dw $8A72,$C513,$8A24                 ;
 			dw set_open_top
-                       dw $86C1                             ;  
+                       dw $86C1                             ;
                        dw check_ice                         ; ptr to hit check code
-                       dw $0001                             ;  
+                       dw $0001                             ;
                        dw draw_ice_top                     ; ptr to draw instructions
-        DATA16_84F2AA: dw $86B4                             ;  
-                                                            ;  
-    close_list_ice_bottom: dw $0008,$A69B,$0002,$A99B,$8C19     ;  
-                       db $08                               ;  
-                       dw $0002,$A98F,$0002,$A983,$0001     ;  
+        DATA16_84F2AA: dw $86B4                             ;
+                                                            ;
+    close_list_ice_bottom: dw $0008,$A69B,$0002,$A99B,$8C19     ;
+                       db $08                               ;
+                       dw $0002,$A98F,$0002,$A983,$0001     ;
                        dw draw_ice_bottom                     ; ptr to draw instructions
-                                                            ;  
-   main_list_ice_bottom: dw $8A72,$C544,$8A24                 ;  
+                                                            ;
+   main_list_ice_bottom: dw $8A72,$C544,$8A24                 ;
 			dw set_open_bottom
-                       dw $86C1                             ;  
+                       dw $86C1                             ;
                        dw check_ice                         ; ptr to hit check code
-                       dw $0001                             ;  
+                       dw $0001                             ;
                        dw draw_ice_bottom                     ; ptr to draw instructions
-        DATA16_84F30C: dw $86B4                             ;  
-                                                            ;  
-   close_list_spazer_left: dw $0008,$A677,$0002,$A90B,$8C19     ;  
-                       db $15                               ;  
-                       dw $0002,$A8FF,$0002,$A8F3,$0001     ;  
+        DATA16_84F30C: dw $86B4                             ;
+                                                            ;
+   close_list_spazer_left: dw $0008,$A677,$0002,$A90B,$8C19     ;
+                       db $15                               ;
+                       dw $0002,$A8FF,$0002,$A8F3,$0001     ;
                        dw draw_spazer_left                    ; ptr to draw instructions
-                                                            ;  
-  main_list_spazer_left: dw $8A72,$C4B1,$8A24                 ;  
+                                                            ;
+  main_list_spazer_left: dw $8A72,$C4B1,$8A24                 ;
 			dw set_open_left
-                       dw $86C1                             ;  
+                       dw $86C1                             ;
                        dw check_spazer                      ; ptr to hit check code
-                       dw $0001                             ;  
+                       dw $0001                             ;
                        dw draw_spazer_left                    ; ptr to draw instructions
-        DATA16_84F36E: dw $86B4                             ;  
-                                                            ;  
-   close_list_spazer_right: dw $0008,$A683,$0002,$A93B,$8C19     ;  
-                       db $15                               ;  
-                       dw $0002,$A92F,$0002,$A923,$0001     ;  
+        DATA16_84F36E: dw $86B4                             ;
+                                                            ;
+   close_list_spazer_right: dw $0008,$A683,$0002,$A93B,$8C19     ;
+                       db $15                               ;
+                       dw $0002,$A92F,$0002,$A923,$0001     ;
                        dw draw_spazer_right                    ; ptr to draw instructions
-                                                            ;  
-  main_list_spazer_right: dw $8A72,$C4E2,$8A24                 ;  
+                                                            ;
+  main_list_spazer_right: dw $8A72,$C4E2,$8A24                 ;
 			dw set_open_right
-                       dw $86C1                             ;  
+                       dw $86C1                             ;
                        dw check_spazer                      ; ptr to hit check code
-                       dw $0001                             ;  
+                       dw $0001                             ;
                        dw draw_spazer_right                    ; ptr to draw instructions
-        DATA16_84F3D0: dw $86B4                             ;  
-                                                            ;  
-   close_list_spazer_top: dw $0002,$A68F,$0002,$A96B,$8C19     ;  
-                       db $08                               ;  
-                       dw $0002,$A95F,$0002,$A953,$0001     ;  
+        DATA16_84F3D0: dw $86B4                             ;
+                                                            ;
+   close_list_spazer_top: dw $0002,$A68F,$0002,$A96B,$8C19     ;
+                       db $08                               ;
+                       dw $0002,$A95F,$0002,$A953,$0001     ;
                        dw draw_spazer_top                    ; ptr to draw instructions
-                                                            ;  
-  main_list_spazer_top: dw $8A72,$C513,$8A24                 ;  
+                                                            ;
+  main_list_spazer_top: dw $8A72,$C513,$8A24                 ;
 			dw set_open_top
-                       dw $86C1                             ;  
+                       dw $86C1                             ;
                        dw check_spazer                      ; ptr to hit check code
-                       dw $0001                             ;  
+                       dw $0001                             ;
                        dw draw_spazer_top                    ; ptr to draw instructions
-        DATA16_84F432: dw $86B4                             ;  
-                                                            ;  
-   close_list_spazer_bottom: dw $0008,$A69B,$0002,$A99B,$8C19     ;  
-                       db $08                               ;  
-                       dw $0002,$A98F,$0002,$A983,$0001     ;  
+        DATA16_84F432: dw $86B4                             ;
+                                                            ;
+   close_list_spazer_bottom: dw $0008,$A69B,$0002,$A99B,$8C19     ;
+                       db $08                               ;
+                       dw $0002,$A98F,$0002,$A983,$0001     ;
                        dw draw_spazer_bottom                    ; ptr to draw instructions
-                                                            ;  
-  main_list_spazer_bottom: dw $8A72,$C544,$8A24                 ;  
+                                                            ;
+  main_list_spazer_bottom: dw $8A72,$C544,$8A24                 ;
 			dw set_open_bottom
-                       dw $86C1                             ;  
+                       dw $86C1                             ;
                        dw check_spazer                      ; ptr to hit check code
-                       dw $0001                             ;  
+                       dw $0001                             ;
                        dw draw_spazer_bottom                    ; ptr to draw instructions
-        DATA16_84F494: dw $86B4                             ;  
-                                                            ;  
-   close_list_plasma_left: dw $0008,$A677,$0002,$A90B,$8C19     ;  
-                       db $15                               ;  
-                       dw $0002,$A8FF,$0002,$A8F3,$0001     ;  
+        DATA16_84F494: dw $86B4                             ;
+                                                            ;
+   close_list_plasma_left: dw $0008,$A677,$0002,$A90B,$8C19     ;
+                       db $15                               ;
+                       dw $0002,$A8FF,$0002,$A8F3,$0001     ;
                        dw draw_plasma_left                    ; ptr to draw instructions
-                                                            ;  
-  main_list_plasma_left: dw $8A72,$C4B1,$8A24                 ;  
+                                                            ;
+  main_list_plasma_left: dw $8A72,$C4B1,$8A24                 ;
 			dw set_open_left
-                       dw $86C1                             ;  
+                       dw $86C1                             ;
                        dw check_plasma                      ; ptr to hit check code
-                       dw $0001                             ;  
+                       dw $0001                             ;
                        dw draw_plasma_left                    ; ptr to draw instructions
-        DATA16_84F4F6: dw $86B4                             ;  
-                                                            ;  
-   close_list_plasma_right: dw $0008,$A683,$0002,$A93B,$8C19     ;  
-                       db $15                               ;  
-                       dw $0002,$A92F,$0002,$A923,$0001     ;  
+        DATA16_84F4F6: dw $86B4                             ;
+                                                            ;
+   close_list_plasma_right: dw $0008,$A683,$0002,$A93B,$8C19     ;
+                       db $15                               ;
+                       dw $0002,$A92F,$0002,$A923,$0001     ;
                        dw draw_plasma_right                    ; ptr to draw instructions
-                                                            ;  
-  main_list_plasma_right: dw $8A72,$C4E2,$8A24                 ;  
+                                                            ;
+  main_list_plasma_right: dw $8A72,$C4E2,$8A24                 ;
 			dw set_open_right
-                       dw $86C1                             ;  
+                       dw $86C1                             ;
                        dw check_plasma                      ; ptr to hit check code
-                       dw $0001                             ;  
+                       dw $0001                             ;
                        dw draw_plasma_right                    ; ptr to draw instructions
-        DATA16_84F558: dw $86B4                             ;  
-                                                            ;  
-   close_list_plasma_top: dw $0002,$A68F,$0002,$A96B,$8C19     ;  
-                       db $08                               ;  
-                       dw $0002,$A95F,$0002,$A953,$0001     ;  
+        DATA16_84F558: dw $86B4                             ;
+                                                            ;
+   close_list_plasma_top: dw $0002,$A68F,$0002,$A96B,$8C19     ;
+                       db $08                               ;
+                       dw $0002,$A95F,$0002,$A953,$0001     ;
                        dw draw_plasma_top                    ; ptr to draw instructions
-                                                            ;  
-  main_list_plasma_top: dw $8A72,$C513,$8A24                 ;  
+                                                            ;
+  main_list_plasma_top: dw $8A72,$C513,$8A24                 ;
 			dw set_open_top
-                       dw $86C1                             ;  
+                       dw $86C1                             ;
                        dw check_plasma                      ; ptr to hit check code
-                       dw $0001                             ;  
+                       dw $0001                             ;
                        dw draw_plasma_top                    ; ptr to draw instructions
-        DATA16_84F5BA: dw $86B4                             ;  
-                                                            ;  
-   close_list_plasma_bottom: dw $0008,$A69B,$0002,$A99B,$8C19     ;  
-                       db $08                               ;  
-                       dw $0002,$A98F,$0002,$A983,$0001     ;  
+        DATA16_84F5BA: dw $86B4                             ;
+                                                            ;
+   close_list_plasma_bottom: dw $0008,$A69B,$0002,$A99B,$8C19     ;
+                       db $08                               ;
+                       dw $0002,$A98F,$0002,$A983,$0001     ;
                        dw draw_plasma_bottom                    ; ptr to draw instructions
-                                                            ;  
-  main_list_plasma_bottom: dw $8A72,$C544,$8A24                 ;  
+                                                            ;
+  main_list_plasma_bottom: dw $8A72,$C544,$8A24                 ;
 			dw set_open_bottom
-                       dw $86C1                             ;  
+                       dw $86C1                             ;
                        dw check_plasma                      ; ptr to hit check code
-                       dw $0001                             ;  
+                       dw $0001                             ;
                        dw draw_plasma_bottom                    ; ptr to draw instructions
-        DATA16_84F61C: dw $86B4                             ;  
+        DATA16_84F61C: dw $86B4                             ;
 
 ;; Beam Doors checker functions, disassembled and factorized from original patch.
 ;; Added extra check for spazer/plasma doors to avoid beam switching
            check_wave: jsr check_beam : beq no_hit
-                       LDA.W $1D77,X                        ;  
-                       bit #$0001                         ;  
+                       LDA.W $1D77,X                        ;
+                       bit #$0001                         ;
                        bne open_door
                        bra no_hit
-                                                            ;  
+                                                            ;
             check_ice: jsr check_beam : beq no_hit
-                       LDA.W $1D77,X                        ;  
-                       bit #$0002                         ;  
+                       LDA.W $1D77,X                        ;
+                       bit #$0002                         ;
                        bne open_door
                        bra no_hit
-                                                            ;  
+                                                            ;
          check_spazer: jsr check_beam : beq no_hit
                        LDA.W $1D77,X                        ;
                        bit #$0004                         ;
                        bne open_door
 			;; if plasma and spazer are collected, check for plasma hit
 	               lda $09a8 : and #$000c : cmp #$000c : bne no_hit
-                       LDA.W $1D77,X                        ;  
-                       bit #$0008                         ;  
+                       LDA.W $1D77,X                        ;
+                       bit #$0008                         ;
                        bne open_door
                        bra no_hit
-                                                            ;  
+                                                            ;
          check_plasma: jsr check_beam : beq no_hit
-                       LDA.W $1D77,X                        ;  
-                       bit #$0008                         ;  
+                       LDA.W $1D77,X                        ;
+                       bit #$0008                         ;
                        bne open_door
 			;; if plasma and spazer are collected, check for spazer hit
 	               lda $09a8 : and #$000c : cmp #$000c : bne no_hit
-                       LDA.W $1D77,X                        ;  
-                       bit #$0004                         ;  
+                       LDA.W $1D77,X                        ;
+                       bit #$0004                         ;
                        bne open_door
 no_hit:
-                       STZ.W $1D77,X                        ;  
-                       RTS                                  ;  
+                       STZ.W $1D77,X                        ;
+                       RTS                                  ;
 open_door:
-	               STZ.W $1D77,X                        ;  
-                       LDA.L $7EDEBC,X                      ;  
-                       STA.W $1D27,X                        ;  
-                       LDA.W #$0001                         ;  
-                       STA.L $7EDE1C,X                      ;  
-                       RTS                                  ;  
+	               STZ.W $1D77,X                        ;
+                       LDA.L $7EDEBC,X                      ;
+                       STA.W $1D27,X                        ;
+                       LDA.W #$0001                         ;
+                       STA.L $7EDE1C,X                      ;
+                       RTS                                  ;
 
 check_beam:
-		       LDA.W $1D77,X                        ;  
-                       AND.W #$0F00                         ;  
-                       CMP.W #$0500                         ;  
+		       LDA.W $1D77,X                        ;
+                       AND.W #$0F00                         ;
+                       CMP.W #$0500                         ;
 		       rts
 
 ;;; Define instructions lists and PLMs for beam door indicators
@@ -333,102 +333,63 @@ check_beam:
 print "Instruction lists end: ", pc
 warnpc $84f70e
 
-org $84f70f                                ;  
-        plm_wave_top: dw $C7B1                             ;  
-                       dw main_list_wave_top               ;  
-                       dw close_list_wave_top                ;  
-                                                            ;  
-        plm_wave_bottom: dw $C7B1                             ;  
-                       dw main_list_wave_bottom               ;  
-                       dw close_list_wave_bottom                ;  
-                                                            ;  
-         plm_ice_left: dw $C7B1                             ;  
-                       dw main_list_ice_left                ;  
-                       dw close_list_ice_left                 ;  
-                                                            ;  
-         plm_ice_right: dw $C7B1                             ;  
-                       dw main_list_ice_right                ;  
-                       dw close_list_ice_right                 ;  
-                                                            ;  
-         plm_ice_top: dw $C7B1                             ;  
-                       dw main_list_ice_top                ;  
-                       dw close_list_ice_top                 ;  
-                                                            ;  
-         plm_ice_bottom: dw $C7B1                             ;  
-                       dw main_list_ice_bottom                ;  
-                       dw close_list_ice_bottom                 ;  
-                                                            ;  
-      plm_spazer_left: dw $C7B1                             ;  
-                       dw main_list_spazer_left               ;  
-                       dw close_list_spazer_left                ;  
-                                                            ;  
-      plm_spazer_right: dw $C7B1                             ;  
-                       dw main_list_spazer_right               ;  
-                       dw close_list_spazer_right                ;  
-                                                            ;  
-      plm_spazer_top: dw $C7B1                             ;  
-                       dw main_list_spazer_top               ;  
-                       dw close_list_spazer_top                ;  
-                                                            ;  
-      plm_spazer_bottom: dw $C7B1                             ;  
-                       dw main_list_spazer_bottom               ;  
-                       dw close_list_spazer_bottom                ;  
-                                                            ;  
-      plm_plasma_left: dw $C7B1                             ;  
-                       dw main_list_plasma_left               ;  
-                       dw close_list_plasma_left                ;  
-                                                            ;  
-      plm_plasma_right: dw $C7B1                             ;  
-                       dw main_list_plasma_right               ;  
-                       dw close_list_plasma_right                ;  
-                                                            ;  
-      plm_plasma_top: dw $C7B1                             ;  
-                       dw main_list_plasma_top               ;  
-                       dw close_list_plasma_top                ;  
-                                                            ;  
-      plm_plasma_bottom: dw $C7B1                             ;  
-                       dw main_list_plasma_bottom               ;  
-                       dw close_list_plasma_bottom                ;  
-                                                            ;  
-        plm_wave_left: dw $C7B1                             ;  
-                       dw main_list_wave_left               ;  
-                       dw close_list_wave_left                ;  
-                                                            ;  
-        plm_wave_right: dw $C7B1                             ;  
-                       dw main_list_wave_right               ;  
-                       dw close_list_wave_right                ;  
-                                                            ;  
-       draw_wave_left: dw $8004,$C0E0,$D0E1,$D8E1,$D8E0,$0000;  
-                                                            ;  
-       draw_wave_right: dw $8004,$C4E0,$D4E1,$DCE1,$DCE0,$0000;  
-                                                            ;  
-       draw_wave_top: dw $0004,$C4E9,$54E8,$50E8,$50E9,$0000;  
-                                                            ;  
-       draw_wave_bottom: dw $0004,$CCE9,$5CE8,$58E8,$58E9,$0000;  
-                                                            ;  
-        draw_ice_left: dw $8004,$C0E2,$D0E3,$D8E3,$D8E2,$0000;  
-                                                            ;  
-        draw_ice_right: dw $8004,$C4E2,$D4E3,$DCE3,$DCE2,$0000;  
-                                                            ;  
-        draw_ice_top: dw $0004,$C4EB,$54EA,$50EA,$50EB,$0000;  
-                                                            ;  
-        draw_ice_bottom: dw $0004,$CCEB,$5CEA,$58EA,$58EB,$0000;  
-                                                            ;  
-       draw_spazer_left: dw $8004,$C0E4,$D0E5,$D8E5,$D8E4,$0000;  
-                                                            ;  
-       draw_spazer_right: dw $8004,$C4E4,$D4E5,$DCE5,$DCE4,$0000;  
-                                                            ;  
-       draw_spazer_top: dw $0004,$C4ED,$54EC,$50EC,$50ED,$0000;  
-                                                            ;  
-       draw_spazer_bottom: dw $0004,$CCED,$5CEC,$58EC,$58ED,$0000;  
-                                                            ;  
-       draw_plasma_left: dw $8004,$C0E6,$D0E7,$D8E7,$D8E6,$0000;  
-                                                            ;  
-       draw_plasma_right: dw $8004,$C4E6,$D4E7,$DCE7,$DCE6,$0000;  
-                                                            ;  
-       draw_plasma_top: dw $0004,$C4EF,$54EE,$50EE,$50EF,$0000;  
-                                                            ;  
-       draw_plasma_bottom: dw $0004,$CCEF,$5CEE,$58EE,$58EF,$0000;  
+macro defineBeamDoorPLM(req, direction)
+%export(plm_<req>_<direction>)
+        dw $C7B1
+        dw main_list_<req>_<direction>
+        dw close_list_<req>_<direction>
+endmacro
+
+org $84f70f
+
+%defineBeamDoorPLM(wave, top)
+%defineBeamDoorPLM(wave, bottom)
+%defineBeamDoorPLM(ice, left)
+%defineBeamDoorPLM(ice, right)
+%defineBeamDoorPLM(ice, top)
+%defineBeamDoorPLM(ice, bottom)
+%defineBeamDoorPLM(spazer, left)
+%defineBeamDoorPLM(spazer, right)
+%defineBeamDoorPLM(spazer, top)
+%defineBeamDoorPLM(spazer, bottom)
+%defineBeamDoorPLM(plasma, left)
+%defineBeamDoorPLM(plasma, right)
+%defineBeamDoorPLM(plasma, top)
+%defineBeamDoorPLM(plasma, bottom)
+%defineBeamDoorPLM(wave, left)
+%defineBeamDoorPLM(wave, right)
+
+       draw_wave_left: dw $8004,$C0E0,$D0E1,$D8E1,$D8E0,$0000;
+                                                            ;
+       draw_wave_right: dw $8004,$C4E0,$D4E1,$DCE1,$DCE0,$0000;
+                                                            ;
+       draw_wave_top: dw $0004,$C4E9,$54E8,$50E8,$50E9,$0000;
+                                                            ;
+       draw_wave_bottom: dw $0004,$CCE9,$5CE8,$58E8,$58E9,$0000;
+                                                            ;
+        draw_ice_left: dw $8004,$C0E2,$D0E3,$D8E3,$D8E2,$0000;
+                                                            ;
+        draw_ice_right: dw $8004,$C4E2,$D4E3,$DCE3,$DCE2,$0000;
+                                                            ;
+        draw_ice_top: dw $0004,$C4EB,$54EA,$50EA,$50EB,$0000;
+                                                            ;
+        draw_ice_bottom: dw $0004,$CCEB,$5CEA,$58EA,$58EB,$0000;
+                                                            ;
+       draw_spazer_left: dw $8004,$C0E4,$D0E5,$D8E5,$D8E4,$0000;
+                                                            ;
+       draw_spazer_right: dw $8004,$C4E4,$D4E5,$DCE5,$DCE4,$0000;
+                                                            ;
+       draw_spazer_top: dw $0004,$C4ED,$54EC,$50EC,$50ED,$0000;
+                                                            ;
+       draw_spazer_bottom: dw $0004,$CCED,$5CEC,$58EC,$58ED,$0000;
+                                                            ;
+       draw_plasma_left: dw $8004,$C0E6,$D0E7,$D8E7,$D8E6,$0000;
+                                                            ;
+       draw_plasma_right: dw $8004,$C4E6,$D4E7,$DCE7,$DCE6,$0000;
+                                                            ;
+       draw_plasma_top: dw $0004,$C4EF,$54EE,$50EE,$50EF,$0000;
+                                                            ;
+       draw_plasma_bottom: dw $0004,$CCEF,$5CEE,$58EE,$58EF,$0000;
 
 print "b84 end: ", pc
 %freespaceEnd($84F82F)

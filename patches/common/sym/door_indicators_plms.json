@@ -1,4 +1,20 @@
 {
     "freespace_alloc_end_1": 8715295,
-    "freespace_alloc_start_1": 8714496
+    "freespace_alloc_start_1": 8714496,
+    "plm_indicator_PB_bottom": 8715250,
+    "plm_indicator_PB_left": 8715232,
+    "plm_indicator_PB_right": 8715238,
+    "plm_indicator_PB_top": 8715244,
+    "plm_indicator_missile_bottom": 8715202,
+    "plm_indicator_missile_left": 8715184,
+    "plm_indicator_missile_right": 8715190,
+    "plm_indicator_missile_top": 8715196,
+    "plm_indicator_none_bottom": 8715274,
+    "plm_indicator_none_left": 8715256,
+    "plm_indicator_none_right": 8715262,
+    "plm_indicator_none_top": 8715268,
+    "plm_indicator_super_bottom": 8715226,
+    "plm_indicator_super_left": 8715208,
+    "plm_indicator_super_right": 8715214,
+    "plm_indicator_super_top": 8715220
 }

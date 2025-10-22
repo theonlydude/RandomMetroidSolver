@@ -434,6 +434,8 @@ class InteractiveSolver(CommonSolver):
             suitsMode = "Vanilla"
 
         patches = ["Escape_Animals_Disable"]
+        if self.romConf.better_reserves:
+            patches.append('better_reserves.ips')
 
         doors = GraphUtils.getDoorConnections(AccessGraph(Logic.accessPoints(), self.fillGraph()),
                                               self.romConf.areaRando, self.romConf.bossRando,
@@ -471,6 +473,7 @@ class InteractiveSolver(CommonSolver):
             "variaTweaksCustom": variaTweaksCustom,
             "nerfedCharge": RomPatches.NerfedCharge in RomPatches.ActivePatches,
             "nerfedRainbowBeam": RomPatches.NerfedRainbowBeam in RomPatches.ActivePatches,
+            "starting_energy": self.romConf.startingEnergy,
             "escapeAttr": escapeAttr,
             # these settings are kept to False or None to keep what's in base ROM
             "ctrlDict": None,
@@ -492,7 +495,6 @@ class InteractiveSolver(CommonSolver):
             "hud": self.romConf.hud,
             "round_robin_cf": self.romConf.round_robin_cf,
             "disable_spark_damage": self.romConf.disable_spark_damage,
-            "starting_energy": self.romConf.startingEnergy,
             "plando": {
                 "graphTrans": self.curGraphTransitions,
                 "maxTransitions": len(vanillaBossesTransitions) + len(vanillaTransitions),

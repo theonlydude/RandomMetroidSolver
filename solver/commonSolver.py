@@ -94,6 +94,7 @@ class CommonSolver(object):
                 romConf.hud = self.romLoader.hasPatch("hud")
                 romConf.round_robin_cf = self.romLoader.hasPatch("round_robin_cf")
                 romConf.disable_spark_damage = self.romLoader.hasPatch("disable_spark_damage")
+                romConf.better_reserves = self.romLoader.hasPatch("better_reserves")
                 romConf.startingEnergy = self.romLoader.getStartingEnergy()
 
             if self.conf.interactive:

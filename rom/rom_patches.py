@@ -386,6 +386,11 @@ definitions = {
             'desc': "VARIA HUD",
             'ips': ['varia_hud.ips']
         },
+        'better_reserves': {
+            'address': snes_to_pc(0x81fb80), 'value': 0xa5,
+            'desc': "Better reserves",
+            'ips': ['better_reserves.ips']
+        },
         'door_indicators_plms': {
             'address': 0x27900, 'value': 0x2,
             'desc': 'Blinking doors, showing the color of the door on the other side',

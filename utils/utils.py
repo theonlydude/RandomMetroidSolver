@@ -393,7 +393,7 @@ def loadRandoPreset(randoPreset, args):
         if randoParams.get(patch, "off") == "on":
             args.patches.append(patch + '.ips')
 
-    patches = ["No_Music", "Infinite_Space_Jump"]
+    patches = ["No_Music", "Infinite_Space_Jump", "random_music"]
     for patch in patches:
         if randoParams.get(patch, "off") == "on":
             args.patches.append(patch)
@@ -551,6 +551,7 @@ def getRandomizerDefaultParameters():
     defaultParams['Infinite_Space_Jump'] = "off"
     defaultParams['refill_before_save'] = "off"
     defaultParams['hud'] = "off"
+    defaultParams['better_reserves'] = "off"
     defaultParams['animals'] = "off"
     defaultParams['No_Music'] = "off"
     defaultParams['random_music'] = "off"

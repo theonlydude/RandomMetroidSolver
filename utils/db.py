@@ -447,7 +447,7 @@ order by 1,2;"""
             'Patches': [
                 'layoutPatches', 'variaTweaks', 'nerfedCharge', 'gravityBehaviour', 'itemsounds',
                 'elevators_speed', 'fast_doors', 'spinjumprestart', 'rando_speed', 'Infinite_Space_Jump',
-                'refill_before_save', 'hud', 'revealMap', 'animals', 'No_Music', 'random_music',
+                'refill_before_save', 'hud', 'revealMap', 'better_reserves', 'animals', 'No_Music', 'random_music',
                 'relaxed_round_robin_cf', 'disable_spark_damage']
         }
 

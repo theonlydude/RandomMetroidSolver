@@ -636,7 +636,7 @@ class CommonSolver(object):
                         # first check required locs
                         if set(requiredLocs).issubset(visitedLocNames):
                             # extract missing APs and visit them to get objective path
-                            missingAPs = set(requiredAPs) - self.container.visitedAPs()
+                            missingAPs = sorted(set(requiredAPs) - self.container.visitedAPs())
                             paths = None
                             if missingAPs:
                                 # loop on difficulties to avoid having the solver choosing a mania path when a medium one exists

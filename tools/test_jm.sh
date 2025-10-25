@@ -251,6 +251,7 @@ function computeSeed {
 
     if [ ${COMPARE} -eq 0 ]; then
 	OLD_MD5="old n/a"
+        echo $OLD_PYTHON ${ORIG}/randomizer.py ${PARAMS}
 	RANDO_OUT=$(${TIME} -f "\t%E real" $OLD_PYTHON ${ORIG}/randomizer.py ${PARAMS} 2>&1)
 	if [ $? -ne 0 ]; then
 	    echo "${RANDO_OUT}" >> ${LOG}

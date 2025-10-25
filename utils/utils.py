@@ -388,12 +388,12 @@ def loadRandoPreset(randoPreset, args):
         else:
             args.superFun.append("SuitsRandom")
 
-    ipsPatches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "refill_before_save", "relaxed_round_robin_cf", "better_reserves"]
+    ipsPatches = ["itemsounds", "spinjumprestart", "rando_speed", "elevators_speed", "fast_doors", "refill_before_save", "relaxed_round_robin_cf", "better_reserves", "random_music"]
     for patch in ipsPatches:
         if randoParams.get(patch, "off") == "on":
             args.patches.append(patch + '.ips')
 
-    patches = ["No_Music", "Infinite_Space_Jump", "random_music"]
+    patches = ["No_Music", "Infinite_Space_Jump"]
     for patch in patches:
         if randoParams.get(patch, "off") == "on":
             args.patches.append(patch)

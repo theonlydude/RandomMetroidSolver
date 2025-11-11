@@ -222,6 +222,7 @@ function generate_rando_presets {
     "refill_before_save": "$(random_switch ${refill_before_save})",
     "hud": "$(random_switch ${hud})",
     "revealMap": "$(random_switch ${revealMap})",
+    "better_reserves": "$(random_switch ${better_reserves})",
     "animals": "$(random_switch ${animals})",
     "No_Music": "$(random_switch ${No_Music})",
     "random_music": "$(random_switch ${random_music})"
@@ -250,6 +251,7 @@ function computeSeed {
 
     if [ ${COMPARE} -eq 0 ]; then
 	OLD_MD5="old n/a"
+        echo $OLD_PYTHON ${ORIG}/randomizer.py ${PARAMS}
 	RANDO_OUT=$(${TIME} -f "\t%E real" $OLD_PYTHON ${ORIG}/randomizer.py ${PARAMS} 2>&1)
 	if [ $? -ne 0 ]; then
 	    echo "${RANDO_OUT}" >> ${LOG}

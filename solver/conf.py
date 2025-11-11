@@ -96,6 +96,7 @@ class RomConf:
         self.hud = False
         self.round_robin_cf = False
         self.disable_spark_damage = False
+        self.better_reserves = False
 
         # vanilla transitions
         self.areaTransitions = vanillaTransitions[:]

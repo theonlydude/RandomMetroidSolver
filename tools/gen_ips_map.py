@@ -88,11 +88,16 @@ for r in ips.getRanges():
     for i in r:
         modified[vanilla_map[pc_to_snes(i)]] += 1
         ranges[vanilla_map[pc_to_snes(i)]].add(r)
-
-print("patch {} has modifications in:".format(patch))
-print("")
-print("Address  | Bytes | Label")
-print("-"*128)
 modifiedKeys = sorted(list(modified.keys()))
-for address in modifiedKeys:
-    print("{} | {:>5} | {} | {}".format(hex(address), modified[address], vanilla[address], ["[{}-{}]".format(hex(pc_to_snes(r.start)), hex(pc_to_snes(r.stop))) for r in sorted(ranges[address], key=lambda x: x.start)]))
+
+if len(sys.argv) > 2:
+    # output usable by another script
+    for address in modifiedKeys:
+        print("{}|{}".format(hex(address), modified[address]))
+else:
+    print("patch {} has modifications in:".format(patch))
+    print("")
+    print("Address  | Bytes | Label")
+    print("-"*128)
+    for address in modifiedKeys:
+        print("{} | {:>5} | {} | {}".format(hex(address), modified[address], vanilla[address], ["[{}-{}]".format(hex(pc_to_snes(r.start)), hex(pc_to_snes(r.stop))) for r in sorted(ranges[address], key=lambda x: x.start)]))

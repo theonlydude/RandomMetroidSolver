@@ -94,6 +94,7 @@ class CommonSolver(object):
                 romConf.hud = self.romLoader.hasPatch("hud")
                 romConf.round_robin_cf = self.romLoader.hasPatch("round_robin_cf")
                 romConf.disable_spark_damage = self.romLoader.hasPatch("disable_spark_damage")
+                romConf.better_reserves = self.romLoader.hasPatch("better_reserves")
                 romConf.startingEnergy = self.romLoader.getStartingEnergy()
 
             if self.conf.interactive:
@@ -635,7 +636,7 @@ class CommonSolver(object):
                         # first check required locs
                         if set(requiredLocs).issubset(visitedLocNames):
                             # extract missing APs and visit them to get objective path
-                            missingAPs = set(requiredAPs) - self.container.visitedAPs()
+                            missingAPs = sorted(set(requiredAPs) - self.container.visitedAPs())
                             paths = None
                             if missingAPs:
                                 # loop on difficulties to avoid having the solver choosing a mania path when a medium one exists

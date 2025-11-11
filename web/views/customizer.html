@@ -2379,7 +2379,7 @@ if seedInfo != None:
               <tr id="layoutPatchesStep"><td>Anti-softlock layout patches</td><td><div class="vue-app"></div></td></tr>
               <tr id="variaTweaksStep"><td>VARIA tweaks</td><td><div class="vue-app"></div></td></tr>
               <tr {{=setBold("nerfedCharge")}}><td>Nerfed Charge Beam available from the start</td><td>{{=seedParams["nerfedCharge"]}}</td></tr>
-              <tr {{=setBold("relaxed_round_robin_cf")}}><td>Relaxed Round Robin Crytal Flash</td><td>{{=seedParams["relaxed_round_robin_cf"]}}</td></tr>
+              <tr {{=setBold("relaxed_round_robin_cf")}}><td>Relaxed Round Robin Crystal Flash</td><td>{{=seedParams["relaxed_round_robin_cf"]}}</td></tr>
               <tr {{=setBold("disable_spark_damage")}}><td>Disable Shinespark damage</td><td>{{=seedParams["disable_spark_damage"]}}</td></tr>
               <tr {{=setBold("gravityBehaviour")}}><td>Suits properties</td><td>{{=seedParams["gravityBehaviour"]}}</td></tr>
 {{    if seedParams["gravityBehaviour"] == "random":}}
@@ -2394,6 +2394,7 @@ if seedInfo != None:
               <tr {{=setBold("refill_before_save")}}><td>Refill before save</td><td>{{=seedParams["refill_before_save"]}}</td></tr>
               <tr {{=setBold("hud")}}><td>Display items count in the HUD</td><td>{{=seedParams["hud"]}}</td></tr>
               <tr {{=setBold("revealMap")}}><td>Reveal the whole map on start</td><td>{{=seedParams.get("revealMap", "off")}}</td></tr>
+              <tr {{=setBold("better_reserves")}}><td>Better Reserves <img src="/solver/static/images/tracker/inventory/Reserve.png" class="width: 32px"/></td><td>{{=seedParams.get("better_reserves", "off")}}</td></tr>
               <tr {{=setBold("animals")}}><td>Save the animals surprise</td><td>{{=seedParams["animals"]}}</td></tr>
               <tr {{=setBold("No_Music")}}><td>Disable background music</td><td>{{=seedParams["No_Music"]}}</td></tr>
               <tr {{=setBold("random_music")}}><td>Randomize background music</td><td>{{=seedParams["random_music"]}}</td></tr>

@@ -144,7 +144,7 @@ class RomPatches:
         from graph.graph_utils import GraphUtils
         RomPatches.ActivePatches = [RomPatches.RedTowerBlueDoors] + RomPatches.TotalLayout + GraphUtils.getGraphPatches(startLocation) + [RomPatches.NoGravityEnvProtection]
 
-_baseIPS = [
+baseIPS = [
     # common utility routines
     'utils.ips',
     # MFreak map patch, tweaked for VARIA
@@ -161,18 +161,12 @@ _baseIPS = [
     'reset.ips',
     # handles starting location and start blue doors
     'start.ips',
-    # generic PLM spawner used for extra saves, blinking doors etc.
-    'plm_spawn.ips',
     # needed fixes for VARIA
     'vanilla_bugfixes.ips',
     # custom credits
     'credits.ips',
     # actual game hijacks to update tracking stats
     'stats.ips',
-    # enemy names in menu for seed ID
-    'seed_display.ips',
-    # door ASM to wake zebes early in blue brinstar
-    'wake_zebes.ips',
     # use any button for angle up/down
     'AimAnyButton.ips',
     # credits item% based on actual number of items in the game
@@ -181,16 +175,25 @@ _baseIPS = [
     'supermetroid_msu1.ips',
     # displays max ammo
     'max_ammo_display.ips',
-    # VARIA logo on startup screen
-    'varia_logo.ips',
-    # new nothing plm
-    'nothing_item_plm.ips',
     # objectives management and display
     'objectives.ips',
     # objectives ROM options
     'objectives_options.ips',
     # display collected items percentage and RTA time in pause inventory menu
-    'equipment_screen.ips',
+    'equipment_screen.ips'
+]
+
+_baseIPS = baseIPS + [
+    # generic PLM spawner used for extra saves, blinking doors etc.
+    'plm_spawn.ips',
+    # enemy names in menu for seed ID
+    'seed_display.ips',
+    # door ASM to wake zebes early in blue brinstar
+    'wake_zebes.ips',
+    # VARIA logo on startup screen
+    'varia_logo.ips',
+    # new nothing plm
+    'nothing_item_plm.ips',
     # always disable demos as it causes crashes in area, hud and mirrortroid
     'no_demo.ips'
 ]

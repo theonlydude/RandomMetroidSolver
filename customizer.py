@@ -6,8 +6,11 @@ from logic.logic import Logic
 from rom.PaletteRando import PaletteRando
 from rom.rompatcher import RomPatcher, MusicPatcher, RomTypeForMusic
 from rom.romreader import RomReader
+from rom.rom_patches import baseIPS
 from utils.utils import dumpErrorMsg
 from rom.flavor import RomFlavor
+from rando.vanillaItemLocations import vanillaItemLocations
+from utils.objectives import Objectives
 
 import utils.log
 import utils.db as db
@@ -114,11 +117,14 @@ if __name__ == "__main__":
         # extract logic from ips
         logic = RomReader.getLogicFromIPS(args.seedIps)
 
-    if args.base:        
-        args.patches += ["utils.ips", "base.ips", "start.ips", "stats.ips", "credits.ips", "endingtotals.ips", "area_ids_vanilla_layout.ips"]
-
     Logic.factory(logic)
     RomFlavor.factory()
+
+    patcherSettings = {}
+    if args.base:
+        args.patches = baseIPS + args.patches
+        Objectives.setVanilla()
+        patcherSettings["itemLocs"] = vanillaItemLocations
 
     ctrlDict = None
     if args.controls:
@@ -153,11 +159,11 @@ if __name__ == "__main__":
             romFile = os.path.basename(inFileName)
             outFileName = os.path.join(romDir, 'Custom_' + romFile)
             shutil.copyfile(inFileName, outFileName)
-            romPatcher = RomPatcher(romFileName=outFileName)
+            romPatcher = RomPatcher(romFileName=outFileName, settings=patcherSettings)
         else:
             # web mode
             outFileName = args.output
-            romPatcher = RomPatcher()
+            romPatcher = RomPatcher(settings=patcherSettings)
 
         musicPatcher = None
         if args.music is not None:
@@ -185,6 +191,9 @@ if __name__ == "__main__":
             romPatcher.applyIPSPatch(args.seedIps)
 
         romPatcher.addIPSPatches(args.patches)
+
+        if args.base:
+            romPatcher.writeItemMapTiles("Full", vanillaItemLocations)
 
         if args.sprite is not None:
             purge = args.ship is not None

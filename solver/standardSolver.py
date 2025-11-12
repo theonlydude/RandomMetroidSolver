@@ -14,7 +14,7 @@ import utils.log
 
 class StandardSolver(CommonSolver):
     # given a rom and parameters returns the estimated difficulty
-    def __init__(self, args):
+    def __init__(self, args, baseDir=None):
         self.log = utils.log.get('Solver')
 
         self.conf = StandardSolverConf(args)
@@ -39,7 +39,7 @@ class StandardSolver(CommonSolver):
 
         self.objectives = Objectives()
 
-        self.romConf = self.loadRom(args.romFileName)
+        self.romConf = self.loadRom(args.romFileName, baseDir=baseDir)
 
         # if tourian is disabled force item pickup to any%
         if self.romConf.tourian == 'Disabled':

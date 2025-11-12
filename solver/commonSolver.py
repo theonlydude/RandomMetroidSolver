@@ -18,7 +18,7 @@ from rom.flavor import RomFlavor
 from graph.location import define_location
 
 class CommonSolver(object):
-    def loadRom(self, rom, extraSettings=None):
+    def loadRom(self, rom, extraSettings=None, baseDir=None):
         # rom can be:
         #  None: for tracker seedless
         #  dict: for tracker
@@ -49,7 +49,7 @@ class CommonSolver(object):
             Logic.factory(self.romLoader.readLogic())
             self.logic = Logic.implementation
             if not self.conf.interactive:
-                RomFlavor.factory()
+                RomFlavor.factory(baseDir)
             self.romLoader.loadSymbols()
             self.locations = Logic.locations()
             (romConf.majorsSplit, romConf.masterMajorsSplit) = self.romLoader.assignItems(self.locations)

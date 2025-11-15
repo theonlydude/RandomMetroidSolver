@@ -1234,10 +1234,11 @@ class RomPatcher:
             allAreas.append("Tourian")
         for conn in doorConnections:
             src, dst = conn['transition']
+            # skip if not this area or loop portal
+            if src.Name == dst.Name or (src.Name not in graphAreaOverride and src.GraphArea not in allAreas):
+                continue
             srcMapInfo, dstMapInfo = getMapInfo(src.Name, True), getMapInfo(dst.Name, False)
             if srcMapInfo is None or dstMapInfo is None or srcMapInfo['area'] != area:
-                continue
-            if src.Name not in graphAreaOverride and src.GraphArea not in allAreas:
                 continue
             if "coords" in srcMapInfo:
                 x, y = srcMapInfo['coords']

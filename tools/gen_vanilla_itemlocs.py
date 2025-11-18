@@ -37,5 +37,7 @@ _locs = Logic.locationsDict()
 vanillaItemLocations = [
 """)
     for loc in solver.container.visitedLocations():
+        if loc.Name == "Gunship":
+            continue
         f.write(f"    ItemLocation(ItemManager.getItem('{loc.itemName}'), _locs['{loc.Name}']),\n")
     f.write("]\n")

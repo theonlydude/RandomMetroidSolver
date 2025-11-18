@@ -60,10 +60,13 @@ class RomPatcher:
         # TODO create vertical maps for rotation
         self.areaMaps = defaultdict(AreaMap)
 
-    def patchRom(self):
+    def initPatcher(self):
         self._mapIconTableAddr = Addresses.getOne("map_mapicons_tables")
         self._accessibleAreasNoBoss = self._getAccessibleAreasNoBoss(self.settings["itemLocs"])
         self._updateMapIconsGraphAreas(self.settings["itemLocs"])
+
+    def patchRom(self):
+        self.initPatcher()
         # apply patches first
         self.applyIPSPatches()
         self.commitIPS()
@@ -88,7 +91,7 @@ class RomPatcher:
         self.writeItemsNumber()
         # objectives
         self.writeObjectives(self.settings["itemLocs"], self.settings["tourian"])
-        self.writeObjectivesMapIcons(self.settings["tourian"])
+        self.writeObjectivesMapIcons()
         # area connections
         self.writeDoorConnections(self.settings["doors"])
         self.writeDoorConnectionsMapIcons(self.settings["doors"], self.settings["tourian"])
@@ -1469,7 +1472,7 @@ class RomPatcher:
         self.romFile.writeWord(itemsMask, Addresses.getOne('itemsMask'))
         self.romFile.writeWord(beamsMask, Addresses.getOne('beamsMask'))
 
-    def writeObjectivesMapIcons(self, tourian):
+    def writeObjectivesMapIcons(self):
         assert len(self.areaMaps) > 0, "call writeObjectivesMapIcons when areaMaps are built"
         # create a dict area => {(x, y) => (obj, mapIcon)}
         objByArea = defaultdict(dict)

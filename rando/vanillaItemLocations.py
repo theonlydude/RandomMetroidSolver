@@ -114,5 +114,4 @@ vanillaItemLocations = [
     ItemLocation(ItemManager.getItem('Plasma'), _locs['Plasma Beam']),
     ItemLocation(ItemManager.getItem('Missile'), _locs['Missile (Gold Torizo)']),
     ItemLocation(ItemManager.getItem('MotherBrain'), _locs['Mother Brain']),
-    ItemLocation(ItemManager.getItem('Gunship'), _locs['Gunship']),
 ]

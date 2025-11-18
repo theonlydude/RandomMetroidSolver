@@ -9,7 +9,6 @@ from rom.romreader import RomReader
 from rom.rom_patches import baseIPS
 from utils.utils import dumpErrorMsg
 from rom.flavor import RomFlavor
-from rando.vanillaItemLocations import vanillaItemLocations
 from utils.objectives import Objectives
 
 import utils.log
@@ -122,9 +121,13 @@ if __name__ == "__main__":
 
     patcherSettings = {}
     if args.base:
-        args.patches = baseIPS + args.patches
-        Objectives.setVanilla()
+        args.patches = baseIPS + ['area_ids_vanilla_layout.ips', 'minimap_data_vanilla_layout.ips', 'map_data_area_alt.ips', "Restore_Intro"] + args.patches
+        objectives = Objectives()
+        objectives.setVanilla()
+        from rando.vanillaItemLocations import vanillaItemLocations
         patcherSettings["itemLocs"] = vanillaItemLocations
+        patcherSettings["majorsSplit"] = "Full"
+        patcherSettings["tourian"] = "Vanilla"
 
     ctrlDict = None
     if args.controls:
@@ -192,9 +195,6 @@ if __name__ == "__main__":
 
         romPatcher.addIPSPatches(args.patches)
 
-        if args.base:
-            romPatcher.writeItemMapTiles("Full", vanillaItemLocations)
-
         if args.sprite is not None:
             purge = args.ship is not None
             romPatcher.customSprite(args.sprite, args.customItemNames, args.noSpinAttack, purge) # adds another IPS
@@ -206,6 +206,13 @@ if __name__ == "__main__":
         # we have to write ips to ROM before doing our direct modifications
         # which will rewrite some parts (like in credits)
         romPatcher.commitIPS()
+        if args.base:
+            romPatcher.initPatcher()
+            romPatcher.writeItemMapTiles("Full", vanillaItemLocations)
+            romPatcher.writeObjectives(vanillaItemLocations, "Vanilla")
+            romPatcher.writeObjectivesMapIcons()
+            romPatcher.writeDoorsMapIcons()
+
         if ctrlDict is not None:
             romPatcher.writeControls(ctrlDict)
         if args.moonWalk == True:

@@ -1,5 +1,6 @@
 # base dockerfile from git@github.com:cabildocl/web2py-docker.git
-FROM nginx:latest
+# web2py doesn't work with python3.13, so stick to 3.12
+FROM python:3.12-slim
 MAINTAINER VARIA "varia@varia.run"
 
 ENV CERT_PASS web2py
@@ -11,11 +12,20 @@ ARG GITHUB_TOKEN
 
 EXPOSE 443 80 8000
 
-RUN apt-get update && \
-    apt-get install curl wget unzip jq -y && \
-    apt-get -y install python3 python3-pip && \
-    pip3 install gunicorn mysql-connector-python
-RUN apt-get install -y supervisor unzip git graphviz imagemagick
+# install required packages
+RUN apt-get update
+RUN apt-get install curl wget unzip jq -y
+RUN apt-get install supervisor git -y
+RUN apt-get install graphviz imagemagick -y
+RUN apt-get install nginx -y
+
+# set venv
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+RUN pip install mysql-connector-python
+RUN pip install gunicorn
 
 WORKDIR /root
 RUN wget https://mdipierro.pythonanywhere.com/examples/static/web2py_src.zip && \

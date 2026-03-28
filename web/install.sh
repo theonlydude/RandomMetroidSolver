@@ -1,10 +1,28 @@
 #!/bin/bash
+# required packages:
+#  graphviz (for dot exec)
+#  imagemagick (for convert exec)
 
 if [ $# -eq 1 -a "$1" == "--clean" ]; then
     find ~/web2py/applications/solver/static/images -type l -exec rm -f {} \;
 fi
 
 mkdir -p ~/web2py/roms/
+mkdir -p ~/web2py/applications/solver/cache
+mkdir -p ~/web2py/applications/solver/controllers
+mkdir -p ~/web2py/applications/solver/cron
+mkdir -p ~/web2py/applications/solver/databases
+mkdir -p ~/web2py/applications/solver/errors
+mkdir -p ~/web2py/applications/solver/languages
+mkdir -p ~/web2py/applications/solver/models
+mkdir -p ~/web2py/applications/solver/modules
+mkdir -p ~/web2py/applications/solver/private
+mkdir -p ~/web2py/applications/solver/sessions
+mkdir -p ~/web2py/applications/solver/static/js
+mkdir -p ~/web2py/applications/solver/static/css
+mkdir -p ~/web2py/applications/solver/static/graph
+mkdir -p ~/web2py/applications/solver/uploads
+mkdir -p ~/web2py/applications/solver/views/solver_web
 
 # first remove brocken symlinks
 find ~/web2py/applications/solver/static -xtype l -exec rm -f {} \;

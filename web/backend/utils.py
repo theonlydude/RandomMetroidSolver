@@ -436,7 +436,12 @@ def generateJsonROM(romJsonStr):
 
     return (base, jsonRomFileName)
 
-def get_client_files(include_css=True):
+def get_client_files(cache, include_css=True):
+    # use a cache to avoid reading the file everytime
+    clientFiles = cache.ram('clientFiles', lambda:dict(), time_expire=None)
+    if include_css in clientFiles:
+        return clientFiles[include_css]
+
     with open('applications/solver/static/client/manifest.json', 'r') as manifest:
         data = json.loads(manifest.read())
     js = [v for k, v in data.items() if k.endswith('.js')]
@@ -453,7 +458,10 @@ def get_client_files(include_css=True):
     ]
     js_tags = [f'<script src="{url}"></script>' for url in js]
     css_tags =  [f'<link href="{url}" rel="stylesheet" />' for url in css]
-    return {
+
+    out = {
         "js": '\n'.join(js_tags),
         "css": '\n'.join(css_tags),
     }
+    clientFiles[include_css] = out
+    return out

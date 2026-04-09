@@ -56,4 +56,4 @@ class Plando(object):
                     vanillaAPs=vanillaAPs, vanillaBossesAPs=vanillaBossesAPs, escapeAPs=escapeAPs,
                     curSession=self.session.plando, addresses=addresses, startAPs=startAPs,
                     version=displayedVersion, flavorPatches=RomReader.flavorPatches,
-                    client_files=get_client_files())
+                    client_files=get_client_files(self.cache))

@@ -97,7 +97,7 @@ class Customizer(object):
 
         return dict(customSprites=customSprites, customShips=customShips, musics=musics, comPresets=comPresets,
                     seedInfo=seedInfo, seedParams=seedParams, msg=msg, defaultParams=defaultParams,
-                    flavorPatches=RomReader.flavorPatches, client_files=get_client_files(include_css=False))
+                    flavorPatches=RomReader.flavorPatches, client_files=get_client_files(self.cache, include_css=False))
 
     def initCustomizerSession(self):
         if self.session.customizer is None:

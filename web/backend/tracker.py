@@ -66,7 +66,7 @@ class Tracker(object):
                     bossBitMasks=InteractiveSolver.bossBitMasks,
                     apsGraphArea=apsGraphArea, flavorPatches=RomReader.flavorPatches,
                     inventoryBitMasks=InteractiveSolver.inventoryBitMasks,
-                    client_files=get_client_files())
+                    client_files=get_client_files(self.cache))
 
     def trackerWebService(self):
         # unified web service for item/area trackers

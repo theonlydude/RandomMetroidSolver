@@ -222,7 +222,7 @@ class Randomizer(object):
                     maxsize=sys.maxsize, displayNames=displayNames, objectivesExclusions=objectivesExclusions,
                     objectivesTypes=objectivesTypes, objectivesSort=objectivesSort,
                     objectivesCategories=objectivesCategories, logics=logics,
-                    client_files=get_client_files(include_css=False))
+                    client_files=get_client_files(self.cache, include_css=False))
 
     def initRandomizerSession(self):
         if self.session.randomizer is None:
